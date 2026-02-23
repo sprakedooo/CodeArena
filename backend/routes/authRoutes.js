@@ -21,7 +21,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const dbService = require('../services/dbService');
-const { generateToken } = require('../middleware/authMiddleware');
+const { generateToken, authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
 
 const SALT_ROUNDS = 10;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -368,6 +368,26 @@ router.post('/admin', (req, res) => {
         token,
         user: { id: 0, fullName: 'Faculty', email: 'faculty@codearena', role: 'faculty' }
     });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: Get All Students (Faculty View)
+// GET /api/auth/students
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/students', authMiddleware, requireFaculty, (req, res) => {
+    const students = mockUsers.map(u => ({
+        id: u.id,
+        email: u.email,
+        fullName: u.fullName,
+        role: u.role || 'student',
+        totalPoints: u.totalPoints || 0,
+        currentLevel: u.currentLevel || 'beginner',
+        badges: u.badges || [],
+        selectedLanguage: u.selectedLanguage || null,
+        createdAt: u.createdAt || null
+    }));
+
+    res.json({ success: true, students, count: students.length });
 });
 
 // Export router and mockUsers (for other routes to access)

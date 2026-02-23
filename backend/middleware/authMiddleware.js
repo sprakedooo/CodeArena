@@ -68,4 +68,18 @@ function generateToken(user) {
     );
 }
 
-module.exports = { authMiddleware, generateToken };
+/**
+ * Middleware to restrict access to faculty/admin users only.
+ * Must be used AFTER authMiddleware (requires req.user to be set).
+ */
+function requireFaculty(req, res, next) {
+    if (!req.user || req.user.role !== 'faculty') {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Faculty only.'
+        });
+    }
+    next();
+}
+
+module.exports = { authMiddleware, requireFaculty, generateToken };

@@ -1166,12 +1166,35 @@
 
         // ─── Render: Multiple Choice (original) ─────────────────────────
 
+        function getOptionText(opt) {
+            if (!opt) return '';
+            // Strip "A) ", "B) ", "C) ", "D) " prefix if present
+            if (/^[A-Da-d][)\.]\s/.test(opt)) return opt.slice(3);
+            return opt;
+        }
+
         function renderMultipleChoice(q, container) {
             container.className = 'options-grid';
-            container.innerHTML = q.options.map((opt, idx) => `
+
+            // Normalise options: handle undefined, empty array, or JSON string
+            let opts = q.options;
+            if (typeof opts === 'string') {
+                try { opts = JSON.parse(opts); } catch (e) { opts = []; }
+            }
+            if (!opts || opts.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--text-muted);">
+                        <div style="font-size:1.5rem;margin-bottom:0.5rem;">⚠️</div>
+                        <div>Answer options unavailable for this question.</div>
+                        <button class="btn btn-ghost" style="margin-top:0.75rem;font-size:0.8rem;" onclick="nextQuestion()">Skip →</button>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = opts.map((opt, idx) => `
                 <button class="option-btn" onclick="selectAnswer('${String.fromCharCode(65 + idx)}', this)" data-index="${idx}">
                     <span class="option-letter">${String.fromCharCode(65 + idx)}</span>
-                    <span class="option-text">${opt.substring(3)}</span>
+                    <span class="option-text">${escapeHtml(getOptionText(opt))}</span>
                 </button>
             `).join('');
         }

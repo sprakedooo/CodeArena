@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content Manager - CodeArena</title>
+    <title>Faculty Portal - CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        /* ── ADMIN LAYOUT ── */
+        /* ── FACULTY PORTAL LAYOUT ── */
         .admin-page {
             max-width: 1400px;
             margin: 0 auto;
@@ -35,18 +35,32 @@
             margin-top: 0.35rem;
         }
 
+        .faculty-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(124,58,237,0.12);
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 20px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
         /* Tab navigation */
         .admin-tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.25rem;
             margin-bottom: 1.5rem;
             border-bottom: 1px solid var(--border);
             padding-bottom: 0;
+            flex-wrap: wrap;
         }
 
         .admin-tab {
-            padding: 0.6rem 1.25rem;
-            font-size: 0.85rem;
+            padding: 0.6rem 1.1rem;
+            font-size: 0.82rem;
             font-weight: 600;
             color: var(--text-muted);
             background: none;
@@ -55,6 +69,7 @@
             cursor: pointer;
             transition: all 0.2s;
             margin-bottom: -1px;
+            white-space: nowrap;
         }
 
         .admin-tab:hover { color: var(--text); }
@@ -142,9 +157,7 @@
         }
 
         .admin-table tr:last-child td { border-bottom: none; }
-
         .admin-table tr:hover td { background: rgba(124,58,237,0.04); }
-
         .admin-table td strong { color: var(--text); }
 
         .diff-badge {
@@ -190,6 +203,9 @@
 
         .btn-delete { background: rgba(239,68,68,0.12); color: #ef4444; }
         .btn-delete:hover { background: rgba(239,68,68,0.25); }
+
+        .btn-view { background: rgba(6,182,212,0.12); color: #06b6d4; }
+        .btn-view:hover { background: rgba(6,182,212,0.25); }
 
         /* Empty state */
         .empty-state {
@@ -422,7 +438,7 @@
             border-radius: var(--radius-lg);
             padding: 2.5rem 2rem;
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -436,20 +452,30 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
 
-        .faculty-gate-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+        .faculty-gate-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
 
         .faculty-gate-title {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.65rem;
             color: var(--text);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             letter-spacing: 1px;
         }
 
+        .faculty-gate-role {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
         .faculty-gate-sub {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
             margin-bottom: 1.5rem;
+            line-height: 1.5;
         }
 
         .faculty-gate-back {
@@ -467,6 +493,192 @@
             text-overflow: ellipsis;
         }
 
+        /* ── STUDENTS TAB ── */
+        .student-search {
+            padding: 0.4rem 0.85rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.8rem;
+            width: 200px;
+        }
+
+        .student-search:focus { outline: none; border-color: var(--primary); }
+
+        .badge-chip {
+            display: inline-block;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            background: rgba(124,58,237,0.15);
+            color: var(--primary);
+            text-transform: uppercase;
+            margin: 0 0.1rem;
+        }
+
+        /* ── ANALYTICS TAB ── */
+        .analytics-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 700px) {
+            .analytics-summary { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .analytics-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.1rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analytics-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .analytics-card.purple::before { background: var(--primary); }
+        .analytics-card.cyan::before { background: var(--secondary); }
+        .analytics-card.green::before { background: var(--success); }
+        .analytics-card.gold::before { background: #fbbf24; }
+
+        .analytics-card-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+
+        .analytics-card-num {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .analytics-card.purple .analytics-card-num { color: var(--primary); }
+        .analytics-card.cyan .analytics-card-num { color: var(--secondary); }
+        .analytics-card.green .analytics-card-num { color: var(--success); }
+        .analytics-card.gold .analytics-card-num { color: #fbbf24; }
+
+        .analytics-card-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .analytics-section-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .analytics-section { margin-bottom: 2rem; }
+
+        /* Level distribution bar */
+        .level-dist-bar {
+            display: flex;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-dist-bar .seg-beginner { background: #34d399; }
+        .level-dist-bar .seg-intermediate { background: #fbbf24; }
+        .level-dist-bar .seg-advanced { background: #f87171; }
+
+        .level-dist-legend {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.3rem;
+        }
+
+        /* Status badge for analytics */
+        .status-ok { color: var(--success); font-size: 0.72rem; font-weight: 600; }
+        .status-warn { color: #fbbf24; font-size: 0.72rem; font-weight: 600; }
+        .status-danger { color: #ef4444; font-size: 0.72rem; font-weight: 600; }
+
+        .accuracy-bar-wrap {
+            width: 80px;
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.4rem;
+        }
+
+        .accuracy-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* Progress modal */
+        .progress-lang-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .progress-lang-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-lang-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+
+        .progress-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+        }
+
+        .progress-stat-item {
+            text-align: center;
+        }
+
+        .progress-stat-val {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .progress-stat-lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
         @media (max-width: 768px) {
             .admin-table th:nth-child(n+5),
             .admin-table td:nth-child(n+5) { display: none; }
@@ -475,21 +687,22 @@
 </head>
 <body>
 
-    <!-- Faculty password gate (shown when not logged in) -->
+    <!-- Faculty password gate -->
     <div class="faculty-gate" id="facultyGate" style="display:none;">
         <div class="faculty-gate-box">
-            <div class="faculty-gate-icon">&#x1F512;</div>
-            <div class="faculty-gate-title">FACULTY ACCESS</div>
-            <div class="faculty-gate-sub">Enter faculty password to manage content</div>
+            <div class="faculty-gate-icon">&#x1F9D1;&#x200D;&#x1F3EB;</div>
+            <div class="faculty-gate-title">CODEARENA</div>
+            <div class="faculty-gate-role">Faculty Portal</div>
+            <div class="faculty-gate-sub">Sign in with your faculty credentials to manage course content, view student progress, and access performance analytics.</div>
             <div id="gateAlert" style="margin-bottom:0.75rem;"></div>
             <div class="form-group" style="text-align:left;">
-                <label class="form-label">Password</label>
+                <label class="form-label">Faculty Password</label>
                 <input type="password" id="adminPassword" class="form-input" placeholder="Enter faculty password"
-                    onkeydown="if(event.key==='Enter') adminLogin()">
+                    onkeydown="if(event.key==='Enter') facultyLogin()">
             </div>
-            <button class="btn btn-primary btn-block" onclick="adminLogin()">&#x1F513; Unlock</button>
+            <button class="btn btn-primary btn-block" onclick="facultyLogin()">&#x1F513; Access Faculty Portal</button>
             <div class="faculty-gate-back">
-                <a href="login.html">&larr; Back to Login</a>
+                <a href="login.html">&larr; Back to Student Login</a>
                 &nbsp;|&nbsp;
                 <a href="dashboard.html">Dashboard</a>
             </div>
@@ -503,6 +716,7 @@
         <ul class="navbar-nav">
             <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="lessons.html">Lessons</a></li>
+            <li><a href="admin.html" style="color:var(--primary);">&#x1F9D1;&#x200D;&#x1F3EB; Faculty</a></li>
             <li><a href="#" onclick="logout()">Logout</a></li>
         </ul>
     </nav>
@@ -512,37 +726,42 @@
         <!-- Page header -->
         <div class="admin-page-header">
             <div>
-                <div class="admin-page-title">&#x2699; CONTENT MANAGER</div>
-                <div class="admin-page-subtitle">Manage lessons and game questions &mdash; changes apply immediately</div>
+                <div class="admin-page-title">&#x1F9D1;&#x200D;&#x1F3EB; FACULTY PORTAL</div>
+                <div class="admin-page-subtitle">Manage course content, monitor student progress, and review performance analytics</div>
             </div>
-            <div style="font-size:0.75rem; color:var(--text-muted);">Faculty Access</div>
+            <div class="faculty-badge">
+                <span>&#x1F512;</span>
+                <span>Faculty Access</span>
+            </div>
         </div>
 
         <!-- Stats row -->
-        <div class="stats-row" id="statsRow">
+        <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-card-num" id="statLessons">–</div>
+                <div class="stat-card-num" id="statStudents">&#x2013;</div>
+                <div class="stat-card-label">Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-num" id="statLessons">&#x2013;</div>
                 <div class="stat-card-label">Lessons</div>
             </div>
             <div class="stat-card">
-                <div class="stat-card-num" id="statQuestions">–</div>
-                <div class="stat-card-label">Questions</div>
+                <div class="stat-card-num" id="statQuestions">&#x2013;</div>
+                <div class="stat-card-label">Quizzes</div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-num" id="statLangs">4</div>
                 <div class="stat-card-label">Languages</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-card-num" id="statDone">0</div>
-                <div class="stat-card-label">Completed</div>
-            </div>
         </div>
 
         <!-- Tabs -->
         <div class="admin-tabs">
-            <button class="admin-tab active" onclick="switchTab('lessons')">&#x1F4DA; Lessons</button>
-            <button class="admin-tab" onclick="switchTab('questions')">&#x2753; Questions</button>
-            <button class="admin-tab" onclick="switchTab('languages')">&#x1F30D; Languages</button>
+            <button class="admin-tab active" data-tab="lessons" onclick="switchTab('lessons')">&#x1F4DA; Lessons</button>
+            <button class="admin-tab" data-tab="quizzes" onclick="switchTab('quizzes')">&#x2753; Quizzes</button>
+            <button class="admin-tab" data-tab="students" onclick="switchTab('students')">&#x1F465; Students</button>
+            <button class="admin-tab" data-tab="analytics" onclick="switchTab('analytics')">&#x1F4CA; Analytics</button>
+            <button class="admin-tab" data-tab="languages" onclick="switchTab('languages')">&#x1F30D; Languages</button>
         </div>
 
         <!-- ══ LESSONS TAB ══ -->
@@ -583,8 +802,8 @@
             </div>
         </div>
 
-        <!-- ══ QUESTIONS TAB ══ -->
-        <div id="tabQuestions" style="display:none">
+        <!-- ══ QUIZZES TAB ══ -->
+        <div id="tabQuizzes" style="display:none">
             <div class="tab-toolbar">
                 <div class="toolbar-left">
                     <select class="filter-select" id="qLangFilter" onchange="loadQuestions()">
@@ -623,6 +842,125 @@
                 </table>
             </div>
         </div>
+
+        <!-- ══ STUDENTS TAB ══ -->
+        <div id="tabStudents" style="display:none">
+            <div class="tab-toolbar">
+                <div class="toolbar-left">
+                    <input type="text" class="student-search" id="studentSearch"
+                        placeholder="&#x1F50D; Search students..." oninput="renderStudents()">
+                    <select class="filter-select" id="studentLevelFilter" onchange="renderStudents()">
+                        <option value="">All Levels</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);">
+                    Showing <span id="studentCount">0</span> students
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Level</th>
+                            <th>Points</th>
+                            <th>Language</th>
+                            <th>Badges</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsBody">
+                        <tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading students...</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ ANALYTICS TAB ══ -->
+        <div id="tabAnalytics" style="display:none">
+
+            <!-- Summary cards -->
+            <div class="analytics-summary">
+                <div class="analytics-card purple">
+                    <div class="analytics-card-icon">&#x1F4CA;</div>
+                    <div class="analytics-card-num" id="aAvgAccuracy">&#x2013;</div>
+                    <div class="analytics-card-label">Avg. Accuracy</div>
+                </div>
+                <div class="analytics-card cyan">
+                    <div class="analytics-card-icon">&#x1F9E0;</div>
+                    <div class="analytics-card-num" id="aActive">&#x2013;</div>
+                    <div class="analytics-card-label">Active Students</div>
+                </div>
+                <div class="analytics-card green">
+                    <div class="analytics-card-icon">&#x1F3C6;</div>
+                    <div class="analytics-card-num" id="aTopStudents">&#x2013;</div>
+                    <div class="analytics-card-label">Top Performers</div>
+                </div>
+                <div class="analytics-card gold">
+                    <div class="analytics-card-icon">&#x26A0;</div>
+                    <div class="analytics-card-num" id="aNeedHelp">&#x2013;</div>
+                    <div class="analytics-card-label">Need Help</div>
+                </div>
+            </div>
+
+            <!-- Level distribution -->
+            <div class="analytics-section">
+                <div class="analytics-section-title">&#x1F4CA; Class Level Distribution</div>
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;">
+                    <div class="level-dist-bar" id="levelDistBar">
+                        <div class="seg-beginner" style="width:100%"></div>
+                    </div>
+                    <div class="level-dist-legend" id="levelDistLegend">
+                        <span><span class="legend-dot" style="background:#34d399;"></span>Beginner: –</span>
+                        <span><span class="legend-dot" style="background:#fbbf24;"></span>Intermediate: –</span>
+                        <span><span class="legend-dot" style="background:#f87171;"></span>Advanced: –</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Per-student progress table -->
+            <div class="analytics-section">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.85rem;">
+                    <div class="analytics-section-title" style="margin:0;border:0;padding:0;">&#x1F4DD; Student Progress Report</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <select class="filter-select" id="aLangFilter" onchange="filterAnalytics()">
+                            <option value="">All Languages</option>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                        <button class="btn btn-ghost" onclick="loadAnalytics()" style="font-size:0.75rem;">&#x21BB; Refresh</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Language</th>
+                                <th>Level</th>
+                                <th>Questions</th>
+                                <th>Accuracy</th>
+                                <th>Last Active</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsBody">
+                            <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading analytics data...</div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ══ LANGUAGES TAB ══ -->
         <div id="tabLanguages" style="display:none">
             <div class="tab-toolbar">
@@ -647,6 +985,7 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <!-- ══ LANGUAGE MODAL ══ -->
@@ -671,7 +1010,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Icon (emoji)</label>
-                        <input type="text" id="langIcon" class="form-input" placeholder="e.g. 🦀">
+                        <input type="text" id="langIcon" class="form-input" placeholder="e.g. &#x1F980;">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Difficulty Label</label>
@@ -797,7 +1136,7 @@
                     <textarea id="qText" class="form-textarea" rows="3" placeholder="Enter your question here..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Options (one per line with A) B) C) D) prefix)</label>
+                    <label class="form-label">Answer Options</label>
                     <div class="options-grid">
                         <div>
                             <label class="form-hint" style="display:block;margin-bottom:0.25rem;">Option A</label>
@@ -835,30 +1174,49 @@
         </div>
     </div>
 
+    <!-- ══ STUDENT PROGRESS MODAL ══ -->
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal-box" style="max-width:720px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="progressModalTitle">STUDENT PROGRESS</div>
+                    <div id="progressModalSub" style="font-size:0.72rem;color:var(--text-muted);margin-top:0.3rem;"></div>
+                </div>
+                <button class="modal-close" onclick="closeModal('progress')">&times;</button>
+            </div>
+            <div class="modal-body" id="progressModalBody">
+                <div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading progress...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('progress')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API = 'http://localhost:3000/api';
 
-        // ── Faculty gate: show password form if not authenticated ──
+        // ── Auth helpers ──
+        // Faculty portal only accepts the adminToken — student tokens are rejected
         function getToken() {
-            // Prefer regular user token, fall back to admin token
-            return localStorage.getItem('token') || localStorage.getItem('adminToken') || null;
+            return localStorage.getItem('adminToken') || null;
         }
 
         function isAuthenticated() {
-            return !!(localStorage.getItem('user') || localStorage.getItem('adminToken'));
+            return !!localStorage.getItem('adminToken');
         }
 
         if (!isAuthenticated()) {
             document.getElementById('facultyGate').style.display = 'flex';
         }
 
-        async function adminLogin() {
+        async function facultyLogin() {
             const password = document.getElementById('adminPassword').value;
             const alertEl = document.getElementById('gateAlert');
             alertEl.innerHTML = '';
 
             if (!password) {
-                alertEl.innerHTML = '<div class="alert alert-error">Please enter the password.</div>';
+                alertEl.innerHTML = '<div class="alert alert-error">Please enter the faculty password.</div>';
                 return;
             }
 
@@ -873,13 +1231,12 @@
                 if (data.success) {
                     localStorage.setItem('adminToken', data.token);
                     document.getElementById('facultyGate').style.display = 'none';
-                    loadLessons();
-                    loadQuestions();
+                    initPortal();
                 } else {
                     alertEl.innerHTML = `<div class="alert alert-error">${data.message}</div>`;
                 }
             } catch (e) {
-                alertEl.innerHTML = '<div class="alert alert-error">Cannot connect to server.</div>';
+                alertEl.innerHTML = '<div class="alert alert-error">Cannot connect to server. Is the backend running?</div>';
             }
         }
 
@@ -893,31 +1250,41 @@
         // ── State ──
         let allLessons = [];
         let allQuestions = [];
+        let allStudents = [];
+        let allAnalyticsRows = [];
         let lessonFilter = 'all';
         let currentTab = 'lessons';
 
-        // ── Init: only load data if already authenticated ──
-        if (isAuthenticated()) {
+        function initPortal() {
             loadLessons();
             loadQuestions();
+            loadStudents();
+        }
+
+        if (isAuthenticated()) {
+            initPortal();
         }
 
         // ── Tab switching ──
         function switchTab(tab) {
             currentTab = tab;
-            document.querySelectorAll('.admin-tab').forEach((t, i) => {
-                t.classList.toggle('active', (i === 0 && tab === 'lessons') || (i === 1 && tab === 'questions'));
+            document.querySelectorAll('.admin-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
             });
-            document.getElementById('tabLessons').style.display = tab === 'lessons' ? 'block' : 'none';
-            document.getElementById('tabQuestions').style.display = tab === 'questions' ? 'block' : 'none';
+            document.getElementById('tabLessons').style.display   = tab === 'lessons'   ? 'block' : 'none';
+            document.getElementById('tabQuizzes').style.display   = tab === 'quizzes'   ? 'block' : 'none';
+            document.getElementById('tabStudents').style.display  = tab === 'students'  ? 'block' : 'none';
+            document.getElementById('tabAnalytics').style.display = tab === 'analytics' ? 'block' : 'none';
             document.getElementById('tabLanguages').style.display = tab === 'languages' ? 'block' : 'none';
+
             if (tab === 'languages') loadLanguages();
+            if (tab === 'analytics') loadAnalytics();
         }
 
         // ── LESSONS ──
         async function loadLessons() {
             try {
-                const langFilter = document.getElementById('lLangFilter') ? document.getElementById('lLangFilter').value : '';
+                const langFilter = document.getElementById('lLangFilter')?.value || '';
                 const url = langFilter ? `${API}/lessons?language=${langFilter}` : `${API}/lessons`;
                 const res = await fetch(url, { headers: getHeaders() });
                 const data = await res.json();
@@ -941,18 +1308,18 @@
             const filtered = lessonFilter === 'all' ? allLessons : allLessons.filter(l => l.difficulty === lessonFilter);
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div>No lessons found.</div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">&#x1F4ED;</div>No lessons found.</div></td></tr>`;
                 return;
             }
 
-            const langLabels = { python: '🐍 Python', javascript: '🌐 JS', java: '☕ Java', cpp: '⚡ C++' };
+            const langLabels = { python: '&#x1F40D; Python', javascript: '&#x1F310; JS', java: '&#x2615; Java', cpp: '&#x26A1; C++' };
             tbody.innerHTML = filtered.map(l => `
                 <tr>
-                    <td><span style="color:var(--text-muted);font-size:0.75rem;">#${l.orderNumber || '–'}</span></td>
+                    <td><span style="color:var(--text-muted);font-size:0.75rem;">#${l.orderNumber || '&#x2013;'}</span></td>
                     <td><strong>${escHtml(l.title)}</strong></td>
-                    <td><span style="font-size:0.75rem;">${langLabels[l.language] || l.language || '–'}</span></td>
+                    <td><span style="font-size:0.75rem;">${langLabels[l.language] || l.language || '&#x2013;'}</span></td>
                     <td><span class="diff-badge diff-${l.difficulty}">${l.difficulty}</span></td>
-                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '–')}</td>
+                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '&#x2013;')}</td>
                     <td>
                         <button class="action-btn btn-edit" onclick="openLessonModal(${l.id})">Edit</button>
                         <button class="action-btn btn-delete" onclick="deleteLesson(${l.id})">Delete</button>
@@ -1024,7 +1391,7 @@
             } catch (e) { showToast('Server error', true); }
         }
 
-        // ── QUESTIONS ──
+        // ── QUESTIONS / QUIZZES ──
         async function loadQuestions() {
             const lang = document.getElementById('qLangFilter')?.value || '';
             const level = document.getElementById('qLevelFilter')?.value || '';
@@ -1050,7 +1417,7 @@
         function renderQuestions() {
             const tbody = document.getElementById('questionsBody');
             if (allQuestions.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📭</div>No questions found.</div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">&#x1F4ED;</div>No questions found.</div></td></tr>`;
                 return;
             }
 
@@ -1060,7 +1427,7 @@
                     <td class="q-text-cell" title="${escHtml(q.question)}">${escHtml(q.question)}</td>
                     <td><span class="lang-tag lang-${q.language}">${q.language}</span></td>
                     <td><span class="diff-badge diff-${q.level}">${q.level}</span></td>
-                    <td>${escHtml(q.topic || '–')}</td>
+                    <td>${escHtml(q.topic || '&#x2013;')}</td>
                     <td><strong style="color:var(--success)">${q.correctAnswer}</strong></td>
                     <td>
                         <button class="action-btn btn-edit" onclick="openQuestionModal(${q.id})">Edit</button>
@@ -1089,8 +1456,8 @@
                 document.getElementById('optC').value = opts[2] || '';
                 document.getElementById('optD').value = opts[3] || '';
             } else {
-                ['qLanguage','qLevel','qTopic','qText','qHint','qExplanation','optA','optB','optC','optD'].forEach(id => {
-                    const el = document.getElementById(id);
+                ['qLanguage','qLevel','qTopic','qText','qHint','qExplanation','optA','optB','optC','optD'].forEach(fid => {
+                    const el = document.getElementById(fid);
                     if (el.tagName === 'SELECT') return;
                     el.value = '';
                 });
@@ -1148,41 +1515,276 @@
             } catch (e) { showToast('Server error', true); }
         }
 
-        // ── Modal helpers ──
-        function openModal(type) {
-            document.getElementById(type + 'Modal').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(type) {
-            document.getElementById(type + 'Modal').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        // Close on backdrop click
-        document.querySelectorAll('.modal-overlay').forEach(mo => {
-            mo.addEventListener('click', e => {
-                if (e.target === mo) {
-                    mo.classList.remove('open');
-                    document.body.style.overflow = '';
+        // ── STUDENTS ──
+        async function loadStudents() {
+            try {
+                const res = await fetch(`${API}/auth/students`, { headers: getHeaders() });
+                const data = await res.json();
+                if (data.success) {
+                    allStudents = data.students || [];
+                    renderStudents();
+                    document.getElementById('statStudents').textContent = allStudents.length;
                 }
-            });
-        });
-
-        // ── Toast ──
-        function showToast(msg, isError = false) {
-            const existing = document.querySelector('.admin-toast');
-            if (existing) existing.remove();
-            const t = document.createElement('div');
-            t.className = 'admin-toast' + (isError ? ' error' : '');
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 2800);
+            } catch (e) {
+                console.error('Failed to load students', e);
+            }
         }
 
-        // ── Util ──
-        function escHtml(str) {
-            return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        function renderStudents() {
+            const tbody = document.getElementById('studentsBody');
+            const search = (document.getElementById('studentSearch')?.value || '').toLowerCase();
+            const levelFilter = document.getElementById('studentLevelFilter')?.value || '';
+
+            let filtered = allStudents.filter(s => {
+                const matchSearch = !search ||
+                    (s.fullName || '').toLowerCase().includes(search) ||
+                    (s.email || '').toLowerCase().includes(search);
+                const matchLevel = !levelFilter || s.currentLevel === levelFilter;
+                return matchSearch && matchLevel;
+            });
+
+            document.getElementById('studentCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">&#x1F464;</div>No students found.</div></td></tr>`;
+                return;
+            }
+
+            const langLabels = { python: '&#x1F40D;', javascript: '&#x1F310;', java: '&#x2615;', cpp: '&#x26A1;', null: '&#x2013;' };
+            tbody.innerHTML = filtered.map((s, i) => {
+                const badges = (s.badges || []).map(b =>
+                    `<span class="badge-chip">${b.replace(/_/g,' ')}</span>`
+                ).join('');
+                const joined = s.createdAt ? new Date(s.createdAt).toLocaleDateString() : '&#x2013;';
+                const lang = s.selectedLanguage;
+                const langIcon = langLabels[lang] || '&#x2013;';
+                return `
+                    <tr>
+                        <td style="color:var(--text-muted);font-size:0.75rem;">${i + 1}</td>
+                        <td><strong>${escHtml(s.fullName || '&#x2013;')}</strong></td>
+                        <td style="font-size:0.75rem;color:var(--text-muted);">${escHtml(s.email)}</td>
+                        <td><span class="diff-badge diff-${s.currentLevel}">${s.currentLevel}</span></td>
+                        <td style="color:var(--xp);font-weight:700;">${s.totalPoints || 0} <span style="font-size:0.6rem;color:var(--text-muted);">pts</span></td>
+                        <td>${langIcon} <span style="font-size:0.72rem;">${lang || '&#x2013;'}</span></td>
+                        <td>${badges || '<span style="color:var(--text-muted);font-size:0.72rem;">None</span>'}</td>
+                        <td style="font-size:0.75rem;color:var(--text-muted);">${joined}</td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewStudentProgress(${s.id}, '${escHtml(s.fullName)}', '${escHtml(s.email)}')">Progress</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function viewStudentProgress(userId, name, email) {
+            document.getElementById('progressModalTitle').textContent = 'STUDENT PROGRESS';
+            document.getElementById('progressModalSub').textContent = `${name} — ${email}`;
+            document.getElementById('progressModalBody').innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading...</div>';
+            openModal('progress');
+
+            try {
+                const res = await fetch(`${API}/progress/${userId}`, { headers: getHeaders() });
+                const data = await res.json();
+
+                if (!data.success) {
+                    document.getElementById('progressModalBody').innerHTML = '<div class="empty-state">No progress data available.</div>';
+                    return;
+                }
+
+                const overall = data.overall || {};
+                const langs = data.byLanguage || {};
+                const langIcons = { python: '&#x1F40D; Python', javascript: '&#x1F310; JavaScript', java: '&#x2615; Java', cpp: '&#x26A1; C++' };
+
+                let html = `
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.25rem;">
+                        <div class="analytics-card purple" style="padding:0.85rem;">
+                            <div class="analytics-card-num" style="font-size:0.9rem;">${overall.accuracy || 0}%</div>
+                            <div class="analytics-card-label">Overall Accuracy</div>
+                        </div>
+                        <div class="analytics-card cyan" style="padding:0.85rem;">
+                            <div class="analytics-card-num" style="font-size:0.9rem;">${overall.totalQuestions || 0}</div>
+                            <div class="analytics-card-label">Questions Answered</div>
+                        </div>
+                        <div class="analytics-card green" style="padding:0.85rem;">
+                            <div class="analytics-card-num" style="font-size:0.9rem;">${overall.totalCorrect || 0}</div>
+                            <div class="analytics-card-label">Correct Answers</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem;">Progress by Language</div>
+                `;
+
+                for (const [key, prog] of Object.entries(langs)) {
+                    const acc = prog.accuracy || 0;
+                    const barColor = acc >= 80 ? '#34d399' : acc >= 60 ? '#fbbf24' : '#f87171';
+                    html += `
+                        <div class="progress-lang-card">
+                            <div class="progress-lang-header">
+                                <span class="progress-lang-title">${langIcons[key] || key}</span>
+                                <span class="diff-badge diff-${prog.level || 'beginner'}">${prog.level || 'beginner'}</span>
+                            </div>
+                            <div class="progress-stat-grid">
+                                <div class="progress-stat-item">
+                                    <div class="progress-stat-val">${prog.questionsAnswered || 0}</div>
+                                    <div class="progress-stat-lbl">Answered</div>
+                                </div>
+                                <div class="progress-stat-item">
+                                    <div class="progress-stat-val" style="color:${barColor}">${acc}%</div>
+                                    <div class="progress-stat-lbl">Accuracy</div>
+                                </div>
+                                <div class="progress-stat-item">
+                                    <div class="progress-stat-val" style="color:var(--text-muted);font-size:0.72rem;">${prog.lastActive || 'Never'}</div>
+                                    <div class="progress-stat-lbl">Last Active</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:0.65rem;">
+                                <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+                                    <div style="height:100%;width:${acc}%;background:${barColor};border-radius:3px;transition:width 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('progressModalBody').innerHTML = html;
+            } catch (e) {
+                document.getElementById('progressModalBody').innerHTML = '<div class="empty-state">Failed to load progress data.</div>';
+            }
+        }
+
+        // ── ANALYTICS ──
+        async function loadAnalytics() {
+            const tbody = document.getElementById('analyticsBody');
+            tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Fetching student data...</div></td></tr>';
+
+            // Load students if not already loaded
+            if (allStudents.length === 0) await loadStudents();
+
+            allAnalyticsRows = [];
+
+            // Fetch progress for each student
+            const progressPromises = allStudents.map(async (s) => {
+                try {
+                    const res = await fetch(`${API}/progress/${s.id}`, { headers: getHeaders() });
+                    const data = await res.json();
+                    if (data.success && data.byLanguage) {
+                        for (const [lang, prog] of Object.entries(data.byLanguage)) {
+                            if ((prog.questionsAnswered || 0) > 0) {
+                                allAnalyticsRows.push({
+                                    studentId: s.id,
+                                    studentName: s.fullName,
+                                    language: lang,
+                                    level: prog.level || 'beginner',
+                                    questionsAnswered: prog.questionsAnswered || 0,
+                                    accuracy: prog.accuracy || 0,
+                                    lastActive: prog.lastActive || null
+                                });
+                            }
+                        }
+                    }
+                } catch (e) { /* skip failed fetches */ }
+            });
+
+            await Promise.all(progressPromises);
+
+            renderAnalyticsSummary();
+            renderAnalyticsTable();
+        }
+
+        function renderAnalyticsSummary() {
+            const rows = allAnalyticsRows;
+            if (rows.length === 0) {
+                document.getElementById('aAvgAccuracy').textContent = '0%';
+                document.getElementById('aActive').textContent = '0';
+                document.getElementById('aTopStudents').textContent = '0';
+                document.getElementById('aNeedHelp').textContent = '0';
+                return;
+            }
+
+            const avgAcc = Math.round(rows.reduce((s, r) => s + r.accuracy, 0) / rows.length);
+            const activeStudentIds = [...new Set(rows.map(r => r.studentId))];
+            const topPerformers = activeStudentIds.filter(id => {
+                const studentRows = rows.filter(r => r.studentId === id);
+                const avg = studentRows.reduce((s, r) => s + r.accuracy, 0) / studentRows.length;
+                return avg >= 80;
+            });
+            const needHelp = activeStudentIds.filter(id => {
+                const studentRows = rows.filter(r => r.studentId === id);
+                const avg = studentRows.reduce((s, r) => s + r.accuracy, 0) / studentRows.length;
+                return avg < 60;
+            });
+
+            document.getElementById('aAvgAccuracy').textContent = avgAcc + '%';
+            document.getElementById('aActive').textContent = activeStudentIds.length;
+            document.getElementById('aTopStudents').textContent = topPerformers.length;
+            document.getElementById('aNeedHelp').textContent = needHelp.length;
+
+            // Level distribution based on students' current level
+            const beg = allStudents.filter(s => s.currentLevel === 'beginner').length;
+            const int = allStudents.filter(s => s.currentLevel === 'intermediate').length;
+            const adv = allStudents.filter(s => s.currentLevel === 'advanced').length;
+            const total = allStudents.length || 1;
+
+            const begPct = Math.round((beg / total) * 100);
+            const intPct = Math.round((int / total) * 100);
+            const advPct = 100 - begPct - intPct;
+
+            document.getElementById('levelDistBar').innerHTML = `
+                <div class="seg-beginner" style="width:${begPct}%"></div>
+                <div class="seg-intermediate" style="width:${intPct}%"></div>
+                <div class="seg-advanced" style="width:${Math.max(advPct, 0)}%"></div>
+            `;
+            document.getElementById('levelDistLegend').innerHTML = `
+                <span><span class="legend-dot" style="background:#34d399;"></span>Beginner: ${beg}</span>
+                <span><span class="legend-dot" style="background:#fbbf24;"></span>Intermediate: ${int}</span>
+                <span><span class="legend-dot" style="background:#f87171;"></span>Advanced: ${adv}</span>
+            `;
+        }
+
+        function filterAnalytics() { renderAnalyticsTable(); }
+
+        function renderAnalyticsTable() {
+            const tbody = document.getElementById('analyticsBody');
+            const langFilter = document.getElementById('aLangFilter')?.value || '';
+
+            let rows = langFilter ? allAnalyticsRows.filter(r => r.language === langFilter) : allAnalyticsRows;
+
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">&#x1F4CA;</div>No activity data yet. Students need to answer questions first.</div></td></tr>`;
+                return;
+            }
+
+            // Sort by accuracy descending
+            rows = [...rows].sort((a, b) => b.accuracy - a.accuracy);
+
+            const langIcons = { python: '&#x1F40D;', javascript: '&#x1F310;', java: '&#x2615;', cpp: '&#x26A1;' };
+
+            tbody.innerHTML = rows.map(r => {
+                const barColor = r.accuracy >= 80 ? '#34d399' : r.accuracy >= 60 ? '#fbbf24' : '#ef4444';
+                let statusHtml;
+                if (r.accuracy >= 80) {
+                    statusHtml = '<span class="status-ok">&#x2713; On Track</span>';
+                } else if (r.accuracy >= 60) {
+                    statusHtml = '<span class="status-warn">&#x26A0; Needs Review</span>';
+                } else {
+                    statusHtml = '<span class="status-danger">&#x26A0; Needs Help</span>';
+                }
+                return `
+                    <tr>
+                        <td><strong>${escHtml(r.studentName)}</strong></td>
+                        <td><span class="lang-tag lang-${r.language}">${langIcons[r.language] || ''} ${r.language}</span></td>
+                        <td><span class="diff-badge diff-${r.level}">${r.level}</span></td>
+                        <td>${r.questionsAnswered}</td>
+                        <td>
+                            <span class="accuracy-bar-wrap">
+                                <span class="accuracy-bar-fill" style="width:${r.accuracy}%;background:${barColor};"></span>
+                            </span>
+                            <strong style="color:${barColor}">${r.accuracy}%</strong>
+                        </td>
+                        <td style="font-size:0.75rem;color:var(--text-muted);">${r.lastActive || '&#x2013;'}</td>
+                        <td>${statusHtml}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // ── LANGUAGES ──
@@ -1202,16 +1804,16 @@
         function renderLanguages() {
             const tbody = document.getElementById('languagesBody');
             if (allLanguages.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div>No languages found.</div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">&#x1F4ED;</div>No languages found.</div></td></tr>`;
                 return;
             }
             tbody.innerHTML = allLanguages.map(l => `
                 <tr>
-                    <td style="font-size:1.4rem;">${escHtml(l.icon || '💻')}</td>
+                    <td style="font-size:1.4rem;">${escHtml(l.icon || '&#x1F4BB;')}</td>
                     <td><strong>${escHtml(l.name)}</strong></td>
                     <td><code>${escHtml(l.code)}</code></td>
-                    <td>${escHtml(l.difficulty || '–')}</td>
-                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '–')}</td>
+                    <td>${escHtml(l.difficulty || '&#x2013;')}</td>
+                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '&#x2013;')}</td>
                     <td>
                         <button class="action-btn btn-edit" onclick="openLangModal('${l.code}')">Edit</button>
                         <button class="action-btn btn-delete" onclick="deleteLang('${l.code}')">Delete</button>
@@ -1280,9 +1882,43 @@
                 const data = await res.json();
                 if (data.success) { showToast('Language deleted'); loadLanguages(); }
                 else showToast(data.message || 'Error', true);
-            } catch (e) {
-                showToast('Server error', true);
-            }
+            } catch (e) { showToast('Server error', true); }
+        }
+
+        // ── Modal helpers ──
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(mo => {
+            mo.addEventListener('click', e => {
+                if (e.target === mo) {
+                    mo.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // ── Toast ──
+        function showToast(msg, isError = false) {
+            const existing = document.querySelector('.admin-toast');
+            if (existing) existing.remove();
+            const t = document.createElement('div');
+            t.className = 'admin-toast' + (isError ? ' error' : '');
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2800);
+        }
+
+        // ── Util ──
+        function escHtml(str) {
+            return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
         function logout() {

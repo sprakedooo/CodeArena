@@ -9,6 +9,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { requireFaculty } = require('../middleware/authMiddleware');
 
 let mockLessons = [
 
@@ -1324,7 +1325,7 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/lessons
-router.post('/', (req, res) => {
+router.post('/', requireFaculty, (req, res) => {
     const { title, description, content, difficulty, language, orderNumber, topics } = req.body;
     if (!title || !content || !language) {
         return res.status(400).json({ error: 'title, content, and language are required' });
@@ -1345,7 +1346,7 @@ router.post('/', (req, res) => {
 });
 
 // PUT /api/lessons/:id
-router.put('/:id', (req, res) => {
+router.put('/:id', requireFaculty, (req, res) => {
     const id = parseInt(req.params.id);
     const idx = mockLessons.findIndex(l => l.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Lesson not found' });
@@ -1355,7 +1356,7 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /api/lessons/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireFaculty, (req, res) => {
     const id = parseInt(req.params.id);
     const idx = mockLessons.findIndex(l => l.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Lesson not found' });

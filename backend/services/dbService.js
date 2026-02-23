@@ -116,10 +116,11 @@ async function getQuestions(language, level) {
             [language, level]
         );
 
-        // Parse JSON options
+        // Parse JSON options — mysql2 may already have auto-parsed the JSON column
         return results.map(q => ({
             ...q,
-            options: (() => { try { return JSON.parse(q.options); } catch { return []; } })()
+            options: Array.isArray(q.options) ? q.options
+                   : (q.options ? (() => { try { return JSON.parse(q.options); } catch { return []; } })() : [])
         }));
     } catch (error) {
         console.error('Error getting questions:', error);
@@ -147,7 +148,8 @@ async function getQuestionById(questionId) {
         const q = results[0];
         return {
             ...q,
-            options: (() => { try { return JSON.parse(q.options); } catch { return []; } })()
+            options: Array.isArray(q.options) ? q.options
+                   : (q.options ? (() => { try { return JSON.parse(q.options); } catch { return []; } })() : [])
         };
     } catch (error) {
         console.error('Error getting question:', error);

@@ -26,6 +26,7 @@ const router = express.Router();
 
 // Import database service
 const dbService = require('../services/dbService');
+const { requireFaculty } = require('../middleware/authMiddleware');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MOCK DATA: Programming Questions by Language and Level
@@ -841,7 +842,7 @@ questionBank.push(
 // ROUTE: Get All Questions (Admin)
 // GET /api/questions/all
 // ─────────────────────────────────────────────────────────────────────────────
-router.get('/all', (req, res) => {
+router.get('/all', requireFaculty, (req, res) => {
     const { language, level } = req.query;
     let results = [...questionBank];
     if (language) results = results.filter(q => q.language === language.toLowerCase());
@@ -853,7 +854,7 @@ router.get('/all', (req, res) => {
 // ROUTE: Create Question (Admin/Faculty)
 // POST /api/questions
 // ─────────────────────────────────────────────────────────────────────────────
-router.post('/', (req, res) => {
+router.post('/', requireFaculty, (req, res) => {
     const { language, level, topic, question, options, correctAnswer, hint, explanation, questionType } = req.body;
     if (!language || !level || !question || !options || !correctAnswer) {
         return res.status(400).json({ success: false, message: 'Required: language, level, question, options, correctAnswer' });
@@ -872,7 +873,7 @@ router.post('/', (req, res) => {
 // ROUTE: Update Question (Admin/Faculty)
 // PUT /api/questions/:id
 // ─────────────────────────────────────────────────────────────────────────────
-router.put('/:id', (req, res) => {
+router.put('/:id', requireFaculty, (req, res) => {
     const id = parseInt(req.params.id);
     const idx = questionBank.findIndex(q => q.id === id);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Question not found' });
@@ -885,7 +886,7 @@ router.put('/:id', (req, res) => {
 // ROUTE: Delete Question (Admin/Faculty)
 // DELETE /api/questions/:id
 // ─────────────────────────────────────────────────────────────────────────────
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireFaculty, (req, res) => {
     const id = parseInt(req.params.id);
     const idx = questionBank.findIndex(q => q.id === id);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Question not found' });
@@ -928,7 +929,7 @@ router.get('/', async (req, res) => {
             questionsForStudent = dbQuestions.map(q => ({
                 id: q.id,
                 question: q.question,
-                options: q.options,
+                options: q.options || [],
                 topic: q.topic,
                 level: q.level
             }));
@@ -980,7 +981,7 @@ router.get('/:language/:level', async (req, res) => {
             questionsForStudent = dbQuestions.map(q => ({
                 id: q.id,
                 question: q.question,
-                options: q.options,
+                options: q.options || [],
                 topic: q.topic,
                 level: q.level,
                 correctAnswer: q.correctAnswer,
@@ -1007,7 +1008,7 @@ router.get('/:language/:level', async (req, res) => {
         questionsForStudent = filteredQuestions.map(q => ({
             id: q.id,
             question: q.question,
-            options: q.options,
+            options: q.options || [],
             topic: q.topic,
             level: q.level,
             correctAnswer: q.correctAnswer,
