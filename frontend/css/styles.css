@@ -1,0 +1,967 @@
+/**
+ * ============================================================================
+ * CODEARENA - Codedex-Inspired Retro Game Theme
+ * ============================================================================
+ * 8-bit adventure aesthetic with dark theme, pixel accents, and vibrant colors
+ * ============================================================================
+ */
+
+/* Google Fonts - Press Start 2P for pixel headings, Inter for body */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ============================================================================
+   CSS VARIABLES
+   ============================================================================ */
+:root {
+    /* Dark theme base */
+    --bg-dark: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-hover: #1c2333;
+    --bg-surface: #21262d;
+    --bg-input: #0d1117;
+
+    /* Accent colors - vibrant retro palette */
+    --primary: #7c3aed;
+    --primary-glow: rgba(124, 58, 237, 0.3);
+    --primary-light: rgba(124, 58, 237, 0.15);
+    --secondary: #06b6d4;
+    --secondary-glow: rgba(6, 182, 212, 0.3);
+
+    /* Game feedback */
+    --success: #10b981;
+    --success-glow: rgba(16, 185, 129, 0.3);
+    --success-bg: rgba(16, 185, 129, 0.1);
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.3);
+    --danger-bg: rgba(239, 68, 68, 0.1);
+    --warning: #f59e0b;
+    --warning-glow: rgba(245, 158, 11, 0.3);
+    --warning-bg: rgba(245, 158, 11, 0.1);
+    --xp-gold: #fbbf24;
+
+    /* Level colors */
+    --beginner: #10b981;
+    --intermediate: #f59e0b;
+    --advanced: #ef4444;
+
+    /* Text */
+    --text: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --white: #ffffff;
+
+    /* Border */
+    --border: #30363d;
+    --border-light: rgba(255,255,255,0.06);
+
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+
+    /* Shadows */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --glow-primary: 0 0 20px var(--primary-glow);
+    --glow-success: 0 0 20px var(--success-glow);
+
+    /* Radius */
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-sm: 8px;
+}
+
+/* ============================================================================
+   RESET & BASE
+   ============================================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Pixel font for headings */
+.pixel-font, .pixel-title {
+    font-family: 'Press Start 2P', monospace;
+}
+
+a {
+    color: var(--secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    color: var(--primary);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================ */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-lg);
+}
+
+.container-sm {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: var(--space-lg);
+}
+
+/* ============================================================================
+   NAVBAR - Dark game header
+   ============================================================================ */
+.navbar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem var(--space-xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.3rem;
+    gap: 2px;
+}
+
+.logo-bracket { color: var(--text-muted); }
+.logo-code {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.85rem;
+    color: var(--primary);
+    letter-spacing: 1px;
+}
+.logo-arena {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.85rem;
+    color: var(--success);
+    letter-spacing: 1px;
+}
+
+.logo-tagline {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    margin-left: 0.75rem;
+    text-transform: uppercase;
+}
+
+.navbar-nav {
+    display: flex;
+    gap: var(--space-sm);
+    list-style: none;
+    align-items: center;
+}
+
+.navbar-nav a {
+    color: var(--text-secondary);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.navbar-nav a:hover {
+    color: var(--white);
+    background: var(--bg-surface);
+}
+
+.navbar-nav a.active {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* XP Bar in navbar */
+.nav-xp-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--bg-surface);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+}
+
+.nav-xp-bar .xp-icon {
+    color: var(--xp-gold);
+    font-weight: 700;
+}
+
+.nav-xp-bar .xp-amount {
+    color: var(--xp-gold);
+    font-weight: 600;
+}
+
+/* ============================================================================
+   CARDS - Glass morphism dark cards
+   ============================================================================ */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+    transition: all 0.3s;
+}
+
+.card:hover {
+    border-color: rgba(124, 58, 237, 0.3);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.card-glow {
+    box-shadow: var(--glow-primary);
+    border-color: var(--primary);
+}
+
+/* ============================================================================
+   BUTTONS - Retro game style
+   ============================================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.5rem;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, #9333ea 100%);
+    color: var(--white);
+    border-color: var(--primary);
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 25px var(--primary-glow);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: var(--white);
+    box-shadow: 0 4px 15px var(--success-glow);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    color: var(--white);
+    box-shadow: 0 4px 15px var(--danger-glow);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text);
+}
+
+.btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.btn-ghost {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+    color: var(--white);
+    border-color: var(--text-secondary);
+}
+
+.btn-lg {
+    padding: 0.85rem 2rem;
+    font-size: 1.05rem;
+}
+
+.btn-block {
+    display: flex;
+    width: 100%;
+}
+
+.btn-pixel {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    padding: 0.85rem 1.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ============================================================================
+   FORMS - Dark input fields
+   ============================================================================ */
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-input);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ============================================================================
+   LANGUAGE SELECTION
+   ============================================================================ */
+.language-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+}
+
+.language-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl) var(--space-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.language-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.language-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--primary);
+    box-shadow: var(--glow-primary);
+}
+
+.language-card:hover::before {
+    opacity: 1;
+}
+
+.language-icon {
+    font-size: 3.5rem;
+    margin-bottom: var(--space-md);
+    filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
+}
+
+.language-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.9rem;
+    margin-bottom: var(--space-sm);
+    color: var(--white);
+}
+
+.language-desc {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* ============================================================================
+   STATS BAR - Game HUD style
+   ============================================================================ */
+.stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xl);
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0 var(--space-md);
+}
+
+.stat-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.25rem;
+    color: var(--xp-gold);
+    text-shadow: 0 0 10px var(--warning-glow);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.25rem;
+}
+
+/* ============================================================================
+   LEVEL BADGES
+   ============================================================================ */
+.level-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid;
+}
+
+.level-beginner {
+    background: var(--success-bg);
+    color: var(--beginner);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.level-intermediate {
+    background: var(--warning-bg);
+    color: var(--intermediate);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.level-advanced {
+    background: var(--danger-bg);
+    color: var(--advanced);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================================================
+   QUESTION DISPLAY
+   ============================================================================ */
+.question-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.question-number {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+}
+
+.question-text {
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin-bottom: var(--space-xl);
+    line-height: 1.7;
+    color: var(--text);
+}
+
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.option-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    background: var(--bg-surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.option-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateX(4px);
+}
+
+.option-btn.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.option-btn.correct {
+    border-color: var(--success);
+    background: var(--success-bg);
+    box-shadow: 0 0 15px var(--success-glow);
+}
+
+.option-btn.wrong {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+    box-shadow: 0 0 15px var(--danger-glow);
+}
+
+/* ============================================================================
+   FEEDBACK BOXES
+   ============================================================================ */
+.feedback-box {
+    padding: var(--space-lg);
+    border-radius: var(--radius);
+    margin-top: var(--space-lg);
+    border: 1px solid;
+}
+
+.feedback-correct {
+    background: var(--success-bg);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--success);
+}
+
+.feedback-wrong {
+    background: var(--danger-bg);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--danger);
+}
+
+.hint-box {
+    background: var(--warning-bg);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--radius);
+    padding: var(--space-lg);
+    margin-top: var(--space-lg);
+}
+
+.hint-label {
+    display: inline-block;
+    background: var(--warning);
+    color: var(--bg-dark);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--space-sm);
+}
+
+/* ============================================================================
+   PROGRESS BARS - Retro game XP style
+   ============================================================================ */
+.progress-bar {
+    height: 10px;
+    background: var(--bg-surface);
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,0.15) 50%,
+        transparent 100%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.level-progress {
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.level-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+}
+
+/* XP Progress Bar (large) */
+.xp-progress-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.xp-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.xp-level-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    color: var(--xp-gold);
+}
+
+.xp-bar {
+    height: 16px;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--xp-gold), #f59e0b, var(--xp-gold));
+    background-size: 200% 100%;
+    border-radius: 6px;
+    transition: width 0.8s ease;
+    animation: goldShimmer 3s infinite;
+}
+
+@keyframes goldShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================================================
+   STREAK & BADGES
+   ============================================================================ */
+.streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.35rem 0.75rem;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: var(--bg-dark);
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.streak-badge.hot {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(251, 191, 36, 0); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+}
+
+.badges-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.badge-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.badge-icon {
+    font-size: 1.25rem;
+}
+
+/* ============================================================================
+   ALERTS
+   ============================================================================ */
+.alert {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-lg);
+    border: 1px solid;
+    font-size: 0.9rem;
+}
+
+.alert-success {
+    background: var(--success-bg);
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.alert-error {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.alert-info {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: rgba(124, 58, 237, 0.3);
+}
+
+/* ============================================================================
+   DASHBOARD GRID
+   ============================================================================ */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+.text-center { text-align: center; }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.text-gold { color: var(--xp-gold); }
+
+.mt-1 { margin-top: var(--space-sm); }
+.mt-2 { margin-top: var(--space-md); }
+.mt-3 { margin-top: var(--space-lg); }
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
+
+.hidden { display: none; }
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+.animate-bounce {
+    animation: bounce 0.5s;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.animate-shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px var(--primary-glow); }
+    50% { box-shadow: 0 0 25px var(--primary-glow); }
+}
+
+/* Floating particles background */
+.particles-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    opacity: 0.15;
+    animation: float linear infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem var(--space-md);
+    }
+
+    .navbar-nav {
+        gap: 0.25rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stats-bar {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+    }
+
+    .stat-item {
+        flex: 1;
+        min-width: 80px;
+    }
+
+    .language-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        padding: var(--space-md);
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+}

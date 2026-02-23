@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: var(--bg-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+        }
+
+        /* Two-column layout */
+        .login-page {
+            flex: 1;
+            display: flex;
+            align-items: stretch;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── LEFT HERO PANEL ── */
+        .hero-panel {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 3.5rem;
+            border-right: 1px solid var(--border);
+            background: linear-gradient(160deg, rgba(124,58,237,0.06) 0%, rgba(6,182,212,0.04) 50%, transparent 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 900px) {
+            .hero-panel { display: flex; }
+        }
+
+        /* Decorative blob */
+        .hero-blob {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%);
+            top: -80px;
+            left: -80px;
+            pointer-events: none;
+        }
+
+        .hero-blob-2 {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(6,182,212,0.06), transparent 70%);
+            bottom: -50px;
+            right: -50px;
+            pointer-events: none;
+        }
+
+        .hero-logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.6rem;
+            margin-bottom: 0.6rem;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-logo .code { color: var(--primary); }
+        .hero-logo .arena { color: var(--success); }
+        .hero-logo .brk { color: var(--text-muted); }
+
+        .hero-tagline {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Language showcase */
+        .lang-showcase {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lang-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .lang-pill:hover {
+            border-color: var(--primary);
+            color: var(--text);
+            transform: translateY(-2px);
+        }
+
+        .lang-pill img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+
+        /* Feature boxes */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .feature-box:hover { border-color: rgba(124,58,237,0.4); }
+
+        .feature-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .feature-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+        }
+
+        .feature-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item { text-align: center; }
+        .stat-num {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            color: var(--primary);
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ── RIGHT LOGIN PANEL ── */
+        .login-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 900px) {
+            .login-panel { width: 420px; }
+        }
+
+        .login-container { width: 100%; max-width: 380px; }
+
+        /* Mobile-only logo */
+        .mobile-logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+            .mobile-logo { display: none; }
+        }
+
+        .mobile-logo .ml-logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+        }
+        .mobile-logo .code { color: var(--primary); }
+        .mobile-logo .arena { color: var(--success); }
+        .mobile-logo .brk { color: var(--text-muted); }
+
+        .mobile-tagline {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+        }
+
+        /* Login card */
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success));
+        }
+
+        .login-card h2 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.75rem;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span { padding: 0 1rem; }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.25rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .login-footer a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .test-account {
+            margin-top: 1.25rem;
+            padding: 0.75rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .test-account code {
+            color: var(--secondary);
+            background: rgba(6, 182, 212, 0.1);
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        /* Admin link */
+        .admin-link {
+            text-align: center;
+            margin-top: 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .admin-link a { color: var(--text-muted); }
+        .admin-link a:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="particles-bg" id="particles"></div>
+
+    <div class="login-page">
+
+        <!-- LEFT HERO PANEL -->
+        <div class="hero-panel">
+            <div class="hero-blob"></div>
+            <div class="hero-blob-2"></div>
+
+            <div class="hero-logo">
+                <span class="brk">&lt;</span><span class="code">Code</span><span class="arena">Arena</span><span class="brk">/&gt;</span>
+            </div>
+            <div class="hero-tagline">Your Coding Adventure Starts Here</div>
+            <p class="hero-subtitle">
+                Master programming through an epic game-based journey. Adaptive AI, real code challenges, and instant feedback.
+            </p>
+
+            <!-- Stats -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-num">4</span>
+                    <span class="stat-label">Languages</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">12</span>
+                    <span class="stat-label">Lessons</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">60+</span>
+                    <span class="stat-label">Challenges</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">AI</span>
+                    <span class="stat-label">Powered</span>
+                </div>
+            </div>
+
+            <!-- Language pills -->
+            <div class="lang-showcase">
+                <div class="lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python" onerror="this.style.display='none'">
+                    Python
+                </div>
+                <div class="lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JS" onerror="this.style.display='none'">
+                    JavaScript
+                </div>
+                <div class="lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java" onerror="this.style.display='none'">
+                    Java
+                </div>
+                <div class="lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="C++" onerror="this.style.display='none'">
+                    C++
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-title">Adaptive AI</div>
+                    <div class="feature-desc">Questions adjust to your skill level automatically</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🎮</div>
+                    <div class="feature-title">Game Mechanics</div>
+                    <div class="feature-desc">XP, streaks, combos, and achievements</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-title">AI Hints</div>
+                    <div class="feature-desc">Smart hints when you need help</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">ML Predictions</div>
+                    <div class="feature-desc">Decision Tree tracks your progress</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT LOGIN PANEL -->
+        <div class="login-panel">
+            <div class="login-container">
+
+                <!-- Mobile-only logo -->
+                <div class="mobile-logo">
+                    <div class="ml-logo">
+                        <span class="brk">&lt;</span><span class="code">Code</span><span class="arena">Arena</span><span class="brk">/&gt;</span>
+                    </div>
+                    <div class="mobile-tagline">Start Your Coding Adventure</div>
+                </div>
+
+                <!-- Login Card -->
+                <div class="login-card fade-in">
+                    <h2>PLAYER LOGIN</h2>
+
+                    <div id="alertBox"></div>
+
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            &#x1F3AE; Start Adventure
+                        </button>
+                    </form>
+
+                    <div class="login-footer">
+                        New player? <a href="register.html">Create Account</a>
+                    </div>
+
+                    <div class="test-account">
+                        Demo: <code>student@example.com</code> / <code>student123</code>
+                    </div>
+                </div>
+
+                <div class="admin-link">
+                    <a href="admin.html">&#x2699; Faculty Content Manager</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 18; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            p.style.animationDelay = (Math.random() * 10) + 's';
+            p.style.width = (Math.random() * 4 + 2) + 'px';
+            p.style.height = p.style.width;
+            const colors = ['var(--primary)', 'var(--success)', 'var(--secondary)'];
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            particlesContainer.appendChild(p);
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('isLoggedIn', 'true');
+                    if (data.token) localStorage.setItem('token', data.token);
+                    btn.textContent = 'Entering Arena...';
+                    btn.style.background = 'linear-gradient(135deg, var(--success) 0%, #059669 100%)';
+                    setTimeout(() => {
+                        window.location.href = data.user.selectedLanguage ? 'dashboard.html' : 'select_language.html';
+                    }, 500);
+                } else {
+                    document.getElementById('alertBox').innerHTML =
+                        `<div class="alert alert-error">${data.message}</div>`;
+                    btn.textContent = '🎮 Start Adventure';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                document.getElementById('alertBox').innerHTML =
+                    '<div class="alert alert-error">Cannot connect to server. Make sure the backend is running.</div>';
+                btn.textContent = '🎮 Start Adventure';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

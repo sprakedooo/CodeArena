@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <defs>
+    <linearGradient id="codeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="arenaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Code< bracket -->
+  <text x="10" y="65" font-family="'Segoe UI', Arial, sans-serif" font-size="48" font-weight="700" fill="url(#codeGradient)">
+    &lt;
+  </text>
+
+  <!-- Code text -->
+  <text x="35" y="65" font-family="'Segoe UI', Arial, sans-serif" font-size="48" font-weight="700" fill="url(#codeGradient)">
+    Code
+  </text>
+
+  <!-- Arena text -->
+  <text x="165" y="65" font-family="'Segoe UI', Arial, sans-serif" font-size="48" font-weight="700" fill="url(#arenaGradient)">
+    Arena
+  </text>
+
+  <!-- Closing bracket />  -->
+  <text x="325" y="65" font-family="'Segoe UI', Arial, sans-serif" font-size="48" font-weight="700" fill="url(#arenaGradient)">
+    /&gt;
+  </text>
+
+  <!-- Tagline -->
+  <text x="35" y="90" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#6b7280" letter-spacing="2">
+    AI-POWERED ADAPTIVE LEARNING
+  </text>
+</svg>

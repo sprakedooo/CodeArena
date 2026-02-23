@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Manager - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── ADMIN LAYOUT ── */
+        .admin-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .admin-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-page-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--white);
+            letter-spacing: 1px;
+        }
+
+        .admin-page-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        /* Tab navigation */
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .admin-tab {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: -1px;
+        }
+
+        .admin-tab:hover { color: var(--text); }
+
+        .admin-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Toolbar */
+        .tab-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover { border-color: var(--primary); color: var(--text); }
+        .filter-chip.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        .filter-select {
+            padding: 0.35rem 0.75rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .filter-select:focus { outline: none; border-color: var(--primary); }
+
+        /* Table */
+        .table-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            background: var(--bg-surface);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-table td {
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(48,54,61,0.5);
+            vertical-align: middle;
+        }
+
+        .admin-table tr:last-child td { border-bottom: none; }
+
+        .admin-table tr:hover td { background: rgba(124,58,237,0.04); }
+
+        .admin-table td strong { color: var(--text); }
+
+        .diff-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .diff-beginner { background: rgba(16,185,129,0.15); color: #34d399; }
+        .diff-intermediate { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .diff-advanced { background: rgba(239,68,68,0.15); color: #f87171; }
+
+        .lang-tag {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .lang-python { background: rgba(55,118,171,0.2); color: #60a5fa; }
+        .lang-javascript { background: rgba(247,223,30,0.2); color: #fbbf24; }
+        .lang-java { background: rgba(231,111,0,0.2); color: #fb923c; }
+        .lang-cpp { background: rgba(101,154,210,0.2); color: #93c5fd; }
+
+        /* Action buttons */
+        .action-btn {
+            padding: 0.3rem 0.65rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-edit { background: rgba(124,58,237,0.15); color: var(--primary); }
+        .btn-edit:hover { background: rgba(124,58,237,0.3); }
+
+        .btn-delete { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .btn-delete:hover { background: rgba(239,68,68,0.25); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.25s;
+        }
+
+        .modal-overlay.open .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-surface);
+        }
+
+        .modal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            color: var(--text);
+            letter-spacing: 1px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover { color: var(--text); }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            background: var(--bg-surface);
+        }
+
+        /* Form helpers */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 520px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.9rem;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Consolas', monospace;
+            font-size: 0.78rem;
+        }
+
+        .form-textarea.html-editor { min-height: 220px; }
+
+        .form-hint {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* Options grid for questions */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 520px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Stats summary cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 700px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card-num {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-card-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Toast */
+        .admin-toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--success);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+            animation: slideUpToast 0.3s ease, fadeOutToast 0.4s ease 2s forwards;
+        }
+
+        .admin-toast.error { background: var(--danger); box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
+
+        @keyframes slideUpToast {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeOutToast {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* ── FACULTY GATE ── */
+        .faculty-gate {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .faculty-gate-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .faculty-gate-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .faculty-gate-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+        .faculty-gate-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .faculty-gate-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .faculty-gate-back {
+            margin-top: 1rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .faculty-gate-back a { color: var(--primary); }
+
+        .q-text-cell {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 768px) {
+            .admin-table th:nth-child(n+5),
+            .admin-table td:nth-child(n+5) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Faculty password gate (shown when not logged in) -->
+    <div class="faculty-gate" id="facultyGate" style="display:none;">
+        <div class="faculty-gate-box">
+            <div class="faculty-gate-icon">&#x1F512;</div>
+            <div class="faculty-gate-title">FACULTY ACCESS</div>
+            <div class="faculty-gate-sub">Enter faculty password to manage content</div>
+            <div id="gateAlert" style="margin-bottom:0.75rem;"></div>
+            <div class="form-group" style="text-align:left;">
+                <label class="form-label">Password</label>
+                <input type="password" id="adminPassword" class="form-input" placeholder="Enter faculty password"
+                    onkeydown="if(event.key==='Enter') adminLogin()">
+            </div>
+            <button class="btn btn-primary btn-block" onclick="adminLogin()">&#x1F513; Unlock</button>
+            <div class="faculty-gate-back">
+                <a href="login.html">&larr; Back to Login</a>
+                &nbsp;|&nbsp;
+                <a href="dashboard.html">Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <span class="navbar-brand logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        </span>
+        <ul class="navbar-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="lessons.html">Lessons</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="admin-page">
+
+        <!-- Page header -->
+        <div class="admin-page-header">
+            <div>
+                <div class="admin-page-title">&#x2699; CONTENT MANAGER</div>
+                <div class="admin-page-subtitle">Manage lessons and game questions &mdash; changes apply immediately</div>
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Faculty Access</div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="stat-card-num" id="statLessons">–</div>
+                <div class="stat-card-label">Lessons</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-num" id="statQuestions">–</div>
+                <div class="stat-card-label">Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-num" id="statLangs">4</div>
+                <div class="stat-card-label">Languages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-num" id="statDone">0</div>
+                <div class="stat-card-label">Completed</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="switchTab('lessons')">&#x1F4DA; Lessons</button>
+            <button class="admin-tab" onclick="switchTab('questions')">&#x2753; Questions</button>
+            <button class="admin-tab" onclick="switchTab('languages')">&#x1F30D; Languages</button>
+        </div>
+
+        <!-- ══ LESSONS TAB ══ -->
+        <div id="tabLessons">
+            <div class="tab-toolbar">
+                <div class="toolbar-left">
+                    <select class="filter-select" id="lLangFilter" onchange="loadLessons()">
+                        <option value="">All Languages</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                    <button class="filter-chip active" onclick="filterLessons('all', this)">All</button>
+                    <button class="filter-chip" onclick="filterLessons('beginner', this)">Beginner</button>
+                    <button class="filter-chip" onclick="filterLessons('intermediate', this)">Intermediate</button>
+                    <button class="filter-chip" onclick="filterLessons('advanced', this)">Advanced</button>
+                </div>
+                <button class="btn btn-primary" onclick="openLessonModal(null)" style="font-size:0.8rem;">&#x2B; Add Lesson</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Language</th>
+                            <th>Difficulty</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lessonsBody">
+                        <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading lessons...</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══ QUESTIONS TAB ══ -->
+        <div id="tabQuestions" style="display:none">
+            <div class="tab-toolbar">
+                <div class="toolbar-left">
+                    <select class="filter-select" id="qLangFilter" onchange="loadQuestions()">
+                        <option value="">All Languages</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                    <select class="filter-select" id="qLevelFilter" onchange="loadQuestions()">
+                        <option value="">All Levels</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="openQuestionModal(null)" style="font-size:0.8rem;">&#x2B; Add Question</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Language</th>
+                            <th>Level</th>
+                            <th>Topic</th>
+                            <th>Ans</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questionsBody">
+                        <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading questions...</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- ══ LANGUAGES TAB ══ -->
+        <div id="tabLanguages" style="display:none">
+            <div class="tab-toolbar">
+                <div class="toolbar-left"></div>
+                <button class="btn btn-primary" onclick="openLangModal(null)" style="font-size:0.8rem;">&#x2B; Add Language</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Icon</th>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Difficulty Label</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="languagesBody">
+                        <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">&#x23F3;</div>Loading languages...</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ LANGUAGE MODAL ══ -->
+    <div class="modal-overlay" id="langModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" id="langModalTitle">ADD LANGUAGE</div>
+                <button class="modal-close" onclick="closeModal('lang')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="langCode">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Language Name *</label>
+                        <input type="text" id="langName" class="form-input" placeholder="e.g. Rust">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Code (lowercase) *</label>
+                        <input type="text" id="langCodeInput" class="form-input" placeholder="e.g. rust">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Icon (emoji)</label>
+                        <input type="text" id="langIcon" class="form-input" placeholder="e.g. 🦀">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Difficulty Label</label>
+                        <input type="text" id="langDifficulty" class="form-input" placeholder="e.g. Advanced">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" id="langDesc" class="form-input" placeholder="Brief description of the language">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Topics (comma-separated)</label>
+                    <input type="text" id="langTopics" class="form-input" placeholder="e.g. Variables, Functions, Memory">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('lang')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLang()">&#x2714; Save Language</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ LESSON MODAL ══ -->
+    <div class="modal-overlay" id="lessonModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" id="lessonModalTitle">ADD LESSON</div>
+                <button class="modal-close" onclick="closeModal('lesson')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="lessonId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Language *</label>
+                        <select id="lessonLang" class="form-select">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Difficulty *</label>
+                        <select id="lessonDiff" class="form-select">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Title *</label>
+                    <input type="text" id="lessonTitle" class="form-input" placeholder="e.g. Introduction to Programming">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" id="lessonDesc" class="form-input" placeholder="Brief one-line description">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Order Number</label>
+                        <input type="number" id="lessonOrder" class="form-input" placeholder="e.g. 7" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Content (HTML) *</label>
+                    <textarea id="lessonContent" class="form-textarea html-editor" placeholder="Enter HTML lesson content. Use &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;div class=&quot;code-block&quot;&gt;, &lt;div class=&quot;info-box&quot;&gt; etc."></textarea>
+                    <div class="form-hint">Supports HTML. Use class="code-block" for code, class="info-box" for notes, class="info-box tip" for tips.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('lesson')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLesson()">&#x2714; Save Lesson</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ QUESTION MODAL ══ -->
+    <div class="modal-overlay" id="questionModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" id="questionModalTitle">ADD QUESTION</div>
+                <button class="modal-close" onclick="closeModal('question')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="questionId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Language *</label>
+                        <select id="qLanguage" class="form-select">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level *</label>
+                        <select id="qLevel" class="form-select">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Topic</label>
+                        <input type="text" id="qTopic" class="form-input" placeholder="e.g. Variables, Loops">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Correct Answer *</label>
+                        <select id="qCorrect" class="form-select">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Question Text *</label>
+                    <textarea id="qText" class="form-textarea" rows="3" placeholder="Enter your question here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Options (one per line with A) B) C) D) prefix)</label>
+                    <div class="options-grid">
+                        <div>
+                            <label class="form-hint" style="display:block;margin-bottom:0.25rem;">Option A</label>
+                            <input type="text" id="optA" class="form-input" placeholder="A) First option">
+                        </div>
+                        <div>
+                            <label class="form-hint" style="display:block;margin-bottom:0.25rem;">Option B</label>
+                            <input type="text" id="optB" class="form-input" placeholder="B) Second option">
+                        </div>
+                        <div>
+                            <label class="form-hint" style="display:block;margin-bottom:0.25rem;">Option C</label>
+                            <input type="text" id="optC" class="form-input" placeholder="C) Third option">
+                        </div>
+                        <div>
+                            <label class="form-hint" style="display:block;margin-bottom:0.25rem;">Option D</label>
+                            <input type="text" id="optD" class="form-input" placeholder="D) Fourth option">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Hint</label>
+                        <input type="text" id="qHint" class="form-input" placeholder="Shown when wrong answer">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Explanation</label>
+                        <input type="text" id="qExplanation" class="form-input" placeholder="Detailed explanation">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('question')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveQuestion()">&#x2714; Save Question</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        // ── Faculty gate: show password form if not authenticated ──
+        function getToken() {
+            // Prefer regular user token, fall back to admin token
+            return localStorage.getItem('token') || localStorage.getItem('adminToken') || null;
+        }
+
+        function isAuthenticated() {
+            return !!(localStorage.getItem('user') || localStorage.getItem('adminToken'));
+        }
+
+        if (!isAuthenticated()) {
+            document.getElementById('facultyGate').style.display = 'flex';
+        }
+
+        async function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            const alertEl = document.getElementById('gateAlert');
+            alertEl.innerHTML = '';
+
+            if (!password) {
+                alertEl.innerHTML = '<div class="alert alert-error">Please enter the password.</div>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/auth/admin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('adminToken', data.token);
+                    document.getElementById('facultyGate').style.display = 'none';
+                    loadLessons();
+                    loadQuestions();
+                } else {
+                    alertEl.innerHTML = `<div class="alert alert-error">${data.message}</div>`;
+                }
+            } catch (e) {
+                alertEl.innerHTML = '<div class="alert alert-error">Cannot connect to server.</div>';
+            }
+        }
+
+        function getHeaders() {
+            const h = { 'Content-Type': 'application/json' };
+            const t = getToken();
+            if (t) h['Authorization'] = `Bearer ${t}`;
+            return h;
+        }
+
+        // ── State ──
+        let allLessons = [];
+        let allQuestions = [];
+        let lessonFilter = 'all';
+        let currentTab = 'lessons';
+
+        // ── Init: only load data if already authenticated ──
+        if (isAuthenticated()) {
+            loadLessons();
+            loadQuestions();
+        }
+
+        // ── Tab switching ──
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.admin-tab').forEach((t, i) => {
+                t.classList.toggle('active', (i === 0 && tab === 'lessons') || (i === 1 && tab === 'questions'));
+            });
+            document.getElementById('tabLessons').style.display = tab === 'lessons' ? 'block' : 'none';
+            document.getElementById('tabQuestions').style.display = tab === 'questions' ? 'block' : 'none';
+            document.getElementById('tabLanguages').style.display = tab === 'languages' ? 'block' : 'none';
+            if (tab === 'languages') loadLanguages();
+        }
+
+        // ── LESSONS ──
+        async function loadLessons() {
+            try {
+                const langFilter = document.getElementById('lLangFilter') ? document.getElementById('lLangFilter').value : '';
+                const url = langFilter ? `${API}/lessons?language=${langFilter}` : `${API}/lessons`;
+                const res = await fetch(url, { headers: getHeaders() });
+                const data = await res.json();
+                allLessons = data.lessons || [];
+                renderLessons();
+                document.getElementById('statLessons').textContent = allLessons.length;
+            } catch (e) {
+                showToast('Failed to load lessons', true);
+            }
+        }
+
+        function filterLessons(filter, chipEl) {
+            lessonFilter = filter;
+            document.querySelectorAll('#tabLessons .filter-chip').forEach(c => c.classList.remove('active'));
+            if (chipEl) chipEl.classList.add('active');
+            renderLessons();
+        }
+
+        function renderLessons() {
+            const tbody = document.getElementById('lessonsBody');
+            const filtered = lessonFilter === 'all' ? allLessons : allLessons.filter(l => l.difficulty === lessonFilter);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div>No lessons found.</div></td></tr>`;
+                return;
+            }
+
+            const langLabels = { python: '🐍 Python', javascript: '🌐 JS', java: '☕ Java', cpp: '⚡ C++' };
+            tbody.innerHTML = filtered.map(l => `
+                <tr>
+                    <td><span style="color:var(--text-muted);font-size:0.75rem;">#${l.orderNumber || '–'}</span></td>
+                    <td><strong>${escHtml(l.title)}</strong></td>
+                    <td><span style="font-size:0.75rem;">${langLabels[l.language] || l.language || '–'}</span></td>
+                    <td><span class="diff-badge diff-${l.difficulty}">${l.difficulty}</span></td>
+                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '–')}</td>
+                    <td>
+                        <button class="action-btn btn-edit" onclick="openLessonModal(${l.id})">Edit</button>
+                        <button class="action-btn btn-delete" onclick="deleteLesson(${l.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openLessonModal(id) {
+            document.getElementById('lessonId').value = id || '';
+            document.getElementById('lessonModalTitle').textContent = id ? 'EDIT LESSON' : 'ADD LESSON';
+
+            if (id) {
+                const l = allLessons.find(x => x.id === id);
+                document.getElementById('lessonLang').value = l.language || 'python';
+                document.getElementById('lessonTitle').value = l.title || '';
+                document.getElementById('lessonDesc').value = l.description || '';
+                document.getElementById('lessonDiff').value = l.difficulty || 'beginner';
+                document.getElementById('lessonOrder').value = l.orderNumber || '';
+                document.getElementById('lessonContent').value = l.content || '';
+            } else {
+                document.getElementById('lessonLang').value = document.getElementById('lLangFilter').value || 'python';
+                document.getElementById('lessonTitle').value = '';
+                document.getElementById('lessonDesc').value = '';
+                document.getElementById('lessonDiff').value = 'beginner';
+                document.getElementById('lessonOrder').value = allLessons.length + 1;
+                document.getElementById('lessonContent').value = '';
+            }
+            openModal('lesson');
+        }
+
+        async function saveLesson() {
+            const id = document.getElementById('lessonId').value;
+            const language = document.getElementById('lessonLang').value;
+            const title = document.getElementById('lessonTitle').value.trim();
+            const description = document.getElementById('lessonDesc').value.trim();
+            const difficulty = document.getElementById('lessonDiff').value;
+            const orderNumber = parseInt(document.getElementById('lessonOrder').value) || (allLessons.length + 1);
+            const content = document.getElementById('lessonContent').value.trim();
+
+            if (!title || !content) { showToast('Title and content are required', true); return; }
+
+            const body = { language, title, description, content, difficulty, orderNumber };
+
+            try {
+                const url = id ? `${API}/lessons/${id}` : `${API}/lessons`;
+                const method = id ? 'PUT' : 'POST';
+                const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(id ? 'Lesson updated!' : 'Lesson created!');
+                    closeModal('lesson');
+                    loadLessons();
+                } else {
+                    showToast(data.message || 'Error saving lesson', true);
+                }
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        async function deleteLesson(id) {
+            if (!confirm('Delete this lesson? This cannot be undone.')) return;
+            try {
+                const res = await fetch(`${API}/lessons/${id}`, { method: 'DELETE', headers: getHeaders() });
+                const data = await res.json();
+                if (data.success) { showToast('Lesson deleted'); loadLessons(); }
+                else showToast(data.message || 'Error', true);
+            } catch (e) { showToast('Server error', true); }
+        }
+
+        // ── QUESTIONS ──
+        async function loadQuestions() {
+            const lang = document.getElementById('qLangFilter')?.value || '';
+            const level = document.getElementById('qLevelFilter')?.value || '';
+            let url = `${API}/questions/all`;
+            const params = new URLSearchParams();
+            if (lang) params.set('language', lang);
+            if (level) params.set('level', level);
+            if (params.toString()) url += '?' + params.toString();
+
+            try {
+                const res = await fetch(url, { headers: getHeaders() });
+                const data = await res.json();
+                if (data.success) {
+                    allQuestions = data.questions;
+                    renderQuestions();
+                    document.getElementById('statQuestions').textContent = data.count;
+                }
+            } catch (e) {
+                console.error('Failed to load questions', e);
+            }
+        }
+
+        function renderQuestions() {
+            const tbody = document.getElementById('questionsBody');
+            if (allQuestions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📭</div>No questions found.</div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allQuestions.map(q => `
+                <tr>
+                    <td>${q.id}</td>
+                    <td class="q-text-cell" title="${escHtml(q.question)}">${escHtml(q.question)}</td>
+                    <td><span class="lang-tag lang-${q.language}">${q.language}</span></td>
+                    <td><span class="diff-badge diff-${q.level}">${q.level}</span></td>
+                    <td>${escHtml(q.topic || '–')}</td>
+                    <td><strong style="color:var(--success)">${q.correctAnswer}</strong></td>
+                    <td>
+                        <button class="action-btn btn-edit" onclick="openQuestionModal(${q.id})">Edit</button>
+                        <button class="action-btn btn-delete" onclick="deleteQuestion(${q.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openQuestionModal(id) {
+            document.getElementById('questionId').value = id || '';
+            document.getElementById('questionModalTitle').textContent = id ? 'EDIT QUESTION' : 'ADD QUESTION';
+
+            if (id) {
+                const q = allQuestions.find(x => x.id === id);
+                document.getElementById('qLanguage').value = q.language || 'python';
+                document.getElementById('qLevel').value = q.level || 'beginner';
+                document.getElementById('qTopic').value = q.topic || '';
+                document.getElementById('qText').value = q.question || '';
+                document.getElementById('qCorrect').value = q.correctAnswer || 'A';
+                document.getElementById('qHint').value = q.hint || '';
+                document.getElementById('qExplanation').value = q.explanation || '';
+                const opts = q.options || ['A) ', 'B) ', 'C) ', 'D) '];
+                document.getElementById('optA').value = opts[0] || '';
+                document.getElementById('optB').value = opts[1] || '';
+                document.getElementById('optC').value = opts[2] || '';
+                document.getElementById('optD').value = opts[3] || '';
+            } else {
+                ['qLanguage','qLevel','qTopic','qText','qHint','qExplanation','optA','optB','optC','optD'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el.tagName === 'SELECT') return;
+                    el.value = '';
+                });
+                document.getElementById('qLanguage').value = 'python';
+                document.getElementById('qLevel').value = 'beginner';
+                document.getElementById('qCorrect').value = 'A';
+            }
+            openModal('question');
+        }
+
+        async function saveQuestion() {
+            const id = document.getElementById('questionId').value;
+            const language = document.getElementById('qLanguage').value;
+            const level = document.getElementById('qLevel').value;
+            const topic = document.getElementById('qTopic').value.trim();
+            const question = document.getElementById('qText').value.trim();
+            const correctAnswer = document.getElementById('qCorrect').value;
+            const hint = document.getElementById('qHint').value.trim();
+            const explanation = document.getElementById('qExplanation').value.trim();
+            const options = [
+                document.getElementById('optA').value.trim(),
+                document.getElementById('optB').value.trim(),
+                document.getElementById('optC').value.trim(),
+                document.getElementById('optD').value.trim()
+            ].filter(Boolean);
+
+            if (!question || options.length < 2) { showToast('Question text and at least 2 options required', true); return; }
+
+            const body = { language, level, topic, question, options, correctAnswer, hint, explanation, questionType: 'multiple_choice' };
+
+            try {
+                const url = id ? `${API}/questions/${id}` : `${API}/questions`;
+                const method = id ? 'PUT' : 'POST';
+                const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(id ? 'Question updated!' : 'Question created!');
+                    closeModal('question');
+                    loadQuestions();
+                } else {
+                    showToast(data.message || 'Error saving question', true);
+                }
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm('Delete this question?')) return;
+            try {
+                const res = await fetch(`${API}/questions/${id}`, { method: 'DELETE', headers: getHeaders() });
+                const data = await res.json();
+                if (data.success) { showToast('Question deleted'); loadQuestions(); }
+                else showToast(data.message || 'Error', true);
+            } catch (e) { showToast('Server error', true); }
+        }
+
+        // ── Modal helpers ──
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Close on backdrop click
+        document.querySelectorAll('.modal-overlay').forEach(mo => {
+            mo.addEventListener('click', e => {
+                if (e.target === mo) {
+                    mo.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // ── Toast ──
+        function showToast(msg, isError = false) {
+            const existing = document.querySelector('.admin-toast');
+            if (existing) existing.remove();
+            const t = document.createElement('div');
+            t.className = 'admin-toast' + (isError ? ' error' : '');
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2800);
+        }
+
+        // ── Util ──
+        function escHtml(str) {
+            return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── LANGUAGES ──
+        let allLanguages = [];
+
+        async function loadLanguages() {
+            try {
+                const res = await fetch(`${API}/languages`, { headers: getHeaders() });
+                const data = await res.json();
+                allLanguages = data.languages || [];
+                renderLanguages();
+            } catch (e) {
+                showToast('Failed to load languages', true);
+            }
+        }
+
+        function renderLanguages() {
+            const tbody = document.getElementById('languagesBody');
+            if (allLanguages.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div>No languages found.</div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = allLanguages.map(l => `
+                <tr>
+                    <td style="font-size:1.4rem;">${escHtml(l.icon || '💻')}</td>
+                    <td><strong>${escHtml(l.name)}</strong></td>
+                    <td><code>${escHtml(l.code)}</code></td>
+                    <td>${escHtml(l.difficulty || '–')}</td>
+                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '–')}</td>
+                    <td>
+                        <button class="action-btn btn-edit" onclick="openLangModal('${l.code}')">Edit</button>
+                        <button class="action-btn btn-delete" onclick="deleteLang('${l.code}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openLangModal(code) {
+            document.getElementById('langCode').value = code || '';
+            document.getElementById('langModalTitle').textContent = code ? 'EDIT LANGUAGE' : 'ADD LANGUAGE';
+            if (code) {
+                const l = allLanguages.find(x => x.code === code);
+                document.getElementById('langName').value = l.name || '';
+                document.getElementById('langCodeInput').value = l.code || '';
+                document.getElementById('langCodeInput').disabled = true;
+                document.getElementById('langIcon').value = l.icon || '';
+                document.getElementById('langDifficulty').value = l.difficulty || '';
+                document.getElementById('langDesc').value = l.description || '';
+                document.getElementById('langTopics').value = (l.topics || []).join(', ');
+            } else {
+                document.getElementById('langName').value = '';
+                document.getElementById('langCodeInput').value = '';
+                document.getElementById('langCodeInput').disabled = false;
+                document.getElementById('langIcon').value = '';
+                document.getElementById('langDifficulty').value = '';
+                document.getElementById('langDesc').value = '';
+                document.getElementById('langTopics').value = '';
+            }
+            openModal('lang');
+        }
+
+        async function saveLang() {
+            const existingCode = document.getElementById('langCode').value;
+            const name = document.getElementById('langName').value.trim();
+            const code = existingCode || document.getElementById('langCodeInput').value.trim().toLowerCase();
+            const icon = document.getElementById('langIcon').value.trim();
+            const difficulty = document.getElementById('langDifficulty').value.trim();
+            const description = document.getElementById('langDesc').value.trim();
+            const topics = document.getElementById('langTopics').value.split(',').map(t => t.trim()).filter(Boolean);
+
+            if (!name || !code) { showToast('Name and code are required', true); return; }
+
+            const body = { name, code, icon, difficulty, description, topics };
+            try {
+                const url = existingCode ? `${API}/languages/${existingCode}` : `${API}/languages`;
+                const method = existingCode ? 'PUT' : 'POST';
+                const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(existingCode ? 'Language updated!' : 'Language created!');
+                    closeModal('lang');
+                    loadLanguages();
+                } else {
+                    showToast(data.message || 'Error saving language', true);
+                }
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        async function deleteLang(code) {
+            if (!confirm(`Delete language "${code}"?`)) return;
+            try {
+                const res = await fetch(`${API}/languages/${code}`, { method: 'DELETE', headers: getHeaders() });
+                const data = await res.json();
+                if (data.success) { showToast('Language deleted'); loadLanguages(); }
+                else showToast(data.message || 'Error', true);
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

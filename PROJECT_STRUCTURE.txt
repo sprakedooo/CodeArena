@@ -1,0 +1,94 @@
+================================================================================
+CODEARENA - AI-POWERED GAME-BASED ADAPTIVE LEARNING SYSTEM
+Project Folder Structure Documentation
+================================================================================
+
+ai-cai-system/                    # Root project folder
+│
+├── backend/                      # Server-side application (Node.js + Express)
+│   │
+│   ├── routes/                   # API route handlers
+│   │   ├── authRoutes.js         # Login and registration endpoints
+│   │   ├── languageRoutes.js     # Programming language selection
+│   │   ├── questionRoutes.js     # Question fetching by language/level
+│   │   ├── answerRoutes.js       # Answer checking and hint generation
+│   │   ├── rewardRoutes.js       # Points, badges, level progression
+│   │   ├── progressRoutes.js     # Student progress and level tracking
+│   │   ├── feedbackRoutes.js     # AI-generated feedback on weak areas
+│   │   └── mlRoutes.js           # Machine Learning prediction endpoints
+│   │
+│   ├── services/                 # Business logic and AI/ML services
+│   │   ├── aiService.js          # Rule-based AI hint generation
+│   │   ├── adaptiveEngine.js     # Adaptive difficulty logic
+│   │   └── decisionTreeML.js     # Decision Tree ML Model
+│   │
+│   ├── config/                   # Configuration files
+│   │   └── database.js           # MySQL database connection
+│   │
+│   ├── server.js                 # Main Express server entry point
+│   └── package.json              # Node.js dependencies
+│
+├── frontend/                     # Client-side application (HTML/CSS/JS)
+│   │
+│   ├── pages/                    # HTML page files
+│   │   ├── login.html            # User login page
+│   │   ├── register.html         # User registration page
+│   │   ├── select_language.html  # Programming language selection
+│   │   ├── dashboard.html        # Student dashboard with ML insights
+│   │   ├── lesson_game.html      # Main game interface
+│   │   └── feedback.html         # AI-generated feedback page
+│   │
+│   ├── css/                      # Stylesheets
+│   │   └── styles.css            # Game-themed stylesheet
+│   │
+│   └── js/                       # JavaScript files
+│       ├── auth.js               # Authentication logic
+│       ├── game.js               # Game mechanics
+│       ├── rewards.js            # Points and badge display
+│       └── dashboard.js          # Dashboard data loading
+│
+├── database/                     # Database-related files
+│   └── schema.sql                # MySQL table creation (7 tables)
+│
+├── PROJECT_STRUCTURE.txt         # This file
+└── THESIS_PROGRESS.md            # Thesis defense documentation
+
+================================================================================
+SYSTEM CONCEPT: GAME-BASED ADAPTIVE LEARNING WITH ML
+================================================================================
+
+KEY FEATURES:
+1. Language Selection     - Students choose Python, Java, or C++
+2. Adaptive Questions     - Difficulty adjusts based on performance
+3. Reward System          - Points, badges, and level progression
+4. Rule-Based AI Hints    - Generated when answers are wrong
+5. Weak Area Tracking     - System identifies struggling topics
+6. Progress Levels        - Beginner → Intermediate → Advanced
+7. Decision Tree ML       - Predicts optimal learning paths
+
+MACHINE LEARNING COMPONENT:
+- Model Type: Decision Tree Classifier
+- Features: accuracy, streak, questions answered, current level
+- Predictions:
+  * Difficulty Recommendation (INCREASE/MAINTAIN/DECREASE)
+  * Intervention Detection (NEEDS_HELP/AT_RISK/ON_TRACK)
+  * Topic Priority (FOCUS_WEAK/EXPLORE_NEW/REINFORCE)
+
+ML API ENDPOINTS:
+- GET /api/ml/predict/:userId/:language     - All predictions
+- GET /api/ml/difficulty/:userId/:language  - Difficulty only
+- GET /api/ml/intervention/:userId/:language - Intervention check
+- GET /api/ml/model-info                    - Model documentation
+- POST /api/ml/analyze                      - Custom data analysis
+
+LEARNING FLOW:
+1. Student logs in
+2. Selects a programming language
+3. Views ML insights on dashboard
+4. Starts at Beginner level
+5. Answers questions (game-style)
+6. Correct = Points + ML checks for level advancement
+7. Wrong = AI hint + weak area recorded
+8. After session = AI feedback on weak areas
+
+================================================================================

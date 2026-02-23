@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "WebFetch(domain:www.codedex.io)",
+      "WebSearch",
+      "WebFetch(domain:dev.to)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /PID 13148 /F\")",
+      "Bash(cmd //c \"taskkill /PID 13148 /F\")",
+      "Bash(javac:*)",
+      "Bash(g++:*)",
+      "Bash(where:*)",
+      "Bash(py:*)",
+      "Bash(C:Usersjubilai-cai-systemtmp_testtest.exe)",
+      "Bash(for f in backend/routes/feedbackRoutes.js backend/routes/answerRoutes.js backend/routes/authRoutes.js)",
+      "Bash(do node -c \"$f\")",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(cmd //c \"taskkill /PID 3180 /F\")"
+    ]
+  }
+}

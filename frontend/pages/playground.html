@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Playground - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Widescreen container override */
+        .container {
+            max-width: 1600px;
+            padding: var(--space-md) var(--space-lg);
+        }
+
+        /* Top Bar */
+        .pg-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius) var(--radius) 0 0;
+            border-bottom: none;
+        }
+
+        .pg-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .pg-breadcrumb .pg-bc-root {
+            color: var(--text-muted);
+        }
+
+        .pg-breadcrumb .pg-bc-sep {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .pg-breadcrumb .pg-bc-project {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .pg-lang-select {
+            background: var(--bg-surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .pg-lang-select:focus {
+            border-color: var(--primary);
+        }
+
+        /* 3-Panel IDE Grid */
+        .pg-ide {
+            display: grid;
+            grid-template-columns: 180px 1fr 30%;
+            min-height: calc(100vh - 160px);
+            border: 1px solid var(--border);
+            border-radius: 0 0 var(--radius) var(--radius);
+            overflow: hidden;
+        }
+
+        @media (min-width: 1400px) {
+            .pg-ide {
+                grid-template-columns: 200px 1fr 32%;
+                min-height: calc(100vh - 140px);
+            }
+        }
+
+        @media (min-width: 1800px) {
+            .container {
+                max-width: 1800px;
+            }
+            .pg-ide {
+                grid-template-columns: 220px 1fr 30%;
+            }
+        }
+
+        /* File Explorer Sidebar */
+        .pg-sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pg-sidebar-header {
+            padding: 0.6rem 0.75rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.4rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-surface);
+        }
+
+        .pg-file-list {
+            list-style: none;
+            padding: 0.5rem 0;
+        }
+
+        .pg-file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 2px solid transparent;
+        }
+
+        .pg-file-item:hover {
+            background: var(--bg-surface);
+            color: var(--text);
+        }
+
+        .pg-file-item.active {
+            background: rgba(124, 58, 237, 0.08);
+            color: var(--text);
+            border-left-color: var(--primary);
+        }
+
+        .pg-file-icon {
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .pg-file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Editor Center Area */
+        .pg-editor-area {
+            display: flex;
+            flex-direction: column;
+            background: #1e1e2e;
+            min-width: 0;
+        }
+
+        /* Tab Bar */
+        .pg-tab-bar {
+            display: flex;
+            align-items: center;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            min-height: 36px;
+        }
+
+        .pg-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            white-space: nowrap;
+            background: transparent;
+        }
+
+        .pg-tab:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .pg-tab.active {
+            color: var(--text);
+            border-bottom-color: var(--primary);
+            background: rgba(124, 58, 237, 0.06);
+        }
+
+        .pg-tab-icon {
+            font-size: 0.85rem;
+        }
+
+        /* Editor */
+        #editor {
+            flex: 1;
+            min-height: 0;
+            font-size: 14px;
+        }
+
+        /* Editor Action Bar */
+        .pg-editor-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+        }
+
+        .pg-btn-run {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.45rem 1.1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.2s;
+        }
+
+        .pg-btn-run:hover {
+            background: #059669;
+            box-shadow: 0 0 12px var(--success-glow);
+        }
+
+        .pg-btn-run:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .pg-btn-run.running {
+            background: var(--warning);
+        }
+
+        .pg-btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 0.45rem 0.8rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+
+        .pg-btn-secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text);
+        }
+
+        .pg-actions-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pg-shortcut-hint {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* Terminal Panel */
+        .pg-terminal {
+            display: flex;
+            flex-direction: column;
+            background: #0d1117;
+            border-left: 1px solid var(--border);
+        }
+
+        .pg-terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pg-terminal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.4rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .pg-terminal-status {
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .pg-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .pg-status-dot.ready { background: var(--success); }
+        .pg-status-dot.running { background: var(--warning); animation: pulse 1s infinite; }
+        .pg-status-dot.error { background: var(--danger); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .pg-terminal-body {
+            flex: 1;
+            padding: 0.75rem;
+            font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #e6edf3;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .pg-terminal-body .output-placeholder {
+            color: #484f58;
+            font-style: italic;
+        }
+
+        .pg-terminal-body .output-error {
+            color: #f85149;
+        }
+
+        .pg-terminal-body .output-success {
+            color: #56d364;
+        }
+
+        .pg-terminal-body .terminal-prompt {
+            color: var(--success);
+            user-select: none;
+        }
+
+        /* Starter info bar */
+        .starter-info {
+            display: none;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-md);
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+
+        .starter-info.visible {
+            display: flex;
+        }
+
+        .starter-info .dismiss {
+            margin-left: auto;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Copy toast */
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-surface);
+            color: var(--text);
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            z-index: 200;
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 1.5s forwards;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .pg-ide {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .pg-sidebar {
+                display: none;
+            }
+
+            .pg-terminal {
+                border-left: none;
+                border-top: 1px solid var(--border);
+                min-height: 200px;
+            }
+
+            #editor {
+                min-height: 300px;
+            }
+
+            .pg-shortcut-hint {
+                display: none;
+            }
+        }
+
+        @media (min-width: 901px) {
+            #editor {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span class="navbar-brand logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        </span>
+        <ul class="navbar-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="lessons.html">Lessons</a></li>
+            <li><a href="lesson_game.html">Play</a></li>
+            <li><a href="playground.html" class="active">Playground</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+            <li>
+                <div class="nav-xp-bar">
+                    <span class="xp-icon">&#x2B50;</span>
+                    <span class="xp-amount" id="navXP">0 XP</span>
+                </div>
+            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Starter info (shown when code is pre-loaded from a lesson) -->
+        <div class="starter-info" id="starterInfo">
+            <span>&#x1F4DA;</span>
+            <span id="starterText">Code loaded from lesson</span>
+            <span class="dismiss" onclick="this.parentElement.classList.remove('visible')">&times;</span>
+        </div>
+
+        <!-- Top Bar -->
+        <div class="pg-topbar fade-in">
+            <div class="pg-breadcrumb">
+                <span class="pg-bc-root">My Builds</span>
+                <span class="pg-bc-sep">/</span>
+                <span class="pg-bc-project" id="projectName">Python Project</span>
+            </div>
+            <select class="pg-lang-select" id="languageSelect" onchange="changeLanguage()">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+
+        <!-- 3-Panel IDE -->
+        <div class="pg-ide fade-in">
+            <!-- File Explorer -->
+            <aside class="pg-sidebar">
+                <div class="pg-sidebar-header">Files</div>
+                <ul class="pg-file-list" id="fileList">
+                    <!-- Populated by JS -->
+                </ul>
+            </aside>
+
+            <!-- Editor Area -->
+            <div class="pg-editor-area">
+                <div class="pg-tab-bar" id="tabBar">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="editor"></div>
+                <div class="pg-editor-actions">
+                    <button class="pg-btn-run" id="runBtn" onclick="runCode()">&#x25B6; Run</button>
+                    <button class="pg-btn-secondary" onclick="copyCode()">&#x1F4CB; Copy</button>
+                    <div class="pg-actions-right">
+                        <span class="pg-shortcut-hint">Ctrl+Enter to run</span>
+                        <button class="pg-btn-secondary" onclick="resetCode()">&#x21BA; Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal -->
+            <div class="pg-terminal">
+                <div class="pg-terminal-header">
+                    <span class="pg-terminal-title">Terminal</span>
+                    <span class="pg-terminal-status">
+                        <span class="pg-status-dot ready" id="statusDot"></span>
+                        <span id="statusLabel">Ready</span>
+                    </span>
+                </div>
+                <div class="pg-terminal-body" id="outputBody">
+                    <span class="output-placeholder">Click "Run" to execute your code...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ace Editor CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.js"></script>
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) window.location.href = 'login.html';
+
+        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        // Virtual file system
+        const virtualFiles = {
+            python:     [{ name: 'script.py',   icon: '\uD83D\uDC0D' }],
+            javascript: [{ name: 'script.js',   icon: '\uD83D\uDFE8' }],
+            java:       [{ name: 'Main.java',   icon: '\u2615' }],
+            cpp:        [{ name: 'main.cpp',    icon: '\u2699\uFE0F' }]
+        };
+
+        const projectNames = {
+            python:     'Python Project',
+            javascript: 'JavaScript Project',
+            java:       'Java Project',
+            cpp:        'C++ Project'
+        };
+
+        // Starter code templates
+        const templates = {
+            python:     `# Welcome to CodeArena Playground!\n# Write your Python code here\n\nprint("Hello, World!")\n`,
+            javascript: `// Welcome to CodeArena Playground!\n// Write your JavaScript code here\n\nconsole.log("Hello, World!");\n`,
+            java:       `// Welcome to CodeArena Playground!\n// Write your Java code here\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}\n`,
+            cpp:        `// Welcome to CodeArena Playground!\n// Write your C++ code here\n\n#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}\n`
+        };
+
+        const aceModes = {
+            python:     'ace/mode/python',
+            javascript: 'ace/mode/javascript',
+            java:       'ace/mode/java',
+            cpp:        'ace/mode/c_cpp'
+        };
+
+        const langLabels = { python: 'Python', java: 'Java', cpp: 'C++' };
+
+        // Initialize Ace Editor
+        const editor = ace.edit('editor');
+        editor.setTheme('ace/theme/tomorrow_night_blue');
+        editor.setFontSize(14);
+        editor.setShowPrintMargin(false);
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            wrap: true,
+            tabSize: 4
+        });
+
+        // Determine initial language
+        let currentLang = 'python';
+
+        // Check if code was pre-loaded from a lesson
+        const preloadedCode = localStorage.getItem('playgroundCode');
+        const preloadedLang = localStorage.getItem('playgroundLang');
+        const preloadedSource = localStorage.getItem('playgroundSource');
+
+        if (preloadedCode && preloadedLang) {
+            currentLang = preloadedLang;
+            editor.setValue(preloadedCode, -1);
+
+            if (preloadedSource) {
+                document.getElementById('starterText').textContent = `Code loaded from: ${preloadedSource}`;
+                document.getElementById('starterInfo').classList.add('visible');
+            }
+
+            localStorage.removeItem('playgroundCode');
+            localStorage.removeItem('playgroundLang');
+            localStorage.removeItem('playgroundSource');
+        } else {
+            editor.setValue(templates[currentLang], -1);
+        }
+
+        document.getElementById('languageSelect').value = currentLang;
+        editor.session.setMode(aceModes[currentLang]);
+
+        // Render file explorer and tabs
+        function renderFileExplorer() {
+            const files = virtualFiles[currentLang] || [];
+            const list = document.getElementById('fileList');
+            list.innerHTML = files.map((f, i) => `
+                <li class="pg-file-item ${i === 0 ? 'active' : ''}" onclick="selectFile(this)">
+                    <span class="pg-file-icon">${f.icon}</span>
+                    <span class="pg-file-name">${f.name}</span>
+                </li>
+            `).join('');
+        }
+
+        function renderTabBar() {
+            const files = virtualFiles[currentLang] || [];
+            const tabBar = document.getElementById('tabBar');
+            tabBar.innerHTML = files.map((f, i) => `
+                <div class="pg-tab ${i === 0 ? 'active' : ''}">
+                    <span class="pg-tab-icon">${f.icon}</span>
+                    <span>${f.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectFile(el) {
+            document.querySelectorAll('.pg-file-item').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function updateBreadcrumb() {
+            document.getElementById('projectName').textContent = projectNames[currentLang];
+        }
+
+        // Initialize UI
+        renderFileExplorer();
+        renderTabBar();
+        updateBreadcrumb();
+
+        // Change language
+        function changeLanguage() {
+            const lang = document.getElementById('languageSelect').value;
+            currentLang = lang;
+            editor.session.setMode(aceModes[lang]);
+            editor.setValue(templates[lang], -1);
+            renderFileExplorer();
+            renderTabBar();
+            updateBreadcrumb();
+            clearOutput();
+        }
+
+        // Reset to template
+        function resetCode() {
+            editor.setValue(templates[currentLang], -1);
+            clearOutput();
+        }
+
+        // Copy code to clipboard
+        function copyCode() {
+            const code = editor.getValue();
+            navigator.clipboard.writeText(code).then(() => {
+                const toast = document.createElement('div');
+                toast.className = 'copy-toast';
+                toast.textContent = 'Copied to clipboard!';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            });
+        }
+
+        function clearOutput() {
+            document.getElementById('outputBody').innerHTML =
+                '<span class="output-placeholder">Click "Run" to execute your code...</span>';
+            setTerminalStatus('ready', 'Ready');
+        }
+
+        function setTerminalStatus(state, text) {
+            const dot = document.getElementById('statusDot');
+            const label = document.getElementById('statusLabel');
+            dot.className = 'pg-status-dot ' + state;
+            label.textContent = text;
+            label.style.color = state === 'ready' ? 'var(--success)'
+                              : state === 'running' ? 'var(--warning)'
+                              : 'var(--danger)';
+        }
+
+        // Run code
+        async function runCode() {
+            const code = editor.getValue().trim();
+            if (!code) return;
+
+            const runBtn = document.getElementById('runBtn');
+            const outputBody = document.getElementById('outputBody');
+
+            runBtn.disabled = true;
+            runBtn.classList.add('running');
+            runBtn.innerHTML = '&#x23F3; Running...';
+            setTerminalStatus('running', 'Running...');
+            outputBody.innerHTML = '<span class="terminal-prompt">$ running ' + (virtualFiles[currentLang][0]?.name || 'code') + '...</span>\n';
+
+            try {
+                const res = await fetch(`${API}/execute`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ language: currentLang, code: code })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    let html = '<span class="terminal-prompt">$ ' + (virtualFiles[currentLang][0]?.name || 'code') + '</span>\n';
+                    if (data.output) {
+                        html += `<span class="output-success">${escapeHtml(data.output)}</span>`;
+                    }
+                    if (data.stderr) {
+                        html += `<span class="output-error">${escapeHtml(data.stderr)}</span>`;
+                    }
+                    if (!data.output && !data.stderr) {
+                        html += '<span class="output-placeholder">(No output)</span>';
+                    }
+                    outputBody.innerHTML = html;
+                    setTerminalStatus(data.exitCode === 0 ? 'ready' : 'error',
+                        data.exitCode === 0 ? 'Success' : 'Exit: ' + data.exitCode);
+                } else {
+                    let html = '<span class="terminal-prompt">$ error</span>\n';
+                    html += `<span class="output-error">${escapeHtml(data.message || 'Execution failed.')}</span>`;
+                    if (data.stderr) {
+                        html += `\n<span class="output-error">${escapeHtml(data.stderr)}</span>`;
+                    }
+                    outputBody.innerHTML = html;
+                    setTerminalStatus('error', 'Error');
+                }
+            } catch (err) {
+                outputBody.innerHTML = '<span class="output-error">Could not connect to the execution service. Make sure the backend is running.</span>';
+                setTerminalStatus('error', 'Error');
+            }
+
+            runBtn.disabled = false;
+            runBtn.classList.remove('running');
+            runBtn.innerHTML = '&#x25B6; Run';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Keyboard shortcut: Ctrl+Enter to run
+        editor.commands.addCommand({
+            name: 'runCode',
+            bindKey: { win: 'Ctrl-Enter', mac: 'Cmd-Enter' },
+            exec: function() { runCode(); }
+        });
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

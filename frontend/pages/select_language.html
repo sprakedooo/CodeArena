@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Path - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .select-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .select-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .select-header h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            color: var(--white);
+            margin-bottom: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .select-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* 4-column grid */
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 900px) {
+            .language-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .language-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Language Card */
+        .language-card {
+            position: relative;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .language-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Language-specific hover gradients */
+        .lang-python::before { background: radial-gradient(ellipse at top, rgba(55,118,171,0.2), transparent 70%); }
+        .lang-javascript::before { background: radial-gradient(ellipse at top, rgba(247,223,30,0.15), transparent 70%); }
+        .lang-java::before { background: radial-gradient(ellipse at top, rgba(231,111,0,0.18), transparent 70%); }
+        .lang-cpp::before { background: radial-gradient(ellipse at top, rgba(101,154,210,0.2), transparent 70%); }
+
+        .language-card:hover::before { opacity: 1; }
+
+        .lang-python:hover { border-color: #3776AB; box-shadow: 0 8px 32px rgba(55,118,171,0.3); transform: translateY(-6px); }
+        .lang-javascript:hover { border-color: #F7DF1E; box-shadow: 0 8px 32px rgba(247,223,30,0.25); transform: translateY(-6px); }
+        .lang-java:hover { border-color: #E76F00; box-shadow: 0 8px 32px rgba(231,111,0,0.3); transform: translateY(-6px); }
+        .lang-cpp:hover { border-color: #659AD2; box-shadow: 0 8px 32px rgba(101,154,210,0.3); transform: translateY(-6px); }
+
+        /* Badge */
+        .lang-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-recommended { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); }
+        .badge-popular { background: rgba(247,223,30,0.2); color: #e5c80a; border: 1px solid rgba(247,223,30,0.4); }
+        .badge-intermediate { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); }
+        .badge-advanced { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); }
+
+        /* Icon */
+        .language-icon {
+            position: relative;
+            z-index: 1;
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .language-icon img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+            transition: transform 0.3s ease;
+        }
+
+        .language-card:hover .language-icon img {
+            transform: scale(1.1);
+        }
+
+        .language-name {
+            position: relative;
+            z-index: 1;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .language-desc {
+            position: relative;
+            z-index: 1;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 0.85rem;
+        }
+
+        /* Feature tags */
+        .lang-features {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .lang-feature-tag {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 500;
+        }
+
+        /* Select button (shown on hover) */
+        .lang-select-btn {
+            position: relative;
+            z-index: 1;
+            display: block;
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .lang-python .lang-select-btn { background: #3776AB; color: white; }
+        .lang-javascript .lang-select-btn { background: #F7DF1E; color: #1a1a00; }
+        .lang-java .lang-select-btn { background: #E76F00; color: white; }
+        .lang-cpp .lang-select-btn { background: #659AD2; color: white; }
+
+        .language-card:hover .lang-select-btn { opacity: 1; }
+
+        /* Animated grid */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(124, 58, 237, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.025) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Selection animation */
+        .language-card.selecting {
+            animation: pulse-select 0.4s ease;
+        }
+        @keyframes pulse-select {
+            0% { transform: translateY(-6px) scale(1); }
+            50% { transform: translateY(-6px) scale(0.97); }
+            100% { transform: translateY(-6px) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <nav class="navbar">
+        <span class="navbar-brand logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        </span>
+        <ul class="navbar-nav">
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="select-page">
+        <div class="select-header fade-in">
+            <h1>CHOOSE YOUR PATH</h1>
+            <p>Select a programming language to begin your adventure</p>
+        </div>
+
+        <div class="language-grid fade-in">
+
+            <!-- Python -->
+            <div class="language-card lang-python" onclick="selectLanguage('python')">
+                <span class="lang-badge badge-recommended">Recommended</span>
+                <div class="language-icon">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python" onerror="this.outerHTML='<span style=\'font-size:3rem\'>🐍</span>'">
+                </div>
+                <div class="language-name">Python</div>
+                <div class="language-desc">Beginner-friendly with clean, readable syntax. Perfect for your first language.</div>
+                <div class="lang-features">
+                    <span class="lang-feature-tag">Easy Syntax</span>
+                    <span class="lang-feature-tag">Versatile</span>
+                    <span class="lang-feature-tag">AI &amp; Data</span>
+                </div>
+                <button class="lang-select-btn">Start Python ›</button>
+            </div>
+
+            <!-- JavaScript -->
+            <div class="language-card lang-javascript" onclick="selectLanguage('javascript')">
+                <span class="lang-badge badge-popular">Popular</span>
+                <div class="language-icon">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript" onerror="this.outerHTML='<span style=\'font-size:3rem\'>🌐</span>'">
+                </div>
+                <div class="language-name">JavaScript</div>
+                <div class="language-desc">The language of the web. Build interactive sites, apps, and servers.</div>
+                <div class="lang-features">
+                    <span class="lang-feature-tag">Web</span>
+                    <span class="lang-feature-tag">Interactive</span>
+                    <span class="lang-feature-tag">Full-Stack</span>
+                </div>
+                <button class="lang-select-btn">Start JavaScript ›</button>
+            </div>
+
+            <!-- Java -->
+            <div class="language-card lang-java" onclick="selectLanguage('java')">
+                <span class="lang-badge badge-intermediate">Intermediate</span>
+                <div class="language-icon">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java" onerror="this.outerHTML='<span style=\'font-size:3rem\'>☕</span>'">
+                </div>
+                <div class="language-name">Java</div>
+                <div class="language-desc">Industry-standard OOP language for enterprise apps and Android development.</div>
+                <div class="lang-features">
+                    <span class="lang-feature-tag">OOP</span>
+                    <span class="lang-feature-tag">Enterprise</span>
+                    <span class="lang-feature-tag">Android</span>
+                </div>
+                <button class="lang-select-btn">Start Java ›</button>
+            </div>
+
+            <!-- C++ -->
+            <div class="language-card lang-cpp" onclick="selectLanguage('cpp')">
+                <span class="lang-badge badge-advanced">Advanced</span>
+                <div class="language-icon">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="C++" onerror="this.outerHTML='<span style=\'font-size:3rem\'>⚡</span>'">
+                </div>
+                <div class="language-name">C++</div>
+                <div class="language-desc">High-performance language for systems programming, game development, and competitive coding.</div>
+                <div class="lang-features">
+                    <span class="lang-feature-tag">Fast</span>
+                    <span class="lang-feature-tag">Systems</span>
+                    <span class="lang-feature-tag">Games</span>
+                </div>
+                <button class="lang-select-btn">Start C++ ›</button>
+            </div>
+
+        </div>
+
+        <div id="alertBox" class="mt-3"></div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) window.location.href = 'login.html';
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        async function selectLanguage(language) {
+            const languageNames = { python: 'Python', javascript: 'JavaScript', java: 'Java', cpp: 'C++' };
+            const clickedCard = event.currentTarget;
+
+            // Visual feedback: dim other cards, highlight selected
+            document.querySelectorAll('.language-card').forEach(card => {
+                card.style.opacity = '0.4';
+                card.style.pointerEvents = 'none';
+            });
+            clickedCard.style.opacity = '1';
+            clickedCard.classList.add('selecting');
+
+            try {
+                const res = await fetch(`${API}/languages/select`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ userId: user.id, languageCode: language })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    user.selectedLanguage = language;
+                    localStorage.setItem('user', JSON.stringify(user));
+
+                    document.getElementById('alertBox').innerHTML =
+                        `<div class="alert alert-success" style="text-align:center;">Starting your ${languageNames[language]} adventure...</div>`;
+
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                } else {
+                    document.getElementById('alertBox').innerHTML =
+                        `<div class="alert alert-error">${data.message}</div>`;
+                    document.querySelectorAll('.language-card').forEach(c => {
+                        c.style.opacity = '1'; c.style.pointerEvents = 'auto';
+                    });
+                    clickedCard.classList.remove('selecting');
+                }
+            } catch (err) {
+                document.getElementById('alertBox').innerHTML =
+                    '<div class="alert alert-error">Cannot connect to server</div>';
+                document.querySelectorAll('.language-card').forEach(c => {
+                    c.style.opacity = '1'; c.style.pointerEvents = 'auto';
+                });
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

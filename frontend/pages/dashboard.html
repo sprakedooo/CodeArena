@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Widescreen container override */
+        .container {
+            max-width: 1400px;
+            padding: var(--space-md) var(--space-lg);
+        }
+
+        @media (min-width: 1600px) {
+            .container { max-width: 1600px; }
+        }
+
+        @media (min-width: 1800px) {
+            .container { max-width: 1800px; }
+        }
+
+        /* Welcome banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--success), var(--secondary));
+        }
+
+        .welcome-info h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .welcome-info h1 span {
+            color: var(--primary);
+        }
+
+        .welcome-info .welcome-sub {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .welcome-info .language-tag {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .welcome-action .btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+        }
+
+        .lang-switcher-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-top: 0.6rem;
+        }
+
+        .lang-switcher-row .switch-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .lang-switch-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            padding: 0.2rem 0.65rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .lang-switch-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .lang-switch-btn.active {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Two-column layout: roadmap + sidebar */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: var(--space-lg);
+            align-items: start;
+        }
+
+        @media (min-width: 1400px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr 420px;
+                gap: var(--space-xl);
+            }
+        }
+
+        @media (min-width: 1800px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr 460px;
+            }
+        }
+
+        /* ── ROADMAP ── */
+        .roadmap-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            position: relative;
+        }
+
+        .roadmap-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .roadmap-progress-bar {
+            margin-bottom: var(--space-lg);
+        }
+
+        .roadmap-progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .roadmap-progress-text .pct {
+            color: var(--xp-gold);
+            font-weight: 600;
+        }
+
+        /* Chapter stages */
+        .chapter-stage {
+            margin-bottom: var(--space-xl);
+            position: relative;
+        }
+
+        .chapter-stage:last-child {
+            margin-bottom: 0;
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .chapter-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .chapter-icon.basics { background: rgba(124, 58, 237, 0.15); border: 2px solid var(--primary); }
+        .chapter-icon.control { background: rgba(6, 182, 212, 0.15); border: 2px solid var(--secondary); }
+        .chapter-icon.data { background: rgba(251, 191, 36, 0.15); border: 2px solid var(--xp-gold); }
+        .chapter-icon.advanced { background: rgba(16, 185, 129, 0.15); border: 2px solid var(--success); }
+
+        .chapter-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chapter-count {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* Lesson nodes grid inside each chapter */
+        .lesson-nodes {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding-left: 18px;
+            border-left: 2px solid var(--border);
+            margin-left: 17px;
+        }
+
+        @media (min-width: 1200px) {
+            .lesson-nodes {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem 1rem;
+                border-left: none;
+                padding-left: 0;
+                margin-left: 0;
+            }
+            .lesson-node::before {
+                display: none;
+            }
+            .lesson-node {
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 0.7rem 0.85rem;
+            }
+            .lesson-node:hover {
+                border-color: var(--primary);
+            }
+            .lesson-node.completed {
+                border-color: rgba(16, 185, 129, 0.3);
+            }
+            .lesson-node.current {
+                border-color: var(--primary);
+                background: rgba(124, 58, 237, 0.06);
+            }
+        }
+
+        .lesson-node {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .lesson-node::before {
+            content: '';
+            position: absolute;
+            left: -19px;
+            width: 12px;
+            height: 2px;
+            background: var(--border);
+            top: 50%;
+        }
+
+        .lesson-node:hover {
+            background: var(--bg-surface);
+            border-color: var(--border);
+        }
+
+        .node-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        /* Node states */
+        .lesson-node.completed .node-num {
+            background: var(--success);
+            color: var(--bg-dark);
+            border: 2px solid var(--success);
+            box-shadow: 0 0 8px var(--success-glow);
+        }
+
+        .lesson-node.current .node-num {
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+            animation: pulse-node 2s infinite;
+        }
+
+        .lesson-node.locked .node-num {
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            border: 2px solid var(--border);
+        }
+
+        .lesson-node.locked {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .lesson-node.locked:hover {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        @keyframes pulse-node {
+            0%, 100% { box-shadow: 0 0 8px var(--primary-glow); }
+            50% { box-shadow: 0 0 18px var(--primary-glow); }
+        }
+
+        .node-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .node-title {
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lesson-node.completed .node-title {
+            color: var(--success);
+        }
+
+        .lesson-node.current .node-title {
+            color: var(--primary);
+        }
+
+        .lesson-node.locked .node-title {
+            color: var(--text-muted);
+        }
+
+        .node-diff {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: capitalize;
+        }
+
+        .node-status-icon {
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar-panels {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        /* Quick Stats 2x2 grid */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-sm);
+        }
+
+        .quick-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .quick-stat:hover {
+            border-color: var(--primary);
+        }
+
+        .quick-stat .qs-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .quick-stat .qs-value {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85rem;
+            color: var(--xp-gold);
+        }
+
+        .quick-stat .qs-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.15rem;
+        }
+
+        /* ML Insights */
+        .ml-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+        }
+
+        .ml-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: var(--space-sm);
+        }
+
+        .ml-item {
+            padding: 0.6rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .ml-item-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ml-item-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 0.15rem;
+        }
+
+        .ml-insight-box {
+            margin-top: var(--space-sm);
+            padding: 0.75rem;
+            background: var(--primary-light);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            color: var(--text);
+        }
+
+        .ai-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Badges section */
+        .badges-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+        }
+
+        .badges-compact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: var(--space-sm);
+        }
+
+        .badge-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .badge-chip:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .badge-chip .b-icon {
+            font-size: 0.85rem;
+        }
+
+        /* Quick links */
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .quick-link:hover {
+            border-color: var(--primary);
+            color: var(--text);
+            background: var(--bg-surface);
+        }
+
+        .quick-link .ql-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Widescreen sidebar enhancements */
+        @media (min-width: 1400px) {
+            .quick-stat {
+                padding: 1.25rem;
+            }
+
+            .quick-stat .qs-value {
+                font-size: 1rem;
+            }
+
+            .ml-card, .badges-card {
+                padding: 1.5rem;
+            }
+
+            .quick-link {
+                padding: 0.85rem;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-banner {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .ml-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <span class="navbar-brand logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        </span>
+        <ul class="navbar-nav">
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="lessons.html">Lessons</a></li>
+            <li><a href="lesson_game.html">Play</a></li>
+            <li><a href="playground.html">Playground</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+            <li><a href="admin.html" style="color:var(--text-muted);font-size:0.8rem;" title="Content Manager">&#x2699;</a></li>
+            <li>
+                <div class="nav-xp-bar">
+                    <span class="xp-icon">&#x2B50;</span>
+                    <span class="xp-amount" id="navXP">0 XP</span>
+                </div>
+            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner fade-in">
+            <div class="welcome-info">
+                <h1>Welcome back, <span id="userName">Student</span>!</h1>
+                <div class="welcome-sub">
+                    Currently learning:
+                    <span class="language-tag" id="currentLanguage">Python</span>
+                    <span class="level-badge level-beginner" id="levelBadge">BEGINNER</span>
+                </div>
+                <div class="lang-switcher-row">
+                    <span class="switch-label">Switch:</span>
+                    <button class="lang-switch-btn" data-lang="python" onclick="switchLanguage('python')">🐍 Python</button>
+                    <button class="lang-switch-btn" data-lang="javascript" onclick="switchLanguage('javascript')">🟨 JS</button>
+                    <button class="lang-switch-btn" data-lang="java" onclick="switchLanguage('java')">☕ Java</button>
+                    <button class="lang-switch-btn" data-lang="cpp" onclick="switchLanguage('cpp')">⚡ C++</button>
+                </div>
+            </div>
+            <div class="welcome-action">
+                <button class="btn btn-primary btn-pixel" onclick="startGame()">
+                    &#x1F3AE; PLAY NOW
+                </button>
+            </div>
+        </div>
+
+        <!-- XP Progress Bar -->
+        <div class="xp-progress-container fade-in">
+            <div class="xp-progress-header">
+                <span class="xp-level-label" id="xpLevelLabel">LEVEL: BEGINNER</span>
+                <span class="xp-level-label" id="xpProgressText">0 / 200 XP</span>
+            </div>
+            <div class="xp-bar">
+                <div class="xp-fill" id="xpFill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Two-Column Layout -->
+        <div class="dashboard-layout fade-in">
+            <!-- LEFT: Roadmap -->
+            <div class="roadmap-section">
+                <div class="roadmap-title">&#x1F5FA; Learning Roadmap</div>
+
+                <!-- Roadmap progress -->
+                <div class="roadmap-progress-bar">
+                    <div class="roadmap-progress-text">
+                        <span><span id="rmCompleted">0</span> of <span id="rmTotal">12</span> lessons completed</span>
+                        <span class="pct" id="rmPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="rmFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Chapter stages populated by JS -->
+                <div id="roadmapContent">
+                    <p class="text-muted">Loading lessons...</p>
+                </div>
+            </div>
+
+            <!-- RIGHT: Sidebar Panels -->
+            <div class="sidebar-panels">
+                <!-- Quick Stats 2x2 -->
+                <div class="quick-stats">
+                    <div class="quick-stat">
+                        <div class="qs-icon">&#x2B50;</div>
+                        <div class="qs-value" id="totalPoints">0</div>
+                        <div class="qs-label">Points</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="qs-icon">&#x1F4DD;</div>
+                        <div class="qs-value" id="questionsAnswered">0</div>
+                        <div class="qs-label">Answered</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="qs-icon">&#x1F3AF;</div>
+                        <div class="qs-value" id="accuracy">0%</div>
+                        <div class="qs-label">Accuracy</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="qs-icon">&#x1F525;</div>
+                        <div class="qs-value" id="currentStreak">0</div>
+                        <div class="qs-label">Streak</div>
+                    </div>
+                </div>
+
+                <!-- ML Insights -->
+                <div class="ml-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="section-title" style="margin-bottom: 0; font-size: 0.6rem;">&#x1F9E0; ML Insights</div>
+                        <span class="ai-tag">&#x1F916; AI</span>
+                    </div>
+                    <div id="mlInsights">
+                        <p class="text-muted" style="margin-top: 0.75rem; font-size: 0.85rem;">Loading predictions...</p>
+                    </div>
+                </div>
+
+                <!-- Badges -->
+                <div class="badges-card">
+                    <div class="section-title" style="margin-bottom: 0; font-size: 0.6rem;">&#x1F3C5; Badges</div>
+                    <div class="badges-compact" id="badgesContainer">
+                        <span class="badge-chip"><span class="b-icon">&#x1F3C6;</span> No badges yet</span>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="quick-links">
+                    <a class="quick-link" href="lessons.html">
+                        <span class="ql-icon">&#x1F4DA;</span> Lessons
+                    </a>
+                    <a class="quick-link" href="lesson_game.html">
+                        <span class="ql-icon">&#x1F3AE;</span> Play Quiz
+                    </a>
+                    <a class="quick-link" href="playground.html">
+                        <span class="ql-icon">&#x1F4BB;</span> Playground
+                    </a>
+                    <a class="quick-link" href="feedback.html">
+                        <span class="ql-icon">&#x1F4CA;</span> Feedback
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) window.location.href = 'login.html';
+        if (!user.selectedLanguage) user.selectedLanguage = 'python';
+
+        const languageNames = { 'python': 'Python', 'javascript': 'JavaScript', 'java': 'Java', 'cpp': 'C++' };
+
+        const badgeIcons = {
+            'first_login': { icon: '&#x1F44B;', name: 'Welcome!' },
+            'first_correct': { icon: '&#x2705;', name: 'First Win' },
+            'streak_3': { icon: '&#x1F525;', name: '3 Streak' },
+            'streak_5': { icon: '&#x1F31F;', name: '5 Streak' },
+            'streak_10': { icon: '&#x1F4AB;', name: '10 Streak' },
+            'level_intermediate': { icon: '&#x1F4AA;', name: 'Intermediate' },
+            'level_advanced': { icon: '&#x1F3C6;', name: 'Advanced' },
+            'fast_learner': { icon: '&#x26A1;', name: 'Fast Learner' },
+            'perfect_10': { icon: '&#x1F4AF;', name: 'Perfect 10' }
+        };
+
+        // Chapter definitions grouped by difficulty
+        const difficultyChapters = [
+            { key: 'beginner',     name: 'Basics',         icon: 'basics',   emoji: '&#x1F4D6;' },
+            { key: 'intermediate', name: 'Core Concepts',  icon: 'control',  emoji: '&#x1F500;' },
+            { key: 'advanced',     name: 'Advanced Topics',icon: 'advanced', emoji: '&#x1F680;' }
+        ];
+
+        // Initialize basic UI
+        document.getElementById('userName').textContent = user.fullName || 'Student';
+        document.getElementById('currentLanguage').textContent = languageNames[user.selectedLanguage] || user.selectedLanguage;
+        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
+
+        // Mark active language button
+        document.querySelectorAll('.lang-switch-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === user.selectedLanguage);
+        });
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        // Update XP bar
+        const points = user.totalPoints || 0;
+        const xpForNext = points < 200 ? 200 : (points < 500 ? 500 : 1000);
+        const xpPercent = Math.min(100, (points / xpForNext) * 100);
+        document.getElementById('xpFill').style.width = xpPercent + '%';
+        document.getElementById('xpProgressText').textContent = points + ' / ' + xpForNext + ' XP';
+
+        loadProgress();
+        loadMLPredictions();
+        loadRoadmap();
+
+        async function loadRoadmap() {
+            try {
+                const res = await fetch(`${API}/lessons?language=${user.selectedLanguage}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+
+                if (data.lessons && data.lessons.length > 0) {
+                    renderRoadmap(data.lessons);
+                } else {
+                    document.getElementById('roadmapContent').innerHTML =
+                        '<p class="text-muted">No lessons found for this language.</p>';
+                }
+            } catch (err) {
+                console.error('Error loading roadmap:', err);
+                document.getElementById('roadmapContent').innerHTML =
+                    '<p class="text-muted">Could not load lessons.</p>';
+            }
+        }
+
+        function renderRoadmap(lessons) {
+            const completedKey = 'completedLessons_' + user.selectedLanguage;
+            const completedLessons = JSON.parse(localStorage.getItem(completedKey) || '[]');
+            const container = document.getElementById('roadmapContent');
+
+            // Find current lesson index (first incomplete)
+            let currentIndex = -1;
+            for (let i = 0; i < lessons.length; i++) {
+                if (!completedLessons.includes(lessons[i].id)) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            // Update progress bar
+            const completedCount = lessons.filter(l => completedLessons.includes(l.id)).length;
+            const total = lessons.length;
+            const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+            document.getElementById('rmCompleted').textContent = completedCount;
+            document.getElementById('rmTotal').textContent = total;
+            document.getElementById('rmPercent').textContent = pct + '%';
+            document.getElementById('rmFill').style.width = pct + '%';
+
+            let html = '';
+
+            difficultyChapters.forEach(chapter => {
+                const chapterLessons = lessons.filter(l => l.difficulty === chapter.key);
+                if (chapterLessons.length === 0) return;
+                const chapterCompleted = chapterLessons.filter(l => completedLessons.includes(l.id)).length;
+
+                html += `
+                    <div class="chapter-stage">
+                        <div class="chapter-header">
+                            <div class="chapter-icon ${chapter.icon}">${chapter.emoji}</div>
+                            <span class="chapter-name">${chapter.name}</span>
+                            <span class="chapter-count">${chapterCompleted}/${chapterLessons.length}</span>
+                        </div>
+                        <div class="lesson-nodes">
+                `;
+
+                chapterLessons.forEach(lesson => {
+                    const globalIndex = lessons.indexOf(lesson);
+                    const isCompleted = completedLessons.includes(lesson.id);
+                    const isCurrent = globalIndex === currentIndex;
+                    const isLocked = !isCompleted && !isCurrent && globalIndex > currentIndex;
+
+                    let stateClass = 'locked';
+                    let statusIcon = '&#x1F512;';
+                    let numContent = lesson.orderNumber || (globalIndex + 1);
+
+                    if (isCompleted) {
+                        stateClass = 'completed';
+                        statusIcon = '&#x2705;';
+                        numContent = '&#x2713;';
+                    } else if (isCurrent) {
+                        stateClass = 'current';
+                        statusIcon = '&#x25B6;';
+                    }
+
+                    html += `
+                        <div class="lesson-node ${stateClass}" onclick="${isLocked ? '' : 'goToLesson(' + globalIndex + ')'}" title="${lesson.title}">
+                            <div class="node-num">${numContent}</div>
+                            <div class="node-info">
+                                <div class="node-title">${lesson.title}</div>
+                                <div class="node-diff">${lesson.difficulty}</div>
+                            </div>
+                            <span class="node-status-icon">${statusIcon}</span>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html || '<p class="text-muted">No lessons available.</p>';
+        }
+
+        function goToLesson(index) {
+            localStorage.setItem('openLessonIndex', index);
+            window.location.href = 'lessons.html';
+        }
+
+        async function loadProgress() {
+            try {
+                const res = await fetch(`${API}/progress/${user.id}/${user.selectedLanguage}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+
+                if (data.success) {
+                    const progress = data.progress;
+                    document.getElementById('totalPoints').textContent = user.totalPoints || 0;
+                    document.getElementById('questionsAnswered').textContent = progress.questionsAnswered || 0;
+                    document.getElementById('accuracy').textContent = (progress.accuracy || 0) + '%';
+                    document.getElementById('currentStreak').textContent = progress.consecutiveCorrect || 0;
+
+                    updateLevelDisplay(progress.currentLevel || 'beginner');
+                    updateBadges(user.badges || []);
+                }
+            } catch (err) {
+                console.error('Error loading progress:', err);
+            }
+        }
+
+        async function loadMLPredictions() {
+            try {
+                const res = await fetch(`${API}/ml/predict/${user.id}/${user.selectedLanguage}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                if (data.success) displayMLInsights(data.predictions);
+            } catch (err) {
+                document.getElementById('mlInsights').innerHTML =
+                    '<p class="text-muted" style="margin-top: 0.75rem; font-size: 0.85rem;">Answer some questions to unlock ML insights.</p>';
+            }
+        }
+
+        function displayMLInsights(predictions) {
+            const container = document.getElementById('mlInsights');
+            const diffIcons = { 'increase': '&#x2B06;', 'maintain': '&#x27A1;', 'decrease': '&#x2B07;' };
+            const urgencyColors = { 'high': 'var(--danger)', 'medium': 'var(--warning)', 'low': 'var(--secondary)', 'none': 'var(--success)' };
+
+            container.innerHTML = `
+                <div class="ml-grid">
+                    <div class="ml-item">
+                        <div class="ml-item-label">Difficulty</div>
+                        <div class="ml-item-value">${diffIcons[predictions.difficulty.action] || ''} ${predictions.difficulty.action.toUpperCase()}</div>
+                    </div>
+                    <div class="ml-item">
+                        <div class="ml-item-label">Status</div>
+                        <div class="ml-item-value" style="color: ${urgencyColors[predictions.intervention.urgency] || 'var(--text)'}">${predictions.intervention.prediction.replace('_', ' ')}</div>
+                    </div>
+                    <div class="ml-item">
+                        <div class="ml-item-label">Confidence</div>
+                        <div class="ml-item-value">${predictions.difficulty.confidence}%</div>
+                    </div>
+                </div>
+                <div class="ml-insight-box">
+                    <strong>&#x1F4A1;</strong> ${predictions.summary.keyInsight}
+                </div>
+            `;
+        }
+
+        function updateLevelDisplay(level) {
+            const badge = document.getElementById('levelBadge');
+            badge.textContent = level.toUpperCase();
+            badge.className = 'level-badge level-' + level;
+            document.getElementById('xpLevelLabel').textContent = 'LEVEL: ' + level.toUpperCase();
+        }
+
+        function updateBadges(badges) {
+            const container = document.getElementById('badgesContainer');
+            if (badges && badges.length > 0) {
+                container.innerHTML = badges.map(badgeId => {
+                    const badge = badgeIcons[badgeId] || { icon: '&#x1F3C5;', name: badgeId };
+                    return `<span class="badge-chip"><span class="b-icon">${badge.icon}</span> ${badge.name}</span>`;
+                }).join('');
+            }
+        }
+
+        function switchLanguage(lang) {
+            user.selectedLanguage = lang;
+            localStorage.setItem('user', JSON.stringify(user));
+            // Update display
+            document.getElementById('currentLanguage').textContent = languageNames[lang] || lang;
+            document.querySelectorAll('.lang-switch-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            // Reload roadmap for new language
+            document.getElementById('roadmapContent').innerHTML = '<p class="text-muted">Loading lessons...</p>';
+            loadRoadmap();
+        }
+
+        function startGame() { window.location.href = 'lesson_game.html'; }
+        function viewFeedback() { window.location.href = 'feedback.html'; }
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

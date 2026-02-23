@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Feedback - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .ai-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .assessment-box {
+            padding: 1.25rem;
+            background: var(--primary-light);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        .weak-area-card {
+            padding: 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--danger);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+        }
+
+        .weak-area-card .area-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .weak-area-card .area-header strong {
+            color: var(--text);
+        }
+
+        .weak-area-card .area-accuracy {
+            color: var(--danger);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .weak-area-card .area-msg {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-box {
+            background: var(--warning-bg);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .tip-box strong {
+            color: var(--warning);
+        }
+
+        .strong-area-card {
+            padding: 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--success);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+        }
+
+        .strong-area-card .area-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .strong-area-card .area-accuracy {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .next-step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            color: white;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .encouragement-text {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span class="navbar-brand logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        </span>
+        <ul class="navbar-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="lessons.html">Lessons</a></li>
+            <li><a href="lesson_game.html">Play</a></li>
+            <li><a href="playground.html">Playground</a></li>
+            <li><a href="feedback.html" class="active">Feedback</a></li>
+            <li>
+                <div class="nav-xp-bar">
+                    <span class="xp-icon">&#x2B50;</span>
+                    <span class="xp-amount" id="navXP">0 XP</span>
+                </div>
+            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="card">
+            <div class="feedback-header">
+                <h1>AI-Powered Feedback</h1>
+                <span class="ai-tag">&#x1F916; AI Generated</span>
+            </div>
+            <p class="text-secondary">Personalized learning insights for <strong id="languageName" style="color: var(--primary);">Python</strong></p>
+        </div>
+
+        <!-- Overall Assessment -->
+        <div class="card">
+            <div class="section-title">&#x1F4CA; Overall Assessment</div>
+            <div class="assessment-box" id="overallAssessment">
+                Loading your personalized feedback...
+            </div>
+            <p class="encouragement-text" id="encouragementMessage"></p>
+        </div>
+
+        <!-- Weak Areas -->
+        <div class="card">
+            <div class="section-title">&#x1F534; Areas Needing Improvement</div>
+            <div id="weakAreasContainer">
+                <p class="text-muted">Analyzing your performance...</p>
+            </div>
+        </div>
+
+        <!-- Strong Areas -->
+        <div class="card">
+            <div class="section-title">&#x1F7E2; Your Strengths</div>
+            <div id="strongAreasContainer">
+                <p class="text-muted">Analyzing your performance...</p>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="card">
+            <div class="section-title">&#x1F3AF; Recommended Next Steps</div>
+            <div id="nextStepsContainer">
+                <p class="text-muted">Generating recommendations...</p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card text-center">
+            <div class="action-bar">
+                <button class="btn btn-primary btn-lg" onclick="startPractice()">
+                    &#x1F3AE; Practice Weak Areas
+                </button>
+                <button class="btn btn-outline btn-lg" onclick="refreshFeedback()">
+                    &#x1F504; Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user || !user.selectedLanguage) window.location.href = 'login.html';
+
+        const languageNames = { 'python': 'Python', 'java': 'Java', 'cpp': 'C++' };
+        document.getElementById('languageName').textContent = languageNames[user.selectedLanguage] || user.selectedLanguage;
+        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        loadFeedback();
+
+        async function loadFeedback() {
+            try {
+                const res = await fetch(`${API}/feedback/${user.id}/${user.selectedLanguage}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                if (data.success && data.feedback) {
+                    displayFeedback(data.feedback);
+                } else {
+                    await generateFeedback();
+                }
+            } catch (err) {
+                showNoFeedback();
+            }
+        }
+
+        async function generateFeedback() {
+            try {
+                const res = await fetch(`${API}/feedback/generate`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ userId: user.id, language: user.selectedLanguage })
+                });
+                const data = await res.json();
+                if (data.success && data.feedback) {
+                    displayFeedback(data.feedback);
+                } else {
+                    showNoFeedback();
+                }
+            } catch (err) {
+                showNoFeedback();
+            }
+        }
+
+        function displayFeedback(feedback) {
+            document.getElementById('overallAssessment').textContent =
+                feedback.overallAssessment || 'Keep practicing to receive detailed feedback!';
+            document.getElementById('encouragementMessage').textContent =
+                feedback.encouragement || '';
+
+            const weakContainer = document.getElementById('weakAreasContainer');
+            const weakAreas = feedback.weakAreas || [];
+            if (weakAreas.length > 0) {
+                weakContainer.innerHTML = weakAreas.map(area => `
+                    <div class="weak-area-card">
+                        <div class="area-header">
+                            <strong>${area.topic}</strong>
+                            <span class="area-accuracy">${area.accuracy}%</span>
+                        </div>
+                        <p class="area-msg">${area.message}</p>
+                        <div class="tip-box">
+                            <strong>&#x1F4A1; Tip:</strong> ${area.recommendation || 'Practice more questions on this topic.'}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                weakContainer.innerHTML = '<div class="alert alert-success">Great job! No weak areas detected.</div>';
+            }
+
+            const strongContainer = document.getElementById('strongAreasContainer');
+            const strongAreas = feedback.strongAreas || [];
+            if (strongAreas.length > 0) {
+                strongContainer.innerHTML = strongAreas.map(area => `
+                    <div class="strong-area-card">
+                        <div class="area-header">
+                            <strong>${area.topic}</strong>
+                            <span class="area-accuracy">${area.accuracy}%</span>
+                        </div>
+                        <p class="text-secondary" style="font-size: 0.85rem; margin-top: 0.25rem;">${area.message}</p>
+                    </div>
+                `).join('');
+            } else {
+                strongContainer.innerHTML = '<p class="text-muted">Answer more questions to identify your strengths!</p>';
+            }
+
+            const stepsContainer = document.getElementById('nextStepsContainer');
+            const nextSteps = feedback.nextSteps || [];
+            if (nextSteps.length > 0) {
+                stepsContainer.innerHTML = nextSteps.map((step, idx) => `
+                    <div class="next-step-item">
+                        <span class="step-number">${idx + 1}</span>
+                        <span>${step}</span>
+                    </div>
+                `).join('');
+            } else {
+                stepsContainer.innerHTML = `
+                    <div class="next-step-item">
+                        <span class="step-number">1</span>
+                        <span>Complete more practice sessions to receive personalized recommendations</span>
+                    </div>
+                `;
+            }
+        }
+
+        function showNoFeedback() {
+            document.getElementById('overallAssessment').textContent =
+                'Complete some practice sessions to receive AI-powered feedback on your learning progress.';
+            document.getElementById('weakAreasContainer').innerHTML = '<p class="text-muted">No data yet. Start practicing!</p>';
+            document.getElementById('strongAreasContainer').innerHTML = '<p class="text-muted">No data yet. Start practicing!</p>';
+            document.getElementById('nextStepsContainer').innerHTML = `
+                <div class="next-step-item"><span class="step-number">1</span><span>Go to the dashboard and start a practice session</span></div>
+                <div class="next-step-item"><span class="step-number">2</span><span>Answer at least 10 questions to generate feedback</span></div>
+            `;
+        }
+
+        function startPractice() { window.location.href = 'lesson_game.html'; }
+        async function refreshFeedback() {
+            document.getElementById('overallAssessment').textContent = 'Regenerating feedback...';
+            document.getElementById('weakAreasContainer').innerHTML = '<p class="text-muted">Analyzing...</p>';
+            document.getElementById('strongAreasContainer').innerHTML = '<p class="text-muted">Analyzing...</p>';
+            document.getElementById('nextStepsContainer').innerHTML = '<p class="text-muted">Generating...</p>';
+            await generateFeedback();
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

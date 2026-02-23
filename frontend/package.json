@@ -1,0 +1,16 @@
+{
+  "name": "codearena-frontend",
+  "version": "1.0.0",
+  "description": "CodeArena Frontend Server - Serves static files for the game-based learning system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["codearena", "frontend", "learning", "game"],
+  "author": "CodeArena Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Programming - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Widescreen container override */
+        .container {
+            max-width: 1400px;
+            padding: var(--space-md) var(--space-lg);
+        }
+
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 1600px;
+            }
+        }
+
+        @media (min-width: 1800px) {
+            .container {
+                max-width: 1800px;
+            }
+        }
+
+        /* ===== COURSE GRID VIEW ===== */
+
+        /* Hero Section */
+        .courses-hero {
+            position: relative;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(16, 185, 129, 0.08) 100%);
+            border: 1px solid var(--border);
+            border-top: 3px solid transparent;
+            border-image: linear-gradient(90deg, #7c3aed, #06b6d4, #10b981, #f59e0b) 1;
+            border-image-slice: 1;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            padding: 2.5rem 2rem;
+            margin-bottom: var(--space-lg);
+            overflow: hidden;
+        }
+
+        .courses-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .courses-hero h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.1rem;
+            color: var(--white);
+            margin-bottom: var(--space-md);
+            letter-spacing: 1px;
+        }
+
+        .courses-hero p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 640px;
+            line-height: 1.6;
+        }
+
+        .courses-hero-decor {
+            position: absolute;
+            right: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 120px;
+            height: 120px;
+            opacity: 0.12;
+            background:
+                linear-gradient(45deg, var(--primary) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--secondary) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--success) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--primary) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+            border-radius: var(--radius);
+        }
+
+        /* Progress Bar */
+        .courses-progress {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: 0.85rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: var(--space-lg);
+        }
+
+        .courses-progress-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .courses-progress-label strong {
+            color: var(--text);
+        }
+
+        .courses-progress-track {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .courses-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        .courses-progress-pct {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--xp-gold);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* Filter Chips */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: var(--space-xl);
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--white);
+        }
+
+        /* Chapter Section */
+        .chapter-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+
+        .chapter-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chapter-count {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Course Card Grid */
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: var(--space-md);
+        }
+
+        @media (min-width: 1400px) {
+            .course-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: var(--space-lg);
+            }
+        }
+
+        @media (min-width: 1800px) {
+            .course-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        .course-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(124, 58, 237, 0.4);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.15);
+        }
+
+        .course-card-gradient {
+            height: 100px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0.75rem;
+            position: relative;
+        }
+
+        .course-card-gradient .card-order {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            color: rgba(255,255,255,0.8);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .course-card-gradient .card-icon {
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* Gradient variants per chapter */
+        .gradient-basics { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+        .gradient-control { background: linear-gradient(135deg, #06b6d4, #67e8f9); }
+        .gradient-data { background: linear-gradient(135deg, #f59e0b, #fcd34d); }
+        .gradient-advanced { background: linear-gradient(135deg, #ef4444, #fca5a5); }
+
+        .course-card-body {
+            padding: 0.85rem;
+        }
+
+        .course-card-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .label-basics { color: #a78bfa; }
+        .label-control { color: #67e8f9; }
+        .label-data { color: #fcd34d; }
+        .label-advanced { color: #fca5a5; }
+
+        .course-card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.35rem;
+            line-height: 1.3;
+        }
+
+        .course-card-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .course-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .course-card-badge {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-beginner {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .badge-intermediate {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+
+        .badge-advanced {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .course-card-check {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .course-card-check.completed {
+            background: var(--success);
+            color: var(--bg-dark);
+        }
+
+        .course-card-check.incomplete {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: transparent;
+        }
+
+        /* Reading time + XP row */
+        .course-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .course-card-meta .meta-time { display: flex; align-items: center; gap: 0.2rem; }
+        .course-card-meta .meta-xp {
+            margin-left: auto;
+            color: var(--xp-gold);
+            font-weight: 700;
+        }
+
+        /* ===== LESSON READER VIEW ===== */
+        .lesson-reader {
+            display: none;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .lesson-reader.active {
+            display: block;
+        }
+
+        @media (min-width: 1400px) {
+            .lesson-reader {
+                max-width: 1100px;
+            }
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem 0;
+            margin-bottom: var(--space-md);
+            transition: color 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        .lesson-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .lesson-header {
+            padding: var(--space-xl);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface);
+        }
+
+        .lesson-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-sm);
+            align-items: center;
+        }
+
+        .lesson-body {
+            padding: var(--space-xl);
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .lesson-body h2 {
+            color: var(--primary);
+            margin: var(--space-xl) 0 var(--space-md);
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lesson-body h3 {
+            color: var(--secondary);
+            margin: var(--space-lg) 0 var(--space-sm);
+            font-size: 1.15rem;
+        }
+
+        .lesson-body p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+
+        .lesson-body ul, .lesson-body ol {
+            margin: var(--space-md) 0;
+            padding-left: var(--space-xl);
+            color: var(--text-secondary);
+        }
+
+        .lesson-body li {
+            margin-bottom: var(--space-sm);
+        }
+
+        .lesson-body strong {
+            color: var(--text);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #0d1117;
+            color: #e6edf3;
+            padding: var(--space-lg);
+            border-radius: var(--radius-sm);
+            margin: var(--space-lg) 0;
+            font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+            border: 1px solid var(--border);
+            line-height: 1.6;
+        }
+
+        .code-block::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-family: 'Press Start 2P', monospace;
+            letter-spacing: 1px;
+        }
+
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; }
+        .code-block .function { color: #d2a8ff; }
+        .code-block .number { color: #79c0ff; }
+
+        /* Info Box */
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .info-box.tip {
+            background: var(--success-bg);
+            border-color: var(--success);
+        }
+
+        .info-box.warning {
+            background: var(--warning-bg);
+            border-color: var(--warning);
+        }
+
+        .info-box-title {
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: var(--text);
+        }
+
+        .info-box p {
+            color: var(--text-secondary);
+        }
+
+        /* Try It Section */
+        .try-it-section {
+            background: var(--bg-surface);
+            border: 2px dashed var(--primary);
+            border-radius: var(--radius);
+            padding: var(--space-lg);
+            margin: var(--space-xl) 0;
+        }
+
+        .try-it-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--space-md);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Lesson Footer */
+        .lesson-footer {
+            padding: var(--space-xl);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--success);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            box-shadow: 0 4px 20px var(--success-glow);
+            z-index: 200;
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2s forwards;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* ===== LANGUAGE TABS ===== */
+        .lang-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: var(--space-lg);
+            flex-wrap: wrap;
+        }
+
+        .lang-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 24px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .lang-tab:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .lang-tab.active {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: var(--primary);
+            color: var(--white);
+        }
+
+        .lang-tab-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .courses-hero {
+                padding: 1.5rem 1rem;
+            }
+
+            .courses-hero h1 {
+                font-size: 0.8rem;
+            }
+
+            .courses-hero-decor {
+                display: none;
+            }
+
+            .course-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: var(--space-sm);
+            }
+
+            .course-card-gradient {
+                height: 70px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span class="navbar-brand logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        </span>
+        <ul class="navbar-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="lessons.html" class="active">Lessons</a></li>
+            <li><a href="lesson_game.html">Play</a></li>
+            <li><a href="playground.html">Playground</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+            <li><a href="admin.html" style="color:var(--text-muted);font-size:0.8rem;" title="Content Manager">&#x2699;</a></li>
+            <li>
+                <div class="nav-xp-bar">
+                    <span class="xp-icon">&#x2B50;</span>
+                    <span class="xp-amount" id="navXP">0 XP</span>
+                </div>
+            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- ===== COURSE GRID VIEW ===== -->
+        <div id="courseGridView">
+            <!-- Hero -->
+            <div class="courses-hero fade-in">
+                <div class="courses-hero-content">
+                    <h1>Explore CodeArena</h1>
+                    <p>Master programming fundamentals through interactive lessons. Learn at your own pace, track your progress, and practice with real code.</p>
+                </div>
+                <div class="courses-hero-decor"></div>
+            </div>
+
+            <!-- Language Tabs -->
+            <div class="lang-tabs fade-in" id="langTabs">
+                <button class="lang-tab active" onclick="switchLanguage('python')" data-lang="python">
+                    <img class="lang-tab-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python"> Python
+                </button>
+                <button class="lang-tab" onclick="switchLanguage('javascript')" data-lang="javascript">
+                    <img class="lang-tab-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JS"> JavaScript
+                </button>
+                <button class="lang-tab" onclick="switchLanguage('java')" data-lang="java">
+                    <img class="lang-tab-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java"> Java
+                </button>
+                <button class="lang-tab" onclick="switchLanguage('cpp')" data-lang="cpp">
+                    <img class="lang-tab-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="C++"> C++
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div class="courses-progress fade-in">
+                <span class="courses-progress-label"><strong id="completedCount">0</strong> of <strong id="totalCount">0</strong> completed</span>
+                <div class="courses-progress-track">
+                    <div class="courses-progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <span class="courses-progress-pct" id="progressPercent">0%</span>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="filter-bar fade-in">
+                <button class="filter-chip active" onclick="filterLessons('all')">All</button>
+                <button class="filter-chip" onclick="filterLessons('beginner')">Beginner</button>
+                <button class="filter-chip" onclick="filterLessons('intermediate')">Intermediate</button>
+                <button class="filter-chip" onclick="filterLessons('advanced')">Advanced</button>
+            </div>
+
+            <!-- Course Cards (populated by JS) -->
+            <div id="courseCards"></div>
+        </div>
+
+        <!-- ===== LESSON READER VIEW ===== -->
+        <div id="lessonReaderView" class="lesson-reader">
+            <button class="back-btn" onclick="backToCourses()">
+                &larr; Back to Courses
+            </button>
+
+            <div class="lesson-content">
+                <div class="lesson-header">
+                    <div>
+                        <h1 class="lesson-title" id="lessonTitle">Select a Lesson</h1>
+                        <div class="lesson-meta">
+                            <span class="level-badge level-beginner" id="lessonLevel">Beginner</span>
+                            <span class="text-muted" id="lessonDuration"></span>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" id="markCompleteBtn" onclick="markComplete()" style="display: none;">
+                        &#x2714; Complete
+                    </button>
+                </div>
+
+                <div class="lesson-body" id="lessonBody">
+                    <div class="welcome-state">
+                        <p>Loading lesson content...</p>
+                    </div>
+                </div>
+
+                <div class="lesson-footer" id="lessonFooter" style="display: none;">
+                    <button class="btn btn-ghost" id="prevBtn" onclick="prevLesson()">
+                        &larr; Previous
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='lesson_game.html'">
+                        &#x1F3AE; Practice
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextLesson()">
+                        Next &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) window.location.href = 'login.html';
+
+        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        let lessons = [];
+        let currentLessonIndex = -1;
+        let currentFilter = 'all';
+        let currentLanguage = user.selectedLanguage || 'python';
+
+        function getCompletedKey(lang) {
+            return 'completedLessons_' + (lang || currentLanguage);
+        }
+        let completedLessons = JSON.parse(localStorage.getItem(getCompletedKey(currentLanguage)) || '[]');
+
+        // Difficulty-based chapters (no fixed index ranges)
+        const difficultyChapters = [
+            { difficulty: 'beginner',     name: 'Fundamentals',   icon: '\uD83D\uDCDA', gradient: 'gradient-basics',   label: 'label-basics' },
+            { difficulty: 'intermediate', name: 'Core Concepts',  icon: '\uD83D\uDD00', gradient: 'gradient-control',  label: 'label-control' },
+            { difficulty: 'advanced',     name: 'Advanced Topics',icon: '\uD83D\uDE80', gradient: 'gradient-advanced', label: 'label-advanced' }
+        ];
+
+        // Icon pool cycled per lesson
+        const iconPool = ['\uD83D\uDC4B','\uD83D\uDCE6','\u2795','\uD83D\uDD00','\uD83D\uDD01','\uD83D\uDCDD','\uD83D\uDCCB','\uD83D\uDCD6','\uD83D\uDE80','\u2699\uFE0F','\uD83E\uDDE0','\uD83D\uDCBB'];
+
+        // Set active tab from user's selected language
+        function initLangTabs() {
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.lang === currentLanguage);
+            });
+        }
+
+        async function switchLanguage(lang) {
+            currentLanguage = lang;
+            completedLessons = JSON.parse(localStorage.getItem(getCompletedKey(lang)) || '[]');
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.lang === lang);
+            });
+            currentFilter = 'all';
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.textContent === 'All');
+            });
+            await loadLessons();
+        }
+
+        initLangTabs();
+        loadLessons();
+
+        async function loadLessons() {
+            try {
+                const res = await fetch(`${API}/lessons?language=${currentLanguage}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                lessons = data.lessons || [];
+                renderCourseGrid();
+                updateProgress();
+            } catch (err) {
+                console.error('Error loading lessons:', err);
+            }
+        }
+
+        function renderCourseGrid() {
+            const container = document.getElementById('courseCards');
+            let html = '';
+
+            difficultyChapters.forEach(chapter => {
+                // Get lessons matching this difficulty
+                let chapterLessons = lessons
+                    .filter(l => l.difficulty === chapter.difficulty)
+                    .map((lesson, i) => ({ lesson, index: lessons.indexOf(lesson) }));
+
+                // Apply filter
+                if (currentFilter !== 'all') {
+                    chapterLessons = chapterLessons.filter(cl => cl.lesson.difficulty === currentFilter);
+                }
+
+                if (chapterLessons.length === 0) return;
+
+                html += `
+                    <div class="chapter-section">
+                        <div class="chapter-header">
+                            <span class="chapter-title">${chapter.icon} ${chapter.name}</span>
+                            <span class="chapter-count">${chapterLessons.length} lesson${chapterLessons.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="course-grid">
+                `;
+
+                chapterLessons.forEach(({ lesson, index }) => {
+                    const isCompleted = completedLessons.includes(lesson.id);
+                    const icon = iconPool[index % iconPool.length] || '\uD83D\uDCDD';
+                    const badgeClass = 'badge-' + lesson.difficulty;
+                    const desc = lesson.description || 'Explore this programming concept.';
+                    const readTime = getReadTime(lesson.difficulty);
+                    const xpReward = { beginner: 50, intermediate: 100, advanced: 150 }[lesson.difficulty] || 50;
+
+                    html += `
+                        <div class="course-card" onclick="selectLesson(${index})">
+                            <div class="course-card-gradient ${chapter.gradient}">
+                                <span class="card-order">#${lesson.orderNumber}</span>
+                                <span class="card-icon">${icon}</span>
+                            </div>
+                            <div class="course-card-body">
+                                <div class="course-card-label ${chapter.label}">${chapter.name}</div>
+                                <div class="course-card-title">${lesson.title}</div>
+                                <div class="course-card-desc">${desc}</div>
+                                <div class="course-card-meta">
+                                    <span class="meta-time">&#x23F1; ${readTime}</span>
+                                    <span class="meta-xp">+${xpReward} XP</span>
+                                </div>
+                                <div class="course-card-footer">
+                                    <span class="course-card-badge ${badgeClass}">${lesson.difficulty}</span>
+                                    <span class="course-card-check ${isCompleted ? 'completed' : 'incomplete'}">${isCompleted ? '\u2713' : ''}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getReadTime(difficulty) {
+            return { beginner: '5 min', intermediate: '8 min', advanced: '12 min' }[difficulty] || '5 min';
+        }
+
+        function filterLessons(filter) {
+            currentFilter = filter;
+
+            // Update chip active state
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.textContent.toLowerCase() === filter || (filter === 'all' && chip.textContent === 'All'));
+            });
+
+            renderCourseGrid();
+        }
+
+        async function selectLesson(index) {
+            currentLessonIndex = index;
+            const lesson = lessons[index];
+
+            // Switch to reader view
+            document.getElementById('courseGridView').style.display = 'none';
+            document.getElementById('lessonReaderView').classList.add('active');
+
+            document.getElementById('lessonTitle').textContent = lesson.title;
+            document.getElementById('lessonBody').innerHTML = '<p style="color:var(--text-muted)">Loading...</p>';
+
+            // Fetch full lesson content (the list endpoint omits HTML content)
+            try {
+                const res = await fetch(`${API}/lessons/${lesson.id}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                document.getElementById('lessonBody').innerHTML = data.lesson ? data.lesson.content : lesson.content || '';
+            } catch (e) {
+                document.getElementById('lessonBody').innerHTML = lesson.content || '<p>Could not load lesson.</p>';
+            }
+
+            const levelBadge = document.getElementById('lessonLevel');
+            levelBadge.textContent = lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1);
+            levelBadge.className = `level-badge level-${lesson.difficulty}`;
+
+            document.getElementById('lessonFooter').style.display = 'flex';
+            document.getElementById('markCompleteBtn').style.display = 'block';
+
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === lessons.length - 1;
+
+            window.scrollTo(0, 0);
+        }
+
+        function backToCourses() {
+            document.getElementById('lessonReaderView').classList.remove('active');
+            document.getElementById('courseGridView').style.display = 'block';
+            renderCourseGrid();
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        function prevLesson() {
+            if (currentLessonIndex > 0) selectLesson(currentLessonIndex - 1);
+        }
+
+        function nextLesson() {
+            if (currentLessonIndex < lessons.length - 1) selectLesson(currentLessonIndex + 1);
+        }
+
+        function markComplete() {
+            const lesson = lessons[currentLessonIndex];
+            if (!completedLessons.includes(lesson.id)) {
+                completedLessons.push(lesson.id);
+                localStorage.setItem(getCompletedKey(currentLanguage), JSON.stringify(completedLessons));
+                updateProgress();
+
+                // Show toast
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = `"${lesson.title}" completed!`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2500);
+
+                // Auto-advance
+                if (currentLessonIndex < lessons.length - 1) {
+                    setTimeout(() => nextLesson(), 600);
+                }
+            }
+        }
+
+        function updateProgress() {
+            const completed = completedLessons.length;
+            const total = lessons.length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('progressFill').style.width = `${percent}%`;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+        }
+
+        // Open code in Playground
+        function openPlayground(code, lang, lessonTitle) {
+            localStorage.setItem('playgroundCode', code);
+            localStorage.setItem('playgroundLang', lang || 'python');
+            localStorage.setItem('playgroundSource', lessonTitle || 'Lesson');
+            window.location.href = 'playground.html';
+        }
+
+        // Handle navigation from dashboard roadmap
+        (function handleOpenLessonIndex() {
+            const targetIndex = localStorage.getItem('openLessonIndex');
+            if (targetIndex !== null) {
+                localStorage.removeItem('openLessonIndex');
+                const idx = parseInt(targetIndex);
+                const waitForLessons = setInterval(() => {
+                    if (lessons.length > 0) {
+                        clearInterval(waitForLessons);
+                        if (idx >= 0 && idx < lessons.length) {
+                            selectLesson(idx);
+                        }
+                    }
+                }, 100);
+            }
+        })();
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
