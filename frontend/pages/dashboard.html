@@ -592,6 +592,113 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ── Classrooms Section ── */
+        .classrooms-section {
+            margin-top: var(--space-lg);
+        }
+        .classrooms-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+        .classroom-cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .student-classroom-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.2s, transform 0.15s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .student-classroom-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .sc-card-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .sc-card-subject {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .sc-card-key {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            color: var(--secondary);
+            letter-spacing: 1px;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            padding: 4px 8px;
+            display: inline-block;
+        }
+        .sc-card-enter {
+            font-size: 0.78rem;
+            color: var(--primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .classrooms-empty {
+            text-align: center;
+            padding: 36px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* ── Join Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 420px;
+            transform: translateY(16px);
+            transition: transform 0.2s;
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+        .modal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            color: var(--text);
+            margin: 0 0 8px;
+        }
+        .modal-sub {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin: 0 0 20px;
+        }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .modal-err { color: var(--danger); font-size: 0.8rem; margin-top: 8px; display: none; }
     </style>
 </head>
 <body>
@@ -735,6 +842,35 @@
                         <span class="ql-icon">&#x1F4CA;</span> Feedback
                     </a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Classrooms Section -->
+        <div class="classrooms-section fade-in">
+            <div class="classrooms-section-header">
+                <div class="section-title" style="margin-bottom:0;">🏫 My Classrooms</div>
+                <button class="btn btn-primary" style="font-size:0.75rem;padding:6px 16px;" onclick="openJoinModal()">+ Join Classroom</button>
+            </div>
+            <div class="classroom-cards-row" id="myClassroomsGrid">
+                <div class="classrooms-empty">Loading classrooms…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Classroom Modal -->
+    <div class="modal-overlay" id="joinModal" onclick="handleJoinOverlay(event)">
+        <div class="modal-box">
+            <div class="modal-title">Join a Classroom</div>
+            <div class="modal-sub">Enter the enrollment key your teacher gave you.</div>
+            <input type="text" class="form-input" id="enrollmentKeyInput"
+                placeholder="e.g. ABCD-1234"
+                maxlength="9"
+                style="text-transform:uppercase;letter-spacing:2px;font-family:'Press Start 2P',monospace;font-size:0.8rem;"
+                oninput="this.value=this.value.toUpperCase()">
+            <div class="modal-err" id="joinErr"></div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeJoinModal()">Cancel</button>
+                <button class="btn btn-primary" id="joinBtn" onclick="joinClassroom()">Join</button>
             </div>
         </div>
     </div>
@@ -986,6 +1122,77 @@
             document.getElementById('roadmapContent').innerHTML = '<p class="text-muted">Loading lessons...</p>';
             loadRoadmap();
         }
+
+        // ── Classrooms ───────────────────────────────────────────────────────────
+        async function loadMyClassrooms() {
+            const grid = document.getElementById('myClassroomsGrid');
+            try {
+                const res = await fetch(`${API}/classrooms/enrolled`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                const classrooms = data.success ? (data.classrooms || []) : [];
+                if (!classrooms.length) {
+                    grid.innerHTML = `<div class="classrooms-empty">You haven't joined any classrooms yet.<br>Ask your teacher for an enrollment key!</div>`;
+                    return;
+                }
+                grid.innerHTML = classrooms.map(c => `
+                    <a class="student-classroom-card" href="classroom_room.html?id=${c.classroom_id || c.id}">
+                        <div class="sc-card-name">${escDash(c.name)}</div>
+                        <div class="sc-card-subject">${escDash(c.subject || 'No subject')}</div>
+                        <span class="sc-card-key">${escDash(c.enrollmentKey || c.enrollment_key || '')}</span>
+                        <div class="sc-card-enter">Enter Room →</div>
+                    </a>`).join('');
+            } catch (err) {
+                grid.innerHTML = `<div class="classrooms-empty">Could not load classrooms.</div>`;
+            }
+        }
+
+        function escDash(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function openJoinModal() {
+            document.getElementById('enrollmentKeyInput').value = '';
+            document.getElementById('joinErr').style.display = 'none';
+            document.getElementById('joinModal').classList.add('open');
+            setTimeout(() => document.getElementById('enrollmentKeyInput').focus(), 80);
+        }
+
+        function closeJoinModal() {
+            document.getElementById('joinModal').classList.remove('open');
+        }
+
+        function handleJoinOverlay(e) {
+            if (e.target === document.getElementById('joinModal')) closeJoinModal();
+        }
+
+        async function joinClassroom() {
+            const key = document.getElementById('enrollmentKeyInput').value.trim().toUpperCase();
+            const errEl = document.getElementById('joinErr');
+            if (!key) { errEl.textContent = 'Please enter an enrollment key.'; errEl.style.display = 'block'; return; }
+
+            const btn = document.getElementById('joinBtn');
+            btn.disabled = true; btn.textContent = 'Joining…';
+            errEl.style.display = 'none';
+
+            try {
+                const res = await fetch(`${API}/classrooms/join`, {
+                    method: 'POST', headers: getAuthHeaders(),
+                    body: JSON.stringify({ enrollmentKey: key })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || 'Invalid key');
+                closeJoinModal();
+                loadMyClassrooms();
+            } catch (err) {
+                errEl.textContent = err.message || 'Failed to join. Check the key and try again.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.disabled = false; btn.textContent = 'Join';
+            }
+        }
+
+        loadMyClassrooms();
 
         function startGame() { window.location.href = 'lesson_game.html'; }
         function viewFeedback() { window.location.href = 'feedback.html'; }

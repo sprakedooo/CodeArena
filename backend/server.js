@@ -49,6 +49,7 @@ const mlRoutes = require('./routes/mlRoutes');               // ML predictions
 const lessonRoutes = require('./routes/lessonRoutes');       // Programming lessons
 const executeRoutes = require('./routes/executeRoutes');     // Code execution
 const facultyRoutes = require('./routes/facultyRoutes');     // Faculty dashboard
+const classroomRoutes = require('./routes/classroomRoutes'); // Classroom Mode
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2: INITIALIZE EXPRESS APPLICATION
@@ -113,6 +114,9 @@ app.use('/api/execute', authMiddleware, executeRoutes);
 
 // Faculty Dashboard: /api/faculty (auth + requireFaculty handled inside route)
 app.use('/api/faculty', facultyRoutes);
+
+// Classroom Mode: /api/classrooms (authMiddleware applied inside route)
+app.use('/api/classrooms', classroomRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 5: ROOT ENDPOINT - SERVER STATUS
