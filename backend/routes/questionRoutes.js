@@ -27,6 +27,7 @@ const router = express.Router();
 // Import database service
 const dbService = require('../services/dbService');
 const { requireFaculty } = require('../middleware/authMiddleware');
+const { generateQuestions } = require('../services/questionGeneratorService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MOCK DATA: Programming Questions by Language and Level
@@ -839,6 +840,253 @@ questionBank.push(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// EXTENDED QUESTION BANK  — typed questions for all languages/levels
+// ─────────────────────────────────────────────────────────────────────────────
+questionBank.push(
+    // ── PYTHON fill_blank (beginner) ─────────────────────────────────────────
+    { id: 106, language: 'python', level: 'beginner', topic: 'Output', questionType: 'fill_blank',
+      question: 'Fill in the blank to print "Hello World":',
+      codeSnippet: '___(\"Hello World\")', correctAnswer: 'print',
+      hint: 'Python uses a built-in function to display text.', explanation: 'print() is the built-in output function in Python.' },
+    { id: 107, language: 'python', level: 'beginner', topic: 'Variables', questionType: 'fill_blank',
+      question: 'Assign the value 10 to a variable called num:',
+      codeSnippet: '___ = 10\nprint(num)', correctAnswer: 'num',
+      hint: 'Just write the variable name on the left side of =.', explanation: 'Python variables are created by assigning a value with =.' },
+    { id: 108, language: 'python', level: 'beginner', topic: 'Strings', questionType: 'fill_blank',
+      question: 'Fill in the blank to get the length of a string:',
+      codeSnippet: 'name = \"Alice\"\nprint(___(name))', correctAnswer: 'len',
+      hint: 'This function counts characters.', explanation: 'len() returns the number of characters in a string.' },
+    { id: 109, language: 'python', level: 'beginner', topic: 'Input', questionType: 'fill_blank',
+      question: 'Fill in to read user input:',
+      codeSnippet: 'name = ___("Enter your name: ")', correctAnswer: 'input',
+      hint: 'The function name describes what it does.', explanation: 'input() reads a line of text from the user.' },
+
+    // ── PYTHON fill_blank (intermediate) ────────────────────────────────────
+    { id: 110, language: 'python', level: 'intermediate', topic: 'Lists', questionType: 'fill_blank',
+      question: 'Fill in to add an item to the end of a list:',
+      codeSnippet: 'fruits = [\"apple\", \"banana\"]\nfruits.___(\"cherry\")', correctAnswer: 'append',
+      hint: 'This list method adds to the end.', explanation: 'append() adds an element to the end of a list.' },
+    { id: 111, language: 'python', level: 'intermediate', topic: 'Loops', questionType: 'fill_blank',
+      question: 'Fill in to exit a loop immediately:',
+      codeSnippet: 'for i in range(10):\n    if i == 5:\n        ___\n    print(i)', correctAnswer: 'break',
+      hint: 'This keyword immediately exits the loop.', explanation: 'break exits the loop immediately when executed.' },
+    { id: 112, language: 'python', level: 'intermediate', topic: 'Dictionaries', questionType: 'fill_blank',
+      question: 'Fill in to access a dictionary value by key:',
+      codeSnippet: 'person = {\"name\": \"Alice\", \"age\": 25}\nprint(person[___])', correctAnswer: '"name"',
+      hint: 'Access dictionary values using their key in square brackets.', explanation: 'Dictionary values are accessed with dict[key].' },
+    { id: 113, language: 'python', level: 'intermediate', topic: 'Functions', questionType: 'fill_blank',
+      question: 'Fill in the keyword to return a value from a function:',
+      codeSnippet: 'def add(a, b):\n    ___ a + b', correctAnswer: 'return',
+      hint: 'This keyword sends a value back to the caller.', explanation: 'return sends a value back from the function to the caller.' },
+
+    // ── PYTHON fill_blank (advanced) ─────────────────────────────────────────
+    { id: 114, language: 'python', level: 'advanced', topic: 'Lambda', questionType: 'fill_blank',
+      question: 'Fill in to create a lambda that squares a number:',
+      codeSnippet: 'square = ___ x: x ** 2\nprint(square(4))', correctAnswer: 'lambda',
+      hint: 'Python\'s anonymous function keyword.', explanation: 'lambda creates a small anonymous function.' },
+    { id: 115, language: 'python', level: 'advanced', topic: 'Classes', questionType: 'fill_blank',
+      question: 'Fill in the constructor method name:',
+      codeSnippet: 'class Dog:\n    def ___(self, name):\n        self.name = name', correctAnswer: '__init__',
+      hint: 'Special method called when an object is created.', explanation: '__init__ is the constructor called when a new instance is created.' },
+    { id: 116, language: 'python', level: 'advanced', topic: 'Generators', questionType: 'fill_blank',
+      question: 'Fill in to create a generator function:',
+      codeSnippet: 'def count_up(n):\n    for i in range(n):\n        ___ i', correctAnswer: 'yield',
+      hint: 'This keyword pauses the function and returns a value.', explanation: 'yield makes a function a generator, pausing and yielding values one at a time.' },
+
+    // ── PYTHON output_prediction (beginner) ──────────────────────────────────
+    { id: 206, language: 'python', level: 'beginner', topic: 'Variables', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'x = 10\ny = 3\nprint(x - y)', correctAnswer: '7',
+      hint: 'Subtract y from x.', explanation: '10 - 3 = 7.' },
+    { id: 207, language: 'python', level: 'beginner', topic: 'Strings', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'print("Hi" * 3)', correctAnswer: 'HiHiHi',
+      hint: 'String multiplication repeats the string.', explanation: '"Hi" * 3 repeats "Hi" three times: HiHiHi.' },
+    { id: 208, language: 'python', level: 'beginner', topic: 'Boolean', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'print(5 > 3)', correctAnswer: 'True',
+      hint: 'Comparison operators return Boolean values.', explanation: '5 > 3 is True, so print outputs True.' },
+
+    // ── PYTHON output_prediction (intermediate) ──────────────────────────────
+    { id: 209, language: 'python', level: 'intermediate', topic: 'Loops', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'total = 0\nfor i in range(1, 4):\n    total += i\nprint(total)', correctAnswer: '6',
+      hint: 'Add 1+2+3.', explanation: 'range(1,4) gives 1,2,3. Sum = 1+2+3 = 6.' },
+    { id: 210, language: 'python', level: 'intermediate', topic: 'Strings', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'text = "hello"\nprint(text.upper())', correctAnswer: 'HELLO',
+      hint: 'upper() converts to uppercase.', explanation: '.upper() returns the string in all capital letters.' },
+    { id: 211, language: 'python', level: 'intermediate', topic: 'Lists', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'nums = [3, 1, 4, 1, 5]\nnums.sort()\nprint(nums[0])', correctAnswer: '1',
+      hint: 'After sorting, the smallest is at index 0.', explanation: 'After sort(), nums = [1,1,3,4,5], so index 0 is 1.' },
+
+    // ── PYTHON output_prediction (advanced) ──────────────────────────────────
+    { id: 212, language: 'python', level: 'advanced', topic: 'Comprehension', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'evens = [x for x in range(8) if x % 2 == 0]\nprint(len(evens))', correctAnswer: '4',
+      hint: 'Count even numbers from 0 to 7.', explanation: 'Evens in range(8): 0,2,4,6 → 4 items.' },
+    { id: 213, language: 'python', level: 'advanced', topic: 'Lambda', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'double = lambda x: x * 2\nprint(double(7))', correctAnswer: '14',
+      hint: 'Multiply the input by 2.', explanation: 'lambda x: x*2 doubles the input. double(7) = 14.' },
+    { id: 214, language: 'python', level: 'advanced', topic: 'Classes', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'class Greeter:\n    def hello(self, name):\n        return f"Hi {name}"\ng = Greeter()\nprint(g.hello("Bob"))', correctAnswer: 'Hi Bob',
+      hint: 'The method returns a formatted string.', explanation: 'f"Hi {name}" with name="Bob" gives "Hi Bob".' },
+
+    // ── PYTHON code_ordering (beginner) ─────────────────────────────────────
+    { id: 306, language: 'python', level: 'beginner', topic: 'Input/Output', questionType: 'code_ordering',
+      question: 'Arrange these lines to ask for a name and greet the user:',
+      codeLines: ['name = input("Enter your name: ")', 'print("Hello, " + name)'],
+      correctOrder: [0, 1],
+      hint: 'First get the input, then print the greeting.', explanation: 'You must receive input before you can use the variable in print.' },
+    { id: 307, language: 'python', level: 'beginner', topic: 'Variables', questionType: 'code_ordering',
+      question: 'Arrange these lines to swap two variables:',
+      codeLines: ['a = 5', 'b = 10', 'a, b = b, a', 'print(a, b)'],
+      correctOrder: [0, 1, 2, 3],
+      hint: 'Declare both variables first, then swap, then print.', explanation: 'Define a and b, swap using tuple unpacking, then print to see the result.' },
+    { id: 308, language: 'python', level: 'beginner', topic: 'Conditionals', questionType: 'code_ordering',
+      question: 'Arrange these lines to print whether a number is even or odd:',
+      codeLines: ['num = 7', 'if num % 2 == 0:', '    print("Even")', 'else:', '    print("Odd")'],
+      correctOrder: [0, 1, 2, 3, 4],
+      hint: 'Set num, then the if condition, its body, else, then its body.', explanation: 'Define the variable first, then structure the if/else block.' },
+
+    // ── PYTHON code_ordering (intermediate) ─────────────────────────────────
+    { id: 309, language: 'python', level: 'intermediate', topic: 'Functions', questionType: 'code_ordering',
+      question: 'Arrange these lines to create a function that finds the max of a list:',
+      codeLines: ['def find_max(numbers):', '    max_val = numbers[0]', '    for n in numbers:', '        if n > max_val:', '            max_val = n', '    return max_val'],
+      correctOrder: [0, 1, 2, 3, 4, 5],
+      hint: 'Define the function, initialize max, loop, compare, return.', explanation: 'Function definition → init max → loop over list → compare and update → return result.' },
+    { id: 310, language: 'python', level: 'intermediate', topic: 'Dictionaries', questionType: 'code_ordering',
+      question: 'Arrange these lines to count word frequencies:',
+      codeLines: ['words = ["cat", "dog", "cat", "bird"]', 'freq = {}', 'for word in words:', '    freq[word] = freq.get(word, 0) + 1', 'print(freq)'],
+      correctOrder: [0, 1, 2, 3, 4],
+      hint: 'Create the list, empty dict, loop, count, print.', explanation: 'Prepare data → empty container → iterate → count occurrences → display.' },
+
+    // ── PYTHON code_ordering (advanced) ─────────────────────────────────────
+    { id: 311, language: 'python', level: 'advanced', topic: 'Classes', questionType: 'code_ordering',
+      question: 'Arrange these lines to create a simple class with a method:',
+      codeLines: ['class Circle:', '    def __init__(self, radius):', '        self.radius = radius', '    def area(self):', '        return 3.14 * self.radius ** 2'],
+      correctOrder: [0, 1, 2, 3, 4],
+      hint: 'Class declaration, constructor, attribute, method definition, return.', explanation: 'Class → __init__ → store radius → define area method → compute and return.' },
+    { id: 312, language: 'python', level: 'advanced', topic: 'Exception Handling', questionType: 'code_ordering',
+      question: 'Arrange these lines to handle a division by zero error:',
+      codeLines: ['try:', '    result = 10 / 0', 'except ZeroDivisionError:', '    print("Cannot divide by zero")', 'finally:', '    print("Done")'],
+      correctOrder: [0, 1, 2, 3, 4, 5],
+      hint: 'try → operation → except → handler → finally → cleanup.', explanation: 'try block attempts, except catches the error, finally runs always.' },
+    { id: 313, language: 'python', level: 'advanced', topic: 'Generators', questionType: 'code_ordering',
+      question: 'Arrange these lines to create and use a generator:',
+      codeLines: ['def squares(n):', '    for i in range(n):', '        yield i ** 2', 'gen = squares(4)', 'print(list(gen))'],
+      correctOrder: [0, 1, 2, 3, 4],
+      hint: 'Define generator with yield, create instance, convert to list.', explanation: 'Generator function with yield → create generator → consume all values with list().' },
+
+    // ── JAVASCRIPT fill_blank ─────────────────────────────────────────────────
+    { id: 501, language: 'javascript', level: 'beginner', topic: 'Variables', questionType: 'fill_blank',
+      question: 'Fill in to declare a constant variable:',
+      codeSnippet: '___ PI = 3.14;\nconsole.log(PI);', correctAnswer: 'const',
+      hint: 'This keyword declares a variable that cannot be reassigned.', explanation: 'const declares a constant (read-only) variable.' },
+    { id: 502, language: 'javascript', level: 'beginner', topic: 'Strings', questionType: 'fill_blank',
+      question: 'Fill in to log a greeting using a template literal:',
+      codeSnippet: 'const name = "Alice";\nconsole.log(___`Hello, ${name}!`);', correctAnswer: '',
+      hint: 'Template literals use backticks.', explanation: 'Template literals use backtick quotes and ${} for expressions.' },
+    { id: 503, language: 'javascript', level: 'intermediate', topic: 'Functions', questionType: 'fill_blank',
+      question: 'Fill in to define an arrow function:',
+      codeSnippet: 'const add = (a, b) ___ a + b;', correctAnswer: '=>',
+      hint: 'Arrow functions use a special operator.', explanation: '=> is the arrow operator used in arrow functions.' },
+    { id: 504, language: 'javascript', level: 'intermediate', topic: 'Arrays', questionType: 'fill_blank',
+      question: 'Fill in the array method to double each element:',
+      codeSnippet: 'const nums = [1, 2, 3];\nconst doubled = nums.___(n => n * 2);', correctAnswer: 'map',
+      hint: 'This array method transforms every element.', explanation: 'map() creates a new array by applying a function to each element.' },
+    { id: 505, language: 'javascript', level: 'advanced', topic: 'Async', questionType: 'fill_blank',
+      question: 'Fill in the keyword to wait for a promise:',
+      codeSnippet: 'async function getData() {\n    const res = ___ fetch(url);\n    return res.json();\n}', correctAnswer: 'await',
+      hint: 'This keyword pauses async function execution.', explanation: 'await pauses the async function until the Promise resolves.' },
+
+    // ── JAVASCRIPT output_prediction ─────────────────────────────────────────
+    { id: 601, language: 'javascript', level: 'beginner', topic: 'Operators', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'console.log(typeof 42);', correctAnswer: 'number',
+      hint: 'typeof returns the type name as a string.', explanation: 'typeof 42 returns "number".' },
+    { id: 602, language: 'javascript', level: 'beginner', topic: 'Strings', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'console.log("hello".length);', correctAnswer: '5',
+      hint: 'Count the characters.', explanation: '"hello" has 5 characters so .length is 5.' },
+    { id: 603, language: 'javascript', level: 'intermediate', topic: 'Arrays', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'const arr = [1, 2, 3];\nconsole.log(arr.reverse()[0]);', correctAnswer: '3',
+      hint: 'reverse() reverses in place, then get first element.', explanation: 'After reverse, arr = [3,2,1]. arr[0] = 3.' },
+    { id: 604, language: 'javascript', level: 'intermediate', topic: 'Functions', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'const greet = name => `Hi ${name}`;\nconsole.log(greet("World"));', correctAnswer: 'Hi World',
+      hint: 'Template literal substitutes the variable.', explanation: 'Arrow function with template literal gives "Hi World".' },
+    { id: 605, language: 'javascript', level: 'advanced', topic: 'Closures', questionType: 'output_prediction',
+      question: 'What will this code output?',
+      codeSnippet: 'function counter() {\n  let n = 0;\n  return () => ++n;\n}\nconst inc = counter();\nconsole.log(inc());\nconsole.log(inc());', correctAnswer: '1\n2',
+      hint: 'Each call increments and returns n. What are the two calls?', explanation: 'First call: n becomes 1. Second call: n becomes 2. Closure keeps state.' },
+
+    // ── JAVASCRIPT code_ordering ──────────────────────────────────────────────
+    { id: 701, language: 'javascript', level: 'beginner', topic: 'Variables', questionType: 'code_ordering',
+      question: 'Arrange these lines to declare, assign, and log a variable:',
+      codeLines: ['let score;', 'score = 100;', 'console.log(score);'],
+      correctOrder: [0, 1, 2],
+      hint: 'Declare first, then assign, then log.', explanation: 'Variables must be declared before use. Assign value, then print.' },
+    { id: 702, language: 'javascript', level: 'intermediate', topic: 'Functions', questionType: 'code_ordering',
+      question: 'Arrange these lines to create and call a function:',
+      codeLines: ['function greet(name) {', '    return `Hello, ${name}!`;', '}', 'console.log(greet("Alice"));'],
+      correctOrder: [0, 1, 2, 3],
+      hint: 'Define the function body, close it, then call it.', explanation: 'Function keyword, body, closing brace, then invoke.' },
+    { id: 703, language: 'javascript', level: 'advanced', topic: 'Promises', questionType: 'code_ordering',
+      question: 'Arrange these lines to fetch data and handle errors:',
+      codeLines: ['async function getData(url) {', '    try {', '        const res = await fetch(url);', '        return await res.json();', '    } catch (err) {', '        console.error(err);', '    }', '}'],
+      correctOrder: [0, 1, 2, 3, 4, 5, 6, 7],
+      hint: 'async function → try → fetch → parse → catch → log error → close try → close function.',
+      explanation: 'Async/await wraps fetch in try/catch for error handling.' },
+
+    // ── JAVA fill_blank (intermediate/advanced) ───────────────────────────────
+    { id: 120, language: 'java', level: 'intermediate', topic: 'Loops', questionType: 'fill_blank',
+      question: 'Fill in to iterate over an array with a for-each loop:',
+      codeSnippet: 'int[] nums = {1, 2, 3};\nfor (___ num : nums) {\n    System.out.println(num);\n}', correctAnswer: 'int',
+      hint: 'Specify the type of each element.', explanation: 'Enhanced for-loop syntax: for (Type element : collection).' },
+    { id: 121, language: 'java', level: 'advanced', topic: 'Generics', questionType: 'fill_blank',
+      question: 'Fill in to create an ArrayList of Strings:',
+      codeSnippet: 'ArrayList<___> names = new ArrayList<>();\nnames.add("Alice");', correctAnswer: 'String',
+      hint: 'The type in angle brackets must match what you store.', explanation: 'ArrayList<String> creates a list that holds String objects.' },
+
+    // ── C++ fill_blank (intermediate/advanced) ────────────────────────────────
+    { id: 130, language: 'cpp', level: 'intermediate', topic: 'Pointers', questionType: 'fill_blank',
+      question: 'Fill in to dereference a pointer:',
+      codeSnippet: 'int x = 42;\nint* ptr = &x;\ncout << ___ ptr;', correctAnswer: '*',
+      hint: 'This operator accesses the value at an address.', explanation: 'The * (dereference) operator gives the value stored at a pointer\'s address.' },
+    { id: 131, language: 'cpp', level: 'advanced', topic: 'Templates', questionType: 'fill_blank',
+      question: 'Fill in to define a function template:',
+      codeSnippet: '___ <typename T>\nT maxVal(T a, T b) {\n    return (a > b) ? a : b;\n}', correctAnswer: 'template',
+      hint: 'This keyword introduces a generic function.', explanation: 'template<typename T> defines a function that works with any type.' }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: AI-Generated Questions
+// GET /api/questions/generate?language=python&level=beginner&type=fill_blank&count=5
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/generate', async (req, res) => {
+    const { language = 'python', level = 'beginner', type, count = 5 } = req.query;
+
+    // Get existing static questions to avoid duplication
+    const staticQuestions = questionBank.filter(
+        q => q.language === language.toLowerCase() && q.level === level.toLowerCase()
+            && (type ? (q.questionType || 'multiple_choice') === type : true)
+    );
+
+    try {
+        const questions = await generateQuestions({ language, level, type: type || 'multiple_choice', count, staticQuestions });
+        return res.json({ success: true, language, level, totalQuestions: questions.length, questions, source: 'generated' });
+    } catch (err) {
+        console.error('Question generation error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to generate questions' });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ROUTE: Get All Questions (Admin)
 // GET /api/questions/all
 // ─────────────────────────────────────────────────────────────────────────────
@@ -973,12 +1221,12 @@ router.get('/:language/:level', async (req, res) => {
     const { language, level } = req.params;
     const { type } = req.query; // Optional: filter by questionType
 
-    // Try database first
+    // Try database first (only for multiple_choice or mixed, since DB may lack typed questions)
     let questionsForStudent = null;
-    if (dbService.isDbAvailable()) {
+    if (dbService.isDbAvailable() && (!type || type === 'mixed' || type === 'multiple_choice')) {
         const dbQuestions = await dbService.getQuestions(language.toLowerCase(), level.toLowerCase());
         if (dbQuestions && dbQuestions.length > 0) {
-            questionsForStudent = dbQuestions.map(q => ({
+            let mapped = dbQuestions.map(q => ({
                 id: q.id,
                 question: q.question,
                 options: q.options || [],
@@ -989,10 +1237,14 @@ router.get('/:language/:level', async (req, res) => {
                 explanation: q.explanation,
                 questionType: q.questionType || 'multiple_choice'
             }));
+            if (type && type !== 'mixed') {
+                mapped = mapped.filter(q => q.questionType === type);
+            }
+            if (mapped.length > 0) questionsForStudent = mapped;
         }
     }
 
-    // Fallback to mock data
+    // Fallback to mock data (always used for non-multiple_choice types)
     if (!questionsForStudent) {
         let filteredQuestions = questionBank.filter(
             q => q.language === language.toLowerCase() && q.level === level.toLowerCase()

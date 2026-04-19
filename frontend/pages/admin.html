@@ -791,7 +791,7 @@
                             <th>Title</th>
                             <th>Language</th>
                             <th>Difficulty</th>
-                            <th>Description</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -1197,13 +1197,15 @@
         const API = 'http://localhost:3000/api';
 
         // ── Auth helpers ──
-        // Faculty portal only accepts the adminToken — student tokens are rejected
+        // Accept either: dedicated adminToken (password gate) OR a faculty JWT (role-based login)
         function getToken() {
-            return localStorage.getItem('adminToken') || null;
+            return localStorage.getItem('adminToken') || localStorage.getItem('token') || null;
         }
 
         function isAuthenticated() {
-            return !!localStorage.getItem('adminToken');
+            if (localStorage.getItem('adminToken')) return true;
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            return !!(user && user.role === 'faculty' && localStorage.getItem('token'));
         }
 
         if (!isAuthenticated()) {
@@ -1285,7 +1287,10 @@
         async function loadLessons() {
             try {
                 const langFilter = document.getElementById('lLangFilter')?.value || '';
-                const url = langFilter ? `${API}/lessons?language=${langFilter}` : `${API}/lessons`;
+                // Faculty sees all lessons including unshared ones
+                const url = langFilter
+                    ? `${API}/lessons?language=${langFilter}&all=true`
+                    : `${API}/lessons?all=true`;
                 const res = await fetch(url, { headers: getHeaders() });
                 const data = await res.json();
                 allLessons = data.lessons || [];
@@ -1293,6 +1298,25 @@
                 document.getElementById('statLessons').textContent = allLessons.length;
             } catch (e) {
                 showToast('Failed to load lessons', true);
+            }
+        }
+
+        async function toggleLessonShare(id, currentlyShared) {
+            try {
+                const res = await fetch(`${API}/lessons/${id}/share`, {
+                    method: 'PATCH',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ isShared: !currentlyShared })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message);
+                    loadLessons();
+                } else {
+                    showToast(data.error || 'Failed to update', true);
+                }
+            } catch (e) {
+                showToast('Failed to update sharing', true);
             }
         }
 
@@ -1313,19 +1337,26 @@
             }
 
             const langLabels = { python: '&#x1F40D; Python', javascript: '&#x1F310; JS', java: '&#x2615; Java', cpp: '&#x26A1; C++' };
-            tbody.innerHTML = filtered.map(l => `
+            tbody.innerHTML = filtered.map(l => {
+                const shared = l.isShared !== false;
+                const shareLabel = shared ? '&#x1F4E2; Shared' : '&#x1F512; Private';
+                const shareStyle = shared
+                    ? 'background:rgba(16,185,129,0.15);color:#10b981;border:1px solid #10b981;'
+                    : 'background:rgba(107,114,128,0.15);color:#6b7280;border:1px solid #6b7280;';
+                return `
                 <tr>
                     <td><span style="color:var(--text-muted);font-size:0.75rem;">#${l.orderNumber || '&#x2013;'}</span></td>
                     <td><strong>${escHtml(l.title)}</strong></td>
                     <td><span style="font-size:0.75rem;">${langLabels[l.language] || l.language || '&#x2013;'}</span></td>
                     <td><span class="diff-badge diff-${l.difficulty}">${l.difficulty}</span></td>
-                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '&#x2013;')}</td>
+                    <td><span style="font-size:0.72rem;padding:2px 8px;border-radius:4px;${shareStyle}">${shareLabel}</span></td>
                     <td>
                         <button class="action-btn btn-edit" onclick="openLessonModal(${l.id})">Edit</button>
+                        <button class="action-btn" style="background:rgba(6,182,212,0.1);color:#06b6d4;border:1px solid #06b6d4;" onclick="toggleLessonShare(${l.id}, ${shared})">${shared ? 'Unshare' : 'Share'}</button>
                         <button class="action-btn btn-delete" onclick="deleteLesson(${l.id})">Delete</button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
         }
 
         function openLessonModal(id) {
@@ -1922,11 +1953,37 @@
         }
 
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('token');
-            localStorage.removeItem('adminToken');
-            window.location.href = 'login.html';
+            showLogoutModal('Are you sure you want to logout of the admin panel?', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminToken');
+                window.location.href = 'index.html';
+            });
+        }
+        function showLogoutModal(message, onConfirm) {
+            const existing = document.getElementById('logoutConfirmOverlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'logoutConfirmOverlay';
+            overlay.className = 'confirm-modal-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-modal" role="dialog" aria-modal="true">
+                    <div class="confirm-modal-icon">&#x1F44B;</div>
+                    <div class="confirm-modal-title">Logout?</div>
+                    <div class="confirm-modal-message">${message}</div>
+                    <div class="confirm-modal-actions">
+                        <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+            const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+            document.getElementById('logoutCancelBtn').addEventListener('click', close);
+            document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
         }
     </script>
 </body>

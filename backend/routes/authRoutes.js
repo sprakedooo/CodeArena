@@ -54,7 +54,7 @@ let mockUsers = [
     {
         id: 2,
         email: 'maria@example.com',
-        password: null,  // Will be hashed on first load
+        password: null,
         _rawPassword: 'maria123',
         fullName: 'Maria Santos',
         role: 'student',
@@ -63,6 +63,19 @@ let mockUsers = [
         badges: ['first_login', 'fast_learner', 'perfect_score'],
         selectedLanguage: 'python',
         createdAt: '2024-01-10'
+    },
+    {
+        id: 99,
+        email: 'faculty@codearena.edu',
+        password: null,
+        _rawPassword: 'faculty123',
+        fullName: 'Prof. Reyes',
+        role: 'faculty',
+        totalPoints: 0,
+        currentLevel: null,
+        badges: [],
+        selectedLanguage: null,
+        createdAt: '2024-01-01'
     }
 ];
 
@@ -97,9 +110,24 @@ let mockUsers = [
  * - Success: Returns new user with initial game stats
  * - Failure: Returns error message
  */
+// Faculty registration code (required to register as faculty)
+const FACULTY_CODE = process.env.FACULTY_CODE || 'FACULTY2024';
+
 router.post('/register', async (req, res) => {
     // Extract registration data from request
-    const { email, password, fullName } = req.body;
+    const { email, password, fullName, role, facultyCode } = req.body;
+
+    // Determine role — faculty requires a valid faculty code
+    let userRole = 'student';
+    if (role === 'faculty') {
+        if (facultyCode !== FACULTY_CODE) {
+            return res.status(403).json({
+                success: false,
+                message: 'Invalid faculty registration code'
+            });
+        }
+        userRole = 'faculty';
+    }
 
     // VALIDATION: Check all required fields
     if (!email || !password || !fullName) {
@@ -149,13 +177,13 @@ router.post('/register', async (req, res) => {
             }
 
             // Create user in database with hashed password
-            const newUser = await dbService.createUser({ email, password: hashedPassword, fullName });
+            const newUser = await dbService.createUser({ email, password: hashedPassword, fullName, role: userRole });
             if (newUser) {
                 const userData = {
                     id: newUser.id,
                     email: newUser.email,
                     fullName: newUser.fullName,
-                    role: 'student',
+                    role: userRole,
                     totalPoints: 0,
                     currentLevel: 'beginner',
                     badges: ['first_login']
@@ -187,7 +215,7 @@ router.post('/register', async (req, res) => {
         email: email,
         password: hashedPassword,
         fullName: fullName,
-        role: 'student',
+        role: userRole,
         totalPoints: 0,
         currentLevel: 'beginner',
         badges: ['first_login'],

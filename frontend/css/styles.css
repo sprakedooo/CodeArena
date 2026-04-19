@@ -121,9 +121,9 @@ a:hover {
    LAYOUT
    ============================================================================ */
 .container {
-    max-width: 1100px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: var(--space-lg);
+    padding: 5vh 18%;
 }
 
 .container-sm {
@@ -138,7 +138,7 @@ a:hover {
 .navbar {
     background: var(--bg-card);
     border-bottom: 1px solid var(--border);
-    padding: 0.75rem var(--space-xl);
+    padding: 0.75rem 18%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -930,7 +930,7 @@ a:hover {
     .navbar {
         flex-direction: column;
         gap: 0.5rem;
-        padding: 0.5rem var(--space-md);
+        padding: 0.5rem 1.5rem;
     }
 
     .navbar-nav {
@@ -958,10 +958,70 @@ a:hover {
     }
 
     .container {
-        padding: var(--space-md);
+        padding: 3vh 1.5rem;
     }
 
     .stat-value {
         font-size: 1rem;
     }
+}
+
+/* ========== Confirm Modal (shared) ========== */
+.confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.confirm-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.confirm-modal {
+    background: var(--bg-card, #161b22);
+    border: 1px solid var(--border, #30363d);
+    border-radius: 12px;
+    padding: 1.75rem;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.92);
+    transition: transform 0.2s ease;
+    text-align: center;
+}
+.confirm-modal-overlay.active .confirm-modal {
+    transform: scale(1);
+}
+.confirm-modal-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+.confirm-modal-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.85rem;
+    color: var(--text, #f0f6fc);
+    margin-bottom: 0.75rem;
+    letter-spacing: 1px;
+}
+.confirm-modal-message {
+    color: var(--text-secondary, #8b949e);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+.confirm-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+.confirm-modal-actions .btn {
+    min-width: 110px;
 }

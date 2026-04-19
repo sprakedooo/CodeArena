@@ -25,9 +25,13 @@ app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/pages', express.static(path.join(__dirname, 'pages')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// Redirect root to login page
+// Root serves the marketing homepage (index)
 app.get('/', (req, res) => {
-    res.redirect('/pages/login.html');
+    res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+});
+
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
 
 // Serve index for SPA-style routing (optional)

@@ -25,6 +25,28 @@ const path = require('path');
 const os = require('os');
 const router = express.Router();
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BUNDLED COMPILER DETECTION
+// Checks for portable compilers in <project-root>/compilers/ first.
+// Falls back to system PATH if bundled compilers are not found.
+// Run compilers/setup_compilers.bat once to download portable compilers.
+// ─────────────────────────────────────────────────────────────────────────────
+const COMPILERS_DIR = path.join(__dirname, '..', '..', 'compilers');
+
+function bundled(relPath) {
+    const full = path.join(COMPILERS_DIR, relPath);
+    return fs.existsSync(full) ? full : null;
+}
+
+const BUNDLED = {
+    python:  bundled('python/python.exe'),
+    javac:   bundled('java/bin/javac.exe'),
+    java:    bundled('java/bin/java.exe'),
+    gpp:     bundled('cpp/bin/g++.exe'),
+    // JavaScript always uses the same Node.js process that runs the server
+    node:    process.execPath,
+};
+
 const TIMEOUT = 10000; // 10 second execution timeout
 const MAX_OUTPUT = 10000; // Max output characters
 const MAX_CODE_LENGTH = 50000; // 50KB max code size
@@ -97,8 +119,10 @@ function executePython(code, tempDir) {
         const filePath = path.join(tempDir, 'main.py');
         fs.writeFileSync(filePath, code, 'utf8');
 
-        // Try 'py' (Windows launcher), then 'python3', then 'python'
-        const commands = ['py', 'python3', 'python'];
+        // Prefer bundled portable Python, then fall back to system PATH
+        const commands = BUNDLED.python
+            ? [BUNDLED.python]
+            : ['py', 'python3', 'python'];
         let tried = 0;
 
         function tryNext() {
@@ -106,7 +130,7 @@ function executePython(code, tempDir) {
                 resolve({
                     success: false,
                     output: '',
-                    stderr: 'Python is not installed or not found in PATH. Please install Python.',
+                    stderr: 'Python is not installed or not found in PATH. Run compilers/setup_compilers.bat to install portable Python.',
                     exitCode: 1
                 });
                 return;
@@ -115,9 +139,8 @@ function executePython(code, tempDir) {
             const cmd = commands[tried];
             tried++;
 
-            const proc = execFile(cmd, [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+            execFile(cmd, [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
                 if (error && error.code === 'ENOENT') {
-                    // Command not found, try next
                     tryNext();
                     return;
                 }
@@ -137,22 +160,15 @@ function executePython(code, tempDir) {
 
 /**
  * Execute JavaScript (Node.js) code
+ * Always uses the same Node.js binary that runs this server — always available.
  */
 function executeJavaScript(code, tempDir) {
     return new Promise((resolve) => {
         const filePath = path.join(tempDir, 'main.js');
         fs.writeFileSync(filePath, code, 'utf8');
 
-        execFile('node', [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-            if (error && error.code === 'ENOENT') {
-                resolve({
-                    success: false,
-                    output: '',
-                    stderr: 'Node.js is not installed or not found in PATH.',
-                    exitCode: 1
-                });
-                return;
-            }
+        // BUNDLED.node = process.execPath (the running node binary) — never missing
+        execFile(BUNDLED.node, [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
             resolve({
                 success: true,
                 output: truncate(stdout, MAX_OUTPUT),
@@ -175,14 +191,18 @@ function executeJava(code, tempDir) {
         const filePath = path.join(tempDir, className + '.java');
         fs.writeFileSync(filePath, code, 'utf8');
 
+        // Prefer bundled javac, fall back to system PATH
+        const javacCmd = BUNDLED.javac || 'javac';
+        const javaCmd  = BUNDLED.java  || 'java';
+
         // Compile
-        execFile('javac', [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (compileErr, compileOut, compileStderr) => {
+        execFile(javacCmd, [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (compileErr, compileOut, compileStderr) => {
             if (compileErr) {
                 if (compileErr.code === 'ENOENT') {
                     resolve({
                         success: false,
                         output: '',
-                        stderr: 'Java compiler (javac) is not installed or not found in PATH.',
+                        stderr: 'Java compiler (javac) is not installed or not found in PATH. Run compilers/setup_compilers.bat to install portable Java.',
                         exitCode: 1
                     });
                     return;
@@ -197,7 +217,7 @@ function executeJava(code, tempDir) {
             }
 
             // Run
-            execFile('java', ['-cp', tempDir, className], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (runErr, stdout, stderr) => {
+            execFile(javaCmd, ['-cp', tempDir, className], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (runErr, stdout, stderr) => {
                 resolve({
                     success: true,
                     output: truncate(stdout, MAX_OUTPUT),
@@ -218,14 +238,17 @@ function executeCpp(code, tempDir) {
         const outPath = path.join(tempDir, 'main.exe');
         fs.writeFileSync(srcPath, code, 'utf8');
 
+        // Prefer bundled g++, fall back to system PATH
+        const gppCmd = BUNDLED.gpp || 'g++';
+
         // Compile with g++ using execFile (safer than exec)
-        execFile('g++', ['-static', srcPath, '-o', outPath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (compileErr, compileOut, compileStderr) => {
+        execFile(gppCmd, ['-static', srcPath, '-o', outPath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (compileErr, compileOut, compileStderr) => {
             if (compileErr) {
                 if (compileErr.code === 'ENOENT') {
                     resolve({
                         success: false,
                         output: '',
-                        stderr: 'C++ compiler (g++) is not installed or not found in PATH.',
+                        stderr: 'C++ compiler (g++) is not installed or not found in PATH. Run compilers/setup_compilers.bat to install portable GCC.',
                         exitCode: 1
                     });
                     return;

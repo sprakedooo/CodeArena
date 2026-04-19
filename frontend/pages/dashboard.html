@@ -8,16 +8,8 @@
     <style>
         /* Widescreen container override */
         .container {
-            max-width: 1400px;
-            padding: var(--space-md) var(--space-lg);
-        }
-
-        @media (min-width: 1600px) {
-            .container { max-width: 1600px; }
-        }
-
-        @media (min-width: 1800px) {
-            .container { max-width: 1800px; }
+            max-width: 100%;
+            padding: 5vh 18%;
         }
 
         /* Welcome banner */
@@ -614,7 +606,6 @@
             <li><a href="lesson_game.html">Play</a></li>
             <li><a href="playground.html">Playground</a></li>
             <li><a href="feedback.html">Feedback</a></li>
-            <li><a href="admin.html" style="color:var(--text-muted);font-size:0.8rem;" title="Content Manager">&#x2699;</a></li>
             <li>
                 <div class="nav-xp-bar">
                     <span class="xp-icon">&#x2B50;</span>
@@ -752,7 +743,9 @@
         const API = 'http://localhost:3000/api';
 
         const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!user) window.location.href = 'login.html';
+        if (!user || !localStorage.getItem('token')) { window.location.href = 'login.html'; }
+        // Faculty accounts belong in the admin panel, not the student dashboard
+        if (user && user.role === 'faculty') { window.location.href = 'faculty_dashboard.html'; }
         if (!user.selectedLanguage) user.selectedLanguage = 'python';
 
         const languageNames = { 'python': 'Python', 'javascript': 'JavaScript', 'java': 'Java', 'cpp': 'C++' };
@@ -997,10 +990,36 @@
         function startGame() { window.location.href = 'lesson_game.html'; }
         function viewFeedback() { window.location.href = 'feedback.html'; }
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
+            showLogoutModal('Are you sure you want to logout? You\'ll need to sign in again to continue.', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        }
+        function showLogoutModal(message, onConfirm) {
+            const existing = document.getElementById('logoutConfirmOverlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'logoutConfirmOverlay';
+            overlay.className = 'confirm-modal-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-modal" role="dialog" aria-modal="true">
+                    <div class="confirm-modal-icon">&#x1F44B;</div>
+                    <div class="confirm-modal-title">Logout?</div>
+                    <div class="confirm-modal-message">${message}</div>
+                    <div class="confirm-modal-actions">
+                        <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+            const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+            document.getElementById('logoutCancelBtn').addEventListener('click', close);
+            document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
         }
     </script>
 </body>

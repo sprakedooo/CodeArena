@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
+    role ENUM('student', 'faculty') DEFAULT 'student',
     total_points INT DEFAULT 0,
     current_level ENUM('beginner', 'intermediate', 'advanced') DEFAULT 'beginner',
     badges JSON,
@@ -118,9 +119,9 @@ CREATE TABLE IF NOT EXISTS feedback (
 -- SAMPLE DATA: Demo User
 -- ============================================================================
 -- Passwords are bcrypt-hashed (student123 and maria123 respectively)
-INSERT INTO users (email, password, full_name, total_points, current_level, badges) VALUES
-('student@example.com', '$2b$10$DgFiUCcmDnn5ZXTxal55Eubu7BfrYtdAnAn75R1C4F1r9UX4FiyJi', 'Juan Dela Cruz', 150, 'beginner', '["first_login"]'),
-('maria@example.com', '$2b$10$0jORJv28ymD7M5TEh6KBae21RoHdF7/8zevQeDZs5eyPWQgydRfgy', 'Maria Santos', 450, 'intermediate', '["first_login", "fast_learner", "perfect_score"]');
+INSERT INTO users (email, password, full_name, role, total_points, current_level, badges) VALUES
+('student@example.com', '$2b$10$DgFiUCcmDnn5ZXTxal55Eubu7BfrYtdAnAn75R1C4F1r9UX4FiyJi', 'Juan Dela Cruz', 'student', 150, 'beginner', '["first_login"]'),
+('maria@example.com', '$2b$10$0jORJv28ymD7M5TEh6KBae21RoHdF7/8zevQeDZs5eyPWQgydRfgy', 'Maria Santos', 'student', 450, 'intermediate', '["first_login", "fast_learner", "perfect_score"]');
 
 -- ============================================================================
 -- SAMPLE DATA: Python Questions (Beginner)

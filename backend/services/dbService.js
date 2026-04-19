@@ -68,10 +68,11 @@ async function createUser(userData) {
     if (!dbAvailable) return null;
 
     try {
+        const role = userData.role === 'faculty' ? 'faculty' : 'student';
         const result = await db.query(
-            `INSERT INTO users (email, password, full_name, selected_language)
-             VALUES (?, ?, ?, ?)`,
-            [userData.email, userData.password, userData.fullName, userData.selectedLanguage || null]
+            `INSERT INTO users (email, password, full_name, role, selected_language)
+             VALUES (?, ?, ?, ?, ?)`,
+            [userData.email, userData.password, userData.fullName, role, userData.selectedLanguage || null]
         );
         return { id: result.insertId, ...userData };
     } catch (error) {

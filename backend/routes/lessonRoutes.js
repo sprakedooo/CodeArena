@@ -1302,13 +1302,18 @@ string <span class="function">greet</span>(string name) {
 // ROUTES
 // ─────────────────────────────────────────────────────────────────────────────
 
-// GET /api/lessons?language=python
+// GET /api/lessons?language=python&all=true (all=true is faculty-only for admin view)
 router.get('/', (req, res) => {
-    const { language } = req.query;
+    const { language, all } = req.query;
     let lessons = mockLessons;
 
     if (language) {
-        lessons = mockLessons.filter(l => l.language === language.toLowerCase());
+        lessons = lessons.filter(l => l.language === language.toLowerCase());
+    }
+
+    // Students only see shared lessons; faculty see all (all=true flag)
+    if (all !== 'true') {
+        lessons = lessons.filter(l => l.isShared !== false);
     }
 
     // Strip heavy HTML content for list view
@@ -1339,10 +1344,22 @@ router.post('/', requireFaculty, (req, res) => {
         difficulty: difficulty || 'beginner',
         orderNumber: orderNumber || mockLessons.length + 1,
         topics: topics || [],
+        isShared: false,  // Faculty-created lessons are unshared by default
         createdBy: 1
     };
     mockLessons.push(newLesson);
     res.status(201).json({ lesson: newLesson, message: 'Lesson created successfully' });
+});
+
+// PATCH /api/lessons/:id/share — toggle lesson sharing (faculty only)
+router.patch('/:id/share', requireFaculty, (req, res) => {
+    const id = parseInt(req.params.id);
+    const idx = mockLessons.findIndex(l => l.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Lesson not found' });
+
+    const { isShared } = req.body;
+    mockLessons[idx].isShared = isShared === true || isShared === 'true';
+    res.json({ lesson: mockLessons[idx], message: `Lesson ${mockLessons[idx].isShared ? 'shared' : 'unshared'} successfully` });
 });
 
 // PUT /api/lessons/:id

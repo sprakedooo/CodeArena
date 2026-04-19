@@ -6,6 +6,10 @@
     <title>Arena - CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
+        .container {
+            padding: 5vh 5%;
+        }
+
         .game-container {
             max-width: 900px;
             margin: 0 auto;
@@ -811,6 +815,111 @@
             border-color: var(--danger);
             box-shadow: 0 0 10px var(--danger-glow);
         }
+
+        /* ── Drag-and-drop code ordering ── */
+        .code-order-item[draggable="true"] { cursor: grab; }
+        .code-order-item[draggable="true"]:active { cursor: grabbing; }
+        .code-order-item.drag-over {
+            border-color: var(--secondary);
+            background: rgba(6,182,212,0.12);
+            transform: scale(1.015);
+        }
+        .drag-handle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: grab;
+            padding: 0 4px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .drag-hint {
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Custom Game Modal ── */
+        .game-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.15s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .game-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem 2rem 1.5rem;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .game-modal::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        .game-modal-icon { font-size: 2rem; text-align: center; margin-bottom: 0.5rem; }
+        .game-modal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: var(--xp-gold);
+            text-align: center;
+            margin-bottom: 0.75rem;
+            letter-spacing: 1px;
+        }
+        .game-modal-msg {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.65;
+            margin-bottom: 1.5rem;
+        }
+        .game-modal-actions { display: flex; gap: 0.75rem; justify-content: center; }
+
+        /* ── In-game Back button ── */
+        .back-game-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            padding: 0.35rem 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: none;
+        }
+        .back-game-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── Loading overlay ── */
+        .question-loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+        .loading-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -819,11 +928,11 @@
             <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
         </span>
         <ul class="navbar-nav">
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="lessons.html">Lessons</a></li>
+            <li><a href="dashboard.html" onclick="return navAwayGuard(event, 'dashboard.html')">Dashboard</a></li>
+            <li><a href="lessons.html" onclick="return navAwayGuard(event, 'lessons.html')">Lessons</a></li>
             <li><a href="lesson_game.html" class="active">Play</a></li>
-            <li><a href="playground.html">Playground</a></li>
-            <li><a href="feedback.html">Feedback</a></li>
+            <li><a href="playground.html" onclick="return navAwayGuard(event, 'playground.html')">Playground</a></li>
+            <li><a href="feedback.html" onclick="return navAwayGuard(event, 'feedback.html')">Feedback</a></li>
             <li>
                 <div class="nav-xp-bar">
                     <span class="xp-icon">&#x2B50;</span>
@@ -873,6 +982,13 @@
                 </div>
             </div>
             <button class="btn btn-primary btn-lg" onclick="startGame()">&#x1F3AE; Start Game</button>
+        </div>
+
+        <!-- Back-to-modes button (shown only during active game) -->
+        <div style="margin-bottom:0.75rem; display:none;" id="backBtnRow">
+            <button class="back-game-btn" id="backGameBtn" onclick="backToModes()" style="display:inline-flex;align-items:center;gap:0.4rem;">
+                &#8592; Back to Modes
+            </button>
         </div>
 
         <!-- Game Stats Bar -->
@@ -1011,13 +1127,26 @@
         </div>
     </div>
 
+    <!-- Custom Confirmation Modal -->
+    <div class="game-modal-overlay" id="gameModal" style="display:none;" onclick="handleModalOverlayClick(event)">
+        <div class="game-modal">
+            <div class="game-modal-icon" id="modalIcon">⚠️</div>
+            <div class="game-modal-title" id="modalTitle">CONFIRM</div>
+            <div class="game-modal-msg" id="modalMsg">Are you sure?</div>
+            <div class="game-modal-actions">
+                <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+                <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API = 'http://localhost:3000/api';
 
         const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!user || !user.selectedLanguage) {
-            window.location.href = 'login.html';
-        }
+        if (!user || !localStorage.getItem('token')) { window.location.href = 'login.html'; throw new Error('redirect'); }
+        if (user.role === 'faculty') { window.location.href = 'faculty_dashboard.html'; throw new Error('redirect'); }
+        if (!user.selectedLanguage) { window.location.href = 'login.html'; throw new Error('redirect'); }
 
         document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
 
@@ -1027,6 +1156,214 @@
             const token = localStorage.getItem('token');
             if (token) headers['Authorization'] = `Bearer ${token}`;
             return headers;
+        }
+
+        // ─── Client-side typed question bank ────────────────────────────
+        // Typed questions (fill_blank / output_prediction / code_ordering)
+        // are stored here so they always work regardless of DB state.
+        const LOCAL_TYPED_QUESTIONS = {
+            python: {
+                beginner: {
+                    fill_blank: [
+                        { id:'fb_py_b1', topic:'Output',    question:'Fill in the blank to print "Hello World":',           codeSnippet:'___(\"Hello World\")',                         correctAnswer:'print',    hint:'Python output function.',         explanation:'print() displays text.' },
+                        { id:'fb_py_b2', topic:'Variables', question:'Assign the value 10 to a variable called num:',        codeSnippet:'___ = 10\nprint(num)',                         correctAnswer:'num',      hint:'Variable name on left of =.',     explanation:'Variables are created by assignment.' },
+                        { id:'fb_py_b3', topic:'Strings',   question:'Fill in to get the length of a string:',              codeSnippet:'name = \"Alice\"\nprint(___(name))',            correctAnswer:'len',      hint:'Counts characters.',              explanation:'len() returns string length.' },
+                        { id:'fb_py_b4', topic:'Input',     question:'Fill in to read user input:',                         codeSnippet:'name = ___(\"Enter name: \")',                  correctAnswer:'input',    hint:'Function name describes action.', explanation:'input() reads from user.' },
+                        { id:'fb_py_b5', topic:'Types',     question:'Fill in to convert string "5" to integer:',           codeSnippet:'x = ___(\"5\")',                               correctAnswer:'int',      hint:'Type conversion function.',       explanation:'int() converts to integer.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_py_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'x = 10\ny = 3\nprint(x - y)',           correctAnswer:'7',    hint:'Subtract y from x.' },
+                        { id:'op_py_b2', topic:'Strings',   question:'What will this code output?', codeSnippet:'print(\"Hi\" * 3)',                       correctAnswer:'HiHiHi', hint:'String repetition.' },
+                        { id:'op_py_b3', topic:'Lists',     question:'What will this code output?', codeSnippet:'nums = [1, 2, 3]\nprint(len(nums))',      correctAnswer:'3',    hint:'Count the elements.' },
+                        { id:'op_py_b4', topic:'Booleans',  question:'What will this code output?', codeSnippet:'print(10 > 5)',                           correctAnswer:'True', hint:'Is 10 greater than 5?' },
+                        { id:'op_py_b5', topic:'Math',      question:'What will this code output?', codeSnippet:'print(2 ** 3)',                           correctAnswer:'8',    hint:'2 raised to power 3.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_py_b1', topic:'Loops',     question:'Arrange to print numbers 1 to 3:',
+                          codeLines:['for i in range(1, 4):','    print(i)'], correctOrder:[0,1] },
+                        { id:'co_py_b2', topic:'Functions', question:'Arrange to define and call a function:',
+                          codeLines:['def greet():','    print(\"Hello\")', 'greet()'], correctOrder:[0,1,2] },
+                        { id:'co_py_b3', topic:'Conditions',question:'Arrange an if/else block:',
+                          codeLines:['x = 5','if x > 0:','    print(\"positive\")','else:','    print(\"non-positive\")'], correctOrder:[0,1,2,3,4] },
+                        { id:'co_py_b4', topic:'Variables', question:'Arrange to swap two variables:',
+                          codeLines:['a = 1','b = 2','temp = a','a = b','b = temp','print(a, b)'], correctOrder:[0,1,2,3,4,5] },
+                    ]
+                },
+                intermediate: {
+                    fill_blank: [
+                        { id:'fb_py_m1', topic:'Lists',      question:'Fill in to add item to end of list:',         codeSnippet:'fruits = [\"apple\"]\nfruits.___(\"banana\")', correctAnswer:'append',  hint:'Adds to end of list.',      explanation:'append() adds element to end.' },
+                        { id:'fb_py_m2', topic:'Loops',      question:'Fill in to exit a loop immediately:',          codeSnippet:'for i in range(10):\n    if i==5:\n        ___', correctAnswer:'break', hint:'Exits loop immediately.',   explanation:'break exits the loop.' },
+                        { id:'fb_py_m3', topic:'Functions',  question:'Fill in keyword to return from a function:',   codeSnippet:'def add(a,b):\n    ___ a+b',                 correctAnswer:'return',  hint:'Sends value to caller.',    explanation:'return sends back a value.' },
+                        { id:'fb_py_m4', topic:'Dicts',      question:'Fill in to access dict value by key:',         codeSnippet:'d={\"x\":1}\nprint(d[___])',                  correctAnswer:'"x"',     hint:'Use the key in brackets.',  explanation:'dict[key] accesses value.' },
+                        { id:'fb_py_m5', topic:'Strings',    question:'Fill in to join list items into a string:',    codeSnippet:'words=[\"a\",\"b\"]\nprint(___.join(words))', correctAnswer:'\" \"',   hint:'Use a separator string.',   explanation:'" ".join() joins with spaces.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_py_m1', topic:'Lists',    question:'What will this code output?', codeSnippet:'a=[1,2,3]\na.append(4)\nprint(len(a))', correctAnswer:'4',       hint:'Count after append.' },
+                        { id:'op_py_m2', topic:'Loops',    question:'What will this code output?', codeSnippet:'s=0\nfor i in range(4):\n    s+=i\nprint(s)', correctAnswer:'6', hint:'Sum 0+1+2+3.' },
+                        { id:'op_py_m3', topic:'Functions',question:'What will this code output?', codeSnippet:'def sq(n): return n*n\nprint(sq(4))',       correctAnswer:'16',     hint:'4 squared.' },
+                        { id:'op_py_m4', topic:'Strings',  question:'What will this code output?', codeSnippet:'print(\"hello\".upper())',                  correctAnswer:'HELLO',  hint:'Convert to uppercase.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_py_m1', topic:'Functions', question:'Arrange to define and use a function with return:',
+                          codeLines:['def square(n):','    return n * n','result = square(5)','print(result)'], correctOrder:[0,1,2,3] },
+                        { id:'co_py_m2', topic:'Lists',     question:'Arrange to filter even numbers:',
+                          codeLines:['nums = [1,2,3,4,5]','evens = []','for n in nums:','    if n % 2 == 0:','        evens.append(n)','print(evens)'], correctOrder:[0,1,2,3,4,5] },
+                    ]
+                },
+                advanced: {
+                    fill_blank: [
+                        { id:'fb_py_a1', topic:'Lambda',   question:'Fill in to create a lambda that squares:', codeSnippet:'square = ___ x: x**2\nprint(square(4))', correctAnswer:'lambda', hint:'Anonymous function keyword.', explanation:'lambda creates anonymous functions.' },
+                        { id:'fb_py_a2', topic:'Classes',  question:'Fill in the constructor method name:',    codeSnippet:'class Dog:\n    def ___(self,name):\n        self.name=name', correctAnswer:'__init__', hint:'Called when object is created.', explanation:'__init__ is the constructor.' },
+                        { id:'fb_py_a3', topic:'Generators',question:'Fill in to create a generator:',        codeSnippet:'def gen(n):\n    for i in range(n):\n        ___ i', correctAnswer:'yield', hint:'Pauses and returns a value.', explanation:'yield makes a generator function.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_py_a1', topic:'Lambda',   question:'What will this code output?', codeSnippet:'f = lambda x: x**2\nprint(f(5))',                correctAnswer:'25',   hint:'5 squared.' },
+                        { id:'op_py_a2', topic:'List Comp',question:'What will this code output?', codeSnippet:'print([x*2 for x in range(3)])',                 correctAnswer:'[0, 2, 4]', hint:'Double each 0,1,2.' },
+                        { id:'op_py_a3', topic:'Strings',  question:'What will this code output?', codeSnippet:'print(\",\".join([\"a\",\"b\",\"c\"]))',          correctAnswer:'a,b,c', hint:'Join with comma.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_py_a1', topic:'Classes', question:'Arrange a class definition and usage:',
+                          codeLines:['class Animal:','    def __init__(self, name):','        self.name = name','    def speak(self):','        return self.name','a = Animal(\"Cat\")','print(a.speak())'], correctOrder:[0,1,2,3,4,5,6] },
+                    ]
+                }
+            },
+            javascript: {
+                beginner: {
+                    fill_blank: [
+                        { id:'fb_js_b1', topic:'Variables', question:'Declare a block-scoped variable:',          codeSnippet:'___ x = 5;',                         correctAnswer:'let',      hint:'ES6 block-scoped keyword.',    explanation:'let declares block-scoped variables.' },
+                        { id:'fb_js_b2', topic:'Output',    question:'Fill in to log "Hello" to console:',       codeSnippet:'console.___(\"Hello\");',             correctAnswer:'log',      hint:'Console output method.',       explanation:'console.log() prints to console.' },
+                        { id:'fb_js_b3', topic:'Functions', question:'Fill in the function keyword:',            codeSnippet:'___ greet() { return \"Hi\"; }',       correctAnswer:'function', hint:'Declares a named function.',   explanation:'function keyword defines functions.' },
+                        { id:'fb_js_b4', topic:'Arrays',    question:'Fill in to get array length:',             codeSnippet:'let a=[1,2,3];\nconsole.log(a.___);', correctAnswer:'length',   hint:'Property not a function.',     explanation:'.length gives array length.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_js_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'console.log(3 + 4);',              correctAnswer:'7',    hint:'Simple addition.' },
+                        { id:'op_js_b2', topic:'Strings',    question:'What will this code output?', codeSnippet:'console.log(\"Hi \"+\"World\");', correctAnswer:'Hi World', hint:'String concatenation.' },
+                        { id:'op_js_b3', topic:'Booleans',   question:'What will this code output?', codeSnippet:'console.log(5 === \"5\");',       correctAnswer:'false', hint:'Strict equality checks type.' },
+                        { id:'op_js_b4', topic:'Arrays',     question:'What will this code output?', codeSnippet:'let a=[1,2,3];\nconsole.log(a.length);', correctAnswer:'3', hint:'Count elements.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_js_b1', topic:'Loops', question:'Arrange a for loop to print 1-3:',
+                          codeLines:['for (let i=1; i<=3; i++) {','    console.log(i);','}'], correctOrder:[0,1,2] },
+                        { id:'co_js_b2', topic:'Functions', question:'Arrange to define and call a function:',
+                          codeLines:['function add(a,b) {','    return a+b;','}','console.log(add(2,3));'], correctOrder:[0,1,2,3] },
+                    ]
+                },
+                intermediate: {
+                    fill_blank: [
+                        { id:'fb_js_m1', topic:'Arrays', question:'Fill in to add item to array end:', codeSnippet:'let a=[1,2];\na.___(3);', correctAnswer:'push', hint:'Adds to end.', explanation:'push() adds to end of array.' },
+                        { id:'fb_js_m2', topic:'Arrow Fn',question:'Complete the arrow function:', codeSnippet:'const sq = x ___ x*x;', correctAnswer:'=>', hint:'Arrow syntax.', explanation:'=> creates arrow functions.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_js_m1', topic:'Arrays', question:'What will this code output?', codeSnippet:'let a=[1,2,3];\na.push(4);\nconsole.log(a.length);', correctAnswer:'4', hint:'After push.' },
+                        { id:'op_js_m2', topic:'Arrow',  question:'What will this code output?', codeSnippet:'const sq = x => x*x;\nconsole.log(sq(5));', correctAnswer:'25', hint:'5 squared.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_js_m1', topic:'Array Methods', question:'Arrange to filter even numbers:',
+                          codeLines:['let nums=[1,2,3,4,5];','let evens=nums.filter(n => n%2===0);','console.log(evens);'], correctOrder:[0,1,2] },
+                    ]
+                },
+                advanced: {
+                    fill_blank: [
+                        { id:'fb_js_a1', topic:'Promises', question:'Fill in to create a promise:', codeSnippet:'const p = new ___(resolve => resolve(1));', correctAnswer:'Promise', hint:'Async wrapper.', explanation:'Promise wraps async operations.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_js_a1', topic:'Spread', question:'What will this code output?', codeSnippet:'let a=[1,2];\nlet b=[...a,3];\nconsole.log(b.length);', correctAnswer:'3', hint:'Spread then add one.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_js_a1', topic:'Async', question:'Arrange an async/await function:',
+                          codeLines:['async function getData() {','    const res = await fetch(\"/api\");','    return res.json();','}'], correctOrder:[0,1,2,3] },
+                    ]
+                }
+            },
+            java: {
+                beginner: {
+                    fill_blank: [
+                        { id:'fb_java_b1', topic:'Output',   question:'Fill in to print "Hello":',           codeSnippet:'System.out.___(\"Hello\");',       correctAnswer:'println', hint:'Print with newline.', explanation:'println() prints with newline.' },
+                        { id:'fb_java_b2', topic:'Variables', question:'Fill in the integer type keyword:',   codeSnippet:'___ x = 5;',                       correctAnswer:'int',     hint:'Primitive integer.',  explanation:'int is the integer data type.' },
+                        { id:'fb_java_b3', topic:'Loops',     question:'Fill in the loop keyword:',           codeSnippet:'___ (int i=0;i<3;i++) {}',         correctAnswer:'for',     hint:'Counted loop.',       explanation:'for is the counted loop.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_java_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'System.out.println(3 + 4);',  correctAnswer:'7',  hint:'Simple addition.' },
+                        { id:'op_java_b2', topic:'Strings',    question:'What will this code output?', codeSnippet:'System.out.println(\"Hi\".length());', correctAnswer:'2', hint:'Count characters.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_java_b1', topic:'Class', question:'Arrange a basic Java class with main:',
+                          codeLines:['public class Main {','    public static void main(String[] args) {','        System.out.println(\"Hello\");','    }','}'], correctOrder:[0,1,2,3,4] },
+                    ]
+                },
+                intermediate: {
+                    fill_blank: [
+                        { id:'fb_java_m1', topic:'Arrays', question:'Fill in to declare an int array:', codeSnippet:'___ nums = new int[5];', correctAnswer:'int[]', hint:'Array type declaration.', explanation:'int[] declares an integer array.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_java_m1', topic:'Arrays', question:'What will this code output?', codeSnippet:'int[] a={1,2,3};\nSystem.out.println(a.length);', correctAnswer:'3', hint:'Array size.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_java_m1', topic:'Methods', question:'Arrange a method definition and call:',
+                          codeLines:['static int square(int n) {','    return n * n;','}','System.out.println(square(4));'], correctOrder:[0,1,2,3] },
+                    ]
+                },
+                advanced: {
+                    fill_blank: [
+                        { id:'fb_java_a1', topic:'OOP', question:'Fill in the inheritance keyword:', codeSnippet:'class Dog ___ Animal {}', correctAnswer:'extends', hint:'Inheritance in Java.', explanation:'extends inherits from parent class.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_java_a1', topic:'Casting', question:'What will this code output?', codeSnippet:'System.out.println((int)3.9);', correctAnswer:'3', hint:'Cast truncates.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_java_a1', topic:'Interface', question:'Arrange an interface and implementation:',
+                          codeLines:['interface Shape {','    double area();','}','class Circle implements Shape {','    public double area() { return 3.14; }','}'], correctOrder:[0,1,2,3,4,5] },
+                    ]
+                }
+            },
+            cpp: {
+                beginner: {
+                    fill_blank: [
+                        { id:'fb_cpp_b1', topic:'Output',   question:'Fill in the output stream object:', codeSnippet:'___ << \"Hello\" << endl;',     correctAnswer:'cout', hint:'C++ output stream.',   explanation:'cout outputs to console.' },
+                        { id:'fb_cpp_b2', topic:'Headers',  question:'Fill in the I/O header:',          codeSnippet:'#include <___>',               correctAnswer:'iostream', hint:'Input/output stream.', explanation:'iostream provides cin/cout.' },
+                        { id:'fb_cpp_b3', topic:'Variables',question:'Fill in the integer type:',         codeSnippet:'___ x = 10;',                  correctAnswer:'int',  hint:'Primitive integer.',   explanation:'int declares integer variables.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_cpp_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'cout << 5 + 3;', correctAnswer:'8', hint:'Simple addition.' },
+                        { id:'op_cpp_b2', topic:'Division',   question:'What will this code output?', codeSnippet:'cout << 7 / 2;', correctAnswer:'3', hint:'Integer division truncates.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_cpp_b1', topic:'Program', question:'Arrange a basic C++ program:',
+                          codeLines:['#include <iostream>','using namespace std;','int main() {','    cout << \"Hello\";','    return 0;','}'], correctOrder:[0,1,2,3,4,5] },
+                    ]
+                },
+                intermediate: {
+                    fill_blank: [
+                        { id:'fb_cpp_m1', topic:'Pointers', question:'Fill in to declare a pointer:', codeSnippet:'int x=5;\nint ___ p = &x;', correctAnswer:'*', hint:'Pointer dereference operator.', explanation:'* declares a pointer variable.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_cpp_m1', topic:'Loops', question:'What will this code output?', codeSnippet:'for(int i=0;i<3;i++) cout<<i;\n', correctAnswer:'012', hint:'Print i each iteration.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_cpp_m1', topic:'Functions', question:'Arrange a function definition:',
+                          codeLines:['int square(int n) {','    return n * n;','}','int main() {','    cout << square(5);','}'], correctOrder:[0,1,2,3,4,5] },
+                    ]
+                },
+                advanced: {
+                    fill_blank: [
+                        { id:'fb_cpp_a1', topic:'Templates', question:'Fill in the template keyword:', codeSnippet:'___ <typename T>\nT square(T n) { return n*n; }', correctAnswer:'template', hint:'Generic programming.', explanation:'template enables generic functions.' },
+                    ],
+                    output_prediction: [
+                        { id:'op_cpp_a1', topic:'References', question:'What will this code output?', codeSnippet:'int x=5;\nint& r=x;\nr=10;\ncout<<x;', correctAnswer:'10', hint:'Reference modifies original.' },
+                    ],
+                    code_ordering: [
+                        { id:'co_cpp_a1', topic:'Classes', question:'Arrange a C++ class:',
+                          codeLines:['class Dog {','public:','    string name;','    void bark() { cout<<\"Woof\"; }','};\n','int main() {','    Dog d;','    d.bark();','}'], correctOrder:[0,1,2,3,4,5,6,7,8] },
+                    ]
+                }
+            }
+        };
+
+        function getLocalTypedQuestions(language, level, type) {
+            const lang = (language || 'python').toLowerCase();
+            const lvl  = (level  || 'beginner').toLowerCase();
+            const bank = LOCAL_TYPED_QUESTIONS[lang]?.[lvl]?.[type] || [];
+            return bank.map(q => ({ ...q, language: lang, level: lvl, questionType: type, options: [] }));
         }
 
         // Game state
@@ -1039,6 +1376,87 @@
         let currentLevel = user.currentLevel || 'beginner';
         let answered = false;
         let selectedMode = 'mixed';
+        let gameActive = false;
+        let dragSrcIndex = null;
+
+        // Warn on tab close / browser nav (backup guard)
+        window.addEventListener('beforeunload', (e) => {
+            if (gameActive) { saveGameState(); e.preventDefault(); e.returnValue = ''; }
+        });
+
+        // ─── Custom Modal ────────────────────────────────────────────────────
+
+        function showModal({ icon = '⚠️', title = 'CONFIRM', message, confirmText = 'Yes', cancelText = 'Cancel', onConfirm, onCancel, danger = false }) {
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMsg').textContent = message;
+            const confirmBtn = document.getElementById('modalConfirm');
+            const cancelBtn  = document.getElementById('modalCancel');
+            confirmBtn.textContent = confirmText;
+            cancelBtn.textContent  = cancelText;
+            confirmBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
+            document.getElementById('gameModal').style.display = 'flex';
+
+            const cleanup = () => { document.getElementById('gameModal').style.display = 'none'; confirmBtn.onclick = null; cancelBtn.onclick = null; };
+            confirmBtn.onclick = () => { cleanup(); onConfirm && onConfirm(); };
+            cancelBtn.onclick  = () => { cleanup(); onCancel  && onCancel();  };
+        }
+
+        function handleModalOverlayClick(e) {
+            if (e.target.id === 'gameModal') {
+                document.getElementById('gameModal').style.display = 'none';
+            }
+        }
+
+        // ─── Navigation Guard ────────────────────────────────────────────────
+
+        function navAwayGuard(event, destination) {
+            if (!gameActive) return true;
+            event.preventDefault();
+            showModal({
+                icon: '🚪',
+                title: 'LEAVE GAME?',
+                message: 'You\'re in the middle of a game! Your session score will be lost if you leave now. Overall level progress is saved.',
+                confirmText: 'Leave',
+                cancelText: 'Stay',
+                danger: true,
+                onConfirm: () => { gameActive = false; clearGameState(); window.location.href = destination; }
+            });
+            return false;
+        }
+
+        // ─── Game State Persistence (sessionStorage) ─────────────────────────
+
+        const STATE_KEY = () => `gameState_${user ? user.id : 'guest'}`;
+
+        function saveGameState() {
+            if (!gameActive || questions.length === 0) return;
+            const state = { questions, currentIndex, sessionPoints, correctCount, currentStreak, bestStreak, currentLevel, selectedMode, topicPerformance };
+            sessionStorage.setItem(STATE_KEY(), JSON.stringify(state));
+        }
+
+        function clearGameState() {
+            sessionStorage.removeItem(STATE_KEY());
+        }
+
+        function restoreGameState() {
+            const raw = sessionStorage.getItem(STATE_KEY());
+            if (!raw) return false;
+            try {
+                const state = JSON.parse(raw);
+                if (!state.questions || state.questions.length === 0) return false;
+                questions        = state.questions;
+                currentIndex     = state.currentIndex || 0;
+                sessionPoints    = state.sessionPoints || 0;
+                correctCount     = state.correctCount  || 0;
+                currentStreak    = state.currentStreak || 0;
+                bestStreak       = state.bestStreak    || 0;
+                currentLevel     = state.currentLevel  || user.currentLevel || 'beginner';
+                selectedMode     = state.selectedMode  || 'mixed';
+                topicPerformance = state.topicPerformance || {};
+                return true;
+            } catch { return false; }
+        }
 
         // Timer state
         let timerInterval = null;
@@ -1070,35 +1488,152 @@
         }
 
         function startGame() {
+            // Capture what the user just picked BEFORE restoreGameState can overwrite it
+            const chosenMode = selectedMode;
+
+            // Peek at saved state to see if it matches the user's chosen mode
+            const rawState = sessionStorage.getItem(STATE_KEY());
+            let savedMode = null;
+            if (rawState) {
+                try { savedMode = JSON.parse(rawState).selectedMode; } catch {}
+            }
+
+            // Only offer to resume if saved mode matches current selection.
+            // Otherwise, discard old session and start fresh with the chosen mode.
+            if (savedMode === chosenMode && restoreGameState()) {
+                showModal({
+                    icon: '🔄',
+                    title: 'RESUME SESSION?',
+                    message: `You have an unfinished game (Q${currentIndex + 1}/10, ${sessionPoints} pts). Resume where you left off?`,
+                    confirmText: 'Resume',
+                    cancelText: 'New Game',
+                    onConfirm: () => { _activateGame(false); },
+                    onCancel:  () => {
+                        clearGameState();
+                        selectedMode = chosenMode;
+                        _activateGame(true);
+                    }
+                });
+            } else {
+                // Different mode selected (or no saved state) — always start fresh
+                clearGameState();
+                selectedMode = chosenMode;
+                _activateGame(true);
+            }
+        }
+
+        function _activateGame(fetchNew) {
+            gameActive = true;
             document.getElementById('modeSelector').style.display = 'none';
+            document.getElementById('backBtnRow').style.display = '';
+            document.getElementById('backGameBtn').style.display = 'inline-flex';
             document.getElementById('gameStatsBar').style.display = '';
             document.getElementById('questionCard').style.display = '';
-            loadQuestions();
+            if (fetchNew) {
+                loadQuestions();
+            } else {
+                updateStats();
+                updateLevelBadge();
+                displayQuestion();
+            }
+        }
+
+        function backToModes() {
+            showModal({
+                icon: '🔙',
+                title: 'BACK TO MODES?',
+                message: 'Return to mode selection? Your current session score will be lost, but your overall level progress is saved.',
+                confirmText: 'Go Back',
+                cancelText: 'Resume',
+                danger: true,
+                onConfirm: () => {
+                    gameActive = false;
+                    clearInterval(timerInterval);
+                    clearGameState();
+                    _resetGameUI();
+                }
+            });
+        }
+
+        function _resetGameUI() {
+            currentIndex = 0; sessionPoints = 0; correctCount = 0;
+            currentStreak = 0; bestStreak = 0; comboMultiplier = 1;
+            powerups = { skip: 2, hint: 2, freeze: 1 };
+            topicPerformance = {};
+            document.getElementById('sessionPoints').textContent = '0';
+            document.getElementById('streakCount').textContent   = '0';
+            document.getElementById('accuracyDisplay').textContent = '0%';
+            document.getElementById('comboDisplay').classList.remove('active');
+            document.getElementById('modeSelector').style.display = '';
+            document.getElementById('backBtnRow').style.display   = 'none';
+            document.getElementById('gameStatsBar').style.display = 'none';
+            document.getElementById('questionCard').style.display = 'none';
+            document.getElementById('completeCard').style.display = 'none';
         }
 
         // ─── Load Questions ──────────────────────────────────────────────
 
         async function loadQuestions() {
-            try {
-                let url = `${API}/questions/${user.selectedLanguage}/${currentLevel}`;
-                if (selectedMode && selectedMode !== 'mixed') {
-                    url += `?type=${selectedMode}`;
-                }
-                const res = await fetch(url, { headers: getAuthHeaders() });
-                const data = await res.json();
+            const optEl = document.getElementById('optionsList');
+            if (optEl) optEl.innerHTML = '<div class="question-loading"><div class="loading-spinner"></div>Loading questions...</div>';
 
-                if (data.success && data.questions.length > 0) {
-                    questions = shuffleArray(data.questions).slice(0, 10);
+            const isTypedMode = selectedMode && selectedMode !== 'mixed' && selectedMode !== 'multiple_choice';
+
+            // Typed modes: use the embedded local question bank — no server call needed
+            if (isTypedMode) {
+                const local = getLocalTypedQuestions(user.selectedLanguage, currentLevel, selectedMode);
+                if (local.length > 0) {
+                    questions = shuffleArray(local).slice(0, 10);
                     displayQuestion();
                 } else {
-                    document.getElementById('questionText').textContent =
-                        'No questions available for this mode. Try Mixed Mode!';
+                    showToast('No ' + selectedMode + ' questions yet for this level — using Mixed Mode', 'warning');
+                    selectedMode = 'mixed';
+                    loadQuestions();
                 }
+                return;
+            }
+
+            // MC / mixed: fetch from server
+            try {
+                const url = `${API}/questions/${user.selectedLanguage}/${currentLevel}`;
+                const res  = await fetch(url, { headers: getAuthHeaders() });
+                const data = await res.json();
+
+                let serverQs = (data.success ? data.questions : []);
+
+                if (selectedMode === 'multiple_choice') {
+                    serverQs = serverQs.filter(q => (q.questionType || 'multiple_choice') === 'multiple_choice');
+                }
+
+                if (selectedMode === 'mixed') {
+                    // Blend server MC questions with local typed questions
+                    const fb = getLocalTypedQuestions(user.selectedLanguage, currentLevel, 'fill_blank');
+                    const op = getLocalTypedQuestions(user.selectedLanguage, currentLevel, 'output_prediction');
+                    const co = getLocalTypedQuestions(user.selectedLanguage, currentLevel, 'code_ordering');
+                    const typed = shuffleArray([...fb, ...op, ...co]).slice(0, 4);
+                    const mc    = shuffleArray(serverQs.filter(q => (q.questionType||'multiple_choice')==='multiple_choice')).slice(0, 6);
+                    questions = shuffleArray([...mc, ...typed]).slice(0, 10);
+                } else {
+                    questions = shuffleArray(serverQs).slice(0, 10);
+                }
+
+                if (questions.length === 0) {
+                    document.getElementById('questionText').textContent = 'No questions available. Please try a different language or mode.';
+                    return;
+                }
+                displayQuestion();
             } catch (err) {
                 console.error('Error loading questions:', err);
-                document.getElementById('questionText').textContent =
-                    'Error loading questions. Please check your connection.';
+                document.getElementById('questionText').textContent = 'Failed to load questions. Check your connection and try again.';
             }
+        }
+
+        function showToast(msg, type = 'info') {
+            const t = document.createElement('div');
+            t.style.cssText = `position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:0.6rem 1.2rem;border-radius:8px;font-size:0.82rem;z-index:10000;animation:fadeIn 0.3s ease;background:${type === 'warning' ? '#f59e0b' : 'var(--primary)'};color:white;box-shadow:0 4px 16px rgba(0,0,0,0.4);`;
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3500);
         }
 
         function shuffleArray(array) {
@@ -1251,9 +1786,7 @@
 
         function renderCodeOrdering(q, container) {
             container.className = '';
-            // Shuffle the indices
             currentOrderItems = q.codeLines.map((line, idx) => ({ text: line, originalIdx: idx }));
-            // Shuffle
             for (let i = currentOrderItems.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [currentOrderItems[i], currentOrderItems[j]] = [currentOrderItems[j], currentOrderItems[i]];
@@ -1263,31 +1796,75 @@
 
         function renderOrderingList(container) {
             if (!container) container = document.getElementById('optionsList');
-            container.innerHTML = `
-                <div class="code-ordering-list" id="orderingList">
-                    ${currentOrderItems.map((item, idx) => `
-                        <div class="code-order-item" data-idx="${idx}">
-                            <span class="code-order-num">${idx + 1}</span>
-                            <span class="code-order-text">${escapeHtml(item.text)}</span>
-                            <div class="code-order-controls">
-                                <button onclick="moveOrderItem(${idx}, -1)" title="Move up" ${idx === 0 ? 'disabled' : ''}>&#9650;</button>
-                                <button onclick="moveOrderItem(${idx}, 1)" title="Move down" ${idx === currentOrderItems.length - 1 ? 'disabled' : ''}>&#9660;</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button class="submit-answer-btn" onclick="submitCodeOrder()" style="padding: 0.85rem 2.5rem;">SUBMIT ORDER</button>
-                </div>
-            `;
-        }
+            dragSrcIndex = null;
 
-        function moveOrderItem(idx, direction) {
-            if (answered) return;
-            const newIdx = idx + direction;
-            if (newIdx < 0 || newIdx >= currentOrderItems.length) return;
-            [currentOrderItems[idx], currentOrderItems[newIdx]] = [currentOrderItems[newIdx], currentOrderItems[idx]];
-            renderOrderingList();
+            const hint = document.createElement('p');
+            hint.className = 'drag-hint';
+            hint.textContent = '⠿ Drag lines to reorder — or tap to select then tap target';
+
+            const list = document.createElement('div');
+            list.className = 'code-ordering-list';
+            list.id = 'orderingList';
+
+            currentOrderItems.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'code-order-item';
+                div.setAttribute('draggable', 'true');
+                div.dataset.idx = idx;
+                div.innerHTML = `<span class="drag-handle">⠿</span><span class="code-order-num">${idx + 1}</span><span class="code-order-text">${escapeHtml(item.text)}</span>`;
+
+                div.addEventListener('dragstart', (e) => {
+                    if (answered) { e.preventDefault(); return; }
+                    dragSrcIndex = idx;
+                    setTimeout(() => div.classList.add('dragging'), 0);
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                div.addEventListener('dragend', () => {
+                    div.classList.remove('dragging');
+                    document.querySelectorAll('.code-order-item').forEach(el => el.classList.remove('drag-over'));
+                });
+                div.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    if (dragSrcIndex !== idx) {
+                        document.querySelectorAll('.code-order-item').forEach(el => el.classList.remove('drag-over'));
+                        div.classList.add('drag-over');
+                    }
+                });
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (dragSrcIndex === null || dragSrcIndex === idx || answered) return;
+                    [currentOrderItems[dragSrcIndex], currentOrderItems[idx]] = [currentOrderItems[idx], currentOrderItems[dragSrcIndex]];
+                    renderOrderingList(document.getElementById('optionsList'));
+                });
+                // Tap-to-swap fallback for touch/mobile
+                div.addEventListener('click', () => {
+                    if (answered) return;
+                    const allItems = document.querySelectorAll('.code-order-item');
+                    if (dragSrcIndex === null) {
+                        dragSrcIndex = idx;
+                        allItems.forEach(el => el.style.outline = '');
+                        div.style.outline = '2px solid var(--secondary)';
+                    } else if (dragSrcIndex !== idx) {
+                        [currentOrderItems[dragSrcIndex], currentOrderItems[idx]] = [currentOrderItems[idx], currentOrderItems[dragSrcIndex]];
+                        renderOrderingList(document.getElementById('optionsList'));
+                    } else {
+                        dragSrcIndex = null;
+                        div.style.outline = '';
+                    }
+                });
+
+                list.appendChild(div);
+            });
+
+            const submitWrap = document.createElement('div');
+            submitWrap.style.cssText = 'text-align:center;margin-top:1rem;';
+            submitWrap.innerHTML = `<button class="submit-answer-btn" onclick="submitCodeOrder()" style="padding:0.85rem 2.5rem;">SUBMIT ORDER</button>`;
+
+            container.innerHTML = '';
+            container.appendChild(hint);
+            container.appendChild(list);
+            container.appendChild(submitWrap);
         }
 
         // ─── Submit: Typed Answer (fill_blank & output_prediction) ──────
@@ -1338,17 +1915,15 @@
             const submittedOrder = currentOrderItems.map(item => item.originalIdx);
             const isCorrect = submittedOrder.every((val, idx) => val === q.correctOrder[idx]);
 
-            // Visual feedback on items
+            // Visual feedback on drag-and-drop items (no controls to hide)
             const items = document.querySelectorAll('.code-order-item');
             items.forEach((item, idx) => {
-                item.querySelector('.code-order-controls').style.display = 'none';
-                if (currentOrderItems[idx].originalIdx === q.correctOrder[idx]) {
-                    item.classList.add('correct-order');
-                } else {
-                    item.classList.add('wrong-order');
-                }
+                item.setAttribute('draggable', 'false');
+                item.style.cursor = 'default';
+                item.classList.add(currentOrderItems[idx].originalIdx === q.correctOrder[idx] ? 'correct-order' : 'wrong-order');
             });
-            document.querySelector('.submit-answer-btn').disabled = true;
+            const submitBtn = document.querySelector('.submit-answer-btn');
+            if (submitBtn) submitBtn.disabled = true;
 
             if (!isCorrect) {
                 // Show correct order below
@@ -1436,6 +2011,9 @@
                     currentLevel = data.levelUp.newLevel;
                     updateLevelBadge();
                     showPopup('LEVEL UP!', 'bonus', data.levelUp.newLevel.toUpperCase());
+                    // Persist new level to localStorage immediately
+                    user.currentLevel = currentLevel;
+                    localStorage.setItem('user', JSON.stringify(user));
                 }
 
                 showFeedback(isCorrect, q, data);
@@ -1445,6 +2023,7 @@
             }
 
             document.getElementById('navButtons').style.display = 'block';
+            saveGameState();
         }
 
         // ─── Original selectAnswer (for multiple choice) ────────────────
@@ -1557,7 +2136,10 @@
                     document.querySelectorAll('.submit-answer-btn').forEach(b => b.disabled = true);
                 } else if (qType === 'code_ordering') {
                     document.querySelectorAll('.submit-answer-btn').forEach(b => b.disabled = true);
-                    document.querySelectorAll('.code-order-controls').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('.code-order-item').forEach(el => {
+                        el.setAttribute('draggable', 'false');
+                        el.style.cursor = 'default';
+                    });
                 }
 
                 // Track timeout as wrong answer for topic performance
@@ -1752,9 +2334,15 @@
                 document.getElementById('xpFill').style.width = `${xpPercent}%`;
             }, 500);
 
-            // Update user's total points in localStorage
+            // Persist final points and level; clear session state
+            gameActive = false;
+            clearGameState();
             user.totalPoints = currentXP;
+            user.currentLevel = currentLevel;
             localStorage.setItem('user', JSON.stringify(user));
+
+            // Hide back button (game is done)
+            document.getElementById('backBtnRow').style.display = 'none';
 
             // Update nav XP
             document.getElementById('navXP').textContent = currentXP + ' XP';
@@ -1780,25 +2368,8 @@
         }
 
         function playAgain() {
-            currentIndex = 0;
-            sessionPoints = 0;
-            correctCount = 0;
-            currentStreak = 0;
-            bestStreak = 0;
-            comboMultiplier = 1;
-            powerups = { skip: 2, hint: 2, freeze: 1 };
-            topicPerformance = {};
-
-            document.getElementById('sessionPoints').textContent = '0';
-            document.getElementById('streakCount').textContent = '0';
-            document.getElementById('accuracyDisplay').textContent = '0%';
-            document.getElementById('comboDisplay').classList.remove('active');
-
-            // Show mode selector again
-            document.getElementById('modeSelector').style.display = '';
-            document.getElementById('gameStatsBar').style.display = 'none';
-            document.getElementById('questionCard').style.display = 'none';
-            document.getElementById('completeCard').style.display = 'none';
+            clearGameState();
+            _resetGameUI();
         }
 
         function goToDashboard() {
@@ -1806,10 +2377,36 @@
         }
 
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
+            showLogoutModal('Are you sure you want to logout? Your game progress will be saved for next time.', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        }
+        function showLogoutModal(message, onConfirm) {
+            const existing = document.getElementById('logoutConfirmOverlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'logoutConfirmOverlay';
+            overlay.className = 'confirm-modal-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-modal" role="dialog" aria-modal="true">
+                    <div class="confirm-modal-icon">&#x1F44B;</div>
+                    <div class="confirm-modal-title">Logout?</div>
+                    <div class="confirm-modal-message">${message}</div>
+                    <div class="confirm-modal-actions">
+                        <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+            const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+            document.getElementById('logoutCancelBtn').addEventListener('click', close);
+            document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
         }
     </script>
 </body>
