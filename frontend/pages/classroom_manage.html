@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Classroom — CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Faculty Navbar ── */
+        .faculty-nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18%;
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .faculty-nav .logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-bracket { color: var(--secondary); }
+        .logo-code    { color: var(--primary); }
+        .logo-arena   { color: var(--text); }
+        .faculty-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .faculty-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .faculty-nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .faculty-nav-links a:hover { color: var(--text); background: var(--bg-surface); }
+        .faculty-nav-links .logout-link {
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 6px;
+            padding: 5px 14px;
+        }
+        .faculty-nav-links .logout-link:hover { background: rgba(239,68,68,.1); color: var(--danger); }
+
+        /* ── Page ── */
+        .manage-page { padding: 40px 18%; min-height: calc(100vh - 64px); }
+
+        /* ── Classroom header ── */
+        .classroom-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .classroom-header-left h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            color: var(--text);
+            margin: 0 0 6px;
+        }
+        .classroom-header-left p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        .key-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+        }
+        .key-badge-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .key-badge-val {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.75rem;
+            color: var(--secondary);
+            letter-spacing: 1.5px;
+        }
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .copy-btn:hover { color: var(--primary); }
+
+        /* ── Sub-tabs ── */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            margin-bottom: -1px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Section header ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .section-header h2 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead th {
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--bg-card-hover); }
+        tbody td { padding: 12px 14px; color: var(--text); vertical-align: middle; }
+
+        /* ── Cards for lessons ── */
+        .lesson-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
+        }
+        .lesson-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+        .lesson-card-lang {
+            font-size: 0.68rem;
+            color: var(--secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .lesson-card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .lesson-card-preview {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .lesson-card-actions { display: flex; gap: 6px; }
+
+        /* ── Sessions ── */
+        .session-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .session-info { flex: 1; }
+        .session-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+        .session-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+        .status-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .status-pill.pending      { background: rgba(245,158,11,.15); color: var(--warning); }
+        .status-pill.active       { background: rgba(16,185,129,.15);  color: var(--success); }
+        .status-pill.closed       { background: var(--bg-surface); color: var(--text-muted); }
+        .level-pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .level-pill.beginner     { background: rgba(16,185,129,.15); color: var(--success); }
+        .level-pill.intermediate { background: rgba(245,158,11,.15);  color: var(--warning); }
+        .level-pill.advanced     { background: rgba(239,68,68,.15);   color: var(--danger); }
+
+        /* ── Empty / loading ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .loading-text {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(16px);
+            transition: transform 0.2s;
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+        .modal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            color: var(--text);
+            margin: 0 0 24px;
+        }
+        .modal-field { margin-bottom: 16px; }
+        .modal-field label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+        .err-msg { color: var(--danger); font-size: 0.8rem; margin-top: -8px; margin-bottom: 4px; display: none; }
+
+        @media (max-width: 900px) {
+            .faculty-nav { padding: 0 5%; }
+            .manage-page { padding: 24px 5%; }
+            .classroom-header { flex-direction: column; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Faculty Navbar ── -->
+<nav class="faculty-nav">
+    <a class="logo" href="faculty_dashboard.html">
+        <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        <span class="faculty-badge">FACULTY</span>
+    </a>
+    <ul class="faculty-nav-links">
+        <li><a href="faculty_dashboard.html">← Back to Dashboard</a></li>
+        <li><a href="#" class="logout-link" onclick="logout()">Logout</a></li>
+    </ul>
+</nav>
+
+<main class="manage-page">
+
+    <!-- ── Classroom Header ── -->
+    <div class="classroom-header">
+        <div class="classroom-header-left">
+            <h1 id="classroomName">Loading…</h1>
+            <p id="classroomDesc">—</p>
+        </div>
+        <div class="key-badge">
+            <span class="key-badge-label">Enrollment Key</span>
+            <span class="key-badge-val" id="enrollmentKey">—</span>
+            <button class="copy-btn" title="Copy key" onclick="copyKey()">⎘</button>
+        </div>
+    </div>
+
+    <!-- ── Sub-tabs ── -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('students', this)">Students</button>
+        <button class="tab-btn" onclick="switchTab('lessons', this)">Lessons</button>
+        <button class="tab-btn" onclick="switchTab('challenges', this)">Challenges</button>
+        <button class="tab-btn" onclick="switchTab('sessions', this)">Sessions</button>
+    </div>
+
+    <!-- ── TAB: STUDENTS ── -->
+    <div class="tab-panel active" id="tab-students">
+        <div class="section-header">
+            <h2>Enrolled Students</h2>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Enrolled</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="studentsBody">
+                    <tr><td colspan="5" class="loading-text">Loading students…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── TAB: LESSONS ── -->
+    <div class="tab-panel" id="tab-lessons">
+        <div class="section-header">
+            <h2>Classroom Lessons</h2>
+            <button class="btn btn-primary" onclick="openModal('lesson')">+ Add Lesson</button>
+        </div>
+        <div class="lesson-cards" id="lessonsGrid">
+            <div class="loading-text" style="grid-column:1/-1;">Loading lessons…</div>
+        </div>
+    </div>
+
+    <!-- ── TAB: CHALLENGES ── -->
+    <div class="tab-panel" id="tab-challenges">
+        <div class="section-header">
+            <h2>Challenges / Questions</h2>
+            <button class="btn btn-primary" onclick="openModal('question')">+ Add Challenge</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Type</th>
+                        <th>Difficulty</th>
+                        <th>Points</th>
+                        <th>Topic</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="questionsBody">
+                    <tr><td colspan="6" class="loading-text">Loading challenges…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── TAB: SESSIONS ── -->
+    <div class="tab-panel" id="tab-sessions">
+        <div class="section-header">
+            <h2>Game Sessions</h2>
+            <button class="btn btn-primary" onclick="openModal('session')">+ Create Session</button>
+        </div>
+        <div id="sessionsContainer">
+            <div class="loading-text">Loading sessions…</div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ── Lesson Modal ── -->
+<div class="modal-overlay" id="lessonModal" onclick="handleOverlayClick(event,'lessonModal')">
+    <div class="modal-box">
+        <div class="modal-title" id="lessonModalTitle">Add Lesson</div>
+        <input type="hidden" id="lessonEditId">
+        <div class="modal-field">
+            <label>Title *</label>
+            <input type="text" class="form-input" id="lessonTitle" placeholder="Lesson title">
+        </div>
+        <div class="modal-field">
+            <label>Language</label>
+            <select class="form-input" id="lessonLang">
+                <option value="">All / General</option>
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label>Content *</label>
+            <textarea class="form-input" id="lessonContent" rows="6" placeholder="Lesson content (HTML or plain text)…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea>
+        </div>
+        <div class="err-msg" id="lessonErr"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('lessonModal')">Cancel</button>
+            <button class="btn btn-primary" id="lessonSaveBtn" onclick="saveLesson()">Save Lesson</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Question Modal ── -->
+<div class="modal-overlay" id="questionModal" onclick="handleOverlayClick(event,'questionModal')">
+    <div class="modal-box">
+        <div class="modal-title" id="questionModalTitle">Add Challenge</div>
+        <input type="hidden" id="questionEditId">
+        <div class="modal-field">
+            <label>Question *</label>
+            <textarea class="form-input" id="questionText" rows="3" placeholder="Question text…" style="resize:vertical;font-family:inherit;"></textarea>
+        </div>
+        <div class="modal-field">
+            <label>Type</label>
+            <select class="form-input" id="questionType" onchange="toggleMCQOptions()">
+                <option value="mcq">Multiple Choice (MCQ)</option>
+                <option value="fill_blank">Fill in the Blank</option>
+                <option value="output_pred">Output Prediction</option>
+                <option value="ordering">Code Ordering</option>
+            </select>
+        </div>
+        <div id="mcqOptionsGroup">
+            <div class="modal-field">
+                <label>Option A</label>
+                <input type="text" class="form-input" id="optA" placeholder="Option A">
+            </div>
+            <div class="modal-field">
+                <label>Option B</label>
+                <input type="text" class="form-input" id="optB" placeholder="Option B">
+            </div>
+            <div class="modal-field">
+                <label>Option C</label>
+                <input type="text" class="form-input" id="optC" placeholder="Option C">
+            </div>
+            <div class="modal-field">
+                <label>Option D</label>
+                <input type="text" class="form-input" id="optD" placeholder="Option D">
+            </div>
+        </div>
+        <div class="modal-field">
+            <label>Correct Answer *</label>
+            <input type="text" class="form-input" id="correctAnswer" placeholder="e.g. A  or  exact text for other types">
+        </div>
+        <div class="modal-field">
+            <label>Hint</label>
+            <input type="text" class="form-input" id="questionHint" placeholder="Optional hint">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div class="modal-field">
+                <label>Difficulty</label>
+                <select class="form-input" id="questionDiff">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Points</label>
+                <input type="number" class="form-input" id="questionPoints" value="10" min="1" max="100">
+            </div>
+            <div class="modal-field">
+                <label>Topic</label>
+                <input type="text" class="form-input" id="questionTopic" placeholder="e.g. Loops">
+            </div>
+        </div>
+        <div class="err-msg" id="questionErr"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('questionModal')">Cancel</button>
+            <button class="btn btn-primary" id="questionSaveBtn" onclick="saveQuestion()">Save Challenge</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Session Modal ── -->
+<div class="modal-overlay" id="sessionModal" onclick="handleOverlayClick(event,'sessionModal')">
+    <div class="modal-box">
+        <div class="modal-title">Create Session</div>
+        <div class="modal-field">
+            <label>Session Title *</label>
+            <input type="text" class="form-input" id="sessionTitle" placeholder="e.g. Week 3 Quiz">
+        </div>
+        <div class="modal-field">
+            <label>Game Mode</label>
+            <select class="form-input" id="sessionMode">
+                <option value="mcq">Multiple Choice</option>
+                <option value="fill_blank">Fill in the Blank</option>
+                <option value="output_pred">Output Prediction</option>
+                <option value="ordering">Code Ordering</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label>Select Challenges</label>
+            <div id="sessionQuestionPicker" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--bg-surface);">
+                <div class="loading-text" style="padding:12px;">Loading challenges…</div>
+            </div>
+        </div>
+        <div class="err-msg" id="sessionErr"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('sessionModal')">Cancel</button>
+            <button class="btn btn-primary" id="sessionSaveBtn" onclick="createSession()">Create Session</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:3000/api';
+    const params = new URLSearchParams(window.location.search);
+    const classroomId = params.get('id');
+
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
+    if (!user || !token) { window.location.href = 'login.html'; }
+    if (user && user.role !== 'faculty') { window.location.href = 'dashboard.html'; }
+    if (!classroomId) { window.location.href = 'faculty_dashboard.html'; }
+
+    function getAuthHeaders() {
+        return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function relativeTime(iso) {
+        if (!iso) return '—';
+        const diff = Date.now() - new Date(iso).getTime();
+        const m = Math.floor(diff / 60000);
+        if (m < 1) return 'Just now';
+        if (m < 60) return `${m}m ago`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `${h}h ago`;
+        return `${Math.floor(h/24)}d ago`;
+    }
+
+    // ── Tab switching ─────────────────────────────────────────────────────────
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+    }
+
+    // ── Load classroom info ───────────────────────────────────────────────────
+    let classroomData = null;
+    let classroomQuestions = [];
+
+    async function loadClassroom() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            classroomData = data.classroom;
+            document.getElementById('classroomName').textContent = classroomData.name;
+            document.getElementById('classroomDesc').textContent = classroomData.description || classroomData.subject || 'No description';
+            document.getElementById('enrollmentKey').textContent = classroomData.enrollmentKey || classroomData.enrollment_key || '—';
+            document.title = `${classroomData.name} — CodeArena`;
+        } catch (err) {
+            document.getElementById('classroomName').textContent = 'Classroom not found';
+        }
+    }
+
+    function copyKey() {
+        const key = document.getElementById('enrollmentKey').textContent;
+        navigator.clipboard.writeText(key).then(() => showToast('Enrollment key copied!'));
+    }
+
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--success);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.82rem;z-index:999;';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2200);
+    }
+
+    // ── Students ──────────────────────────────────────────────────────────────
+    async function loadStudents() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/students`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const students = data.success ? (data.students || []) : [];
+            const tbody = document.getElementById('studentsBody');
+            if (!students.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No students enrolled yet. Share the enrollment key!</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td><strong>${escHtml(s.fullName || s.full_name || 'Unknown')}</strong></td>
+                    <td style="color:var(--text-secondary);">${escHtml(s.email || '—')}</td>
+                    <td style="color:var(--text-muted);">${relativeTime(s.enrolledAt || s.enrolled_at)}</td>
+                    <td><span style="color:var(--success);font-size:0.75rem;font-weight:600;">${s.status || 'active'}</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="font-size:0.72rem;padding:3px 10px;color:var(--danger);border-color:var(--danger);"
+                            onclick="removeStudent(${s.id || s.student_id}, '${escHtml(s.fullName || s.full_name || '')}')">Remove</button>
+                    </td>
+                </tr>`).join('');
+        } catch (err) {
+            document.getElementById('studentsBody').innerHTML = `<tr><td colspan="5" class="loading-text" style="color:var(--danger);">Failed to load students.</td></tr>`;
+        }
+    }
+
+    async function removeStudent(studentId, name) {
+        if (!confirm(`Remove ${name} from this classroom?`)) return;
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/students/${studentId}`, {
+                method: 'DELETE', headers: getAuthHeaders()
+            });
+            loadStudents();
+        } catch (err) { alert('Failed to remove student.'); }
+    }
+
+    // ── Lessons ───────────────────────────────────────────────────────────────
+    let lessonsList = [];
+
+    async function loadLessons() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            lessonsList = data.success ? (data.lessons || []) : [];
+            renderLessons();
+        } catch (err) {
+            document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load lessons.</div>`;
+        }
+    }
+
+    function renderLessons() {
+        const grid = document.getElementById('lessonsGrid');
+        if (!lessonsList.length) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No lessons yet. Add the first one!</div>`;
+            return;
+        }
+        grid.innerHTML = lessonsList.map(l => `
+            <div class="lesson-card">
+                <div class="lesson-card-lang">${l.language || 'General'}</div>
+                <div class="lesson-card-title">${escHtml(l.title)}</div>
+                <div class="lesson-card-preview">${escHtml(l.content || '').replace(/<[^>]+>/g, '').substring(0, 100)}…</div>
+                <div class="lesson-card-actions">
+                    <button class="btn btn-outline" style="flex:1;font-size:0.78rem;" onclick="editLesson(${l.lesson_id || l.id})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="deleteLesson(${l.lesson_id || l.id})">Delete</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function openModal(type) {
+        if (type === 'lesson') {
+            document.getElementById('lessonModalTitle').textContent = 'Add Lesson';
+            document.getElementById('lessonEditId').value = '';
+            document.getElementById('lessonTitle').value = '';
+            document.getElementById('lessonLang').value = '';
+            document.getElementById('lessonContent').value = '';
+            document.getElementById('lessonErr').style.display = 'none';
+            document.getElementById('lessonModal').classList.add('open');
+            setTimeout(() => document.getElementById('lessonTitle').focus(), 80);
+        } else if (type === 'question') {
+            document.getElementById('questionModalTitle').textContent = 'Add Challenge';
+            document.getElementById('questionEditId').value = '';
+            document.getElementById('questionText').value = '';
+            document.getElementById('questionType').value = 'mcq';
+            document.getElementById('optA').value = '';
+            document.getElementById('optB').value = '';
+            document.getElementById('optC').value = '';
+            document.getElementById('optD').value = '';
+            document.getElementById('correctAnswer').value = '';
+            document.getElementById('questionHint').value = '';
+            document.getElementById('questionDiff').value = 'beginner';
+            document.getElementById('questionPoints').value = '10';
+            document.getElementById('questionTopic').value = '';
+            document.getElementById('questionErr').style.display = 'none';
+            toggleMCQOptions();
+            document.getElementById('questionModal').classList.add('open');
+        } else if (type === 'session') {
+            document.getElementById('sessionTitle').value = '';
+            document.getElementById('sessionMode').value = 'mcq';
+            document.getElementById('sessionErr').style.display = 'none';
+            renderSessionQuestionPicker();
+            document.getElementById('sessionModal').classList.add('open');
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    function handleOverlayClick(e, id) {
+        if (e.target === document.getElementById(id)) closeModal(id);
+    }
+
+    async function saveLesson() {
+        const id = document.getElementById('lessonEditId').value;
+        const title = document.getElementById('lessonTitle').value.trim();
+        const language = document.getElementById('lessonLang').value;
+        const content = document.getElementById('lessonContent').value.trim();
+        const errEl = document.getElementById('lessonErr');
+
+        if (!title || !content) {
+            errEl.textContent = 'Title and content are required.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        const btn = document.getElementById('lessonSaveBtn');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        errEl.style.display = 'none';
+
+        try {
+            const url = id
+                ? `${API}/classrooms/${classroomId}/lessons/${id}`
+                : `${API}/classrooms/${classroomId}/lessons`;
+            const method = id ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method, headers: getAuthHeaders(),
+                body: JSON.stringify({ title, language, content })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            closeModal('lessonModal');
+            loadLessons();
+        } catch (err) {
+            errEl.textContent = err.message || 'Failed to save lesson.';
+            errEl.style.display = 'block';
+        } finally {
+            btn.disabled = false; btn.textContent = 'Save Lesson';
+        }
+    }
+
+    function editLesson(id) {
+        const lesson = lessonsList.find(l => (l.lesson_id || l.id) === id);
+        if (!lesson) return;
+        document.getElementById('lessonModalTitle').textContent = 'Edit Lesson';
+        document.getElementById('lessonEditId').value = id;
+        document.getElementById('lessonTitle').value = lesson.title || '';
+        document.getElementById('lessonLang').value = lesson.language || '';
+        document.getElementById('lessonContent').value = lesson.content || '';
+        document.getElementById('lessonErr').style.display = 'none';
+        document.getElementById('lessonModal').classList.add('open');
+    }
+
+    async function deleteLesson(id) {
+        if (!confirm('Delete this lesson?')) return;
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/lessons/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            loadLessons();
+        } catch (err) { alert('Failed to delete lesson.'); }
+    }
+
+    // ── Questions ─────────────────────────────────────────────────────────────
+    async function loadQuestions() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/questions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            classroomQuestions = data.success ? (data.questions || []) : [];
+            renderQuestions();
+        } catch (err) {
+            document.getElementById('questionsBody').innerHTML = `<tr><td colspan="6" class="loading-text" style="color:var(--danger);">Failed to load challenges.</td></tr>`;
+        }
+    }
+
+    function renderQuestions() {
+        const tbody = document.getElementById('questionsBody');
+        if (!classroomQuestions.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No challenges yet.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = classroomQuestions.map(q => `
+            <tr>
+                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(q.question_text || q.questionText || '')}">${escHtml((q.question_text || q.questionText || '').substring(0, 60))}…</td>
+                <td style="color:var(--text-secondary);font-size:0.78rem;">${q.type || 'mcq'}</td>
+                <td><span class="level-pill ${q.difficulty || 'beginner'}">${q.difficulty || 'beginner'}</span></td>
+                <td style="color:var(--xp-gold);font-weight:600;">${q.points || 10}</td>
+                <td style="color:var(--text-secondary);">${escHtml(q.topic || '—')}</td>
+                <td>
+                    <button class="btn btn-outline" style="font-size:0.72rem;padding:3px 10px;margin-right:4px;" onclick="editQuestion(${q.question_id || q.id})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:0.72rem;padding:3px 10px;color:var(--danger);border-color:var(--danger);" onclick="deleteQuestion(${q.question_id || q.id})">Delete</button>
+                </td>
+            </tr>`).join('');
+    }
+
+    function toggleMCQOptions() {
+        const type = document.getElementById('questionType').value;
+        document.getElementById('mcqOptionsGroup').style.display = type === 'mcq' ? 'block' : 'none';
+    }
+
+    async function saveQuestion() {
+        const id = document.getElementById('questionEditId').value;
+        const question_text = document.getElementById('questionText').value.trim();
+        const type = document.getElementById('questionType').value;
+        const correct_answer = document.getElementById('correctAnswer').value.trim();
+        const hint = document.getElementById('questionHint').value.trim();
+        const difficulty = document.getElementById('questionDiff').value;
+        const points = parseInt(document.getElementById('questionPoints').value) || 10;
+        const topic = document.getElementById('questionTopic').value.trim();
+        const errEl = document.getElementById('questionErr');
+
+        if (!question_text || !correct_answer) {
+            errEl.textContent = 'Question and correct answer are required.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        let options = null;
+        if (type === 'mcq') {
+            const a = document.getElementById('optA').value.trim();
+            const b = document.getElementById('optB').value.trim();
+            const c = document.getElementById('optC').value.trim();
+            const d = document.getElementById('optD').value.trim();
+            options = [a && `A) ${a}`, b && `B) ${b}`, c && `C) ${c}`, d && `D) ${d}`].filter(Boolean);
+        }
+
+        const btn = document.getElementById('questionSaveBtn');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        errEl.style.display = 'none';
+
+        try {
+            const url = id
+                ? `${API}/classrooms/${classroomId}/questions/${id}`
+                : `${API}/classrooms/${classroomId}/questions`;
+            const method = id ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method, headers: getAuthHeaders(),
+                body: JSON.stringify({ question_text, type, options, correct_answer, hint, difficulty, points, topic })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            closeModal('questionModal');
+            loadQuestions();
+        } catch (err) {
+            errEl.textContent = err.message || 'Failed to save challenge.';
+            errEl.style.display = 'block';
+        } finally {
+            btn.disabled = false; btn.textContent = 'Save Challenge';
+        }
+    }
+
+    function editQuestion(id) {
+        const q = classroomQuestions.find(x => (x.question_id || x.id) === id);
+        if (!q) return;
+        document.getElementById('questionModalTitle').textContent = 'Edit Challenge';
+        document.getElementById('questionEditId').value = id;
+        document.getElementById('questionText').value = q.question_text || q.questionText || '';
+        document.getElementById('questionType').value = q.type || 'mcq';
+        document.getElementById('correctAnswer').value = q.correct_answer || q.correctAnswer || '';
+        document.getElementById('questionHint').value = q.hint || '';
+        document.getElementById('questionDiff').value = q.difficulty || 'beginner';
+        document.getElementById('questionPoints').value = q.points || 10;
+        document.getElementById('questionTopic').value = q.topic || '';
+        toggleMCQOptions();
+        if (q.type === 'mcq' && Array.isArray(q.options)) {
+            const opts = q.options.map(o => o.replace(/^[A-D]\)\s*/, ''));
+            document.getElementById('optA').value = opts[0] || '';
+            document.getElementById('optB').value = opts[1] || '';
+            document.getElementById('optC').value = opts[2] || '';
+            document.getElementById('optD').value = opts[3] || '';
+        }
+        document.getElementById('questionErr').style.display = 'none';
+        document.getElementById('questionModal').classList.add('open');
+    }
+
+    async function deleteQuestion(id) {
+        if (!confirm('Delete this challenge?')) return;
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/questions/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            loadQuestions();
+        } catch (err) { alert('Failed to delete challenge.'); }
+    }
+
+    // ── Sessions ──────────────────────────────────────────────────────────────
+    let sessionsList = [];
+
+    async function loadSessions() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            sessionsList = data.success ? (data.sessions || []) : [];
+            renderSessions();
+        } catch (err) {
+            document.getElementById('sessionsContainer').innerHTML = `<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`;
+        }
+    }
+
+    function renderSessions() {
+        const container = document.getElementById('sessionsContainer');
+        if (!sessionsList.length) {
+            container.innerHTML = `<div class="empty-state">No sessions yet. Create one and students can join with the classroom key.</div>`;
+            return;
+        }
+        container.innerHTML = sessionsList.map(s => `
+            <div class="session-card">
+                <div class="session-info">
+                    <div class="session-title">${escHtml(s.title)}</div>
+                    <div class="session-meta">Mode: ${s.game_mode || s.gameMode || '—'} · Created ${relativeTime(s.created_at || s.createdAt)}</div>
+                </div>
+                <span class="status-pill ${s.status}">${s.status}</span>
+                ${s.status === 'pending' ? `<button class="btn btn-primary" style="font-size:0.78rem;" onclick="setSessionStatus(${s.session_id || s.id},'active')">▶ Launch</button>` : ''}
+                ${s.status === 'active'  ? `<button class="btn btn-outline" style="font-size:0.78rem;" onclick="setSessionStatus(${s.session_id || s.id},'closed')">■ Close</button>` : ''}
+            </div>`).join('');
+    }
+
+    function renderSessionQuestionPicker() {
+        const picker = document.getElementById('sessionQuestionPicker');
+        if (!classroomQuestions.length) {
+            picker.innerHTML = `<div style="color:var(--text-muted);font-size:0.8rem;">No challenges available. Add some in the Challenges tab first.</div>`;
+            return;
+        }
+        picker.innerHTML = classroomQuestions.map(q => `
+            <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:0.83rem;color:var(--text);">
+                <input type="checkbox" value="${q.question_id || q.id}" style="accent-color:var(--primary);">
+                <span>${escHtml((q.question_text || q.questionText || '').substring(0, 60))}…</span>
+            </label>`).join('');
+    }
+
+    async function createSession() {
+        const title = document.getElementById('sessionTitle').value.trim();
+        const game_mode = document.getElementById('sessionMode').value;
+        const checked = [...document.querySelectorAll('#sessionQuestionPicker input[type=checkbox]:checked')].map(c => parseInt(c.value));
+        const errEl = document.getElementById('sessionErr');
+
+        if (!title) { errEl.textContent = 'Session title is required.'; errEl.style.display = 'block'; return; }
+        if (!checked.length) { errEl.textContent = 'Select at least one challenge.'; errEl.style.display = 'block'; return; }
+
+        const btn = document.getElementById('sessionSaveBtn');
+        btn.disabled = true; btn.textContent = 'Creating…';
+        errEl.style.display = 'none';
+
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, {
+                method: 'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({ title, game_mode, question_ids: checked })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            closeModal('sessionModal');
+            loadSessions();
+        } catch (err) {
+            errEl.textContent = err.message || 'Failed to create session.';
+            errEl.style.display = 'block';
+        } finally {
+            btn.disabled = false; btn.textContent = 'Create Session';
+        }
+    }
+
+    async function setSessionStatus(id, status) {
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/sessions/${id}`, {
+                method: 'PATCH', headers: getAuthHeaders(),
+                body: JSON.stringify({ status })
+            });
+            loadSessions();
+        } catch (err) { alert('Failed to update session.'); }
+    }
+
+    // ── Logout ────────────────────────────────────────────────────────────────
+    function logout() {
+        if (!confirm('Logout?')) return;
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'index.html';
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadClassroom();
+    loadStudents();
+    loadLessons();
+    loadQuestions();
+    loadSessions();
+</script>
+</body>
+</html>

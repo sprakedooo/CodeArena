@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeArena — Loading</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+
+        canvas {
+            display: block;
+            position: fixed;
+            inset: 0;
+        }
+        /* CRT scanlines overlay */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 3px,
+                rgba(0, 0, 0, 0.18) 3px,
+                rgba(0, 0, 0, 0.18) 4px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+        /* Vignette */
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center,
+                transparent 45%,
+                rgba(0, 0, 0, 0.65) 100%
+            );
+            pointer-events: none;
+            z-index: 11;
+        }
+        .skip-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 0.55rem 1rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            cursor: pointer;
+            z-index: 20;
+            letter-spacing: 1px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .skip-btn:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body>
+    <canvas id="c"></canvas>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <button class="skip-btn" id="skipBtn">SKIP ›</button>
+
+<script>
+// ════════════════════════════════════════════════════
+//  CODEARENA INTRO ANIMATION
+// ════════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ── Dimensions (recalculated on resize) ──────────────
+let W, H, CX, CY;
+// Monitor geometry (pixels)
+let MW, MH, MCX, MCY, SW, SH, SCX, SCY, TERM_FONT;
+
+function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    CX = W / 2;  CY = H / 2;
+
+    MW  = Math.min(W * 0.52, H * 0.60, 580);
+    MH  = MW * 0.68;
+    MCX = CX;
+    MCY = CY + H * 0.07;          // monitor center, shifted down a bit
+
+    const bevel = MW * 0.085;
+    SW  = MW - bevel * 2;          // screen width
+    SH  = MH - bevel * 1.4;        // screen height
+    SCX = MCX;
+    SCY = MCY - MH * 0.04;         // screen center (slight upward shift inside bezel)
+
+    TERM_FONT = Math.max(7, Math.floor(SW * 0.036));
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Colour palette ────────────────────────────────────
+const PAL = {
+    bg:       '#07090f',
+    star:     '#c8d8ff',
+    green:    '#00e676',
+    dimGreen: '#003d18',
+    cyan:     '#18ffff',
+    yellow:   '#fbbf24',
+    amber:    '#ffb300',
+    white:    '#f0f6fc',
+    purple:   '#7c3aed',
+    bezel:    '#16213e',
+    bezDk:    '#0d1526',
+    screen:   '#020a04',
+    scrGlow:  'rgba(0, 230, 118, 0.08)',
+    shadow:   'rgba(0,0,0,0.7)',
+};
+
+// ── Starfield ─────────────────────────────────────────
+const STARS = Array.from({ length: 220 }, () => ({
+    xf: Math.random(),
+    yf: Math.random(),
+    r:  Math.random() < 0.55 ? 1 : Math.random() < 0.8 ? 1.5 : 2,
+    ph: Math.random() * Math.PI * 2,
+    sp: Math.random() * 0.025 + 0.005,
+}));
+
+function drawStars(t, alpha) {
+    ctx.save();
+    for (const s of STARS) {
+        const b = 0.3 + 0.7 * Math.abs(Math.sin(s.ph + t * s.sp));
+        ctx.globalAlpha = b * alpha;
+        ctx.fillStyle = PAL.star;
+        ctx.fillRect(Math.floor(s.xf * W), Math.floor(s.yf * H), s.r, s.r);
+    }
+    ctx.restore();
+}
+
+// ── Title above monitor ───────────────────────────────
+function drawTitle(alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+
+    const ty  = MCY - MH / 2 - H * 0.12;
+    const fs  = Math.max(12, Math.min(W * 0.032, H * 0.045, 40));
+
+    ctx.font        = `${fs}px 'Press Start 2P', monospace`;
+    ctx.shadowColor = PAL.purple;
+    ctx.shadowBlur  = 24 * alpha;
+    ctx.fillStyle   = PAL.white;
+    ctx.fillText('< CodeArena />', CX, ty);
+
+    ctx.shadowBlur = 0;
+    const fs2 = Math.max(7, fs * 0.45);
+    ctx.font      = `${fs2}px 'Press Start 2P', monospace`;
+    ctx.fillStyle = PAL.yellow;
+    ctx.fillText('YOUR CODING ADVENTURE', CX, ty + fs * 1.5);
+
+    ctx.restore();
+}
+
+// ── Pixel-art monitor ─────────────────────────────────
+function drawMonitor(progress, screenFlicker) {
+    const p = clamp01(progress);
+    const sc = 0.6 + 0.4 * easeOut(p);
+
+    ctx.save();
+    ctx.globalAlpha = p;
+    ctx.translate(MCX, MCY);
+    ctx.scale(sc, sc);
+    ctx.translate(-MCX, -MCY);
+
+    const x0 = MCX - MW / 2, y0 = MCY - MH / 2;
+
+    // Drop shadow
+    ctx.fillStyle = PAL.shadow;
+    ctx.fillRect(x0 + 6, y0 + 6, MW, MH + MW * 0.16);
+
+    // Outer bezel
+    ctx.fillStyle = PAL.bezel;
+    ctx.fillRect(x0, y0, MW, MH);
+
+    // Inner bezel ridge
+    ctx.fillStyle = PAL.bezDk;
+    ctx.fillRect(x0 + MW * 0.025, y0 + MW * 0.025,
+                 MW * 0.95, MH * 0.95);
+
+    // Screen background
+    const sx0 = SCX - SW / 2, sy0 = SCY - SH / 2;
+    const flkAlpha = screenFlicker > 0 ? 0.4 + 0.6 * screenFlicker : 1;
+    ctx.globalAlpha = p * flkAlpha;
+    ctx.fillStyle = PAL.screen;
+    ctx.fillRect(sx0, sy0, SW, SH);
+
+    // Screen phosphor glow
+    const grd = ctx.createRadialGradient(SCX, SCY, 0, SCX, SCY, SW * 0.6);
+    grd.addColorStop(0, 'rgba(0,230,118,0.13)');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.fillRect(sx0, sy0, SW, SH);
+
+    // Pixel grid lines on screen (subtle)
+    ctx.globalAlpha = p * 0.06;
+    ctx.strokeStyle = '#00e676';
+    ctx.lineWidth = 0.5;
+    const gridStep = SW / 18;
+    for (let gx = sx0; gx <= sx0 + SW; gx += gridStep) {
+        ctx.beginPath(); ctx.moveTo(gx, sy0); ctx.lineTo(gx, sy0 + SH); ctx.stroke();
+    }
+    for (let gy = sy0; gy <= sy0 + SH; gy += gridStep) {
+        ctx.beginPath(); ctx.moveTo(sx0, gy); ctx.lineTo(sx0 + SW, gy); ctx.stroke();
+    }
+
+    ctx.globalAlpha = p;
+
+    // Stand neck
+    const neckW = MW * 0.1, neckH = MH * 0.12;
+    const neckX = MCX - neckW / 2, neckY = MCY + MH / 2;
+    ctx.fillStyle = PAL.bezel;
+    ctx.fillRect(neckX, neckY, neckW, neckH);
+
+    // Stand base
+    const baseW = MW * 0.42, baseH = MH * 0.04;
+    ctx.fillStyle = PAL.bezDk;
+    ctx.fillRect(MCX - baseW / 2, neckY + neckH, baseW, baseH);
+    ctx.fillStyle = PAL.bezel;
+    ctx.fillRect(MCX - baseW * 0.45 / 2, neckY + neckH + baseH, baseW * 0.45, baseH * 0.6);
+
+    // Power LED
+    ctx.globalAlpha = p * (0.5 + 0.5 * Math.sin(Date.now() * 0.004));
+    ctx.fillStyle = PAL.green;
+    const ledS = MW * 0.018;
+    ctx.fillRect(x0 + MW - MW * 0.1, y0 + MH - MH * 0.1, ledS, ledS);
+
+    // Bezel brand text
+    ctx.globalAlpha = p * 0.4;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font         = `${Math.max(5, MW * 0.024)}px 'Press Start 2P', monospace`;
+    ctx.fillStyle    = '#445';
+    ctx.fillText('CodeArena', MCX, y0 + MH - MH * 0.08);
+
+    ctx.restore();
+}
+
+// ── Terminal boot lines ───────────────────────────────
+const LINES = [
+    { t: 'CODEARENA OS  v1.0.0',          col: PAL.amber  },
+    { t: '────────────────────────────',   col: '#223'     },
+    { t: '> Booting system kernel...',     col: PAL.green  },
+    { t: '> Loading AI engine......  OK',  col: PAL.green  },
+    { t: '> Calibrating difficulty.. OK',  col: PAL.cyan   },
+    { t: '> Initializing lessons.... OK',  col: PAL.cyan   },
+    { t: '> Scanning your profile... OK',  col: PAL.yellow },
+    { t: '> Launching playground..... OK', col: PAL.yellow },
+    { t: '  ■ ADVENTURE READY!  ■',        col: PAL.white  },
+];
+// Cumulative fraction of terminal phase each line occupies
+const LINE_FRACS = [0, 0.05, 0.12, 0.25, 0.38, 0.50, 0.62, 0.74, 0.87];
+
+function drawTerminal(termProgress) {
+    const sx0 = SCX - SW / 2, sy0 = SCY - SH / 2;
+    const padX = SW * 0.05, padY = SH * 0.07;
+    const lineH = TERM_FONT * 1.75;
+
+    ctx.save();
+    // Clip to screen area
+    ctx.beginPath();
+    ctx.rect(sx0, sy0, SW, SH);
+    ctx.clip();
+
+    ctx.font         = `${TERM_FONT}px 'Press Start 2P', monospace`;
+    ctx.textBaseline = 'top';
+
+    for (let i = 0; i < LINES.length; i++) {
+        const startF = LINE_FRACS[i];
+        const endF   = i + 1 < LINE_FRACS.length ? LINE_FRACS[i + 1] : 1.0;
+        if (termProgress < startF) break;
+
+        const lineP   = clamp01((termProgress - startF) / (endF - startF));
+        const chars   = Math.floor(LINES[i].t.length * lineP);
+        const txt     = LINES[i].t.slice(0, chars);
+        const lx      = sx0 + padX;
+        const ly      = sy0 + padY + i * lineH;
+
+        ctx.shadowColor = LINES[i].col;
+        ctx.shadowBlur  = 6;
+        ctx.fillStyle   = LINES[i].col;
+        ctx.fillText(txt, lx, ly);
+
+        // Cursor blink on active line
+        if (chars < LINES[i].t.length && Math.floor(Date.now() / 380) % 2 === 0) {
+            const tw = ctx.measureText(txt).width;
+            ctx.fillStyle = PAL.green;
+            ctx.fillRect(lx + tw + 1, ly + 1, TERM_FONT * 0.55, TERM_FONT * 0.85);
+        }
+    }
+    ctx.restore();
+}
+
+// ── Progress bar (bottom of screen area) ─────────────
+function drawProgressBar(termProgress) {
+    const sx0 = SCX - SW / 2, sy0 = SCY - SH / 2;
+    const bx  = sx0 + SW * 0.05;
+    const by  = sy0 + SH * 0.85;
+    const bw  = SW * 0.9;
+    const bh  = Math.max(3, SH * 0.045);
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(sx0, sy0, SW, SH); ctx.clip();
+
+    // Track
+    ctx.fillStyle = '#0a1a0a';
+    ctx.fillRect(bx, by, bw, bh);
+
+    // Fill
+    const fillW = bw * clamp01(termProgress);
+    if (fillW > 0) {
+        const grd = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+        grd.addColorStop(0, '#00e676');
+        grd.addColorStop(1, '#18ffff');
+        ctx.fillStyle = grd;
+        ctx.shadowColor = '#00e676';
+        ctx.shadowBlur  = 8;
+        ctx.fillRect(bx, by, fillW, bh);
+    }
+
+    // Border
+    ctx.strokeStyle = '#1a4a1a';
+    ctx.lineWidth   = 1;
+    ctx.strokeRect(bx, by, bw, bh);
+
+    // Percent text
+    const pct    = Math.floor(clamp01(termProgress) * 100);
+    const pfs    = Math.max(5, TERM_FONT * 0.8);
+    ctx.font     = `${pfs}px 'Press Start 2P', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowBlur = 0;
+    ctx.fillStyle  = pct >= 50 ? '#000' : PAL.green;
+    ctx.fillText(`${pct}%`, bx + fillW / 2, by + bh / 2);
+
+    ctx.restore();
+}
+
+// ── Flash transition ──────────────────────────────────
+function drawFlash(p) {
+    ctx.save();
+    ctx.globalAlpha = p;
+    ctx.fillStyle   = PAL.purple;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+}
+
+// ── Easing / math helpers ─────────────────────────────
+function clamp01(v)  { return Math.max(0, Math.min(1, v)); }
+function invlerp(a, b, t) { return clamp01((t - a) / (b - a)); }
+function easeOut(t)  { return 1 - (1 - t) ** 2; }
+function easeIn(t)   { return t * t; }
+function easeInOut(t){ return t < 0.5 ? 2*t*t : 1 - (-2*t+2)**2/2; }
+
+// ── Flicker sequence at screen power-on ──────────────
+// Returns a 0-1 "screen on" value with glitchy flicker during [t0,t1]
+function screenOnFlicker(t, t0, t1) {
+    if (t < t0) return 0;
+    if (t > t1) return 1;
+    const tp = (t - t0) / (t1 - t0);
+    // Random flicker: oscillates fast early, settles later
+    const flicker = Math.abs(Math.sin(tp * Math.PI * 14 * (1 - tp))) * (1 - tp);
+    return tp - flicker * 0.5;
+}
+
+// ── Main animation loop ───────────────────────────────
+// Timeline (all in ms):
+const T = {
+    starFadeIn:    [0,    700 ],
+    titleIn:       [500,  1600],
+    monitorIn:     [1400, 3200],
+    screenPowerOn: [2900, 3500],
+    terminal:      [3500, 7800],
+    progressBar:   [3500, 7800],
+    flashOut:      [7800, 8700],
+    redirect:       8750,
+};
+
+let startTime  = null;
+let redirected = false;
+
+function frame(ts) {
+    if (!startTime) startTime = ts;
+    const t = ts - startTime;
+
+    // ── Background ─────────────────────────────
+    ctx.fillStyle = PAL.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Stars ──────────────────────────────────
+    const starA = easeOut(invlerp(...T.starFadeIn, t));
+    if (starA > 0) drawStars(t * 0.001, starA);
+
+    // ── Title ──────────────────────────────────
+    const titleA = easeOut(invlerp(...T.titleIn, t));
+    if (titleA > 0) drawTitle(titleA);
+
+    // ── Monitor ────────────────────────────────
+    const monP = easeInOut(invlerp(...T.monitorIn, t));
+    if (monP > 0) {
+        const flickP = screenOnFlicker(t, T.screenPowerOn[0], T.screenPowerOn[1]);
+        drawMonitor(monP, flickP);
+    }
+
+    // ── Terminal text ──────────────────────────
+    const termP = invlerp(...T.terminal, t);
+    if (termP > 0 && monP >= 1) {
+        drawTerminal(termP);
+        drawProgressBar(termP);
+    }
+
+    // ── Flash transition ───────────────────────
+    const flashP = easeIn(invlerp(...T.flashOut, t));
+    if (flashP > 0) drawFlash(flashP);
+
+    // ── Redirect ───────────────────────────────
+    if (t >= T.redirect && !redirected) {
+        redirected = true;
+        goTo();
+    }
+
+    requestAnimationFrame(frame);
+}
+
+// Start when font is ready
+document.fonts.ready.then(() => requestAnimationFrame(frame));
+
+// ── Navigation ────────────────────────────────────────
+const DEST = new URLSearchParams(location.search).get('to') || 'register.html';
+function goTo() { window.location.href = DEST; }
+document.getElementById('skipBtn').addEventListener('click', goTo);
+</script>
+</body>
+</html>

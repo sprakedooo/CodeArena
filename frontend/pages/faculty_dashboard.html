@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Portal — CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Faculty Navbar ── */
+        .faculty-nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18%;
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .faculty-nav .logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-bracket { color: var(--secondary); }
+        .logo-code    { color: var(--primary); }
+        .logo-arena   { color: var(--text); }
+        .faculty-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .faculty-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .faculty-nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .faculty-nav-links a:hover,
+        .faculty-nav-links a.active {
+            color: var(--text);
+            background: var(--bg-surface);
+        }
+        .faculty-nav-links a.active {
+            color: var(--primary);
+        }
+        .faculty-nav-links .logout-link {
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 6px;
+            padding: 5px 14px;
+        }
+        .faculty-nav-links .logout-link:hover {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        /* ── Page container ── */
+        .faculty-page {
+            padding: 40px 18%;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            margin-bottom: 32px;
+        }
+        .page-header h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 0 0 6px;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* ── Tab navigation ── */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            margin-bottom: -1px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Stat cards ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover { border-color: var(--primary); }
+        .stat-value {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* ── Breakdown grids ── */
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .breakdown-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .breakdown-card h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 16px;
+        }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .bar-label {
+            width: 100px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .bar-track {
+            flex: 1;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--primary);
+            transition: width 0.6s ease;
+        }
+        .bar-count {
+            font-size: 0.8rem;
+            color: var(--text);
+            width: 24px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* ── Recent activity ── */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .activity-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .activity-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+        .activity-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+        .activity-time { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* ── Students tab ── */
+        .search-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .search-row .form-input {
+            flex: 1;
+        }
+
+        .students-table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        thead th {
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            cursor: default;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--bg-card-hover); }
+        tbody td {
+            padding: 12px 14px;
+            color: var(--text);
+            vertical-align: middle;
+        }
+        .acc-high { color: var(--success); font-weight: 600; }
+        .acc-mid  { color: var(--warning); font-weight: 600; }
+        .acc-low  { color: var(--danger);  font-weight: 600; }
+
+        .level-pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .level-pill.beginner     { background: rgba(16,185,129,.15); color: var(--success); }
+        .level-pill.intermediate { background: rgba(245,158,11,.15);  color: var(--warning); }
+        .level-pill.advanced     { background: rgba(239,68,68,.15);   color: var(--danger); }
+
+        .lang-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            background: var(--bg-surface);
+            color: var(--secondary);
+        }
+
+        .badge-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+        .badge-chip {
+            font-size: 0.68rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+
+        /* Student detail panel */
+        .student-detail {
+            margin-top: 8px;
+            background: var(--bg-surface);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: none;
+        }
+        .student-detail.open { display: block; }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .detail-item label {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .detail-item .detail-val {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* ── Lessons / Questions tabs ── */
+        .cms-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .cms-card-info h3 { margin: 0 0 6px; font-size: 1rem; color: var(--text); }
+        .cms-card-info p  { margin: 0; color: var(--text-secondary); font-size: 0.85rem; }
+
+        .lessons-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .lesson-mini {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+        }
+        .lesson-mini-lang {
+            font-size: 0.7rem;
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .lesson-mini-title {
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .questions-summary-table {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-top: 16px;
+        }
+
+        /* ── Classrooms tab ── */
+        .classrooms-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .classrooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .classroom-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+        .classroom-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .classroom-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .classroom-card-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .classroom-card-subject {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .classroom-active-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: rgba(16,185,129,.15);
+            color: var(--success);
+            flex-shrink: 0;
+        }
+        .classroom-key-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+        .classroom-key-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .classroom-key-val {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--secondary);
+            flex: 1;
+            letter-spacing: 1px;
+        }
+        .copy-key-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 0 2px;
+            transition: color 0.2s;
+        }
+        .copy-key-btn:hover { color: var(--primary); }
+        .classroom-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .classroom-meta span strong { color: var(--text); }
+        .classroom-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .classroom-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .classroom-empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .classroom-empty p { font-size: 0.85rem; margin: 0 0 20px; }
+
+        /* ── Create Classroom Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 480px;
+            transform: translateY(16px);
+            transition: transform 0.2s;
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+        .modal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85rem;
+            color: var(--text);
+            margin: 0 0 24px;
+        }
+        .modal-field {
+            margin-bottom: 16px;
+        }
+        .modal-field label {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        /* Loading state */
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 24px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .faculty-nav  { padding: 0 5%; }
+            .faculty-page { padding: 24px 5%; }
+            .stat-grid    { grid-template-columns: repeat(2, 1fr); }
+            .breakdown-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Faculty Navbar ── -->
+<nav class="faculty-nav">
+    <a class="logo" href="faculty_dashboard.html">
+        <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+        <span class="faculty-badge">FACULTY</span>
+    </a>
+    <ul class="faculty-nav-links">
+        <li><a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard', this)">Dashboard</a></li>
+        <li><a href="#" data-tab="students" onclick="switchTab('students', this)">Students</a></li>
+        <li><a href="#" data-tab="lessons" onclick="switchTab('lessons', this)">Lessons</a></li>
+        <li><a href="#" data-tab="questions" onclick="switchTab('questions', this)">Questions</a></li>
+        <li><a href="#" data-tab="classrooms" onclick="switchTab('classrooms', this)">Classrooms</a></li>
+        <li><a href="#" class="logout-link" onclick="logout()">Logout</a></li>
+    </ul>
+</nav>
+
+<!-- ── Main content ── -->
+<main class="faculty-page">
+
+    <div class="page-header">
+        <h1 id="pageTitle">Faculty Dashboard</h1>
+        <p id="pageSubtitle">Overview of student activity and performance</p>
+    </div>
+
+    <!-- Tab nav (mobile-friendly alternative to nav links) -->
+    <div class="tab-nav" style="display:none;" id="tabNav">
+        <button class="tab-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
+        <button class="tab-btn" onclick="switchTab('students', this)">Students</button>
+        <button class="tab-btn" onclick="switchTab('lessons', this)">Lessons</button>
+        <button class="tab-btn" onclick="switchTab('questions', this)">Questions</button>
+    </div>
+
+    <!-- ────────────────────────────────── TAB: DASHBOARD ────────────────── -->
+    <div class="tab-panel active" id="tab-dashboard">
+
+        <!-- Stat cards -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statStudents">—</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statActive">—</div>
+                <div class="stat-label">Active Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAccuracy">—</div>
+                <div class="stat-label">Avg Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statQuestions">—</div>
+                <div class="stat-label">Questions Answered</div>
+            </div>
+        </div>
+
+        <!-- Breakdowns -->
+        <div class="breakdown-grid">
+            <div class="breakdown-card">
+                <h3>Language Breakdown</h3>
+                <div id="langBreakdown"><div class="loading-text">Loading…</div></div>
+            </div>
+            <div class="breakdown-card">
+                <h3>Level Breakdown</h3>
+                <div id="levelBreakdown"><div class="loading-text">Loading…</div></div>
+            </div>
+        </div>
+
+        <!-- Recent activity -->
+        <div class="breakdown-card" style="margin-bottom:0;">
+            <h3>Recent Activity</h3>
+            <div class="activity-list" id="recentActivity">
+                <div class="loading-text">Loading…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ────────────────────────────────── TAB: STUDENTS ────────────────── -->
+    <div class="tab-panel" id="tab-students">
+
+        <div class="search-row">
+            <input type="text" class="form-input" id="studentSearch" placeholder="Search students by name or email…" oninput="filterStudents(this.value)">
+        </div>
+
+        <div class="students-table-wrap">
+            <table id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Language</th>
+                        <th>Level</th>
+                        <th>Points</th>
+                        <th>Accuracy</th>
+                        <th>Questions</th>
+                        <th>Streak</th>
+                        <th>Badges</th>
+                        <th>Last Active</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="studentsBody">
+                    <tr><td colspan="11" class="loading-text">Loading students…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Student detail panel -->
+        <div class="student-detail" id="studentDetail"></div>
+    </div>
+
+    <!-- ────────────────────────────────── TAB: LESSONS ─────────────────── -->
+    <div class="tab-panel" id="tab-lessons">
+
+        <div class="cms-card">
+            <div class="cms-card-info">
+                <h3>Lesson Content Manager</h3>
+                <p>Create, edit, and delete lessons across all 4 programming languages via the Admin CMS.</p>
+            </div>
+            <a href="admin.html" target="_blank" class="btn btn-primary" style="white-space:nowrap;">Open CMS</a>
+        </div>
+
+        <h3 style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;">All Lessons</h3>
+        <div class="lessons-summary" id="lessonsSummary">
+            <div class="loading-text">Loading lessons…</div>
+        </div>
+    </div>
+
+    <!-- ────────────────────────────────── TAB: CLASSROOMS ─────────────── -->
+    <div class="tab-panel" id="tab-classrooms">
+
+        <div class="classrooms-header">
+            <div>
+                <p style="color:var(--text-secondary);font-size:0.85rem;margin:0;">
+                    Create virtual classrooms and share the enrollment key with your students.
+                </p>
+            </div>
+            <button class="btn btn-primary" onclick="openCreateModal()">+ New Classroom</button>
+        </div>
+
+        <div class="classrooms-grid" id="classroomsGrid">
+            <div class="loading-text">Loading classrooms…</div>
+        </div>
+    </div>
+
+    <!-- ────────────────────────────────── TAB: QUESTIONS ───────────────── -->
+    <div class="tab-panel" id="tab-questions">
+
+        <div class="cms-card">
+            <div class="cms-card-info">
+                <h3>Question Bank Manager</h3>
+                <p>Add, edit, or remove questions for any language and difficulty level.</p>
+            </div>
+            <a href="admin.html" target="_blank" class="btn btn-primary" style="white-space:nowrap;">Open CMS</a>
+        </div>
+
+        <h3 style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;">Question Summary</h3>
+        <div class="questions-summary-table">
+            <table id="questionsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Language</th>
+                        <th>Level</th>
+                        <th>Type</th>
+                        <th>Question</th>
+                    </tr>
+                </thead>
+                <tbody id="questionsBody">
+                    <tr><td colspan="5" class="loading-text">Loading questions…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- ── Create Classroom Modal ── -->
+<div class="modal-overlay" id="createClassroomModal" onclick="handleModalClick(event)">
+    <div class="modal-box">
+        <div class="modal-title">New Classroom</div>
+        <div class="modal-field">
+            <label>Classroom Name *</label>
+            <input type="text" class="form-input" id="clName" placeholder="e.g. CS101 — Intro to Python" maxlength="100">
+        </div>
+        <div class="modal-field">
+            <label>Subject</label>
+            <input type="text" class="form-input" id="clSubject" placeholder="e.g. Computer Science" maxlength="100">
+        </div>
+        <div class="modal-field">
+            <label>Description</label>
+            <textarea class="form-input" id="clDesc" rows="3" placeholder="Optional description…" style="resize:vertical;font-family:inherit;"></textarea>
+        </div>
+        <div id="createClassroomErr" style="color:var(--danger);font-size:0.82rem;display:none;margin-top:-8px;"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeCreateModal()">Cancel</button>
+            <button class="btn btn-primary" id="createClassroomBtn" onclick="createClassroom()">Create Classroom</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:3000/api';
+
+    // ── Auth guard ──────────────────────────────────────────────────────────
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
+    if (!user || !token) { window.location.href = 'login.html'; }
+    if (user && user.role !== 'faculty') { window.location.href = 'dashboard.html'; }
+
+    function getAuthHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    // ── Tab switching ────────────────────────────────────────────────────────
+    const tabTitles = {
+        dashboard:  ['Faculty Dashboard', 'Overview of student activity and performance'],
+        students:   ['Students', 'Browse and inspect individual student progress'],
+        lessons:    ['Lessons', 'Manage lesson content across all languages'],
+        questions:  ['Question Bank', 'Review and manage quiz questions'],
+        classrooms: ['My Classrooms', 'Create and manage virtual classroom rooms'],
+    };
+
+    function switchTab(tabId, linkEl) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+
+        document.querySelectorAll('.faculty-nav-links a[data-tab]').forEach(a => a.classList.remove('active'));
+        if (linkEl) linkEl.classList.add('active');
+
+        const [title, sub] = tabTitles[tabId];
+        document.getElementById('pageTitle').textContent = title;
+        document.getElementById('pageSubtitle').textContent = sub;
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function relativeTime(isoStr) {
+        if (!isoStr) return '—';
+        const diff = Date.now() - new Date(isoStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1)   return 'Just now';
+        if (mins < 60)  return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24)   return `${hrs}h ago`;
+        return `${Math.floor(hrs / 24)}d ago`;
+    }
+
+    function accClass(acc) {
+        if (acc >= 75) return 'acc-high';
+        if (acc >= 50) return 'acc-mid';
+        return 'acc-low';
+    }
+
+    function levelPill(level) {
+        return `<span class="level-pill ${level}">${level}</span>`;
+    }
+
+    function badgeChips(badges) {
+        if (!badges || !badges.length) return '<span style="color:var(--text-muted);font-size:0.75rem;">None</span>';
+        return `<div class="badge-chips">${badges.map(b => `<span class="badge-chip">${b.replace('_',' ')}</span>`).join('')}</div>`;
+    }
+
+    // ── Load analytics ───────────────────────────────────────────────────────
+    async function loadAnalytics() {
+        try {
+            const res = await fetch(`${API}/faculty/analytics`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!data.success) throw new Error('Failed');
+            const a = data.analytics;
+
+            document.getElementById('statStudents').textContent  = a.totalStudents;
+            document.getElementById('statActive').textContent    = a.activeToday;
+            document.getElementById('statAccuracy').textContent  = (a.avgAccuracy || 0) + '%';
+            document.getElementById('statQuestions').textContent = a.totalQuestionsAnswered;
+
+            // Language breakdown
+            const langLabels = { python: 'Python', javascript: 'JavaScript', java: 'Java', cpp: 'C++' };
+            const langOrder  = ['python', 'javascript', 'java', 'cpp'];
+            const langTotal  = Math.max(1, langOrder.reduce((s, k) => s + (a.languageBreakdown[k] || 0), 0));
+            document.getElementById('langBreakdown').innerHTML = langOrder.map(k => {
+                const cnt = a.languageBreakdown[k] || 0;
+                const pct = Math.round(cnt / langTotal * 100);
+                return `<div class="bar-row">
+                    <span class="bar-label">${langLabels[k]}</span>
+                    <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+                    <span class="bar-count">${cnt}</span>
+                </div>`;
+            }).join('');
+
+            // Level breakdown
+            const levelLabels = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
+            const levelOrder  = ['beginner', 'intermediate', 'advanced'];
+            const levelColors = { beginner: 'var(--success)', intermediate: 'var(--warning)', advanced: 'var(--danger)' };
+            const levelTotal  = Math.max(1, levelOrder.reduce((s, k) => s + (a.levelBreakdown[k] || 0), 0));
+            document.getElementById('levelBreakdown').innerHTML = levelOrder.map(k => {
+                const cnt = a.levelBreakdown[k] || 0;
+                const pct = Math.round(cnt / levelTotal * 100);
+                return `<div class="bar-row">
+                    <span class="bar-label">${levelLabels[k]}</span>
+                    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${levelColors[k]}"></div></div>
+                    <span class="bar-count">${cnt}</span>
+                </div>`;
+            }).join('');
+
+        } catch (err) {
+            console.error('Analytics error:', err);
+            document.getElementById('statStudents').textContent  = '—';
+        }
+    }
+
+    // ── Load students ────────────────────────────────────────────────────────
+    let allStudents = [];
+    let openDetailId = null;
+
+    async function loadStudents() {
+        try {
+            const res = await fetch(`${API}/faculty/students`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!data.success) throw new Error('Failed');
+            allStudents = data.students;
+            renderStudents(allStudents);
+            renderRecentActivity(allStudents);
+        } catch (err) {
+            console.error('Students error:', err);
+            document.getElementById('studentsBody').innerHTML =
+                '<tr><td colspan="11" class="loading-text" style="color:var(--danger);">Failed to load students.</td></tr>';
+        }
+    }
+
+    function renderStudents(list) {
+        const tbody = document.getElementById('studentsBody');
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="11" class="loading-text">No students found.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map(s => `
+            <tr>
+                <td><strong>${escHtml(s.fullName)}</strong></td>
+                <td style="color:var(--text-secondary);">${escHtml(s.email)}</td>
+                <td><span class="lang-pill">${s.selectedLanguage || '—'}</span></td>
+                <td>${levelPill(s.currentLevel || 'beginner')}</td>
+                <td style="color:var(--xp-gold);font-weight:600;">${s.totalPoints || 0}</td>
+                <td class="${accClass(s.accuracy || 0)}">${s.accuracy || 0}%</td>
+                <td>${s.questionsAnswered || 0}</td>
+                <td>${s.streak || 0} 🔥</td>
+                <td>${badgeChips(s.badges)}</td>
+                <td style="color:var(--text-muted);">${relativeTime(s.lastActive)}</td>
+                <td><button class="btn btn-outline" style="font-size:0.75rem;padding:4px 12px;"
+                    onclick="toggleDetail(${s.id})">View</button></td>
+            </tr>
+            <tr id="detail-row-${s.id}" style="display:none;">
+                <td colspan="11" style="padding:0 14px 14px;">
+                    <div class="student-detail open" id="detail-panel-${s.id}">
+                        <div class="detail-grid">
+                            <div class="detail-item"><label>Full Name</label><div class="detail-val">${escHtml(s.fullName)}</div></div>
+                            <div class="detail-item"><label>Email</label><div class="detail-val">${escHtml(s.email)}</div></div>
+                            <div class="detail-item"><label>Language</label><div class="detail-val">${s.selectedLanguage || '—'}</div></div>
+                            <div class="detail-item"><label>Level</label><div class="detail-val">${s.currentLevel || '—'}</div></div>
+                            <div class="detail-item"><label>Total Points</label><div class="detail-val" style="color:var(--xp-gold);">${s.totalPoints || 0} XP</div></div>
+                            <div class="detail-item"><label>Accuracy</label><div class="detail-val ${accClass(s.accuracy || 0)}">${s.accuracy || 0}%</div></div>
+                            <div class="detail-item"><label>Questions Answered</label><div class="detail-val">${s.questionsAnswered || 0}</div></div>
+                            <div class="detail-item"><label>Current Streak</label><div class="detail-val">${s.streak || 0} 🔥</div></div>
+                            <div class="detail-item"><label>Last Active</label><div class="detail-val">${relativeTime(s.lastActive)}</div></div>
+                        </div>
+                        <div style="margin-top:12px;"><label style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Badges</label>
+                        <div style="margin-top:6px;">${badgeChips(s.badges)}</div></div>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleDetail(id) {
+        const row = document.getElementById(`detail-row-${id}`);
+        if (!row) return;
+        const isOpen = row.style.display !== 'none';
+        // Close any open
+        document.querySelectorAll('[id^="detail-row-"]').forEach(r => { r.style.display = 'none'; });
+        if (!isOpen) row.style.display = '';
+    }
+
+    function filterStudents(query) {
+        const q = query.toLowerCase();
+        const filtered = allStudents.filter(s =>
+            s.fullName.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+        );
+        renderStudents(filtered);
+    }
+
+    function renderRecentActivity(students) {
+        const sorted = [...students].sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive)).slice(0, 5);
+        document.getElementById('recentActivity').innerHTML = sorted.map(s => `
+            <div class="activity-item">
+                <div>
+                    <div class="activity-name">${escHtml(s.fullName)}</div>
+                    <div class="activity-meta">${s.selectedLanguage} · ${s.currentLevel} · ${s.totalPoints} XP</div>
+                </div>
+                <div class="activity-time">${relativeTime(s.lastActive)}</div>
+            </div>
+        `).join('') || '<div class="loading-text">No recent activity.</div>';
+    }
+
+    // ── Load lessons ─────────────────────────────────────────────────────────
+    async function loadLessons() {
+        try {
+            const res = await fetch(`${API}/lessons`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const lessons = Array.isArray(data) ? data : (data.lessons || []);
+            document.getElementById('lessonsSummary').innerHTML = lessons.length
+                ? lessons.map(l => `
+                    <div class="lesson-mini">
+                        <div class="lesson-mini-lang">${l.language}</div>
+                        <div class="lesson-mini-title">${escHtml(l.title)}</div>
+                    </div>`).join('')
+                : '<div class="loading-text">No lessons found.</div>';
+        } catch (err) {
+            document.getElementById('lessonsSummary').innerHTML =
+                '<div class="loading-text" style="color:var(--danger);">Failed to load lessons.</div>';
+        }
+    }
+
+    // ── Load questions ────────────────────────────────────────────────────────
+    async function loadQuestions() {
+        try {
+            const res = await fetch(`${API}/questions/all`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const questions = Array.isArray(data) ? data : (data.questions || []);
+            const tbody = document.getElementById('questionsBody');
+            tbody.innerHTML = questions.length
+                ? questions.slice(0, 100).map(q => `
+                    <tr>
+                        <td>${q.id}</td>
+                        <td><span class="lang-pill">${q.language || '—'}</span></td>
+                        <td>${levelPill(q.level || q.difficulty || 'beginner')}</td>
+                        <td style="color:var(--text-secondary);font-size:0.78rem;">${q.type || 'multiple_choice'}</td>
+                        <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                            title="${escHtml(q.question || q.questionText || '')}">${escHtml((q.question || q.questionText || '').substring(0, 80))}${(q.question || q.questionText || '').length > 80 ? '…' : ''}</td>
+                    </tr>`).join('')
+                : '<tr><td colspan="5" class="loading-text">No questions found.</td></tr>';
+        } catch (err) {
+            document.getElementById('questionsBody').innerHTML =
+                '<tr><td colspan="5" class="loading-text" style="color:var(--danger);">Failed to load questions.</td></tr>';
+        }
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Logout ────────────────────────────────────────────────────────────────
+    function logout() {
+        showLogoutModal('Are you sure you want to logout?', () => {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'index.html';
+        });
+    }
+
+    function showLogoutModal(message, onConfirm) {
+        const existing = document.getElementById('logoutConfirmOverlay');
+        if (existing) existing.remove();
+        const overlay = document.createElement('div');
+        overlay.id = 'logoutConfirmOverlay';
+        overlay.className = 'confirm-modal-overlay';
+        overlay.innerHTML = `
+            <div class="confirm-modal" role="dialog" aria-modal="true">
+                <div class="confirm-modal-icon">&#x1F44B;</div>
+                <div class="confirm-modal-title">Logout?</div>
+                <div class="confirm-modal-message">${message}</div>
+                <div class="confirm-modal-actions">
+                    <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('active'));
+        const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        document.getElementById('logoutCancelBtn').addEventListener('click', close);
+        document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
+        document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
+    }
+
+    // ── Classrooms ────────────────────────────────────────────────────────────
+    let myClassrooms = [];
+
+    async function loadClassrooms() {
+        try {
+            const res = await fetch(`${API}/classrooms/mine`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            myClassrooms = data.success ? (data.classrooms || []) : [];
+            renderClassrooms(myClassrooms);
+        } catch (err) {
+            document.getElementById('classroomsGrid').innerHTML =
+                '<div class="loading-text" style="color:var(--danger);">Failed to load classrooms.</div>';
+        }
+    }
+
+    function renderClassrooms(list) {
+        const grid = document.getElementById('classroomsGrid');
+        if (!list.length) {
+            grid.innerHTML = `
+                <div class="classroom-empty" style="grid-column:1/-1;">
+                    <div class="classroom-empty-icon">🏫</div>
+                    <p>No classrooms yet. Create one and share the enrollment key with your students.</p>
+                    <button class="btn btn-primary" onclick="openCreateModal()">+ Create First Classroom</button>
+                </div>`;
+            return;
+        }
+        grid.innerHTML = list.map(c => `
+            <div class="classroom-card">
+                <div class="classroom-card-header">
+                    <div>
+                        <div class="classroom-card-name">${escHtml(c.name)}</div>
+                        <div class="classroom-card-subject">${escHtml(c.subject || 'No subject')}</div>
+                    </div>
+                    <span class="classroom-active-badge">Active</span>
+                </div>
+                <div class="classroom-key-row">
+                    <span class="classroom-key-label">Key</span>
+                    <span class="classroom-key-val">${escHtml(c.enrollmentKey || c.enrollment_key || '—')}</span>
+                    <button class="copy-key-btn" title="Copy key" onclick="copyKey('${escHtml(c.enrollmentKey || c.enrollment_key || '')}')">⎘</button>
+                </div>
+                <div class="classroom-meta">
+                    <span><strong>${c.studentCount || 0}</strong> Students</span>
+                    <span><strong>${c.lessonCount || 0}</strong> Lessons</span>
+                    <span><strong>${c.questionCount || 0}</strong> Challenges</span>
+                </div>
+                <div class="classroom-card-actions">
+                    <a href="classroom_manage.html?id=${c.classroom_id || c.id}" class="btn btn-primary" style="flex:1;text-align:center;text-decoration:none;">Manage</a>
+                    <button class="btn btn-outline" style="color:var(--danger);border-color:var(--danger);" onclick="deleteClassroom(${c.classroom_id || c.id}, '${escHtml(c.name)}')">Delete</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function openCreateModal() {
+        document.getElementById('clName').value = '';
+        document.getElementById('clSubject').value = '';
+        document.getElementById('clDesc').value = '';
+        document.getElementById('createClassroomErr').style.display = 'none';
+        document.getElementById('createClassroomModal').classList.add('open');
+        setTimeout(() => document.getElementById('clName').focus(), 100);
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createClassroomModal').classList.remove('open');
+    }
+
+    function handleModalClick(e) {
+        if (e.target === document.getElementById('createClassroomModal')) closeCreateModal();
+    }
+
+    async function createClassroom() {
+        const name = document.getElementById('clName').value.trim();
+        const subject = document.getElementById('clSubject').value.trim();
+        const description = document.getElementById('clDesc').value.trim();
+        const errEl = document.getElementById('createClassroomErr');
+
+        if (!name) {
+            errEl.textContent = 'Classroom name is required.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        const btn = document.getElementById('createClassroomBtn');
+        btn.disabled = true;
+        btn.textContent = 'Creating…';
+        errEl.style.display = 'none';
+
+        try {
+            const res = await fetch(`${API}/classrooms`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ name, subject, description })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Failed to create classroom');
+            closeCreateModal();
+            await loadClassrooms();
+        } catch (err) {
+            errEl.textContent = err.message || 'Failed to create classroom. Try again.';
+            errEl.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Classroom';
+        }
+    }
+
+    async function deleteClassroom(id, name) {
+        if (!confirm(`Delete classroom "${name}"? This cannot be undone.`)) return;
+        try {
+            const res = await fetch(`${API}/classrooms/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            await loadClassrooms();
+        } catch (err) {
+            alert('Failed to delete classroom: ' + err.message);
+        }
+    }
+
+    function copyKey(key) {
+        navigator.clipboard.writeText(key).then(() => {
+            const toast = document.createElement('div');
+            toast.textContent = 'Enrollment key copied!';
+            toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--success);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.82rem;z-index:999;animation:fadeIn .2s ease;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        });
+    }
+
+    // ── Initialise all data ───────────────────────────────────────────────────
+    loadAnalytics();
+    loadStudents();
+    loadLessons();
+    loadQuestions();
+    loadClassrooms();
+</script>
+
+</body>
+</html>

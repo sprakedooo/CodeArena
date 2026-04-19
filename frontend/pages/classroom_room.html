@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom — CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Navbar ── */
+        .navbar { padding: 0 18%; }
+
+        /* ── Page ── */
+        .room-page { padding: 40px 18%; min-height: calc(100vh - 64px); }
+
+        /* ── Classroom header ── */
+        .room-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .room-header-left h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            color: var(--text);
+            margin: 0 0 6px;
+        }
+        .room-header-left p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        .room-teacher-badge {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+        }
+
+        /* ── Sub-tabs ── */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            margin-bottom: -1px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Lesson cards ── */
+        .lesson-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .lesson-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+        .lesson-card:hover { border-color: var(--primary); }
+        .lesson-card-lang {
+            font-size: 0.68rem;
+            color: var(--secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .lesson-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .lesson-card-body {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .lesson-read-btn {
+            align-self: flex-start;
+            font-size: 0.78rem;
+        }
+
+        /* ── Lesson reader overlay ── */
+        .reader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.75);
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .reader-overlay.open { opacity: 1; pointer-events: all; }
+        .reader-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(16px);
+            transition: transform 0.2s;
+        }
+        .reader-overlay.open .reader-box { transform: translateY(0); }
+        .reader-lang {
+            font-size: 0.68rem;
+            color: var(--secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .reader-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85rem;
+            color: var(--text);
+            margin: 0 0 20px;
+        }
+        .reader-content {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        .reader-content pre, .reader-content code {
+            background: var(--bg-surface);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .reader-content pre { padding: 14px; display: block; overflow-x: auto; }
+        .reader-close {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        /* ── Sessions ── */
+        .session-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .session-info { flex: 1; }
+        .session-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+        .session-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 3px; }
+        .status-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .status-pill.pending { background: rgba(245,158,11,.15); color: var(--warning); }
+        .status-pill.active  { background: rgba(16,185,129,.15);  color: var(--success); }
+        .status-pill.closed  { background: var(--bg-surface); color: var(--text-muted); }
+
+        /* ── Quiz overlay ── */
+        .quiz-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .quiz-overlay.open { opacity: 1; pointer-events: all; }
+        .quiz-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .quiz-progress {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .quiz-question {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .quiz-option {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: var(--text);
+            text-align: left;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .quiz-option:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); }
+        .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,.15); color: var(--success); }
+        .quiz-option.wrong   { border-color: var(--danger);  background: rgba(239,68,68,.1);   color: var(--danger); }
+        .quiz-option:disabled { cursor: default; }
+        .quiz-hint { font-size: 0.8rem; color: var(--warning); background: rgba(245,158,11,.1); border-radius: 6px; padding: 10px 14px; }
+        .quiz-score { font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--xp-gold); }
+        .fill-input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: monospace;
+            margin-bottom: 12px;
+        }
+        .fill-input:focus { outline: none; border-color: var(--primary); }
+
+        /* ── Leaderboard ── */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .lb-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .lb-rank {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            width: 28px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .lb-rank.gold   { color: #fbbf24; }
+        .lb-rank.silver { color: #94a3b8; }
+        .lb-rank.bronze { color: #b45309; }
+        .lb-name { flex: 1; font-weight: 600; color: var(--text); }
+        .lb-score { font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--xp-gold); }
+
+        /* ── Empty / loading ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .loading-text {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .navbar    { padding: 0 5%; }
+            .room-page { padding: 24px 5%; }
+            .room-header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+    <span class="navbar-brand logo">
+        <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+    </span>
+    <ul class="navbar-nav">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="lessons.html">Lessons</a></li>
+        <li><a href="lesson_game.html">Play</a></li>
+        <li><a href="feedback.html">Feedback</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+</nav>
+
+<main class="room-page">
+
+    <!-- ── Room header ── -->
+    <div class="room-header">
+        <div class="room-header-left">
+            <h1 id="roomName">Loading…</h1>
+            <p id="roomDesc">—</p>
+        </div>
+        <div class="room-teacher-badge" id="roomTeacher">👨‍🏫 —</div>
+    </div>
+
+    <!-- ── Sub-tabs ── -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('lessons', this)">📚 Lessons</button>
+        <button class="tab-btn" onclick="switchTab('play', this)">🎮 Play</button>
+        <button class="tab-btn" onclick="switchTab('leaderboard', this)">🏆 Leaderboard</button>
+    </div>
+
+    <!-- ── TAB: LESSONS ── -->
+    <div class="tab-panel active" id="tab-lessons">
+        <div class="lesson-cards" id="lessonsGrid">
+            <div class="loading-text">Loading lessons…</div>
+        </div>
+    </div>
+
+    <!-- ── TAB: PLAY ── -->
+    <div class="tab-panel" id="tab-play">
+        <div id="sessionsContainer">
+            <div class="loading-text">Loading sessions…</div>
+        </div>
+    </div>
+
+    <!-- ── TAB: LEADERBOARD ── -->
+    <div class="tab-panel" id="tab-leaderboard">
+        <div class="leaderboard-list" id="leaderboardList">
+            <div class="loading-text">Loading leaderboard…</div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ── Lesson Reader ── -->
+<div class="reader-overlay" id="readerOverlay" onclick="handleReaderOverlay(event)">
+    <div class="reader-box">
+        <div class="reader-lang" id="readerLang"></div>
+        <div class="reader-title" id="readerTitle"></div>
+        <div class="reader-content" id="readerContent"></div>
+        <div class="reader-close">
+            <button class="btn btn-outline" onclick="closeReader()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Quiz Overlay ── -->
+<div class="quiz-overlay" id="quizOverlay">
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div>
+                <div id="quizSessionTitle" style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;"></div>
+                <div class="quiz-progress" id="quizProgress">Question 1 of —</div>
+            </div>
+            <div class="quiz-score" id="quizScore">0 pts</div>
+        </div>
+        <div class="quiz-question" id="quizQuestion">—</div>
+        <div id="quizBody"><!-- options or fill input rendered here --></div>
+        <div class="quiz-hint" id="quizHint" style="display:none;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+            <button class="btn btn-outline" onclick="exitQuiz()">✕ Exit</button>
+            <button class="btn btn-primary" id="quizNextBtn" onclick="nextQuestion()" style="display:none;">Next →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:3000/api';
+    const params = new URLSearchParams(window.location.search);
+    const classroomId = params.get('id');
+
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
+    if (!user || !token) { window.location.href = 'login.html'; }
+    if (!classroomId) { window.location.href = 'dashboard.html'; }
+
+    function getAuthHeaders() {
+        return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function relativeTime(iso) {
+        if (!iso) return '—';
+        const diff = Date.now() - new Date(iso).getTime();
+        const m = Math.floor(diff / 60000);
+        if (m < 1) return 'Just now';
+        if (m < 60) return `${m}m ago`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `${h}h ago`;
+        return `${Math.floor(h/24)}d ago`;
+    }
+
+    // ── Tab switching ─────────────────────────────────────────────────────────
+    function switchTab(id, btn) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        if (id === 'leaderboard') loadLeaderboard();
+    }
+
+    // ── Load classroom info ───────────────────────────────────────────────────
+    async function loadClassroom() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            const c = data.classroom;
+            document.getElementById('roomName').textContent = c.name;
+            document.getElementById('roomDesc').textContent = c.description || c.subject || 'No description';
+            document.getElementById('roomTeacher').textContent = '👨‍🏫 ' + (c.facultyName || c.faculty_name || 'Your Teacher');
+            document.title = c.name + ' — CodeArena';
+        } catch (err) {
+            document.getElementById('roomName').textContent = 'Classroom not found';
+        }
+    }
+
+    // ── Lessons ───────────────────────────────────────────────────────────────
+    async function loadLessons() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const lessons = data.success ? (data.lessons || []) : [];
+            const grid = document.getElementById('lessonsGrid');
+            if (!lessons.length) {
+                grid.innerHTML = `<div class="empty-state">No lessons posted yet. Check back later!</div>`;
+                return;
+            }
+            grid.innerHTML = lessons.map(l => `
+                <div class="lesson-card">
+                    <div class="lesson-card-lang">${escHtml(l.language || 'General')}</div>
+                    <div class="lesson-card-title">${escHtml(l.title)}</div>
+                    <div class="lesson-card-body">${escHtml((l.content || '').replace(/<[^>]+>/g, '')).substring(0, 120)}…</div>
+                    <button class="btn btn-outline lesson-read-btn" onclick="openReader(${JSON.stringify(l).replace(/"/g,'&quot;')})">Read Lesson →</button>
+                </div>`).join('');
+        } catch (err) {
+            document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state">Failed to load lessons.</div>`;
+        }
+    }
+
+    function openReader(lesson) {
+        document.getElementById('readerLang').textContent = lesson.language || 'General';
+        document.getElementById('readerTitle').textContent = lesson.title;
+        document.getElementById('readerContent').innerHTML = lesson.content || '';
+        document.getElementById('readerOverlay').classList.add('open');
+    }
+
+    function closeReader() {
+        document.getElementById('readerOverlay').classList.remove('open');
+    }
+
+    function handleReaderOverlay(e) {
+        if (e.target === document.getElementById('readerOverlay')) closeReader();
+    }
+
+    // ── Sessions / Play ───────────────────────────────────────────────────────
+    let sessionQuestions = [];
+    let currentQIdx = 0;
+    let quizScore = 0;
+    let activeSessionId = null;
+    let answered = false;
+
+    async function loadSessions() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const sessions = data.success ? (data.sessions || []) : [];
+            const container = document.getElementById('sessionsContainer');
+            if (!sessions.length) {
+                container.innerHTML = `<div class="empty-state">No sessions yet. Your teacher will create one soon!</div>`;
+                return;
+            }
+            container.innerHTML = sessions.map(s => `
+                <div class="session-card">
+                    <div class="session-info">
+                        <div class="session-title">${escHtml(s.title)}</div>
+                        <div class="session-meta">Mode: ${s.game_mode || s.gameMode || 'mcq'} · ${relativeTime(s.created_at || s.createdAt)}</div>
+                    </div>
+                    <span class="status-pill ${s.status}">${s.status}</span>
+                    ${s.status === 'active'
+                        ? `<button class="btn btn-primary" style="font-size:0.8rem;" onclick="startSession(${s.session_id || s.id},'${escHtml(s.title)}','${s.game_mode||'mcq'}')">▶ Play</button>`
+                        : `<span style="font-size:0.78rem;color:var(--text-muted);">${s.status === 'closed' ? 'Ended' : 'Not started'}</span>`}
+                </div>`).join('');
+        } catch (err) {
+            document.getElementById('sessionsContainer').innerHTML = `<div class="empty-state">Failed to load sessions.</div>`;
+        }
+    }
+
+    async function startSession(sessionId, title, mode) {
+        activeSessionId = sessionId;
+        quizScore = 0;
+        currentQIdx = 0;
+        answered = false;
+        document.getElementById('quizSessionTitle').textContent = title;
+        document.getElementById('quizScore').textContent = '0 pts';
+
+        try {
+            // Fetch session questions via the session details
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const session = (data.sessions || []).find(s => (s.session_id || s.id) === sessionId);
+
+            if (!session) throw new Error('Session not found');
+
+            // Fetch classroom questions filtered to session's question_ids
+            const qRes = await fetch(`${API}/classrooms/${classroomId}/questions`, { headers: getAuthHeaders() });
+            const qData = await qRes.json();
+            const allQ = qData.success ? (qData.questions || []) : [];
+            const ids = session.question_ids || [];
+            sessionQuestions = ids.length
+                ? allQ.filter(q => ids.includes(q.question_id || q.id))
+                : allQ;
+
+            if (!sessionQuestions.length) {
+                alert('This session has no questions yet.');
+                return;
+            }
+
+            document.getElementById('quizOverlay').classList.add('open');
+            renderQuestion();
+        } catch (err) {
+            alert('Failed to load session: ' + err.message);
+        }
+    }
+
+    function renderQuestion() {
+        const q = sessionQuestions[currentQIdx];
+        answered = false;
+        document.getElementById('quizProgress').textContent = `Question ${currentQIdx + 1} of ${sessionQuestions.length}`;
+        document.getElementById('quizQuestion').textContent = q.question_text || q.questionText || '';
+        document.getElementById('quizHint').style.display = 'none';
+        document.getElementById('quizNextBtn').style.display = 'none';
+
+        const type = q.type || 'mcq';
+        const body = document.getElementById('quizBody');
+
+        if (type === 'mcq') {
+            const options = Array.isArray(q.options) ? q.options : [];
+            body.innerHTML = `<div class="quiz-options">${options.map((opt, i) => `
+                <button class="quiz-option" onclick="submitAnswer('${escHtml(String.fromCharCode(65+i))}', this)">${escHtml(opt)}</button>
+            `).join('')}</div>`;
+        } else {
+            body.innerHTML = `
+                <input type="text" class="fill-input" id="fillAnswer" placeholder="Type your answer…">
+                <button class="btn btn-primary" onclick="submitFillAnswer()" style="width:100%;">Submit Answer</button>`;
+        }
+    }
+
+    async function submitAnswer(selected, btn) {
+        if (answered) return;
+        answered = true;
+        const q = sessionQuestions[currentQIdx];
+        const correct = (q.correct_answer || q.correctAnswer || '').trim().toUpperCase();
+        const isCorrect = selected.toUpperCase() === correct;
+
+        document.querySelectorAll('.quiz-option').forEach(b => {
+            b.disabled = true;
+            const letter = String.fromCharCode(65 + [...document.querySelectorAll('.quiz-option')].indexOf(b));
+            if (letter === correct) b.classList.add('correct');
+        });
+        if (!isCorrect) {
+            btn.classList.add('wrong');
+            if (q.hint) {
+                document.getElementById('quizHint').textContent = '💡 ' + q.hint;
+                document.getElementById('quizHint').style.display = 'block';
+            }
+        } else {
+            quizScore += q.points || 10;
+            document.getElementById('quizScore').textContent = quizScore + ' pts';
+        }
+
+        await recordAnswer(q, selected, isCorrect);
+        document.getElementById('quizNextBtn').style.display = 'block';
+    }
+
+    async function submitFillAnswer() {
+        if (answered) return;
+        const val = (document.getElementById('fillAnswer')?.value || '').trim();
+        if (!val) return;
+        answered = true;
+        const q = sessionQuestions[currentQIdx];
+        const correct = (q.correct_answer || q.correctAnswer || '').trim();
+        const isCorrect = val.toLowerCase() === correct.toLowerCase();
+
+        document.getElementById('fillAnswer').disabled = true;
+        document.querySelector('#quizBody button')?.setAttribute('disabled','true');
+
+        if (isCorrect) {
+            document.getElementById('fillAnswer').style.borderColor = 'var(--success)';
+            quizScore += q.points || 10;
+            document.getElementById('quizScore').textContent = quizScore + ' pts';
+        } else {
+            document.getElementById('fillAnswer').style.borderColor = 'var(--danger)';
+            if (q.hint) {
+                document.getElementById('quizHint').textContent = '💡 ' + q.hint;
+                document.getElementById('quizHint').style.display = 'block';
+            }
+        }
+
+        await recordAnswer(q, val, isCorrect);
+        document.getElementById('quizNextBtn').style.display = 'block';
+    }
+
+    async function recordAnswer(q, answer, isCorrect) {
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/sessions/${activeSessionId}/answer`, {
+                method: 'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    question_id: q.question_id || q.id,
+                    answer: String(answer),
+                    is_correct: isCorrect,
+                    points_earned: isCorrect ? (q.points || 10) : 0
+                })
+            });
+        } catch (_) {}
+    }
+
+    function nextQuestion() {
+        currentQIdx++;
+        if (currentQIdx >= sessionQuestions.length) {
+            exitQuiz(true);
+            return;
+        }
+        renderQuestion();
+    }
+
+    function exitQuiz(finished = false) {
+        document.getElementById('quizOverlay').classList.remove('open');
+        if (finished) {
+            const msg = `Session complete! You scored ${quizScore} points.`;
+            setTimeout(() => alert(msg), 200);
+        }
+        loadSessions();
+    }
+
+    // ── Leaderboard ───────────────────────────────────────────────────────────
+    async function loadLeaderboard() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/leaderboard`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const board = data.success ? (data.leaderboard || []) : [];
+            const list = document.getElementById('leaderboardList');
+            if (!board.length) {
+                list.innerHTML = `<div class="empty-state">No scores yet. Be the first to play!</div>`;
+                return;
+            }
+            const rankClasses = ['gold', 'silver', 'bronze'];
+            list.innerHTML = board.map((entry, i) => `
+                <div class="lb-row" ${entry.student_id === user.id ? 'style="border-color:var(--primary);"' : ''}>
+                    <div class="lb-rank ${rankClasses[i] || ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i+1)}</div>
+                    <div class="lb-name">${escHtml(entry.fullName || entry.full_name || 'Student')}${entry.student_id === user.id ? ' <span style="color:var(--primary);font-size:0.7rem;">(You)</span>' : ''}</div>
+                    <div class="lb-score">${entry.totalPoints || entry.total_points || 0} pts</div>
+                </div>`).join('');
+        } catch (err) {
+            document.getElementById('leaderboardList').innerHTML = `<div class="empty-state">Failed to load leaderboard.</div>`;
+        }
+    }
+
+    // ── Logout ────────────────────────────────────────────────────────────────
+    function logout() {
+        if (!confirm('Logout?')) return;
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'index.html';
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadClassroom();
+    loadLessons();
+    loadSessions();
+</script>
+</body>
+</html>
