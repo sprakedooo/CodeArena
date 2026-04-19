@@ -40,5 +40,9 @@ echo    Press Ctrl+C to stop all servers
 echo ================================================================
 echo.
 
+:: Install all dependencies first (safe to run even if already installed)
+call npm run install-all
+
 :: Run both servers concurrently
 npm start
+pause
