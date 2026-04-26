@@ -97,7 +97,7 @@
         .hero {
             position: relative;
             min-height: 100vh;
-            padding: 20vh 1.5rem 26vh;
+            padding: 8vh 1.5rem 26vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -277,6 +277,18 @@
             border-radius: 20px;
             letter-spacing: 2px;
             margin-bottom: 1.75rem;
+        }
+        .hero-logo-img {
+            height: 460px;
+            width: auto;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 60px rgba(124,58,237,0.7)) drop-shadow(0 0 120px rgba(6,182,212,0.35));
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%, 100% { filter: drop-shadow(0 0 60px rgba(124,58,237,0.7)) drop-shadow(0 0 120px rgba(6,182,212,0.35)); transform: scale(1); }
+            50%       { filter: drop-shadow(0 0 80px rgba(124,58,237,0.9)) drop-shadow(0 0 150px rgba(6,182,212,0.5)); transform: scale(1.03); }
         }
         .hero-title {
             font-family: 'Press Start 2P', monospace;
@@ -541,9 +553,7 @@
 
     <!-- ============ TOP NAV ============ -->
     <nav class="top-nav">
-        <div class="nav-logo">
-            <span class="brk">&lt;</span><span class="code">Code</span><span class="arena">Arena</span><span class="brk">/&gt;</span>
-        </div>
+        <div class="nav-logo"></div>
         <ul class="nav-links">
             <li><a href="#courses">Learn</a></li>
             <li><a href="#features">AI <span class="badge-soon">NEW</span></a></li>
@@ -563,8 +573,7 @@
         <div class="mountain-mid"></div>
         <div class="mountain-fg"></div>
         <div class="hero-inner">
-            <div class="hero-eyebrow">&#x2728; START YOUR</div>
-            <h1 class="hero-title">Coding<br>Adventure</h1>
+            <img src="../assets/codearena-logo.png" alt="CodeArena" class="hero-logo-img">
             <p class="hero-subtitle">
                 The most fun and user-friendly way to learn how to code, built for beginners with adaptive AI, real challenges, and instant feedback.
             </p>

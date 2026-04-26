@@ -22,9 +22,18 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const dbService = require('../services/dbService');
 const { generateToken, authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
+const { generateOTP, sendOTPEmail } = require('../services/emailService');
 
 const SALT_ROUNDS = 10;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Convert name to Title Case: "jub manlunas" → "Jub Manlunas"
+const toTitleCase = str =>
+    str.trim().replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+
+// ─── OTP store (in-memory, works with or without DB) ─────────────────────────
+// Key: email → { otp, expiresAt, fullName, hashedPassword, role }
+const otpStore = {};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MOCK DATA: Simulated user database (fallback when MySQL is not available)
@@ -115,19 +124,8 @@ const FACULTY_CODE = process.env.FACULTY_CODE || 'FACULTY2024';
 
 router.post('/register', async (req, res) => {
     // Extract registration data from request
-    const { email, password, fullName, role, facultyCode } = req.body;
-
-    // Determine role — faculty requires a valid faculty code
-    let userRole = 'student';
-    if (role === 'faculty') {
-        if (facultyCode !== FACULTY_CODE) {
-            return res.status(403).json({
-                success: false,
-                message: 'Invalid faculty registration code'
-            });
-        }
-        userRole = 'faculty';
-    }
+    const { email, password, role, facultyCode } = req.body;
+    const fullName = req.body.fullName ? toTitleCase(req.body.fullName) : '';
 
     // VALIDATION: Check all required fields
     if (!email || !password || !fullName) {
@@ -161,22 +159,112 @@ router.post('/register', async (req, res) => {
         });
     }
 
+    // Determine role — faculty requires a valid faculty code
+    let userRole = 'student';
+    if (role === 'faculty') {
+        if (facultyCode !== FACULTY_CODE) {
+            return res.status(403).json({
+                success: false,
+                message: 'Invalid faculty registration code'
+            });
+        }
+        userRole = 'faculty';
+    }
+
+    // Check if email already exists (DB or mock)
+    if (dbService.isDbAvailable()) {
+        try {
+            const existingUser = await dbService.findUserByEmail(email);
+            if (existingUser) {
+                return res.status(400).json({ success: false, message: 'Email already registered' });
+            }
+        } catch (err) {
+            console.error('DB check error:', err);
+        }
+    } else {
+        const existingUser = mockUsers.find(u => u.email === email);
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'Email already registered' });
+        }
+    }
+
+    // Also reject if there's already a pending OTP for this email (rate-limit re-registration spam)
+    if (otpStore[email] && otpStore[email].expiresAt > Date.now()) {
+        // Allow resend via the dedicated endpoint instead
+        return res.status(400).json({
+            success: false,
+            message: 'A verification email was already sent. Please check your inbox or use "Resend OTP".',
+            needsVerification: true,
+            email
+        });
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    // Generate and store OTP
+    const otp = generateOTP();
+    otpStore[email] = {
+        otp,
+        expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+        fullName,
+        hashedPassword,
+        role: userRole
+    };
+
+    // Send OTP email
+    try {
+        await sendOTPEmail(email, fullName, otp);
+    } catch (emailErr) {
+        console.error('Failed to send OTP email:', emailErr);
+        delete otpStore[email];
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to send verification email. Please check your email address and try again.'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        needsVerification: true,
+        email,
+        message: 'Verification code sent! Please check your email.'
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: Verify Email OTP
+// POST /api/auth/verify-email
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/verify-email', async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+    }
+
+    const pending = otpStore[email];
+
+    if (!pending) {
+        return res.status(400).json({ success: false, message: 'No pending verification for this email. Please register again.' });
+    }
+
+    if (Date.now() > pending.expiresAt) {
+        delete otpStore[email];
+        return res.status(400).json({ success: false, message: 'Verification code has expired. Please register again.' });
+    }
+
+    if (otp.trim() !== pending.otp) {
+        return res.status(400).json({ success: false, message: 'Incorrect verification code. Please try again.' });
+    }
+
+    // OTP is valid — create the user
+    const { fullName, hashedPassword, role: userRole } = pending;
+    delete otpStore[email];
 
     // Try database first
     if (dbService.isDbAvailable()) {
         try {
-            // Check if email exists in database
-            const existingUser = await dbService.findUserByEmail(email);
-            if (existingUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email already registered'
-                });
-            }
-
-            // Create user in database with hashed password
             const newUser = await dbService.createUser({ email, password: hashedPassword, fullName, role: userRole });
             if (newUser) {
                 const userData = {
@@ -190,31 +278,22 @@ router.post('/register', async (req, res) => {
                 };
                 return res.status(201).json({
                     success: true,
-                    message: 'Registration successful! Welcome to the learning game!',
+                    message: 'Email verified! Welcome to CodeArena!',
                     token: generateToken(userData),
                     user: userData
                 });
             }
         } catch (error) {
-            console.error('Database registration error:', error);
+            console.error('Database registration error after OTP verify:', error);
         }
     }
 
-    // Fallback to mock data
-    const existingUser = mockUsers.find(user => user.email === email);
-    if (existingUser) {
-        return res.status(400).json({
-            success: false,
-            message: 'Email already registered'
-        });
-    }
-
-    // CREATE: New user with hashed password
+    // Fallback: create in mock store
     const newUser = {
         id: mockUsers.length + 1,
-        email: email,
+        email,
         password: hashedPassword,
-        fullName: fullName,
+        fullName,
         role: userRole,
         totalPoints: 0,
         currentLevel: 'beginner',
@@ -222,7 +301,6 @@ router.post('/register', async (req, res) => {
         selectedLanguage: null,
         createdAt: new Date().toISOString().split('T')[0]
     };
-
     mockUsers.push(newUser);
 
     const userData = {
@@ -235,12 +313,42 @@ router.post('/register', async (req, res) => {
         badges: newUser.badges
     };
 
-    res.status(201).json({
+    return res.status(201).json({
         success: true,
-        message: 'Registration successful! Welcome to the learning game!',
+        message: 'Email verified! Welcome to CodeArena!',
         token: generateToken(userData),
         user: userData
     });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: Resend OTP
+// POST /api/auth/resend-otp
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/resend-otp', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const pending = otpStore[email];
+    if (!pending) {
+        return res.status(400).json({ success: false, message: 'No pending registration found. Please register again.' });
+    }
+
+    // Regenerate OTP and reset expiry
+    const otp = generateOTP();
+    pending.otp = otp;
+    pending.expiresAt = Date.now() + 10 * 60 * 1000;
+
+    try {
+        await sendOTPEmail(email, pending.fullName, otp);
+        return res.json({ success: true, message: 'A new verification code has been sent.' });
+    } catch (emailErr) {
+        console.error('Resend OTP email error:', emailErr);
+        return res.status(500).json({ success: false, message: 'Failed to resend email. Please try again.' });
+    }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -417,6 +525,49 @@ router.get('/students', authMiddleware, requireFaculty, (req, res) => {
 
     res.json({ success: true, students, count: students.length });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GOOGLE OAUTH ROUTES
+// GET  /api/auth/google           — redirect to Google consent screen
+// GET  /api/auth/google/callback  — Google returns here with auth code
+// ─────────────────────────────────────────────────────────────────────────────
+const passport = require('passport');
+require('../config/passport'); // registers the Google strategy
+
+// Start Google OAuth flow
+router.get('/google',
+    passport.authenticate('google', { scope: ['profile', 'email'], session: false })
+);
+
+// Google redirects here after user consents
+router.get('/google/callback',
+    passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:8080/pages/login.html?error=oauth_failed' }),
+    (req, res) => {
+        // req.user is set by passport strategy
+        const user  = req.user;
+        const token = generateToken({
+            id:       user.id,
+            email:    user.email,
+            role:     user.role || 'student',
+            fullName: user.fullName,
+        });
+
+        // Build safe user payload for frontend
+        const userPayload = encodeURIComponent(JSON.stringify({
+            id:               user.id,
+            email:            user.email,
+            fullName:         user.fullName,
+            role:             user.role || 'student',
+            totalPoints:      user.totalPoints || 0,
+            currentLevel:     user.currentLevel || 'beginner',
+            selectedLanguage: user.selectedLanguage || null,
+            avatar:           user.avatar || null,
+        }));
+
+        // Redirect to frontend callback page with token + user in URL
+        res.redirect(`http://localhost:8080/pages/oauth-callback.html?token=${token}&user=${userPayload}`);
+    }
+);
 
 // Export router and mockUsers (for other routes to access)
 module.exports = router;

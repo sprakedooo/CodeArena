@@ -113,7 +113,7 @@
         <div class="register-container">
             <div class="register-hero">
                 <div class="hero-logo">
-                    <span class="brackets">&lt;</span><span class="code">Code</span><span class="arena">Arena</span><span class="brackets">/&gt;</span>
+                    <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:140px;width:auto;object-fit:contain;">
                 </div>
                 <div class="hero-tagline">Join The Adventure</div>
             </div>
@@ -153,6 +153,33 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
                 </form>
+
+                <!-- ── Divider ── -->
+                <div style="display:flex;align-items:center;gap:12px;margin:20px 0 4px;">
+                    <div style="flex:1;height:1px;background:var(--border);"></div>
+                    <span style="font-size:0.75rem;color:var(--text-muted);">or</span>
+                    <div style="flex:1;height:1px;background:var(--border);"></div>
+                </div>
+
+                <!-- ── Google OAuth button ── -->
+                <a href="http://localhost:3000/api/auth/google"
+                   style="display:flex;align-items:center;justify-content:center;gap:10px;
+                          width:100%;padding:11px 0;border-radius:8px;
+                          border:1px solid var(--border);background:var(--bg-surface);
+                          color:var(--text);font-size:0.9rem;font-weight:500;
+                          text-decoration:none;transition:border-color 0.2s,background 0.2s;
+                          margin-bottom:20px;"
+                   onmouseover="this.style.borderColor='#4285F4';this.style.background='var(--bg-card)';"
+                   onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg-surface)';">
+                    <svg width="18" height="18" viewBox="0 0 48 48">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        <path fill="none" d="M0 0h48v48H0z"/>
+                    </svg>
+                    Sign up with Google
+                </a>
 
                 <div class="register-footer">
                     Already a player? <a href="login.html">Login here</a>
@@ -211,10 +238,15 @@
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if (data.success && data.needsVerification) {
+                    // OTP sent — redirect to verify page
                     document.getElementById('alertBox').innerHTML =
-                        '<div class="alert alert-success">Account created! Redirecting...</div>';
-                    // Store session and redirect based on role
+                        '<div class="alert alert-success">Verification code sent! Check your email.</div>';
+                    setTimeout(() => {
+                        window.location.href = `verify-email.html?email=${encodeURIComponent(data.email)}`;
+                    }, 1000);
+                } else if (data.success) {
+                    // Fallback: direct registration (should not happen now)
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('isLoggedIn', 'true');

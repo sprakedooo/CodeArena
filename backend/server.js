@@ -26,10 +26,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const path = require('path');
+// Try root .env first, then backend/.env as fallback
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const express = require('express');       // Web framework for Node.js
 const cors = require('cors');             // Cross-origin resource sharing
+const session = require('express-session');
+const passport = require('passport');
 
 // Import database service
 const dbService = require('./services/dbService');
@@ -70,6 +74,19 @@ app.use(express.json());
 
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
+
+// Session (required by passport for the OAuth redirect flow)
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'codearena-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 5 * 60 * 1000 } // 5 min — just long enough for OAuth redirect
+}));
+
+// Passport (Google OAuth)
+require('./config/passport');
+app.use(passport.initialize());
+app.use(passport.session());
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 4: REGISTER API ROUTES

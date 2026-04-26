@@ -637,7 +637,7 @@
 <body>
     <nav class="navbar">
         <span class="navbar-brand logo">
-            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+            <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:55px;width:auto;object-fit:contain;vertical-align:middle;">
         </span>
         <ul class="navbar-nav">
             <li><a href="dashboard.html">Dashboard</a></li>
@@ -719,9 +719,6 @@
                             <span class="text-muted" id="lessonDuration"></span>
                         </div>
                     </div>
-                    <button class="btn btn-success" id="markCompleteBtn" onclick="markComplete()" style="display: none;">
-                        &#x2714; Complete
-                    </button>
                 </div>
 
                 <div class="lesson-body" id="lessonBody">
@@ -922,7 +919,6 @@
             levelBadge.className = `level-badge level-${lesson.difficulty}`;
 
             document.getElementById('lessonFooter').style.display = 'flex';
-            document.getElementById('markCompleteBtn').style.display = 'block';
 
             document.getElementById('prevBtn').disabled = index === 0;
             document.getElementById('nextBtn').disabled = index === lessons.length - 1;
@@ -943,6 +939,7 @@
         }
 
         function nextLesson() {
+            markComplete(); // auto-complete current lesson on Next
             if (currentLessonIndex < lessons.length - 1) selectLesson(currentLessonIndex + 1);
         }
 
@@ -956,14 +953,9 @@
                 // Show toast
                 const toast = document.createElement('div');
                 toast.className = 'toast';
-                toast.textContent = `"${lesson.title}" completed!`;
+                toast.textContent = `✔ "${lesson.title}" completed!`;
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 2500);
-
-                // Auto-advance
-                if (currentLessonIndex < lessons.length - 1) {
-                    setTimeout(() => nextLesson(), 600);
-                }
             }
         }
 

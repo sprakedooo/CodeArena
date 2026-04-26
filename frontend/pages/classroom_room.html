@@ -300,6 +300,167 @@
         .lb-name { flex: 1; font-weight: 600; color: var(--text); }
         .lb-score { font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--xp-gold); }
 
+        /* ── Live badge ── */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(239,68,68,.15);
+            color: var(--danger);
+            border: 1px solid rgba(239,68,68,.3);
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            text-transform: uppercase;
+        }
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: livePulse 1.2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: .4; transform: scale(.7); }
+        }
+        .session-card.is-live {
+            border-color: rgba(239,68,68,.4);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(239,68,68,.04) 100%);
+        }
+
+        /* ── Play tab notification dot ── */
+        .tab-btn .notif-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            margin-left: 5px;
+            vertical-align: middle;
+            animation: livePulse 1.2s ease-in-out infinite;
+        }
+
+        /* ── Live toast ── */
+        .live-toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg-card);
+            border: 1px solid rgba(239,68,68,.4);
+            border-radius: 12px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 800;
+            box-shadow: 0 8px 32px rgba(0,0,0,.4);
+            transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+            min-width: 280px;
+            cursor: pointer;
+        }
+        .live-toast.show { transform: translateX(-50%) translateY(0); }
+        .live-toast-icon { font-size: 1.4rem; }
+        .live-toast-text strong { color: var(--danger); display: block; font-size: 0.85rem; }
+        .live-toast-text span { color: var(--text-secondary); font-size: 0.78rem; }
+        .live-toast-cta {
+            margin-left: auto;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* ── Results screen ── */
+        .results-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .results-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .results-score {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2rem;
+            color: var(--xp-gold);
+            margin: 16px 0;
+        }
+        .results-sub { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 24px; }
+
+        /* ── Feedback tab ── */
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .feedback-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .feedback-card-title {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .assessment-text {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .stat-item { text-align: center; }
+        .stat-val {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            color: var(--xp-gold);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-secondary); }
+        .area-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .area-pill {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        .area-pill.weak   { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
+        .area-pill.strong { background: rgba(16,185,129,.15); color: var(--success); border: 1px solid rgba(16,185,129,.3); }
+        .reco-list { list-style: none; padding: 0; margin: 0; }
+        .reco-list li {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            line-height: 1.5;
+        }
+        .reco-list li:last-child { border-bottom: none; }
+        .reco-list li::before { content: '→ '; color: var(--primary); font-weight: 700; }
+        @media (max-width: 700px) { .feedback-grid { grid-template-columns: 1fr; } }
+
         /* ── Empty / loading ── */
         .empty-state {
             text-align: center;
@@ -353,6 +514,7 @@
         <button class="tab-btn active" onclick="switchTab('lessons', this)">📚 Lessons</button>
         <button class="tab-btn" onclick="switchTab('play', this)">🎮 Play</button>
         <button class="tab-btn" onclick="switchTab('leaderboard', this)">🏆 Leaderboard</button>
+        <button class="tab-btn" onclick="switchTab('feedback', this)">📊 Feedback</button>
     </div>
 
     <!-- ── TAB: LESSONS ── -->
@@ -376,7 +538,24 @@
         </div>
     </div>
 
+    <!-- ── TAB: FEEDBACK ── -->
+    <div class="tab-panel" id="tab-feedback">
+        <div id="feedbackContainer">
+            <div class="loading-text">Loading your feedback…</div>
+        </div>
+    </div>
+
 </main>
+
+<!-- ── Live Session Toast ── -->
+<div class="live-toast" id="liveToast" onclick="goToPlayTab()">
+    <div class="live-toast-icon">🔴</div>
+    <div class="live-toast-text">
+        <strong>Session is LIVE!</strong>
+        <span id="liveToastTitle">Your teacher started a session</span>
+    </div>
+    <button class="live-toast-cta">Play Now →</button>
+</div>
 
 <!-- ── Lesson Reader ── -->
 <div class="reader-overlay" id="readerOverlay" onclick="handleReaderOverlay(event)">
@@ -423,12 +602,10 @@
     function getAuthHeaders() {
         return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
     }
-
     function escHtml(str) {
         if (!str) return '';
         return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
-
     function relativeTime(iso) {
         if (!iso) return '—';
         const diff = Date.now() - new Date(iso).getTime();
@@ -447,9 +624,17 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         if (btn) btn.classList.add('active');
         if (id === 'leaderboard') loadLeaderboard();
+        if (id === 'feedback')    loadFeedback();
+        if (id === 'play') clearPlayNotifDot();
     }
 
-    // ── Load classroom info ───────────────────────────────────────────────────
+    function goToPlayTab() {
+        hideLiveToast();
+        const playBtn = document.querySelector('.tab-btn[onclick*="play"]');
+        switchTab('play', playBtn);
+    }
+
+    // ── Classroom info ────────────────────────────────────────────────────────
     async function loadClassroom() {
         try {
             const res = await fetch(`${API}/classrooms/${classroomId}`, { headers: getAuthHeaders() });
@@ -494,13 +679,87 @@
         document.getElementById('readerContent').innerHTML = lesson.content || '';
         document.getElementById('readerOverlay').classList.add('open');
     }
+    function closeReader() { document.getElementById('readerOverlay').classList.remove('open'); }
+    function handleReaderOverlay(e) { if (e.target === document.getElementById('readerOverlay')) closeReader(); }
 
-    function closeReader() {
-        document.getElementById('readerOverlay').classList.remove('open');
+    // ── Live polling ──────────────────────────────────────────────────────────
+    let pollTimer = null;
+    let knownStates = {};   // sessionId → status
+    let toastTimer = null;
+    let isQuizOpen = false;
+
+    function startPolling() {
+        if (pollTimer) return;
+        pollTimer = setInterval(pollSessions, 5000);
+    }
+    function stopPolling() {
+        clearInterval(pollTimer);
+        pollTimer = null;
     }
 
-    function handleReaderOverlay(e) {
-        if (e.target === document.getElementById('readerOverlay')) closeReader();
+    async function pollSessions() {
+        if (isQuizOpen) return; // don't refresh while student is mid-quiz
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const sessions = data.success ? (data.sessions || []) : [];
+
+            let hasActive = false;
+            sessions.forEach(s => {
+                const id = s.session_id || s.id;
+                const prev = knownStates[id];
+                const curr = s.status;
+
+                // Detect pending → active (teacher just launched)
+                if (prev === 'pending' && curr === 'active') {
+                    showLiveToast(s.title);
+                    setPlayNotifDot();
+                }
+                // Detect active → closed (teacher ended session during quiz)
+                if (prev === 'active' && curr === 'closed' && isQuizOpen && activeSessionId === id) {
+                    exitQuiz(false, true); // force-exit
+                }
+
+                knownStates[id] = curr;
+                if (curr === 'active') hasActive = true;
+            });
+
+            // Re-render sessions list silently (no loading flash)
+            renderSessions(sessions);
+
+            // Update leaderboard tab if it's open
+            if (document.getElementById('tab-leaderboard').classList.contains('active')) {
+                loadLeaderboard();
+            }
+
+            // Manage notif dot
+            if (hasActive) setPlayNotifDot();
+            else clearPlayNotifDot();
+
+        } catch (_) {}
+    }
+
+    function showLiveToast(title) {
+        document.getElementById('liveToastTitle').textContent = title || 'Your teacher started a session';
+        const toast = document.getElementById('liveToast');
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(hideLiveToast, 8000);
+    }
+    function hideLiveToast() {
+        document.getElementById('liveToast').classList.remove('show');
+    }
+
+    function setPlayNotifDot() {
+        const btn = document.querySelector('.tab-btn[onclick*="play"]');
+        if (btn && !btn.querySelector('.notif-dot')) {
+            const dot = document.createElement('span');
+            dot.className = 'notif-dot';
+            btn.appendChild(dot);
+        }
+    }
+    function clearPlayNotifDot() {
+        document.querySelector('.tab-btn .notif-dot')?.remove();
     }
 
     // ── Sessions / Play ───────────────────────────────────────────────────────
@@ -515,25 +774,36 @@
             const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
             const data = await res.json();
             const sessions = data.success ? (data.sessions || []) : [];
-            const container = document.getElementById('sessionsContainer');
-            if (!sessions.length) {
-                container.innerHTML = `<div class="empty-state">No sessions yet. Your teacher will create one soon!</div>`;
-                return;
-            }
-            container.innerHTML = sessions.map(s => `
-                <div class="session-card">
-                    <div class="session-info">
-                        <div class="session-title">${escHtml(s.title)}</div>
-                        <div class="session-meta">Mode: ${s.game_mode || s.gameMode || 'mcq'} · ${relativeTime(s.created_at || s.createdAt)}</div>
-                    </div>
-                    <span class="status-pill ${s.status}">${s.status}</span>
-                    ${s.status === 'active'
-                        ? `<button class="btn btn-primary" style="font-size:0.8rem;" onclick="startSession(${s.session_id || s.id},'${escHtml(s.title)}','${s.game_mode||'mcq'}')">▶ Play</button>`
-                        : `<span style="font-size:0.78rem;color:var(--text-muted);">${s.status === 'closed' ? 'Ended' : 'Not started'}</span>`}
-                </div>`).join('');
+            // Seed known states on first load (no toast)
+            sessions.forEach(s => { knownStates[s.session_id || s.id] = s.status; });
+            renderSessions(sessions);
         } catch (err) {
             document.getElementById('sessionsContainer').innerHTML = `<div class="empty-state">Failed to load sessions.</div>`;
         }
+    }
+
+    function renderSessions(sessions) {
+        const container = document.getElementById('sessionsContainer');
+        if (!sessions.length) {
+            container.innerHTML = `<div class="empty-state">No sessions yet. Your teacher will create one soon!</div>`;
+            return;
+        }
+        container.innerHTML = sessions.map(s => {
+            const sid = s.session_id || s.id;
+            const isLive = s.status === 'active';
+            return `
+            <div class="session-card${isLive ? ' is-live' : ''}">
+                <div class="session-info">
+                    <div class="session-title">${escHtml(s.title)}</div>
+                    <div class="session-meta">Mode: ${s.game_mode || 'mcq'} · ${relativeTime(s.created_at || s.createdAt)}</div>
+                </div>
+                ${isLive
+                    ? `<span class="live-badge"><span class="live-dot"></span>LIVE</span>
+                       <button class="btn btn-primary" style="font-size:0.8rem;" onclick="startSession(${sid},'${escHtml(s.title)}','${s.game_mode||'mcq'}')">▶ Play</button>`
+                    : `<span class="status-pill ${s.status}">${s.status === 'closed' ? 'Ended' : 'Waiting'}</span>`
+                }
+            </div>`;
+        }).join('');
     }
 
     async function startSession(sessionId, title, mode) {
@@ -541,18 +811,17 @@
         quizScore = 0;
         currentQIdx = 0;
         answered = false;
+        isQuizOpen = true;
+        stopPolling(); // pause polling while playing
         document.getElementById('quizSessionTitle').textContent = title;
         document.getElementById('quizScore').textContent = '0 pts';
 
         try {
-            // Fetch session questions via the session details
             const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
             const data = await res.json();
             const session = (data.sessions || []).find(s => (s.session_id || s.id) === sessionId);
-
             if (!session) throw new Error('Session not found');
 
-            // Fetch classroom questions filtered to session's question_ids
             const qRes = await fetch(`${API}/classrooms/${classroomId}/questions`, { headers: getAuthHeaders() });
             const qData = await qRes.json();
             const allQ = qData.success ? (qData.questions || []) : [];
@@ -563,6 +832,8 @@
 
             if (!sessionQuestions.length) {
                 alert('This session has no questions yet.');
+                isQuizOpen = false;
+                startPolling();
                 return;
             }
 
@@ -570,6 +841,8 @@
             renderQuestion();
         } catch (err) {
             alert('Failed to load session: ' + err.message);
+            isQuizOpen = false;
+            startPolling();
         }
     }
 
@@ -618,7 +891,6 @@
             quizScore += q.points || 10;
             document.getElementById('quizScore').textContent = quizScore + ' pts';
         }
-
         await recordAnswer(q, selected, isCorrect);
         document.getElementById('quizNextBtn').style.display = 'block';
     }
@@ -646,7 +918,6 @@
                 document.getElementById('quizHint').style.display = 'block';
             }
         }
-
         await recordAnswer(q, val, isCorrect);
         document.getElementById('quizNextBtn').style.display = 'block';
     }
@@ -668,19 +939,42 @@
     function nextQuestion() {
         currentQIdx++;
         if (currentQIdx >= sessionQuestions.length) {
-            exitQuiz(true);
+            showResults();
             return;
         }
         renderQuestion();
     }
 
-    function exitQuiz(finished = false) {
+    function showResults() {
+        const total = sessionQuestions.length;
+        const correct = sessionQuestions.filter((_, i) => i < currentQIdx).length; // rough
+        document.getElementById('quizQuestion').style.display = 'none';
+        document.getElementById('quizBody').innerHTML = `
+            <div class="results-box">
+                <div class="results-title">🎉 Session Complete!</div>
+                <div class="results-score">${quizScore} pts</div>
+                <div class="results-sub">You finished all ${total} questions.</div>
+                <button class="btn btn-primary" style="margin:0 auto;" onclick="exitQuiz(true)">See Leaderboard</button>
+            </div>`;
+        document.getElementById('quizHint').style.display = 'none';
+        document.getElementById('quizNextBtn').style.display = 'none';
+    }
+
+    function exitQuiz(finished = false, forced = false) {
+        isQuizOpen = false;
         document.getElementById('quizOverlay').classList.remove('open');
-        if (finished) {
-            const msg = `Session complete! You scored ${quizScore} points.`;
-            setTimeout(() => alert(msg), 200);
+        document.getElementById('quizQuestion').style.display = '';
+        activeSessionId = null;
+        startPolling(); // resume polling
+        if (forced) {
+            setTimeout(() => alert('The teacher has ended this session.'), 150);
         }
-        loadSessions();
+        if (finished) {
+            const playBtn = document.querySelector('.tab-btn[onclick*="leaderboard"]');
+            switchTab('leaderboard', playBtn);
+        } else {
+            loadSessions();
+        }
     }
 
     // ── Leaderboard ───────────────────────────────────────────────────────────
@@ -706,9 +1000,103 @@
         }
     }
 
+    // ── Feedback ──────────────────────────────────────────────────────────────
+    let feedbackLoaded = false;
+    async function loadFeedback() {
+        if (feedbackLoaded) return; // only fetch once per page load
+        const container = document.getElementById('feedbackContainer');
+        container.innerHTML = '<div class="loading-text">Analyzing your performance…</div>';
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/feedback`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'No feedback available yet');
+            feedbackLoaded = true;
+            renderFeedback(data);
+        } catch (err) {
+            container.innerHTML = `<div class="empty-state">📊 ${escHtml(err.message)}<br><br>
+                <small style="color:var(--text-muted);">Complete some session challenges first to get personalized feedback.</small></div>`;
+        }
+    }
+
+    function renderFeedback(data) {
+        const container = document.getElementById('feedbackContainer');
+        const { overallAssessment, weakAreas = [], strongAreas = [], recommendations = [], stats = {} } = data;
+
+        const accuracyPct = stats.accuracy != null ? Math.round(stats.accuracy) : '—';
+        const total    = stats.totalAnswered ?? '—';
+        const correct  = stats.correctAnswers ?? '—';
+
+        const weakPills   = weakAreas.length
+            ? weakAreas.map(t => `<span class="area-pill weak">⚠ ${escHtml(t)}</span>`).join('')
+            : `<span style="color:var(--text-muted);font-size:0.8rem;">None identified — great work!</span>`;
+
+        const strongPills = strongAreas.length
+            ? strongAreas.map(t => `<span class="area-pill strong">✓ ${escHtml(t)}</span>`).join('')
+            : `<span style="color:var(--text-muted);font-size:0.8rem;">Keep practicing to unlock strength areas.</span>`;
+
+        const recoItems = recommendations.length
+            ? recommendations.map(r => `<li>${escHtml(r)}</li>`).join('')
+            : `<li>Complete more sessions to receive personalised recommendations.</li>`;
+
+        container.innerHTML = `
+            <div class="feedback-grid">
+                <!-- Overall assessment -->
+                <div class="feedback-card" style="grid-column:1/-1;">
+                    <div class="feedback-card-title">🤖 AI Assessment</div>
+                    <div class="assessment-text">${escHtml(overallAssessment || 'No assessment yet.')}</div>
+                </div>
+
+                <!-- Stats -->
+                <div class="feedback-card">
+                    <div class="feedback-card-title">📈 Your Stats</div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-val">${accuracyPct}${accuracyPct !== '—' ? '%' : ''}</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-val">${correct}</span>
+                            <span class="stat-label">Correct</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-val">${total}</span>
+                            <span class="stat-label">Answered</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="feedback-card">
+                    <div class="feedback-card-title">💡 Recommendations</div>
+                    <ul class="reco-list">${recoItems}</ul>
+                </div>
+
+                <!-- Weak areas -->
+                <div class="feedback-card">
+                    <div class="feedback-card-title">⚠ Areas to Improve</div>
+                    <div class="area-pills">${weakPills}</div>
+                </div>
+
+                <!-- Strong areas -->
+                <div class="feedback-card">
+                    <div class="feedback-card-title">✓ Strong Areas</div>
+                    <div class="area-pills">${strongPills}</div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:8px;">
+                <button class="btn btn-outline" style="font-size:0.78rem;" onclick="refreshFeedback()">↻ Refresh Feedback</button>
+            </div>`;
+    }
+
+    function refreshFeedback() {
+        feedbackLoaded = false;
+        loadFeedback();
+    }
+
     // ── Logout ────────────────────────────────────────────────────────────────
     function logout() {
         if (!confirm('Logout?')) return;
+        stopPolling();
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('isLoggedIn');
@@ -718,7 +1106,7 @@
     // ── Init ──────────────────────────────────────────────────────────────────
     loadClassroom();
     loadLessons();
-    loadSessions();
+    loadSessions().then(() => startPolling());
 </script>
 </body>
 </html>

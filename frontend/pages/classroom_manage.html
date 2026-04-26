@@ -256,6 +256,77 @@
         .level-pill.intermediate { background: rgba(245,158,11,.15);  color: var(--warning); }
         .level-pill.advanced     { background: rgba(239,68,68,.15);   color: var(--danger); }
 
+        /* ── Live monitor panel ── */
+        .monitor-panel {
+            margin-top: 12px;
+            background: var(--bg-surface);
+            border: 1px solid rgba(16,185,129,.25);
+            border-radius: 10px;
+            padding: 16px 20px;
+        }
+        .monitor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .monitor-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .monitor-refresh {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .monitor-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .monitor-row:last-child { border-bottom: none; }
+        .monitor-name {
+            width: 160px;
+            flex-shrink: 0;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .monitor-bar-wrap {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .monitor-bar-fill {
+            height: 100%;
+            border-radius: 20px;
+            background: var(--success);
+            transition: width 0.5s ease;
+        }
+        .monitor-stats {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            min-width: 110px;
+            text-align: right;
+        }
+        .monitor-pts {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.62rem;
+            color: var(--xp-gold);
+            min-width: 60px;
+            text-align: right;
+        }
+
         /* ── Empty / loading ── */
         .empty-state {
             text-align: center;
@@ -314,6 +385,11 @@
         }
         .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
         .err-msg { color: var(--danger); font-size: 0.8rem; margin-top: -8px; margin-bottom: 4px; display: none; }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: .4; transform: scale(.7); }
+        }
 
         @media (max-width: 900px) {
             .faculty-nav { padding: 0 5%; }
@@ -465,7 +541,56 @@
 <!-- ── Question Modal ── -->
 <div class="modal-overlay" id="questionModal" onclick="handleOverlayClick(event,'questionModal')">
     <div class="modal-box">
-        <div class="modal-title" id="questionModalTitle">Add Challenge</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+            <div class="modal-title" id="questionModalTitle" style="margin:0;">Add Challenge</div>
+            <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;">
+                ✨ Generate with AI
+            </button>
+        </div>
+
+        <!-- AI Generator panel (hidden by default) -->
+        <div id="aiGenPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
+            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">✨ AI Question Generator</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
+                    <input type="text" class="form-input" id="aiTopic" placeholder="e.g. For Loops, Variables…" style="font-size:0.82rem;">
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label>
+                    <select class="form-input" id="aiLanguage" style="font-size:0.82rem;">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
+                    <select class="form-input" id="aiDifficulty" style="font-size:0.82rem;">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Type</label>
+                    <select class="form-input" id="aiType" style="font-size:0.82rem;">
+                        <option value="mcq">Multiple Choice</option>
+                        <option value="fill_blank">Fill in the Blank</option>
+                        <option value="output_pred">Output Prediction</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn btn-primary" id="aiGenerateBtn" onclick="generateQuestion()" style="font-size:0.78rem;">✨ Generate</button>
+                <button class="btn btn-outline" onclick="closeAIGenPanel()" style="font-size:0.78rem;">Cancel</button>
+                <span id="aiGenStatus" style="font-size:0.75rem;color:var(--text-muted);margin-left:4px;"></span>
+            </div>
+        </div>
+
         <input type="hidden" id="questionEditId">
         <div class="modal-field">
             <label>Question *</label>
@@ -842,6 +967,77 @@
         document.getElementById('mcqOptionsGroup').style.display = type === 'mcq' ? 'block' : 'none';
     }
 
+    // ── AI Question Generator ─────────────────────────────────────────────────
+    function openAIGenPanel() {
+        document.getElementById('aiGenPanel').style.display = 'block';
+        document.getElementById('aiGenBtn').style.display = 'none';
+        document.getElementById('questionErr').style.display = 'none';
+        document.getElementById('aiTopic').focus();
+    }
+    function closeAIGenPanel() {
+        document.getElementById('aiGenPanel').style.display = 'none';
+        document.getElementById('aiGenBtn').style.display = 'flex';
+        document.getElementById('aiGenStatus').textContent = '';
+    }
+
+    async function generateQuestion() {
+        const topic      = document.getElementById('aiTopic').value.trim();
+        const language   = document.getElementById('aiLanguage').value;
+        const difficulty = document.getElementById('aiDifficulty').value;
+        const type       = document.getElementById('aiType').value;
+        const statusEl   = document.getElementById('aiGenStatus');
+        const genBtn     = document.getElementById('aiGenerateBtn');
+
+        if (!topic) { statusEl.textContent = 'Enter a topic first.'; statusEl.style.color = 'var(--danger)'; return; }
+
+        genBtn.disabled = true;
+        statusEl.style.color = 'var(--text-muted)';
+        statusEl.textContent = 'Generating…';
+
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/questions/generate`, {
+                method: 'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({ topic, language, difficulty, type })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+
+            const q = data.question;
+
+            // Fill in the form fields
+            document.getElementById('questionText').value     = q.question_text || '';
+            document.getElementById('questionType').value     = q.type || type;
+            document.getElementById('correctAnswer').value    = q.correct_answer || '';
+            document.getElementById('questionHint').value     = q.hint || '';
+            document.getElementById('questionDiff').value     = q.difficulty || difficulty;
+            document.getElementById('questionPoints').value   = q.type === 'advanced' ? 30 : q.type === 'intermediate' ? 20 : 10;
+            document.getElementById('questionTopic').value    = q.topic || topic;
+            toggleMCQOptions();
+
+            // Fill MCQ options
+            if (q.type === 'mcq' && Array.isArray(q.options)) {
+                const opts = q.options.map(o => o.replace(/^[A-D]\)\s*/i, ''));
+                document.getElementById('optA').value = opts[0] || '';
+                document.getElementById('optB').value = opts[1] || '';
+                document.getElementById('optC').value = opts[2] || '';
+                document.getElementById('optD').value = opts[3] || '';
+            }
+
+            // Clear any leftover validation error
+            const errEl = document.getElementById('questionErr');
+            errEl.style.display = 'none';
+
+            statusEl.style.color = 'var(--success)';
+            statusEl.textContent = '✔ Question filled in!';
+            setTimeout(closeAIGenPanel, 1200);
+        } catch (err) {
+            statusEl.style.color = 'var(--danger)';
+            statusEl.textContent = err.message || 'Generation failed.';
+        } finally {
+            genBtn.disabled = false;
+        }
+    }
+
     async function saveQuestion() {
         const id = document.getElementById('questionEditId').value;
         const question_text = document.getElementById('questionText').value.trim();
@@ -945,16 +1141,37 @@
             container.innerHTML = `<div class="empty-state">No sessions yet. Create one and students can join with the classroom key.</div>`;
             return;
         }
-        container.innerHTML = sessionsList.map(s => `
-            <div class="session-card">
-                <div class="session-info">
-                    <div class="session-title">${escHtml(s.title)}</div>
-                    <div class="session-meta">Mode: ${s.game_mode || s.gameMode || '—'} · Created ${relativeTime(s.created_at || s.createdAt)}</div>
+        container.innerHTML = sessionsList.map(s => {
+            const sid = s.session_id || s.id;
+            const isLive = s.status === 'active';
+            return `
+            <div style="margin-bottom:16px;">
+                <div class="session-card" style="${isLive ? 'border-color:rgba(16,185,129,.4);background:linear-gradient(135deg,var(--bg-card) 0%,rgba(16,185,129,.04) 100%);margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;' : ''}">
+                    <div class="session-info">
+                        <div class="session-title">
+                            ${isLive ? `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:0.62rem;font-weight:700;letter-spacing:1px;padding:2px 8px;margin-right:8px;vertical-align:middle;"><span style="width:6px;height:6px;background:var(--success);border-radius:50%;display:inline-block;animation:livePulse 1.2s ease-in-out infinite;"></span>LIVE</span>` : ''}
+                            ${escHtml(s.title)}
+                        </div>
+                        <div class="session-meta">Mode: ${s.game_mode || '—'} · Created ${relativeTime(s.created_at || s.createdAt)}
+                            ${isLive ? `<span id="answerCount-${sid}" style="margin-left:10px;color:var(--success);">· Loading responses…</span>` : ''}
+                        </div>
+                    </div>
+                    <span class="status-pill ${s.status}">${s.status}</span>
+                    ${s.status === 'pending' ? `<button class="btn btn-primary" style="font-size:0.78rem;" onclick="setSessionStatus(${sid},'active')">▶ Launch</button>` : ''}
+                    ${isLive ? `<button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="setSessionStatus(${sid},'closed')">■ End Session</button>` : ''}
                 </div>
-                <span class="status-pill ${s.status}">${s.status}</span>
-                ${s.status === 'pending' ? `<button class="btn btn-primary" style="font-size:0.78rem;" onclick="setSessionStatus(${s.session_id || s.id},'active')">▶ Launch</button>` : ''}
-                ${s.status === 'active'  ? `<button class="btn btn-outline" style="font-size:0.78rem;" onclick="setSessionStatus(${s.session_id || s.id},'closed')">■ Close</button>` : ''}
-            </div>`).join('');
+                ${isLive ? `
+                <div class="monitor-panel" id="monitor-${sid}">
+                    <div class="monitor-header">
+                        <span class="monitor-title">📡 Live Student Monitor</span>
+                        <span class="monitor-refresh" id="monitorRefresh-${sid}">Refreshing…</span>
+                    </div>
+                    <div id="monitorRows-${sid}">
+                        <div class="loading-text" style="padding:8px 0;">Waiting for students…</div>
+                    </div>
+                </div>` : ''}
+            </div>`;
+        }).join('');
     }
 
     function renderSessionQuestionPicker() {
@@ -1006,8 +1223,95 @@
                 method: 'PATCH', headers: getAuthHeaders(),
                 body: JSON.stringify({ status })
             });
-            loadSessions();
+            await loadSessions();
+            if (status === 'active') startLivePolling();
+            if (status === 'closed') stopLivePolling();
         } catch (err) { alert('Failed to update session.'); }
+    }
+
+    // ── Live polling (faculty side) ───────────────────────────────────────────
+    let livePoll = null;
+
+    function startLivePolling() {
+        if (livePoll) return;
+        livePoll = setInterval(pollLiveSessions, 5000);
+        pollLiveSessions(); // immediate first tick
+    }
+    function stopLivePolling() { clearInterval(livePoll); livePoll = null; }
+
+    async function pollLiveSessions() {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const fresh = data.success ? (data.sessions || []) : [];
+
+            // Only re-render if status changed to avoid flicker
+            const activeSessions = fresh.filter(s => s.status === 'active');
+
+            // Update session list reference quietly
+            sessionsList = fresh;
+
+            // For each active session: fetch answer count + monitor data
+            for (const s of activeSessions) {
+                const sid = s.session_id || s.id;
+                fetchAnswerCount(sid);
+                fetchMonitor(sid);
+            }
+
+            // Stop polling when no active sessions remain
+            if (!activeSessions.length) stopLivePolling();
+        } catch (_) {}
+    }
+
+    async function fetchAnswerCount(sessionId) {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/analytics`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const el = document.getElementById(`answerCount-${sessionId}`);
+            if (el && data.success) {
+                const count = data.analytics?.totalAnswers || data.analytics?.answersInSession || 0;
+                el.textContent = `· ${count} response${count !== 1 ? 's' : ''} so far`;
+            }
+        } catch (_) {}
+    }
+
+    async function fetchMonitor(sessionId) {
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/monitor`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const rowsEl = document.getElementById(`monitorRows-${sessionId}`);
+            const refreshEl = document.getElementById(`monitorRefresh-${sessionId}`);
+            if (!rowsEl) return;
+
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (refreshEl) refreshEl.textContent = `Last updated ${now}`;
+
+            if (!data.success) { rowsEl.innerHTML = `<div style="color:var(--text-muted);font-size:0.8rem;padding:6px 0;">Monitor unavailable.</div>`; return; }
+
+            const { monitor = [], totalQuestions = 0 } = data;
+            if (!monitor.length) {
+                rowsEl.innerHTML = `<div style="color:var(--text-muted);font-size:0.8rem;padding:6px 0;">No students have joined yet.</div>`;
+                return;
+            }
+
+            // Sort by points desc
+            const sorted = [...monitor].sort((a, b) => (b.points || 0) - (a.points || 0));
+            rowsEl.innerHTML = sorted.map(m => {
+                const answered = m.answered || 0;
+                const total    = totalQuestions || 1;
+                const pct      = Math.min(100, Math.round((answered / total) * 100));
+                const barColor = m.correct / Math.max(answered, 1) >= 0.7 ? 'var(--success)' : m.correct / Math.max(answered, 1) >= 0.4 ? 'var(--warning)' : 'var(--danger)';
+                return `
+                <div class="monitor-row">
+                    <div class="monitor-name" title="${escHtml(m.fullName || m.full_name || 'Student')}">${escHtml(m.fullName || m.full_name || 'Student')}</div>
+                    <div class="monitor-bar-wrap">
+                        <div class="monitor-bar-fill" style="width:${pct}%;background:${barColor};"></div>
+                    </div>
+                    <div class="monitor-stats">${answered}/${total} · ${m.correct || 0} correct</div>
+                    <div class="monitor-pts">${m.points || 0} pts</div>
+                </div>`;
+            }).join('');
+        } catch (_) {}
     }
 
     // ── Logout ────────────────────────────────────────────────────────────────

@@ -3,16 +3,8 @@ echo ================================================================
 echo    CODEARENA - Starting All Servers
 echo ================================================================
 echo.
-echo Installing dependencies if needed...
-echo.
 
-:: Check if node_modules exists in root
-if not exist "node_modules" (
-    echo Installing root dependencies...
-    call npm install
-)
-
-:: Check if node_modules exists in backend
+:: Install backend dependencies if needed
 if not exist "backend\node_modules" (
     echo Installing backend dependencies...
     cd backend
@@ -20,7 +12,7 @@ if not exist "backend\node_modules" (
     cd ..
 )
 
-:: Check if node_modules exists in frontend
+:: Install frontend dependencies if needed
 if not exist "frontend\node_modules" (
     echo Installing frontend dependencies...
     cd frontend
@@ -29,20 +21,19 @@ if not exist "frontend\node_modules" (
 )
 
 echo.
-echo ================================================================
-echo    Starting CodeArena...
-echo ================================================================
-echo.
 echo    Backend API:  http://localhost:3000
 echo    Frontend:     http://localhost:8080
 echo.
-echo    Press Ctrl+C to stop all servers
+echo    Close either window to stop that server.
 echo ================================================================
 echo.
 
-:: Install all dependencies first (safe to run even if already installed)
-call npm run install-all
+:: Open backend in a new window
+start "CodeArena Backend" cmd /k "cd /d %~dp0backend && npm start"
 
-:: Run both servers concurrently
-npm start
+:: Open frontend in a new window
+start "CodeArena Frontend" cmd /k "cd /d %~dp0frontend && npm start"
+
+echo Both servers started in separate windows.
+echo You can close this window.
 pause

@@ -4,13 +4,15 @@
     {
       "name": "frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "frontend"],
+      "runtimeArgs": ["start"],
+      "cwd": "C:\\Users\\jubil\\ai-cai-system\\frontend",
       "port": 8080
     },
     {
       "name": "backend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "backend"],
+      "runtimeArgs": ["start"],
+      "cwd": "C:\\Users\\jubil\\ai-cai-system\\backend",
       "port": 3000
     }
   ]

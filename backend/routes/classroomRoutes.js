@@ -35,6 +35,7 @@ const router  = express.Router();
 const { authMiddleware } = require('../middleware/authMiddleware');
 const dbService = require('../services/dbService');
 const db = require('../config/database');
+const openaiService = require('../services/openaiService');
 
 // All classroom routes require auth
 router.use(authMiddleware);
@@ -47,6 +48,20 @@ let mockClQuestions  = [];
 let mockClSessions   = [];
 let mockClAnswers    = [];
 let _nextId = { cl: 1, en: 1, le: 1, qu: 1, se: 1, an: 1 };
+
+// ─── User identity cache (mock mode — keyed by user id) ──────────────────────
+// Populated whenever any authenticated request arrives, so we can resolve names
+// even when the DB is offline.
+const mockUserCache = {};
+function cacheUser(req) {
+    if (req.user && req.user.id) {
+        mockUserCache[req.user.id] = {
+            id:       req.user.id,
+            fullName: req.user.fullName || req.user.name || 'Student',
+            email:    req.user.email    || ''
+        };
+    }
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -125,9 +140,13 @@ router.get('/mine', async (req, res) => {
         try {
             const rows = await db.query(
                 `SELECT c.*,
-                    COUNT(DISTINCT e.student_id) AS studentCount
+                    COUNT(DISTINCT e.student_id)   AS studentCount,
+                    COUNT(DISTINCT l.lesson_id)    AS lessonCount,
+                    COUNT(DISTINCT q.question_id)  AS questionCount
                  FROM classrooms c
-                 LEFT JOIN classroom_enrollments e ON e.classroom_id = c.classroom_id AND e.status = 'active'
+                 LEFT JOIN classroom_enrollments e  ON e.classroom_id = c.classroom_id AND e.status = 'active'
+                 LEFT JOIN classroom_lessons l      ON l.classroom_id = c.classroom_id
+                 LEFT JOIN classroom_questions q    ON q.classroom_id = c.classroom_id
                  WHERE c.faculty_id = ?
                  GROUP BY c.classroom_id
                  ORDER BY c.created_at DESC`,
@@ -143,13 +162,16 @@ router.get('/mine', async (req, res) => {
         .filter(c => c.facultyId === facultyId)
         .map(c => ({
             ...c,
-            studentCount: mockEnrollments.filter(e => e.classroomId === c.id && e.status === 'active').length
+            studentCount:  mockEnrollments.filter(e => e.classroomId === c.id && e.status === 'active').length,
+            lessonCount:   mockClLessons.filter(l => l.classroomId === c.id).length,
+            questionCount: mockClQuestions.filter(q => q.classroomId === c.id).length
         }));
     res.json({ success: true, classrooms, source: 'mock' });
 });
 
 // GET /api/classrooms/enrolled — Student's enrolled classrooms
 router.get('/enrolled', async (req, res) => {
+    cacheUser(req); // keep identity fresh
     const studentId = req.user.id;
 
     if (dbService.isDbAvailable()) {
@@ -234,6 +256,7 @@ router.delete('/:id', async (req, res) => {
 
 // POST /api/classrooms/join — Enroll with key
 router.post('/join', async (req, res) => {
+    cacheUser(req); // always cache the student's identity
     const { enrollmentKey } = req.body;
     const studentId = req.user.id;
     if (!enrollmentKey) return res.status(400).json({ success: false, message: 'Enrollment key is required' });
@@ -271,8 +294,18 @@ router.post('/join', async (req, res) => {
     if (existing) {
         if (existing.status === 'active') return res.status(400).json({ success: false, message: 'Already enrolled in this classroom' });
         existing.status = 'active';
+        existing.fullName = req.user.fullName || existing.fullName;
+        existing.email    = req.user.email    || existing.email;
     } else {
-        mockEnrollments.push({ id: _nextId.en++, classroomId: classroom.id, studentId, status: 'active', enrolledAt: new Date().toISOString() });
+        mockEnrollments.push({
+            id: _nextId.en++,
+            classroomId: classroom.id,
+            studentId,
+            fullName: req.user.fullName || 'Student',
+            email:    req.user.email    || '',
+            status: 'active',
+            enrolledAt: new Date().toISOString()
+        });
     }
     res.json({ success: true, message: `Successfully joined "${classroom.name}"`, classroom: { id: classroom.id, name: classroom.name }, source: 'mock' });
 });
@@ -310,7 +343,16 @@ router.get('/:id/students', async (req, res) => {
 
     const students = mockEnrollments
         .filter(e => e.classroomId === classroomId && e.status === 'active')
-        .map(e => ({ id: e.studentId, enrolledAt: e.enrolledAt }));
+        .map(e => {
+            const cached = mockUserCache[e.studentId] || {};
+            return {
+                id:        e.studentId,
+                fullName:  e.fullName  || cached.fullName || 'Student',
+                email:     e.email     || cached.email    || '—',
+                status:    e.status,
+                enrolledAt: e.enrolledAt
+            };
+        });
     res.json({ success: true, students, source: 'mock' });
 });
 
@@ -435,7 +477,9 @@ router.delete('/:id/lessons/:lid', async (req, res) => {
 router.post('/:id/questions', async (req, res) => {
     if (!requireFacultyRole(req, res)) return;
     const classroomId = parseInt(req.params.id);
-    const { questionText, type, options, correctAnswer, hint, difficulty, points, topic } = req.body;
+    const questionText  = req.body.questionText  || req.body.question_text;
+    const correctAnswer = req.body.correctAnswer || req.body.correct_answer;
+    const { type, options, hint, difficulty, points, topic } = req.body;
     if (!questionText || !correctAnswer) return res.status(400).json({ success: false, message: 'Question text and correct answer are required' });
 
     if (dbService.isDbAvailable()) {
@@ -478,7 +522,9 @@ router.put('/:id/questions/:qid', async (req, res) => {
     if (!requireFacultyRole(req, res)) return;
     const classroomId  = parseInt(req.params.id);
     const questionId   = parseInt(req.params.qid);
-    const { questionText, type, options, correctAnswer, hint, difficulty, points, topic } = req.body;
+    const questionText  = req.body.questionText  || req.body.question_text;
+    const correctAnswer = req.body.correctAnswer || req.body.correct_answer;
+    const { type, options, hint, difficulty, points, topic } = req.body;
 
     if (dbService.isDbAvailable()) {
         try {
@@ -510,6 +556,25 @@ router.delete('/:id/questions/:qid', async (req, res) => {
 
     mockClQuestions = mockClQuestions.filter(q => !(q.id === questionId && q.classroomId === classroomId));
     res.json({ success: true, message: 'Question deleted', source: 'mock' });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// AI QUESTION GENERATION (faculty only)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// POST /api/classrooms/:id/questions/generate
+router.post('/:id/questions/generate', async (req, res) => {
+    if (!requireFacultyRole(req, res)) return;
+    const { topic, difficulty, language, type } = req.body;
+    if (!topic) return res.status(400).json({ success: false, message: 'Topic is required' });
+
+    try {
+        const question = await openaiService.generateQuestion({ topic, difficulty, language, type });
+        res.json({ success: true, question });
+    } catch (err) {
+        console.error('OpenAI question generation error:', err.message);
+        res.status(500).json({ success: false, message: err.message || 'Failed to generate question' });
+    }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -599,6 +664,7 @@ router.patch('/:id/sessions/:sid', async (req, res) => {
 
 // POST /api/classrooms/:id/sessions/:sid/answer — Student submits answer
 router.post('/:id/sessions/:sid/answer', async (req, res) => {
+    cacheUser(req); // keep identity fresh for monitor/leaderboard
     const classroomId = parseInt(req.params.id);
     const sessionId   = parseInt(req.params.sid);
     const studentId   = req.user.id;
@@ -663,7 +729,15 @@ router.get('/:id/leaderboard', async (req, res) => {
     mockClAnswers
         .filter(a => sessionIds.includes(a.sessionId))
         .forEach(a => {
-            if (!grouped[a.studentId]) grouped[a.studentId] = { id: a.studentId, totalPoints: 0, answered: 0, correct: 0 };
+            if (!grouped[a.studentId]) {
+                const enr    = mockEnrollments.find(e => e.studentId === a.studentId) || {};
+                const cached = mockUserCache[a.studentId] || {};
+                grouped[a.studentId] = {
+                    student_id:  a.studentId,
+                    fullName:    enr.fullName || cached.fullName || `Student #${a.studentId}`,
+                    totalPoints: 0, answered: 0, correct: 0
+                };
+            }
             grouped[a.studentId].totalPoints += a.pointsEarned;
             grouped[a.studentId].answered++;
             if (a.isCorrect) grouped[a.studentId].correct++;
@@ -697,6 +771,170 @@ router.get('/:id/analytics', async (req, res) => {
     const accuracy = answers.length > 0 ? Math.round((correct / answers.length) * 100) : 0;
 
     res.json({ success: true, analytics: { enrolledStudents: enrolled, totalSessions: sessions, totalAnswers: answers.length, avgAccuracy: accuracy }, source: 'mock' });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PHASE 6 — AI FEEDBACK (per student, per classroom)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// GET /api/classrooms/:id/feedback — Student's AI feedback for this classroom
+router.get('/:id/feedback', async (req, res) => {
+    const classroomId = parseInt(req.params.id);
+    const studentId   = req.user.id;
+
+    let answers = [];
+    let questions = [];
+
+    if (dbService.isDbAvailable()) {
+        try {
+            // Get all answers by this student in this classroom
+            answers = await db.query(
+                `SELECT ca.*, cq.topic, cq.difficulty, cq.points
+                 FROM classroom_answers ca
+                 JOIN classroom_sessions cs ON cs.session_id = ca.session_id
+                 LEFT JOIN classroom_questions cq ON cq.question_id = ca.question_id
+                 WHERE cs.classroom_id = ? AND ca.student_id = ?`,
+                [classroomId, studentId]
+            );
+            questions = await db.query('SELECT * FROM classroom_questions WHERE classroom_id = ?', [classroomId]);
+        } catch (err) { console.error(err); }
+    } else {
+        const sessionIds = mockClSessions.filter(s => s.classroomId === classroomId).map(s => s.id);
+        answers = mockClAnswers.filter(a => sessionIds.includes(a.sessionId) && a.studentId === studentId);
+        questions = mockClQuestions.filter(q => q.classroomId === classroomId);
+    }
+
+    if (!answers.length) {
+        return res.json({
+            success: true,
+            feedback: {
+                overallAssessment: "You haven't played any sessions in this classroom yet. Join an active session to get personalized feedback!",
+                weakAreas: [],
+                strongAreas: [],
+                recommendations: ['Participate in classroom sessions to unlock AI feedback.'],
+                stats: { total: 0, correct: 0, accuracy: 0 }
+            }
+        });
+    }
+
+    // Compute per-topic stats
+    const topicMap = {};
+    answers.forEach(a => {
+        const topic = a.topic || 'General';
+        if (!topicMap[topic]) topicMap[topic] = { correct: 0, total: 0 };
+        topicMap[topic].total++;
+        if (a.is_correct || a.isCorrect) topicMap[topic].correct++;
+    });
+
+    const total   = answers.length;
+    const correct = answers.filter(a => a.is_correct || a.isCorrect).length;
+    const accuracy = Math.round((correct / total) * 100);
+
+    const weakAreas   = Object.entries(topicMap).filter(([, s]) => s.total > 0 && (s.correct / s.total) < 0.5).map(([t, s]) => ({ topic: t, accuracy: Math.round((s.correct / s.total) * 100) }));
+    const strongAreas = Object.entries(topicMap).filter(([, s]) => s.total > 0 && (s.correct / s.total) >= 0.8).map(([t, s]) => ({ topic: t, accuracy: Math.round((s.correct / s.total) * 100) }));
+
+    // Recommendations (always rule-based — fast, free)
+    const recommendations = [];
+    if (weakAreas.length)  recommendations.push(`Review these topics: ${weakAreas.map(w => w.topic).join(', ')}.`);
+    if (accuracy < 70)     recommendations.push('Re-read the classroom lessons before your next session.');
+    if (accuracy >= 80)    recommendations.push('Try the advanced challenges to push yourself further!');
+    if (total < 5)         recommendations.push('Participate in more sessions for a more accurate assessment.');
+    if (!recommendations.length) recommendations.push('Keep practising consistently to maintain your performance!');
+
+    // AI-generated overall assessment via OpenAI (with rule-based fallback)
+    let overallAssessment = '';
+    try {
+        // Fetch classroom name for context
+        let classroomName = 'this classroom';
+        try {
+            if (dbService.isDbAvailable()) {
+                const [cl] = await db.query('SELECT name FROM classrooms WHERE classroom_id = ?', [classroomId]);
+                if (cl) classroomName = cl.name;
+            } else {
+                const cl = mockClassrooms.find(c => c.id === classroomId);
+                if (cl) classroomName = cl.name;
+            }
+        } catch (_) {}
+
+        overallAssessment = await openaiService.generateFeedback({
+            studentName:   req.user.fullName || 'Student',
+            total, correct, accuracy,
+            weakAreas:   weakAreas.map(w => w.topic),
+            strongAreas: strongAreas.map(s => s.topic),
+            classroomName,
+        });
+    } catch (err) {
+        // Fallback to rule-based if OpenAI fails
+        console.warn('OpenAI feedback fallback:', err.message);
+        if (accuracy >= 90)      overallAssessment = `Outstanding performance! You've answered ${correct} of ${total} questions correctly (${accuracy}%). You clearly understand the material.`;
+        else if (accuracy >= 75) overallAssessment = `Great work! You scored ${accuracy}% accuracy across ${total} questions. Keep it up and target your weak areas to reach mastery.`;
+        else if (accuracy >= 50) overallAssessment = `Good effort! You got ${correct}/${total} correct (${accuracy}%). Focus on the topics below to improve your score.`;
+        else                     overallAssessment = `You're getting started! Your accuracy is ${accuracy}% (${correct}/${total}). Review the lesson materials and try again — you'll improve!`;
+    }
+
+    res.json({
+        success: true,
+        overallAssessment, weakAreas, strongAreas, recommendations,
+        stats: { totalAnswered: total, correctAnswers: correct, accuracy }
+    });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PHASE 7 — LIVE MONITORING (faculty: per-student progress in a session)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// GET /api/classrooms/:id/sessions/:sid/monitor
+router.get('/:id/sessions/:sid/monitor', async (req, res) => {
+    if (!requireFacultyRole(req, res)) return;
+    const classroomId = parseInt(req.params.id);
+    const sessionId   = parseInt(req.params.sid);
+
+    if (dbService.isDbAvailable()) {
+        try {
+            // Per-student stats for this session
+            const rows = await db.query(
+                `SELECT u.user_id AS studentId, u.full_name AS fullName,
+                        COUNT(ca.answer_id) AS answered,
+                        SUM(ca.is_correct)  AS correct,
+                        SUM(ca.points_earned) AS points
+                 FROM classroom_enrollments ce
+                 JOIN users u ON u.user_id = ce.student_id
+                 LEFT JOIN classroom_answers ca ON ca.student_id = ce.student_id AND ca.session_id = ?
+                 WHERE ce.classroom_id = ? AND ce.status = 'active'
+                 GROUP BY ce.student_id
+                 ORDER BY points DESC`,
+                [sessionId, classroomId]
+            );
+
+            // Get total questions in this session
+            const [sessionRow] = await db.query('SELECT question_ids FROM classroom_sessions WHERE session_id = ?', [sessionId]);
+            let totalQ = 0;
+            if (sessionRow) {
+                try { totalQ = JSON.parse(sessionRow.question_ids || '[]').length; } catch (_) {}
+            }
+
+            return res.json({ success: true, monitor: rows, totalQuestions: totalQ, source: 'database' });
+        } catch (err) { console.error(err); }
+    }
+
+    // Mock fallback
+    const session = mockClSessions.find(s => s.id === sessionId && s.classroomId === classroomId);
+    const totalQ  = session ? (session.questionIds || []).length : 0;
+    const enrolled = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active');
+
+    const monitor = enrolled.map(e => {
+        const studentAnswers = mockClAnswers.filter(a => a.sessionId === sessionId && a.studentId === e.studentId);
+        const cached = mockUserCache[e.studentId] || {};
+        return {
+            studentId: e.studentId,
+            fullName: e.fullName || cached.fullName || `Student #${e.studentId}`,
+            answered: studentAnswers.length,
+            correct: studentAnswers.filter(a => a.isCorrect).length,
+            points: studentAnswers.reduce((s, a) => s + a.pointsEarned, 0)
+        };
+    }).sort((a, b) => b.points - a.points);
+
+    res.json({ success: true, monitor, totalQuestions: totalQ, source: 'mock' });
 });
 
 module.exports = router;
