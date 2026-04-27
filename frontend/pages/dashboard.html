@@ -727,7 +727,7 @@
         <!-- Welcome Banner -->
         <div class="welcome-banner fade-in">
             <div class="welcome-info">
-                <h1>Welcome back, <span id="userName">Student</span>!</h1>
+                <h1><span id="greeting">Good evening</span>, <span id="userName">Student</span>!</h1>
                 <div class="welcome-sub">
                     Currently learning:
                     <span class="language-tag" id="currentLanguage">Python</span>
@@ -906,6 +906,10 @@
         ];
 
         // Initialize basic UI
+        // Time-based greeting
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+        document.getElementById('greeting').textContent = greeting;
         document.getElementById('userName').textContent = user.fullName || 'Student';
         document.getElementById('currentLanguage').textContent = languageNames[user.selectedLanguage] || user.selectedLanguage;
         document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
@@ -1043,12 +1047,19 @@
 
                 if (data.success) {
                     const progress = data.progress;
-                    document.getElementById('totalPoints').textContent = user.totalPoints || 0;
-                    document.getElementById('questionsAnswered').textContent = progress.questionsAnswered || 0;
-                    document.getElementById('accuracy').textContent = (progress.accuracy || 0) + '%';
-                    document.getElementById('currentStreak').textContent = progress.consecutiveCorrect || 0;
+                    // Use localStorage stats as fallback if server has no data yet
+                    const statsKey = `gameStats_${user.selectedLanguage}`;
+                    const localStats = JSON.parse(localStorage.getItem(statsKey) || '{}');
+                    const answered = progress.questionsAnswered || localStats.questionsAnswered || 0;
+                    const accuracy = progress.accuracy || localStats.accuracy || 0;
+                    const streak   = progress.consecutiveCorrect || localStats.streak || 0;
 
-                    updateLevelDisplay(progress.currentLevel || 'beginner');
+                    document.getElementById('totalPoints').textContent = user.totalPoints || 0;
+                    document.getElementById('questionsAnswered').textContent = answered;
+                    document.getElementById('accuracy').textContent = accuracy + '%';
+                    document.getElementById('currentStreak').textContent = streak;
+
+                    updateLevelDisplay(progress.currentLevel || user.currentLevel || 'beginner');
                     updateBadges(user.badges || []);
                 }
             } catch (err) {

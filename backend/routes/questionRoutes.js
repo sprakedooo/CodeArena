@@ -28,6 +28,7 @@ const router = express.Router();
 const dbService = require('../services/dbService');
 const { requireFaculty } = require('../middleware/authMiddleware');
 const { generateQuestions } = require('../services/questionGeneratorService');
+const openaiService = require('../services/openaiService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MOCK DATA: Programming Questions by Language and Level
@@ -1083,6 +1084,22 @@ router.get('/generate', async (req, res) => {
     } catch (err) {
         console.error('Question generation error:', err);
         return res.status(500).json({ success: false, message: 'Failed to generate questions' });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: AI Single Question Generation (CMS)
+// POST /api/questions/generate
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/generate', requireFaculty, async (req, res) => {
+    const { topic, language = 'python', difficulty = 'beginner', type = 'mcq' } = req.body;
+    if (!topic) return res.status(400).json({ success: false, message: 'Topic is required' });
+    try {
+        const question = await openaiService.generateQuestion({ topic, language, difficulty, type });
+        return res.json({ success: true, question });
+    } catch (err) {
+        console.error('CMS question generation error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to generate question: ' + err.message });
     }
 });
 

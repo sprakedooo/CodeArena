@@ -208,10 +208,10 @@ router.get('/:userId/:language', async (req, res) => {
     const language = req.params.language.toLowerCase();
 
     // Validate language
-    if (!['python', 'java', 'cpp'].includes(language)) {
+    if (!['python', 'javascript', 'java', 'cpp'].includes(language)) {
         return res.status(400).json({
             success: false,
-            message: 'Invalid language. Use: python, java, or cpp'
+            message: 'Invalid language. Use: python, javascript, java, or cpp'
         });
     }
 
@@ -252,9 +252,13 @@ router.get('/:userId/:language', async (req, res) => {
     if (!userProgress[userId]) {
         userProgress[userId] = {
             python: createEmptyProgress(),
+            javascript: createEmptyProgress(),
             java: createEmptyProgress(),
             cpp: createEmptyProgress()
         };
+    }
+    if (!userProgress[userId][language]) {
+        userProgress[userId][language] = createEmptyProgress();
     }
 
     const langProgress = userProgress[userId][language];
@@ -558,5 +562,37 @@ function checkLevelAdvancement(progress) {
 }
 
 // Export router and data
+// Shared helper so answerRoutes can update mock progress without going through HTTP
+function incrementMockProgress(userId, language, isCorrect, topic) {
+    const lang = language.toLowerCase();
+    if (!userProgress[userId]) {
+        userProgress[userId] = {
+            python: createEmptyProgress(),
+            javascript: createEmptyProgress(),
+            java: createEmptyProgress(),
+            cpp: createEmptyProgress()
+        };
+    }
+    if (!userProgress[userId][lang]) {
+        userProgress[userId][lang] = createEmptyProgress();
+    }
+    const p = userProgress[userId][lang];
+    p.questionsAnswered++;
+    if (isCorrect) {
+        p.correctAnswers++;
+        p.consecutiveCorrect++;
+    } else {
+        p.consecutiveCorrect = 0;
+    }
+    p.accuracy = Math.round((p.correctAnswers / p.questionsAnswered) * 100);
+    if (topic) {
+        if (!p.topicProgress[topic]) p.topicProgress[topic] = { answered: 0, correct: 0 };
+        p.topicProgress[topic].answered++;
+        if (isCorrect) p.topicProgress[topic].correct++;
+    }
+    p.lastActive = new Date().toISOString().split('T')[0];
+}
+
 module.exports = router;
 module.exports.userProgress = userProgress;
+module.exports.incrementMockProgress = incrementMockProgress;

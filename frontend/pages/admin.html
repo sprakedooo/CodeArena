@@ -1038,7 +1038,41 @@
         <div class="modal-box">
             <div class="modal-header">
                 <div class="modal-title" id="lessonModalTitle">ADD LESSON</div>
-                <button class="modal-close" onclick="closeModal('lesson')">&times;</button>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-ghost" style="font-size:0.75rem;padding:0.3rem 0.8rem;border:1px solid var(--primary);color:var(--primary);" onclick="toggleAIPanel('lesson')">✨ Generate with AI</button>
+                    <button class="modal-close" onclick="closeModal('lesson')">&times;</button>
+                </div>
+            </div>
+            <!-- AI Generator Panel (Lesson) -->
+            <div id="aiLessonPanel" style="display:none;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:10px;padding:1rem;margin:0 1.5rem 0.5rem;">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:0.75rem;letter-spacing:1px;">✨ AI LESSON GENERATOR</div>
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.6rem;margin-bottom:0.75rem;">
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Topic *</label>
+                        <input type="text" id="aiLTopic" class="form-input" placeholder="e.g. For Loops in Python" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Language</label>
+                        <select id="aiLLang" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Difficulty</label>
+                        <select id="aiLDiff" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="btn btn-primary" style="font-size:0.78rem;padding:0.4rem 1rem;" onclick="generateAILesson()">⚡ Generate</button>
+                    <span id="aiLStatus" style="font-size:0.75rem;color:var(--text-muted);"></span>
+                </div>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="lessonId">
@@ -1093,7 +1127,49 @@
         <div class="modal-box">
             <div class="modal-header">
                 <div class="modal-title" id="questionModalTitle">ADD QUESTION</div>
-                <button class="modal-close" onclick="closeModal('question')">&times;</button>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-ghost" style="font-size:0.75rem;padding:0.3rem 0.8rem;border:1px solid var(--primary);color:var(--primary);" onclick="toggleAIPanel('question')">✨ Generate with AI</button>
+                    <button class="modal-close" onclick="closeModal('question')">&times;</button>
+                </div>
+            </div>
+            <!-- AI Generator Panel (Question) -->
+            <div id="aiQuestionPanel" style="display:none;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:10px;padding:1rem;margin:0 1.5rem 0.5rem;">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:0.75rem;letter-spacing:1px;">✨ AI QUESTION GENERATOR</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.6rem;margin-bottom:0.75rem;">
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Topic *</label>
+                        <input type="text" id="aiQTopic" class="form-input" placeholder="e.g. Loops" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Language</label>
+                        <select id="aiQLang" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Difficulty</label>
+                        <select id="aiQDiff" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Type</label>
+                        <select id="aiQType" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="mcq">Multiple Choice</option>
+                            <option value="fill_blank">Fill in Blank</option>
+                            <option value="output_pred">Output Prediction</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="btn btn-primary" style="font-size:0.78rem;padding:0.4rem 1rem;" onclick="generateAIQuestion()">⚡ Generate</button>
+                    <span id="aiQStatus" style="font-size:0.75rem;color:var(--text-muted);"></span>
+                </div>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="questionId">
@@ -1925,6 +2001,105 @@
         function closeModal(type) {
             document.getElementById(type + 'Modal').classList.remove('open');
             document.body.style.overflow = '';
+            // Also close AI panels
+            const panel = document.getElementById('ai' + type.charAt(0).toUpperCase() + type.slice(1) + 'Panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        // ── AI Panel toggle ──────────────────────────────────────────────────
+        function toggleAIPanel(type) {
+            const panel = document.getElementById('ai' + type.charAt(0).toUpperCase() + type.slice(1) + 'Panel');
+            if (!panel) return;
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ── AI Question Generation ───────────────────────────────────────────
+        async function generateAIQuestion() {
+            const topic      = document.getElementById('aiQTopic').value.trim();
+            const language   = document.getElementById('aiQLang').value;
+            const difficulty = document.getElementById('aiQDiff').value;
+            const type       = document.getElementById('aiQType').value;
+            const statusEl   = document.getElementById('aiQStatus');
+
+            if (!topic) { statusEl.textContent = '⚠ Please enter a topic.'; statusEl.style.color = 'var(--danger)'; return; }
+
+            statusEl.style.color = 'var(--text-muted)';
+            statusEl.textContent = '⏳ Generating…';
+
+            try {
+                const res  = await fetch(`${API}/questions/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || localStorage.getItem('token')) },
+                    body: JSON.stringify({ topic, language, difficulty, type })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                const q = data.question;
+                // Fill question modal fields
+                document.getElementById('qText').value    = q.question_text || '';
+                document.getElementById('qTopic').value   = q.topic || topic;
+                document.getElementById('qHint').value    = q.hint || '';
+                document.getElementById('qLanguage').value = language;
+                document.getElementById('qLevel').value   = difficulty;
+
+                if (q.options && q.options.length === 4) {
+                    document.getElementById('optA').value = q.options[0].replace(/^A\)\s*/i, '');
+                    document.getElementById('optB').value = q.options[1].replace(/^B\)\s*/i, '');
+                    document.getElementById('optC').value = q.options[2].replace(/^C\)\s*/i, '');
+                    document.getElementById('optD').value = q.options[3].replace(/^D\)\s*/i, '');
+                }
+                if (q.correct_answer) {
+                    const letter = q.correct_answer.toUpperCase().charAt(0);
+                    if (['A','B','C','D'].includes(letter)) document.getElementById('qCorrect').value = letter;
+                }
+
+                statusEl.style.color = 'var(--success)';
+                statusEl.textContent = '✔ Question filled in!';
+                // Hide panel after success
+                setTimeout(() => { document.getElementById('aiQuestionPanel').style.display = 'none'; statusEl.textContent = ''; }, 1500);
+            } catch (err) {
+                statusEl.style.color = 'var(--danger)';
+                statusEl.textContent = '✖ ' + (err.message || 'Generation failed');
+            }
+        }
+
+        // ── AI Lesson Generation ─────────────────────────────────────────────
+        async function generateAILesson() {
+            const topic      = document.getElementById('aiLTopic').value.trim();
+            const language   = document.getElementById('aiLLang').value;
+            const difficulty = document.getElementById('aiLDiff').value;
+            const statusEl   = document.getElementById('aiLStatus');
+
+            if (!topic) { statusEl.textContent = '⚠ Please enter a topic.'; statusEl.style.color = 'var(--danger)'; return; }
+
+            statusEl.style.color = 'var(--text-muted)';
+            statusEl.textContent = '⏳ Generating lesson…';
+
+            try {
+                const res  = await fetch(`${API}/lessons/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || localStorage.getItem('token')) },
+                    body: JSON.stringify({ topic, language, difficulty })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                const l = data.lesson;
+                // Fill lesson modal fields
+                document.getElementById('lessonTitle').value   = l.title || '';
+                document.getElementById('lessonDesc').value    = l.description || '';
+                document.getElementById('lessonContent').value = l.content || '';
+                document.getElementById('lessonLang').value    = language;
+                document.getElementById('lessonDiff').value    = l.difficulty || difficulty;
+
+                statusEl.style.color = 'var(--success)';
+                statusEl.textContent = '✔ Lesson filled in!';
+                setTimeout(() => { document.getElementById('aiLessonPanel').style.display = 'none'; statusEl.textContent = ''; }, 1500);
+            } catch (err) {
+                statusEl.style.color = 'var(--danger)';
+                statusEl.textContent = '✖ ' + (err.message || 'Generation failed');
+            }
         }
 
         document.querySelectorAll('.modal-overlay').forEach(mo => {

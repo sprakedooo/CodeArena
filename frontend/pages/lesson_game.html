@@ -2011,10 +2011,18 @@
                     currentLevel = data.levelUp.newLevel;
                     updateLevelBadge();
                     showPopup('LEVEL UP!', 'bonus', data.levelUp.newLevel.toUpperCase());
-                    // Persist new level to localStorage immediately
                     user.currentLevel = currentLevel;
-                    localStorage.setItem('user', JSON.stringify(user));
                 }
+
+                // Persist stats to localStorage so dashboard survives server restarts
+                const statsKey = `gameStats_${user.selectedLanguage}`;
+                const stats = JSON.parse(localStorage.getItem(statsKey) || '{"questionsAnswered":0,"correctAnswers":0,"streak":0}');
+                stats.questionsAnswered++;
+                if (isCorrect) { stats.correctAnswers++; stats.streak++; }
+                else { stats.streak = 0; }
+                stats.accuracy = Math.round((stats.correctAnswers / stats.questionsAnswered) * 100);
+                localStorage.setItem(statsKey, JSON.stringify(stats));
+                localStorage.setItem('user', JSON.stringify(user));
 
                 showFeedback(isCorrect, q, data);
             } catch (err) {

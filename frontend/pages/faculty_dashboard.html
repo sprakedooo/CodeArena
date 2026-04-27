@@ -949,7 +949,7 @@
             <div class="activity-item">
                 <div>
                     <div class="activity-name">${escHtml(s.fullName)}</div>
-                    <div class="activity-meta">${s.selectedLanguage} · ${s.currentLevel} · ${s.totalPoints} XP</div>
+                    <div class="activity-meta">${s.selectedLanguage ? s.selectedLanguage.charAt(0).toUpperCase() + s.selectedLanguage.slice(1) : 'No language'} · ${s.currentLevel || 'beginner'} · ${s.totalPoints || 0} XP</div>
                 </div>
                 <div class="activity-time">${relativeTime(s.lastActive)}</div>
             </div>

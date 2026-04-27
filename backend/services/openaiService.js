@@ -109,4 +109,104 @@ Write 2–4 sentences of warm, constructive, personalised feedback. Mention spec
     return response.choices[0].message.content.trim();
 }
 
-module.exports = { generateQuestion, generateFeedback };
+// ─── Live game hint (wrong answer) ───────────────────────────────────────────
+/**
+ * Generate a contextual hint when a student answers incorrectly.
+ * Returns a 1-2 sentence hint string.
+ */
+async function generateLiveHint({ questionText, correctAnswer, selectedAnswer, topic, language, level }) {
+    const client = getClient();
+
+    const prompt = `A ${level}-level ${language} student just answered a quiz question incorrectly.
+
+Question: "${questionText}"
+Their answer: "${selectedAnswer}"
+Correct answer: "${correctAnswer}"
+Topic: ${topic}
+
+Write a short, encouraging 1-2 sentence hint that:
+1. Gently explains why their answer is wrong (without just giving away the answer)
+2. Points them toward the correct concept
+3. Stays friendly and supportive
+
+Reply with ONLY the hint text, no labels or formatting.`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 120,
+    });
+
+    return response.choices[0].message.content.trim();
+}
+
+// ─── Live game correct-answer message ────────────────────────────────────────
+/**
+ * Generate a brief celebratory message + fun fact when a student answers correctly.
+ * Returns a 1-2 sentence string.
+ */
+async function generateCorrectMessage({ questionText, correctAnswer, topic, language, level }) {
+    const client = getClient();
+
+    const prompt = `A ${level}-level ${language} student just correctly answered a quiz question about "${topic}".
+
+Question: "${questionText}"
+Correct answer: "${correctAnswer}"
+
+Write a short 1-2 sentence response that:
+1. Celebrates their correct answer enthusiastically (use an emoji)
+2. Adds one interesting/useful related fact about the concept
+
+Reply with ONLY the message text, no labels or formatting.`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.8,
+        max_tokens: 100,
+    });
+
+    return response.choices[0].message.content.trim();
+}
+
+// ─── Lesson generation ────────────────────────────────────────────────────────
+/**
+ * Ask GPT to generate a full lesson.
+ * Returns: { title, description, difficulty, content (HTML string) }
+ */
+async function generateLesson({ topic, language = 'python', difficulty = 'beginner' }) {
+    const client = getClient();
+
+    const prompt = `You are an experienced programming teacher creating a ${difficulty}-level ${language} lesson about "${topic}".
+
+Generate a structured lesson with rich HTML content. Respond with ONLY valid JSON (no markdown, no extra text):
+{
+  "title": "A clear lesson title",
+  "description": "One-sentence description of what the student will learn",
+  "difficulty": "${difficulty}",
+  "content": "<HTML string with the full lesson content>"
+}
+
+For the "content" HTML, include:
+- An introductory <p> paragraph explaining the concept
+- At least 2 <h2> section headings with <p> explanations
+- At least 2 code examples inside <div class="code-block"><pre><code>...</code></pre></div>
+- At least 1 tip inside <div class="info-box tip"><strong>💡 Tip:</strong> ...</div>
+- A summary <div class="info-box"><strong>📌 Key Takeaway:</strong> ...</div>
+
+Keep the code examples practical and relevant to ${language}. Escape all HTML special characters inside code blocks properly.`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 2000,
+    });
+
+    const raw = response.choices[0].message.content.trim();
+    const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(jsonStr);
+}
+
+module.exports = { generateQuestion, generateFeedback, generateLesson, generateLiveHint, generateCorrectMessage };

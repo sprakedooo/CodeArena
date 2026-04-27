@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireFaculty } = require('../middleware/authMiddleware');
+const openaiService = require('../services/openaiService');
 
 let mockLessons = [
 
@@ -1327,6 +1328,19 @@ router.get('/:id', (req, res) => {
     const lesson = mockLessons.find(l => l.id === id);
     if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
     res.json({ lesson });
+});
+
+// POST /api/lessons/generate — AI lesson generation (CMS)
+router.post('/generate', requireFaculty, async (req, res) => {
+    const { topic, language = 'python', difficulty = 'beginner' } = req.body;
+    if (!topic) return res.status(400).json({ success: false, message: 'Topic is required' });
+    try {
+        const lesson = await openaiService.generateLesson({ topic, language, difficulty });
+        return res.json({ success: true, lesson });
+    } catch (err) {
+        console.error('CMS lesson generation error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to generate lesson: ' + err.message });
+    }
 });
 
 // POST /api/lessons

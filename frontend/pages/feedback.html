@@ -105,6 +105,39 @@
             color: var(--warning);
         }
 
+        .lesson-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.85rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(124, 58, 237, 0.4);
+            border-radius: var(--radius-sm);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lesson-link-btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(6, 182, 212, 0.2));
+            border-color: var(--primary);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .lesson-link-btn--browse {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(16, 185, 129, 0.08));
+            border-color: rgba(6, 182, 212, 0.35);
+            color: var(--secondary);
+        }
+        .lesson-link-btn--browse:hover {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.28), rgba(16, 185, 129, 0.18));
+            border-color: var(--secondary);
+        }
+
         .strong-area-card {
             padding: 1rem;
             background: var(--bg-surface);
@@ -293,16 +326,46 @@
             }
         }
 
-        function displayFeedback(feedback) {
+        async function displayFeedback(feedback) {
             document.getElementById('overallAssessment').textContent =
                 feedback.overallAssessment || 'Keep practicing to receive detailed feedback!';
             document.getElementById('encouragementMessage').textContent =
                 feedback.encouragement || '';
 
+            // Fetch lessons to match weak areas
+            let lessons = [];
+            try {
+                const lRes = await fetch(`${API}/lessons?language=${user.selectedLanguage}`, { headers: getAuthHeaders() });
+                const lData = await lRes.json();
+                if (lData.success) lessons = lData.lessons || [];
+            } catch (e) { /* lessons stay empty */ }
+
+            function findLesson(topic) {
+                if (!topic || !lessons.length) return null;
+                const t = topic.toLowerCase();
+                return lessons.find(l => l.title && l.title.toLowerCase().includes(t)) ||
+                       lessons.find(l => l.description && l.description.toLowerCase().includes(t)) ||
+                       null;
+            }
+
+            function goToLesson(lessonId) {
+                localStorage.setItem('highlightLesson', lessonId);
+                window.location.href = 'lessons.html';
+            }
+
             const weakContainer = document.getElementById('weakAreasContainer');
             const weakAreas = feedback.weakAreas || [];
             if (weakAreas.length > 0) {
-                weakContainer.innerHTML = weakAreas.map(area => `
+                weakContainer.innerHTML = weakAreas.map(area => {
+                    const matched = findLesson(area.topic);
+                    const lessonBtn = matched
+                        ? `<a class="lesson-link-btn" onclick="localStorage.setItem('highlightLesson','${matched.id}'); window.location.href='lessons.html';">
+                               &#x1F4D6; Review Lesson: ${matched.title}
+                           </a>`
+                        : `<a class="lesson-link-btn lesson-link-btn--browse" href="lessons.html">
+                               &#x1F4DA; Browse Lessons
+                           </a>`;
+                    return `
                     <div class="weak-area-card">
                         <div class="area-header">
                             <strong>${area.topic}</strong>
@@ -312,8 +375,9 @@
                         <div class="tip-box">
                             <strong>&#x1F4A1; Tip:</strong> ${area.recommendation || 'Practice more questions on this topic.'}
                         </div>
-                    </div>
-                `).join('');
+                        ${lessonBtn}
+                    </div>`;
+                }).join('');
             } else {
                 weakContainer.innerHTML = '<div class="alert alert-success">Great job! No weak areas detected.</div>';
             }

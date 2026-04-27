@@ -142,7 +142,7 @@ async function loadLessons(difficulty = '') {
         if (data.success && data.lessons.length > 0) {
             // Display lessons as cards
             container.innerHTML = data.lessons.map(lesson => `
-                <div class="card lesson-card" onclick="openLesson(${lesson.id})">
+                <div class="card lesson-card" id="lesson-card-${lesson.id}" onclick="openLesson(${lesson.id})">
                     <div style="display: flex; align-items: flex-start;">
                         <span class="lesson-number">${lesson.orderNumber}</span>
                         <div style="flex: 1;">
@@ -155,6 +155,20 @@ async function loadLessons(difficulty = '') {
                     </div>
                 </div>
             `).join('');
+
+            // Auto-open lesson if redirected from feedback page
+            const highlightId = localStorage.getItem('highlightLesson');
+            if (highlightId) {
+                localStorage.removeItem('highlightLesson');
+                const targetCard = document.getElementById(`lesson-card-${highlightId}`);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetCard.style.outline = '2px solid var(--primary)';
+                    targetCard.style.boxShadow = '0 0 16px rgba(124,58,237,0.5)';
+                }
+                // Small delay so cards render first
+                setTimeout(() => openLesson(parseInt(highlightId)), 300);
+            }
         } else {
             container.innerHTML = '<p class="text-muted">No lessons available.</p>';
         }

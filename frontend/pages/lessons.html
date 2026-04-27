@@ -808,6 +808,16 @@
                 lessons = data.lessons || [];
                 renderCourseGrid();
                 updateProgress();
+
+                // Auto-open lesson if redirected from the feedback page
+                const highlightId = localStorage.getItem('highlightLesson');
+                if (highlightId) {
+                    localStorage.removeItem('highlightLesson');
+                    const idx = lessons.findIndex(l => String(l.id) === String(highlightId));
+                    if (idx !== -1) {
+                        setTimeout(() => selectLesson(idx), 200);
+                    }
+                }
             } catch (err) {
                 console.error('Error loading lessons:', err);
             }
