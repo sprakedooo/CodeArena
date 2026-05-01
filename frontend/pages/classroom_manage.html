@@ -400,17 +400,6 @@
 </head>
 <body>
 
-<!-- ── Faculty Navbar ── -->
-<nav class="faculty-nav">
-    <a class="logo" href="faculty_dashboard.html">
-        <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
-        <span class="faculty-badge">FACULTY</span>
-    </a>
-    <ul class="faculty-nav-links">
-        <li><a href="faculty_dashboard.html">← Back to Dashboard</a></li>
-        <li><a href="#" class="logout-link" onclick="logout()">Logout</a></li>
-    </ul>
-</nav>
 
 <main class="manage-page">
 
@@ -433,6 +422,7 @@
         <button class="tab-btn" onclick="switchTab('lessons', this)">Lessons</button>
         <button class="tab-btn" onclick="switchTab('challenges', this)">Challenges</button>
         <button class="tab-btn" onclick="switchTab('sessions', this)">Sessions</button>
+        <button class="tab-btn" onclick="switchTab('assignments', this)"><span class="material-symbols-outlined" style="font-size:0.95rem;vertical-align:middle;margin-right:0.25rem;">assignment</span>Assignments</button>
     </div>
 
     <!-- ── TAB: STUDENTS ── -->
@@ -505,13 +495,58 @@
         </div>
     </div>
 
+    <!-- ── TAB: ASSIGNMENTS ── -->
+    <div class="tab-panel" id="tab-assignments">
+        <div class="section-header">
+            <h2>Coding Assignments</h2>
+            <button class="btn btn-primary" onclick="openAssignmentModal()">+ New Assignment</button>
+        </div>
+        <div id="assignmentsContainer">
+            <div class="loading-text">Loading assignments…</div>
+        </div>
+    </div>
+
 </main>
 
 <!-- ── Lesson Modal ── -->
 <div class="modal-overlay" id="lessonModal" onclick="handleOverlayClick(event,'lessonModal')">
-    <div class="modal-box">
-        <div class="modal-title" id="lessonModalTitle">Add Lesson</div>
+    <div class="modal-box" style="max-width:680px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+            <div class="modal-title" style="margin:0;" id="lessonModalTitle">Add Lesson</div>
+            <button class="btn btn-outline" onclick="toggleLessonAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
+        </div>
         <input type="hidden" id="lessonEditId">
+
+        <!-- AI Panel -->
+        <div id="lessonAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
+            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Lesson Generator</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
+                    <input type="text" class="form-input" id="lessonAITopic" placeholder="e.g. For Loops" style="font-size:0.82rem;">
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label>
+                    <select class="form-input" id="lessonAILang" style="font-size:0.82rem;">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
+                    <select class="form-input" id="lessonAIDiff" style="font-size:0.82rem;">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="lessonAIGenBtn" onclick="generateAILesson()" style="font-size:0.8rem;">⚡ Generate Lesson</button>
+            <span id="lessonAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
+        </div>
+
         <div class="modal-field">
             <label>Title *</label>
             <input type="text" class="form-input" id="lessonTitle" placeholder="Lesson title">
@@ -544,13 +579,13 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
             <div class="modal-title" id="questionModalTitle" style="margin:0;">Add Challenge</div>
             <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;">
-                ✨ Generate with AI
+                <span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI
             </button>
         </div>
 
         <!-- AI Generator panel (hidden by default) -->
         <div id="aiGenPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
-            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">✨ AI Question Generator</div>
+            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Question Generator</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
                 <div>
                     <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
@@ -1329,6 +1364,438 @@
     loadLessons();
     loadQuestions();
     loadSessions();
+    loadAssignments();
+
+    // ── ASSIGNMENTS ───────────────────────────────────────────────────────────
+    let assignmentsList = [];
+
+    async function loadAssignments() {
+        try {
+            const res = await fetch(`${API}/assignments?classroomId=${classroomId}`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            assignmentsList = data.success ? (data.assignments || []) : [];
+            renderAssignments();
+        } catch (err) {
+            document.getElementById('assignmentsContainer').innerHTML = `<div class="empty-state">Failed to load assignments.</div>`;
+        }
+    }
+
+    function renderAssignments() {
+        const container = document.getElementById('assignmentsContainer');
+        if (!assignmentsList.length) {
+            container.innerHTML = `<div class="empty-state">No assignments yet. Create one to get started!</div>`;
+            return;
+        }
+        container.innerHTML = assignmentsList.map(a => {
+            const aid = a.assignment_id || a.id;
+            const lang = a.language || 'python';
+            const langColors = { python:'#3b82f6', javascript:'#f59e0b', java:'#ef4444', cpp:'#8b5cf6' };
+            const deadline = a.deadline ? new Date(a.deadline).toLocaleDateString() : 'No deadline';
+            const subCount = a.submission_count || 0;
+            return `
+            <div class="session-card" style="margin-bottom:16px;flex-direction:column;align-items:flex-start;gap:12px;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%;gap:12px;">
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <span style="background:${langColors[lang]||'#6b7280'}22;color:${langColors[lang]||'#6b7280'};border:1px solid ${langColors[lang]||'#6b7280'}44;border-radius:6px;font-size:0.7rem;font-weight:700;padding:2px 8px;text-transform:uppercase;">${lang}</span>
+                            <span style="font-size:0.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:0.25rem;"><span class="material-symbols-outlined" style="font-size:0.85rem;">calendar_today</span> ${deadline}</span>
+                            <span style="font-size:0.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:0.25rem;"><span class="material-symbols-outlined" style="font-size:0.85rem;">emoji_events</span> ${a.max_points || a.maxPoints || 100} pts</span>
+                        </div>
+                        <div class="session-title">${escHtml(a.title)}</div>
+                        <div class="session-meta" style="margin-top:4px;">${a.total_tests || 0} test cases · ${subCount} submission${subCount !== 1 ? 's' : ''} · ${a.scoring_mode || a.scoringMode || 'per_test'}</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                        <button class="btn btn-outline" style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.3rem;" onclick="viewSubmissions(${aid})"><span class="material-symbols-outlined" style="font-size:0.9rem;">bar_chart</span> Submissions</button>
+                        <button class="btn btn-outline" style="font-size:0.75rem;" onclick="editAssignment(${aid})">Edit</button>
+                        <button class="btn btn-outline" style="font-size:0.75rem;color:var(--danger);border-color:var(--danger);" onclick="deleteAssignment(${aid})">Delete</button>
+                    </div>
+                </div>
+                ${a.description ? `<p style="font-size:0.82rem;color:var(--text-secondary);margin:0;line-height:1.5;">${escHtml(a.description.substring(0, 120))}${a.description.length > 120 ? '…' : ''}</p>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    async function deleteAssignment(id) {
+        if (!confirm('Delete this assignment? All student submissions will be lost.')) return;
+        try {
+            await fetch(`${API}/assignments/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            showToast('Assignment deleted');
+            loadAssignments();
+        } catch { alert('Failed to delete assignment.'); }
+    }
+
+    // ── Assignment Modal ──────────────────────────────────────────────────────
+    let editingAssignmentId = null;
+    let testCaseCount = 0;
+
+    function openAssignmentModal(assignmentData = null) {
+        editingAssignmentId = assignmentData ? (assignmentData.assignment_id || assignmentData.id) : null;
+        document.getElementById('assignModalTitle').textContent = assignmentData ? 'Edit Assignment' : 'New Coding Assignment';
+        document.getElementById('assignTitle').value = assignmentData?.title || '';
+        document.getElementById('assignDesc').value = assignmentData?.description || '';
+        document.getElementById('assignLang').value = assignmentData?.language || 'python';
+        document.getElementById('assignMaxPoints').value = assignmentData?.max_points || assignmentData?.maxPoints || 100;
+        document.getElementById('assignScoringMode').value = assignmentData?.scoring_mode || assignmentData?.scoringMode || 'per_test';
+        document.getElementById('assignDeadline').value = assignmentData?.deadline ? assignmentData.deadline.split('T')[0] : '';
+        document.getElementById('assignStarterCode').value = assignmentData?.starter_code || assignmentData?.starterCode || '';
+        document.getElementById('assignErr').style.display = 'none';
+
+        // Load test cases
+        testCaseCount = 0;
+        document.getElementById('testCasesBody').innerHTML = '';
+        if (assignmentData?.testCases) {
+            assignmentData.testCases.forEach(tc => addTestCaseRow(tc));
+        } else {
+            addTestCaseRow(); // start with one empty row
+        }
+        document.getElementById('assignModal').classList.add('open');
+    }
+
+    async function editAssignment(id) {
+        try {
+            const res = await fetch(`${API}/assignments/${id}`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (data.success) {
+                openAssignmentModal({ ...data.assignment, testCases: data.testCases });
+            }
+        } catch { alert('Failed to load assignment.'); }
+    }
+
+    function addTestCaseRow(tc = null) {
+        testCaseCount++;
+        const n = testCaseCount;
+        const row = document.createElement('div');
+        row.className = 'tc-row';
+        row.id = `tc-row-${n}`;
+        row.innerHTML = `
+            <div class="tc-row-header">
+                <span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">Test ${n}</span>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
+                        <input type="checkbox" id="tc-hidden-${n}" ${tc?.is_hidden || tc?.isHidden ? 'checked' : ''} style="accent-color:var(--primary);">
+                        Hidden (judges only)
+                    </label>
+                    <button onclick="removeTestCase(${n})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem;line-height:1;">×</button>
+                </div>
+            </div>
+            <div class="tc-row-fields">
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Input (stdin)</label>
+                    <textarea class="form-input tc-input" id="tc-input-${n}" rows="3" placeholder="e.g. 5\n3">${escHtml(tc?.input || tc?.input || '')}</textarea>
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Expected Output</label>
+                    <textarea class="form-input tc-output" id="tc-output-${n}" rows="3" placeholder="e.g. 8">${escHtml(tc?.expected_output || tc?.expectedOutput || '')}</textarea>
+                </div>
+            </div>`;
+        document.getElementById('testCasesBody').appendChild(row);
+    }
+
+    function removeTestCase(n) {
+        document.getElementById(`tc-row-${n}`)?.remove();
+    }
+
+    function collectTestCases() {
+        const tcs = [];
+        document.querySelectorAll('.tc-row').forEach(row => {
+            const n = row.id.replace('tc-row-', '');
+            const input = document.getElementById(`tc-input-${n}`)?.value || '';
+            const expectedOutput = document.getElementById(`tc-output-${n}`)?.value || '';
+            if (input || expectedOutput) {
+                tcs.push({ input, expectedOutput, isHidden: document.getElementById(`tc-hidden-${n}`)?.checked || false });
+            }
+        });
+        return tcs;
+    }
+
+    async function saveAssignment() {
+        const title = document.getElementById('assignTitle').value.trim();
+        const description = document.getElementById('assignDesc').value.trim();
+        const language = document.getElementById('assignLang').value;
+        const maxPoints = parseInt(document.getElementById('assignMaxPoints').value) || 100;
+        const scoringMode = document.getElementById('assignScoringMode').value;
+        const deadline = document.getElementById('assignDeadline').value || null;
+        const starterCode = document.getElementById('assignStarterCode').value;
+        const testCases = collectTestCases();
+        const errEl = document.getElementById('assignErr');
+
+        if (!title) { errEl.textContent = 'Title is required.'; errEl.style.display = 'block'; return; }
+        if (!testCases.length) { errEl.textContent = 'Add at least one test case.'; errEl.style.display = 'block'; return; }
+
+        const btn = document.getElementById('assignSaveBtn');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        errEl.style.display = 'none';
+
+        try {
+            const url = editingAssignmentId ? `${API}/assignments/${editingAssignmentId}` : `${API}/assignments`;
+            const method = editingAssignmentId ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method, headers: getAuthHeaders(),
+                body: JSON.stringify({ classroomId, title, description, language, maxPoints, scoringMode, deadline, starterCode, testCases, status: 'published' })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            document.getElementById('assignModal').classList.remove('open');
+            showToast(editingAssignmentId ? 'Assignment updated!' : 'Assignment created!');
+            loadAssignments();
+        } catch (err) {
+            errEl.textContent = err.message || 'Failed to save assignment.';
+            errEl.style.display = 'block';
+        } finally {
+            btn.disabled = false; btn.textContent = 'Save Assignment';
+        }
+    }
+
+    // ── AI Lesson Generator ───────────────────────────────────────────────────
+    function toggleLessonAIPanel() {
+        const p = document.getElementById('lessonAIPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function generateAILesson() {
+        const topic = document.getElementById('lessonAITopic').value.trim();
+        const language = document.getElementById('lessonAILang').value;
+        const difficulty = document.getElementById('lessonAIDiff').value;
+        if (!topic) { alert('Please enter a topic first.'); return; }
+
+        const btn = document.getElementById('lessonAIGenBtn');
+        const status = document.getElementById('lessonAIStatus');
+        btn.disabled = true; btn.textContent = '⏳ Generating…';
+        status.textContent = 'Calling GPT-4o mini…';
+
+        try {
+            const res = await fetch(`${API}/lessons/generate`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ topic, language, difficulty })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            const lesson = data.lesson;
+            document.getElementById('lessonTitle').value = lesson.title || '';
+            document.getElementById('lessonLang').value = language;
+            document.getElementById('lessonContent').value = lesson.content || '';
+            document.getElementById('lessonAIPanel').style.display = 'none';
+            status.textContent = '';
+            showToast('✨ Lesson generated! Review and save.');
+        } catch (err) {
+            status.textContent = '❌ Failed: ' + err.message;
+        } finally {
+            btn.disabled = false; btn.textContent = '⚡ Generate Lesson';
+        }
+    }
+
+    // ── AI Assignment Generator ───────────────────────────────────────────────
+    function toggleAssignAIPanel() {
+        const p = document.getElementById('assignAIPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function generateAIAssignment() {
+        const topic = document.getElementById('assignAITopic').value.trim();
+        const language = document.getElementById('assignAILang').value;
+        const difficulty = document.getElementById('assignAIDiff').value;
+        if (!topic) { alert('Please enter a topic first.'); return; }
+
+        const btn = document.getElementById('assignAIGenBtn');
+        const status = document.getElementById('assignAIStatus');
+        btn.disabled = true; btn.textContent = '⏳ Generating…';
+        status.textContent = 'Calling GPT-4o mini…';
+
+        try {
+            const res = await fetch(`${API}/assignments/generate`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ topic, language, difficulty })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            const a = data.assignment;
+
+            // Fill in form fields
+            document.getElementById('assignTitle').value = a.title || '';
+            document.getElementById('assignDesc').value = a.description || '';
+            document.getElementById('assignLang').value = language;
+            document.getElementById('assignStarterCode').value = a.starterCode || a.starter_code || '';
+
+            // Fill in test cases
+            testCaseCount = 0;
+            document.getElementById('testCasesBody').innerHTML = '';
+            const tcs = a.testCases || a.test_cases || [];
+            tcs.forEach(tc => addTestCaseRow({
+                input: tc.input || '',
+                expected_output: tc.expectedOutput || tc.expected_output || '',
+                isHidden: tc.isHidden || tc.is_hidden || false,
+                label: tc.label || ''
+            }));
+            if (!tcs.length) addTestCaseRow();
+
+            document.getElementById('assignAIPanel').style.display = 'none';
+            status.textContent = '';
+            showToast(`✨ Assignment generated with ${tcs.length} test cases! Review and save.`);
+        } catch (err) {
+            status.textContent = '❌ Failed: ' + err.message;
+        } finally {
+            btn.disabled = false; btn.textContent = '⚡ Generate Assignment';
+        }
+    }
+
+    // ── Submissions Viewer ────────────────────────────────────────────────────
+    async function viewSubmissions(assignmentId) {
+        document.getElementById('submissionsModal').classList.add('open');
+        document.getElementById('submissionsBody').innerHTML = '<div class="loading-text">Loading submissions…</div>';
+        try {
+            const res = await fetch(`${API}/assignments/${assignmentId}/submissions`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            const subs = data.success ? (data.submissions || []) : [];
+            if (!subs.length) {
+                document.getElementById('submissionsBody').innerHTML = '<div class="empty-state">No submissions yet.</div>';
+                return;
+            }
+            const maxPts = subs[0]?.total_tests > 0 ? subs[0].score : 100;
+            document.getElementById('submissionsBody').innerHTML = `
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="font-size:0.75rem;color:var(--text-muted);text-align:left;border-bottom:1px solid var(--border);">
+                            <th style="padding:8px 10px;">Student</th>
+                            <th style="padding:8px 10px;">Score</th>
+                            <th style="padding:8px 10px;">Tests Passed</th>
+                            <th style="padding:8px 10px;">Time</th>
+                            <th style="padding:8px 10px;">Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${subs.map((s, i) => {
+                            const pct = s.total_tests > 0 ? Math.round((s.passed_tests / s.total_tests) * 100) : 0;
+                            const color = pct === 100 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+                            return `<tr style="border-bottom:1px solid var(--border);font-size:0.82rem;">
+                                <td style="padding:10px;"><strong>${escHtml(s.studentName || s.full_name || 'Student')}</strong><br><span style="color:var(--text-muted);font-size:0.75rem;">${escHtml(s.email || '')}</span></td>
+                                <td style="padding:10px;font-weight:700;color:${color};">${s.score} pts</td>
+                                <td style="padding:10px;color:${color};">${s.passed_tests}/${s.total_tests} <span style="color:var(--text-muted);">(${pct}%)</span></td>
+                                <td style="padding:10px;color:var(--text-muted);">${s.execution_time_ms || 0}ms</td>
+                                <td style="padding:10px;color:var(--text-muted);">${relativeTime(s.submitted_at)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>`;
+        } catch {
+            document.getElementById('submissionsBody').innerHTML = '<div class="empty-state">Failed to load submissions.</div>';
+        }
+    }
 </script>
+
+<!-- ── Assignment Modal ── -->
+<div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box" style="max-width:760px;width:95vw;max-height:90vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+            <div class="modal-title" id="assignModalTitle" style="margin:0;">New Coding Assignment</div>
+            <button class="btn btn-outline" onclick="toggleAssignAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
+        </div>
+
+        <!-- AI Panel -->
+        <div id="assignAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
+            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Assignment Generator</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
+                    <input type="text" class="form-input" id="assignAITopic" placeholder="e.g. Fibonacci, Sorting…" style="font-size:0.82rem;">
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label>
+                    <select class="form-input" id="assignAILang" style="font-size:0.82rem;">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
+                    <select class="form-input" id="assignAIDiff" style="font-size:0.82rem;">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="assignAIGenBtn" onclick="generateAIAssignment()" style="font-size:0.8rem;">⚡ Generate Assignment</button>
+            <span id="assignAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="modal-field" style="grid-column:1/-1;">
+                <label>Title *</label>
+                <input type="text" class="form-input" id="assignTitle" placeholder="e.g. Two Sum Problem">
+            </div>
+            <div class="modal-field" style="grid-column:1/-1;">
+                <label>Problem Description</label>
+                <textarea class="form-input" id="assignDesc" rows="3" placeholder="Describe the problem, input/output format, constraints…" style="resize:vertical;"></textarea>
+            </div>
+            <div class="modal-field">
+                <label>Language</label>
+                <select class="form-input" id="assignLang">
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Max Points</label>
+                <input type="number" class="form-input" id="assignMaxPoints" value="100" min="1">
+            </div>
+            <div class="modal-field">
+                <label>Scoring Mode</label>
+                <select class="form-input" id="assignScoringMode">
+                    <option value="per_test">Per test case (partial credit)</option>
+                    <option value="all_or_nothing">All or nothing</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Deadline (optional)</label>
+                <input type="date" class="form-input" id="assignDeadline">
+            </div>
+            <div class="modal-field" style="grid-column:1/-1;">
+                <label>Starter Code (optional)</label>
+                <textarea class="form-input" id="assignStarterCode" rows="4" placeholder="# Starter code that students see when they open the assignment…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.85rem;">Test Cases *</label>
+                <button class="btn btn-outline" style="font-size:0.75rem;" onclick="addTestCaseRow()">+ Add Test Case</button>
+            </div>
+            <div id="testCasesBody"></div>
+        </div>
+
+        <div class="err-msg" id="assignErr"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
+            <button class="btn btn-primary" id="assignSaveBtn" onclick="saveAssignment()">Save Assignment</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Submissions Viewer Modal ── -->
+<div class="modal-overlay" id="submissionsModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box" style="max-width:800px;width:95vw;max-height:90vh;overflow-y:auto;">
+        <div class="modal-title">Student Submissions</div>
+        <div id="submissionsBody"><div class="loading-text">Loading…</div></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="document.getElementById('submissionsModal').classList.remove('open')">Close</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.tc-row { background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
+.tc-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.tc-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tc-row-fields textarea { resize:vertical; font-family:monospace; font-size:0.8rem; min-height:72px; }
+</style>
+<script src="../js/sidebar.js"></script>
+<script>window.SIDEBAR_ROLE = 'faculty'; window.SIDEBAR_PAGE = 'classrooms';</script>
+
 </body>
 </html>

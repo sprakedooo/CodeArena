@@ -54,6 +54,11 @@ const lessonRoutes = require('./routes/lessonRoutes');       // Programming less
 const executeRoutes = require('./routes/executeRoutes');     // Code execution
 const facultyRoutes = require('./routes/facultyRoutes');     // Faculty dashboard
 const classroomRoutes = require('./routes/classroomRoutes'); // Classroom Mode
+const assignmentRoutes = require('./routes/assignmentRoutes'); // Coding Assignments
+const profileRoutes = require('./routes/profileRoutes');         // User profiles
+const dailyChallengeRoutes = require('./routes/dailyChallengeRoutes'); // Daily Challenge
+const aiRoutes             = require('./routes/aiRoutes');             // Phase 1 AI endpoints
+const learningPathRoutes   = require('./routes/learningPathRoutes');   // Phase 1 Learning Paths
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2: INITIALIZE EXPRESS APPLICATION
@@ -134,6 +139,153 @@ app.use('/api/faculty', facultyRoutes);
 
 // Classroom Mode: /api/classrooms (authMiddleware applied inside route)
 app.use('/api/classrooms', classroomRoutes);
+
+// Coding Assignments: /api/assignments (authMiddleware applied inside route)
+app.use('/api/assignments', assignmentRoutes);
+
+// User Profiles: /api/profile
+app.use('/api/profile', profileRoutes);
+
+// Daily Challenge: /api/daily-challenge (public GET, auth POST)
+app.use('/api/daily-challenge', dailyChallengeRoutes);
+
+// Phase 1 — AI Endpoints: /api/ai/...
+app.use('/api/ai', aiRoutes);
+
+// Phase 1 — Learning Paths: /api/paths/...
+app.use('/api/paths', learningPathRoutes);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INLINE HELPERS  (must be declared before use)
+// ─────────────────────────────────────────────────────────────────────────────
+const { authMiddleware: _auth } = require('./middleware/authMiddleware');
+const { pool: _pool } = require('./config/database');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STUDENT ANALYTICS  GET /api/analytics/me
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/analytics/me', _auth, async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const [userRows] = await _pool.query(
+            'SELECT user_id, full_name, total_xp, streak, selected_language FROM users WHERE user_id = ?', [userId]
+        );
+        const user = userRows[0] || {};
+
+        // Paths progress
+        const [pathRows] = await _pool.query(
+            `SELECT lp.path_id, lp.title, lp.language,
+                    COUNT(pl.lesson_id) AS lesson_count,
+                    SUM(CASE WHEN lpr.status='completed' THEN 1 ELSE 0 END) AS completed_count
+             FROM learning_paths lp
+             LEFT JOIN path_lessons pl  ON pl.path_id  = lp.path_id AND pl.is_published = 1
+             LEFT JOIN lesson_progress lpr ON lpr.lesson_id = pl.lesson_id AND lpr.user_id = ?
+             GROUP BY lp.path_id`, [userId]
+        );
+        const paths = pathRows.map(p => ({
+            ...p,
+            progress_pct: p.lesson_count > 0 ? Math.round(p.completed_count / p.lesson_count * 100) : 0
+        }));
+
+        // Weaknesses
+        const [weakRows] = await _pool.query(
+            `SELECT topic, language, error_count, total_attempts, error_rate, resolved
+             FROM weaknesses WHERE user_id = ? ORDER BY error_rate DESC`, [userId]
+        );
+
+        // Completed lesson count
+        const [countRows] = await _pool.query(
+            `SELECT COUNT(*) AS cnt FROM lesson_progress WHERE user_id = ? AND status = 'completed'`, [userId]
+        );
+        const completedLessons = countRows[0]?.cnt || 0;
+
+        // Language breakdown (lessons completed per language)
+        const langMap = {};
+        paths.forEach(p => { langMap[p.language] = (langMap[p.language] || 0) + Number(p.completed_count || 0); });
+        const langBreakdown = Object.entries(langMap).map(([language, count]) => ({ language, count }));
+
+        // Recent activity (lessons completed per day last 7 days)
+        const [actRows] = await _pool.query(
+            `SELECT DATE(completed_at) AS date, COUNT(*) AS count
+             FROM lesson_progress
+             WHERE user_id = ? AND status = 'completed' AND completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+             GROUP BY DATE(completed_at) ORDER BY date ASC`, [userId]
+        );
+
+        res.json({ success: true, user, paths, weaknesses: weakRows, completedLessons, langBreakdown, recentActivity: actRows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GLOBAL LEADERBOARD  GET /api/leaderboard?language=python
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/leaderboard', _auth, async (req, res) => {
+    const { language } = req.query;
+    try {
+        let rows;
+        if (language && language !== 'all') {
+            [rows] = await _pool.query(
+                `SELECT u.user_id, u.full_name, u.total_xp, u.streak,
+                        COUNT(DISTINCT r.reward_id) AS badge_count
+                 FROM users u
+                 LEFT JOIN rewards r ON r.user_id = u.user_id AND r.reward_type = 'badge'
+                 WHERE u.selected_language = ? AND u.role = 'student'
+                 GROUP BY u.user_id
+                 ORDER BY u.total_xp DESC
+                 LIMIT 50`,
+                [language]
+            );
+        } else {
+            [rows] = await _pool.query(
+                `SELECT u.user_id, u.full_name, u.total_xp, u.streak,
+                        COUNT(DISTINCT r.reward_id) AS badge_count
+                 FROM users u
+                 LEFT JOIN rewards r ON r.user_id = u.user_id AND r.reward_type = 'badge'
+                 WHERE u.role = 'student'
+                 GROUP BY u.user_id
+                 ORDER BY u.total_xp DESC
+                 LIMIT 50`,
+                []
+            );
+        }
+        res.json({ success: true, leaderboard: rows });
+    } catch (err) {
+        // Fallback: return requesting user only
+        res.json({ success: true, leaderboard: [{ user_id: req.user.id, full_name: req.user.fullName || 'You', total_xp: 0, badge_count: 0 }] });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTIFICATIONS  GET /api/notifications
+// Returns last 20 rewards / achievements for the notification bell.
+// Falls back to empty array if DB unavailable.
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/notifications', _auth, async (req, res) => {
+    const userId = req.user.id;
+    try {
+        // Try rewards table first
+        const [rows] = await _pool.query(
+            `SELECT reward_id, reward_type AS type, description AS message,
+                    earned_at AS created_at
+             FROM rewards
+             WHERE user_id = ?
+             ORDER BY earned_at DESC
+             LIMIT 20`,
+            [userId]
+        );
+        // Map reward_type → notification icon category
+        const notifications = rows.map(r => ({
+            ...r,
+            type: r.type === 'badge' ? 'badge' : r.type === 'level_up' ? 'streak' : 'xp',
+        }));
+        res.json({ success: true, notifications });
+    } catch (err) {
+        // DB unavailable — return empty gracefully
+        res.json({ success: true, notifications: [] });
+    }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 5: ROOT ENDPOINT - SERVER STATUS

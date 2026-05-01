@@ -87,6 +87,41 @@ function classroomBelongsTo(classroomId, facultyId) {
     return mockClassrooms.some(c => c.id === classroomId && c.facultyId === facultyId);
 }
 
+/**
+ * Ensure the requesting user exists as a row in the `users` table.
+ * If not (e.g. registered before role-column migration, Google OAuth mock user),
+ * insert a minimal placeholder so FK constraints don't fail.
+ *
+ * Uses a guaranteed-unique internal email (_placeholder_<id>@codearena.internal)
+ * so the users.email UNIQUE index can never silently swallow the INSERT.
+ */
+async function ensureUserInDb(user) {
+    if (!dbService.isDbAvailable() || !user || !user.id || user.id === 0) return;
+    try {
+        const rows = await db.query('SELECT user_id FROM users WHERE user_id = ?', [user.id]);
+        if (rows && rows.length > 0) return; // already in DB — nothing to do
+
+        // Use a placeholder email that is guaranteed unique per user_id.
+        // Never use the real email here: if it already belongs to a different
+        // user_id row, ON DUPLICATE KEY fires on the UNIQUE email index and
+        // the INSERT is silently converted to an UPDATE — user_id never lands.
+        const placeholderEmail = `_placeholder_${user.id}@codearena.internal`;
+
+        // Include a locked placeholder password so NOT NULL constraint is satisfied
+        // even before the nullable-password migration is applied.
+        // This account can never be logged into (no valid bcrypt prefix).
+        const lockedPassword = '!LOCKED_PLACEHOLDER';
+        await db.query(
+            `INSERT INTO users (user_id, email, password, full_name, role)
+             VALUES (?, ?, ?, ?, ?)`,
+            [user.id, placeholderEmail, lockedPassword, user.fullName || 'User', user.role || 'student']
+        );
+        console.log(`Auto-inserted placeholder for user ${user.id} (${user.email}) to satisfy FK`);
+    } catch (err) {
+        console.warn('ensureUserInDb failed (non-fatal):', err.message);
+    }
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // FACULTY — CLASSROOM CRUD
 // ═════════════════════════════════════════════════════════════════════════════
@@ -102,6 +137,7 @@ router.post('/', async (req, res) => {
 
     if (dbService.isDbAvailable()) {
         try {
+            await ensureUserInDb(req.user);   // ← guarantee FK row exists
             const result = await db.query(
                 'INSERT INTO classrooms (faculty_id, name, description, subject, enrollment_key) VALUES (?, ?, ?, ?, ?)',
                 [facultyId, name, description || null, subject || null, key]
@@ -278,6 +314,7 @@ router.post('/join', async (req, res) => {
                 if (existing[0].status === 'active') return res.status(400).json({ success: false, message: 'Already enrolled in this classroom' });
                 await db.query('UPDATE classroom_enrollments SET status = "active" WHERE classroom_id = ? AND student_id = ?', [classroom.classroom_id, studentId]);
             } else {
+                await ensureUserInDb(req.user);   // ← guarantee student FK row exists
                 await db.query('INSERT INTO classroom_enrollments (classroom_id, student_id) VALUES (?, ?)', [classroom.classroom_id, studentId]);
             }
 
@@ -323,7 +360,7 @@ router.get('/:id/students', async (req, res) => {
         try {
             const rows = await db.query(
                 `SELECT u.user_id AS id, u.full_name AS fullName, u.email,
-                        u.total_points AS totalPoints, u.selected_language AS selectedLanguage,
+                        u.total_xp AS totalXp, u.selected_language AS selectedLanguage,
                         e.enrolled_at AS enrolledAt,
                         COALESCE(p.current_level, 'beginner') AS currentLevel,
                         COALESCE(p.accuracy_percent, 0) AS accuracy,
@@ -392,6 +429,7 @@ router.post('/:id/lessons', async (req, res) => {
 
     if (dbService.isDbAvailable()) {
         try {
+            await ensureUserInDb(req.user);
             const result = await db.query(
                 'INSERT INTO classroom_lessons (classroom_id, faculty_id, title, content, language, order_index) VALUES (?, ?, ?, ?, ?, ?)',
                 [classroomId, req.user.id, title, content, language || null, orderIndex || 0]
@@ -484,6 +522,7 @@ router.post('/:id/questions', async (req, res) => {
 
     if (dbService.isDbAvailable()) {
         try {
+            await ensureUserInDb(req.user);
             const result = await db.query(
                 'INSERT INTO classroom_questions (classroom_id, faculty_id, question_text, type, options, correct_answer, hint, difficulty, points, topic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [classroomId, req.user.id, questionText, type || 'mcq', JSON.stringify(options || []), correctAnswer, hint || null, difficulty || 'beginner', points || 10, topic || null]
@@ -590,6 +629,7 @@ router.post('/:id/sessions', async (req, res) => {
 
     if (dbService.isDbAvailable()) {
         try {
+            await ensureUserInDb(req.user);
             const result = await db.query(
                 'INSERT INTO classroom_sessions (classroom_id, faculty_id, title, game_mode, question_ids) VALUES (?, ?, ?, ?, ?)',
                 [classroomId, req.user.id, title, gameMode || 'mcq', JSON.stringify(questionIds || [])]
@@ -664,29 +704,76 @@ router.patch('/:id/sessions/:sid', async (req, res) => {
 
 // POST /api/classrooms/:id/sessions/:sid/answer — Student submits answer
 router.post('/:id/sessions/:sid/answer', async (req, res) => {
-    cacheUser(req); // keep identity fresh for monitor/leaderboard
+    cacheUser(req);
     const classroomId = parseInt(req.params.id);
     const sessionId   = parseInt(req.params.sid);
     const studentId   = req.user.id;
     const { questionId, answer } = req.body;
 
-    // Find the question to check correctness
-    const question = mockClQuestions.find(q => q.id === questionId);
-    const isCorrect = question ? String(question.correctAnswer).toLowerCase() === String(answer).toLowerCase() : false;
-    const pointsEarned = isCorrect ? (question?.points || 10) : 0;
-
     if (dbService.isDbAvailable()) {
         try {
+            await ensureUserInDb(req.user);
+
+            // Fetch question from DB for authoritative correctness check
+            const qRows = await db.query('SELECT * FROM classroom_questions WHERE question_id = ?', [questionId]);
+            const question   = qRows[0];
+            const isCorrect  = question
+                ? String(question.correct_answer).toLowerCase().trim() === String(answer).toLowerCase().trim()
+                : false;
+            const pointsEarned = isCorrect ? (question?.points || 10) : 0;
+
             await db.query(
                 'INSERT INTO classroom_answers (session_id, student_id, question_id, answer, is_correct, points_earned) VALUES (?, ?, ?, ?, ?, ?)',
                 [sessionId, studentId, questionId, answer, isCorrect, pointsEarned]
             );
-            return res.json({ success: true, isCorrect, pointsEarned, source: 'database' });
-        } catch (err) { console.error(err); }
+
+            // Award XP for correct answers
+            if (isCorrect && pointsEarned > 0) {
+                await db.query('UPDATE users SET total_xp = total_xp + ? WHERE user_id = ?', [pointsEarned, studentId]);
+            }
+
+            // Track weakness for wrong answers
+            if (!isCorrect && question?.topic) {
+                const classroom = await db.query('SELECT language FROM classrooms WHERE classroom_id = ?', [classroomId]);
+                const language  = classroom[0]?.language || 'python';
+                await db.query(
+                    `INSERT INTO weaknesses (user_id, topic, language, error_count, total_attempts, error_rate)
+                     VALUES (?, ?, ?, 1, 1, 100.00)
+                     ON DUPLICATE KEY UPDATE
+                       error_count    = error_count + 1,
+                       total_attempts = total_attempts + 1,
+                       error_rate     = ROUND((error_count + 1) / (total_attempts + 1) * 100, 2),
+                       last_detected_at = NOW()`,
+                    [studentId, question.topic, language]
+                );
+            } else if (isCorrect && question?.topic) {
+                // Reduce error rate on correct answers (improvement tracking)
+                const classroom = await db.query('SELECT language FROM classrooms WHERE classroom_id = ?', [classroomId]);
+                const language  = classroom[0]?.language || 'python';
+                await db.query(
+                    `UPDATE weaknesses
+                     SET total_attempts = total_attempts + 1,
+                         error_rate     = ROUND(error_count / (total_attempts + 1) * 100, 2),
+                         resolved       = IF(error_rate <= 25, 1, 0)
+                     WHERE user_id = ? AND topic = ? AND language = ?`,
+                    [studentId, question.topic, language]
+                );
+            }
+
+            return res.json({
+                success: true, isCorrect, pointsEarned,
+                hint: (!isCorrect && question?.hint) ? question.hint : null,
+                source: 'database'
+            });
+        } catch (err) { console.error('Answer submit error:', err.message); }
     }
 
+    // Mock fallback
+    const question = mockClQuestions.find(q => q.id === questionId);
+    const isCorrect    = question ? String(question.correctAnswer).toLowerCase() === String(answer).toLowerCase() : false;
+    const pointsEarned = isCorrect ? (question?.points || 10) : 0;
     mockClAnswers.push({ id: _nextId.an++, sessionId, studentId, questionId, answer, isCorrect, pointsEarned, answeredAt: new Date().toISOString() });
-    res.json({ success: true, isCorrect, pointsEarned, source: 'mock' });
+    res.json({ success: true, isCorrect, pointsEarned, hint: (!isCorrect && question?.hint) || null, source: 'mock' });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════

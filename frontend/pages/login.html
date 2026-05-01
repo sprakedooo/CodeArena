@@ -249,7 +249,7 @@
                         if (data.user.role === 'faculty') {
                             window.location.href = 'faculty_dashboard.html';
                         } else {
-                            window.location.href = data.user.selectedLanguage ? 'dashboard.html' : 'select_language.html';
+                            window.location.href = 'dashboard.html';
                         }
                     }, 400);
                 } else {
@@ -266,5 +266,6 @@
             }
         });
     </script>
+<script src="../js/theme.js"></script>
 </body>
 </html>

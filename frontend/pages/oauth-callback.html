@@ -88,8 +88,6 @@
                 setTimeout(() => {
                     if (user.role === 'faculty') {
                         window.location.href = 'faculty_dashboard.html';
-                    } else if (!user.selectedLanguage) {
-                        window.location.href = 'select_language.html';
                     } else {
                         window.location.href = 'dashboard.html';
                     }

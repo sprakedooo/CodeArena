@@ -212,14 +212,6 @@
 <body>
     <div class="grid-bg"></div>
 
-    <nav class="navbar">
-        <span class="navbar-brand logo">
-            <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:55px;width:auto;object-fit:contain;vertical-align:middle;">
-        </span>
-        <ul class="navbar-nav">
-            <li><a href="#" onclick="logout()">Logout</a></li>
-        </ul>
-    </nav>
 
     <div class="select-page">
         <div class="select-header fade-in">
@@ -389,5 +381,7 @@
             document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
         }
     </script>
+<script>window.SIDEBAR_PAGE = 'dashboard';</script>
+<script src="../js/sidebar.js"></script>
 </body>
 </html>

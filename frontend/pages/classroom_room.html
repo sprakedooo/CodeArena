@@ -3,1110 +3,687 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom — CodeArena</title>
+    <title>Classroom Room – CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        /* ── Navbar ── */
-        .navbar { padding: 0 18%; }
-
-        /* ── Page ── */
-        .room-page { padding: 40px 18%; min-height: calc(100vh - 64px); }
-
-        /* ── Classroom header ── */
+        /* ── Room header ─────────────────────────────────────────────────────── */
         .room-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 32px;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
         }
-        .room-header-left h1 {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1rem;
-            color: var(--text);
-            margin: 0 0 6px;
+        .room-title { font-size: 1.3rem; font-weight: 700; color: var(--text); margin: 0 0 0.2rem; }
+        .room-meta  { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+        .room-badge {
+            font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.6rem; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .room-header-left p {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin: 0;
-        }
-        .room-teacher-badge {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 6px 12px;
-        }
+        .badge-lang { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+        .badge-teacher { background: rgba(6,182,212,0.1); color: #22d3ee; border: 1px solid rgba(6,182,212,0.25); }
+        .badge-students { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
 
-        /* ── Sub-tabs ── */
-        .tab-nav {
-            display: flex;
-            gap: 4px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 28px;
-        }
+        /* ── Tabs ───────────────────────────────────────────────────────────── */
+        .tab-nav { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
         .tab-btn {
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 10px 20px;
-            margin-bottom: -1px;
-            transition: color 0.2s, border-color 0.2s;
+            padding: 0.6rem 1.1rem; border: none; background: none; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s;
+            display: flex; align-items: center; gap: 0.35rem;
         }
-        .tab-btn:hover { color: var(--text); }
+        .tab-btn .material-symbols-outlined { font-size: 1rem; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-btn:hover:not(.active) { color: var(--text); }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* ── Lesson cards ── */
-        .lesson-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
+        /* ── Lessons tab ────────────────────────────────────────────────────── */
+        .lesson-list { display: flex; flex-direction: column; gap: 0.6rem; }
+        .lesson-row {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem 1.15rem;
+            display: flex; align-items: center; gap: 1rem;
+            cursor: pointer; transition: all 0.15s; text-decoration: none; color: inherit;
         }
-        .lesson-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: border-color 0.2s;
+        .lesson-row:hover { border-color: var(--primary); background: var(--bg-card-hover); }
+        .lesson-row.expanded { border-color: var(--primary); }
+        .lesson-num {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
         }
-        .lesson-card:hover { border-color: var(--primary); }
-        .lesson-card-lang {
-            font-size: 0.68rem;
-            color: var(--secondary);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .lesson-info { flex: 1; min-width: 0; }
+        .lesson-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+        .lesson-sub   { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+        .lesson-content {
+            display: none; padding: 1rem 1.15rem; margin-top: 0.25rem;
+            background: var(--bg-surface); border-radius: var(--radius-sm);
+            font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;
         }
-        .lesson-card-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-        .lesson-card-body {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .lesson-read-btn {
-            align-self: flex-start;
-            font-size: 0.78rem;
-        }
+        .lesson-content.open { display: block; }
 
-        /* ── Lesson reader overlay ── */
-        .reader-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.75);
-            z-index: 400;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
+        /* ── Play tab ───────────────────────────────────────────────────────── */
+        .session-idle {
+            text-align: center; padding: 3rem 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
         }
-        .reader-overlay.open { opacity: 1; pointer-events: all; }
-        .reader-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 36px;
-            width: 100%;
-            max-width: 680px;
-            max-height: 85vh;
-            overflow-y: auto;
-            transform: translateY(16px);
-            transition: transform 0.2s;
-        }
-        .reader-overlay.open .reader-box { transform: translateY(0); }
-        .reader-lang {
-            font-size: 0.68rem;
-            color: var(--secondary);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-        .reader-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.85rem;
-            color: var(--text);
-            margin: 0 0 20px;
-        }
-        .reader-content {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-        .reader-content pre, .reader-content code {
-            background: var(--bg-surface);
-            border-radius: 6px;
-            padding: 2px 6px;
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-        .reader-content pre { padding: 14px; display: block; overflow-x: auto; }
-        .reader-close {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
+        .session-idle .material-symbols-outlined { font-size: 3rem; color: var(--primary); display: block; margin-bottom: 0.75rem; }
+        .session-idle h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0 0 0.4rem; }
+        .session-idle p  { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.25rem; }
 
-        /* ── Sessions ── */
-        .session-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 12px;
+        /* HUD */
+        .game-hud {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 0.65rem; margin-bottom: 1.25rem;
         }
-        .session-info { flex: 1; }
-        .session-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
-        .session-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 3px; }
-        .status-pill {
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 3px 10px;
-            border-radius: 20px;
+        .hud-chip {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.7rem 0.85rem; text-align: center;
         }
-        .status-pill.pending { background: rgba(245,158,11,.15); color: var(--warning); }
-        .status-pill.active  { background: rgba(16,185,129,.15);  color: var(--success); }
-        .status-pill.closed  { background: var(--bg-surface); color: var(--text-muted); }
+        .hud-val { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+        .hud-lbl { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 0.1rem; }
+        .hud-timer .hud-val { color: #f87171; }
+        .hud-score .hud-val { color: #fbbf24; }
+        .hud-streak .hud-val { color: #f97316; }
 
-        /* ── Quiz overlay ── */
-        .quiz-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-dark);
-            z-index: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s;
+        /* Question card */
+        .q-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem;
         }
-        .quiz-overlay.open { opacity: 1; pointer-events: all; }
-        .quiz-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 36px;
-            width: 100%;
-            max-width: 600px;
-        }
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        .quiz-progress {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-        .quiz-question {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text);
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .quiz-option {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            cursor: pointer;
-            font-size: 0.88rem;
-            color: var(--text);
+        .q-meta { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+        .q-text { font-size: 1rem; font-weight: 600; color: var(--text); line-height: 1.6; margin-bottom: 1.1rem; }
+        .q-options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .q-option {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+            cursor: pointer; transition: all 0.15s; font-size: 0.88rem; color: var(--text);
             text-align: left;
-            transition: border-color 0.15s, background 0.15s;
         }
-        .quiz-option:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); }
-        .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,.15); color: var(--success); }
-        .quiz-option.wrong   { border-color: var(--danger);  background: rgba(239,68,68,.1);   color: var(--danger); }
-        .quiz-option:disabled { cursor: default; }
-        .quiz-hint { font-size: 0.8rem; color: var(--warning); background: rgba(245,158,11,.1); border-radius: 6px; padding: 10px 14px; }
-        .quiz-score { font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--xp-gold); }
-        .fill-input {
-            width: 100%;
-            padding: 12px 14px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 0.9rem;
-            font-family: monospace;
-            margin-bottom: 12px;
-        }
-        .fill-input:focus { outline: none; border-color: var(--primary); }
+        .q-option:hover:not(:disabled) { border-color: var(--primary); background: rgba(124,58,237,0.08); }
+        .q-option.correct  { border-color: var(--success); background: rgba(16,185,129,0.12); color: #34d399; }
+        .q-option.wrong    { border-color: var(--danger);  background: rgba(239,68,68,0.12);  color: #f87171; }
+        .q-option:disabled { cursor: default; }
 
-        /* ── Leaderboard ── */
-        .leaderboard-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .q-feedback {
+            display: none; padding: 0.85rem 1rem; border-radius: var(--radius-sm);
+            font-size: 0.85rem; margin-top: 0.75rem; line-height: 1.5;
+        }
+        .q-feedback.correct { display: block; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+        .q-feedback.wrong   { display: block; background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
+
+        /* Waiting / end screens */
+        .wait-screen, .end-screen {
+            text-align: center; padding: 2.5rem 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+        .wait-screen .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--bg-surface); border-top-color: var(--primary); animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .end-score { font-size: 2.5rem; font-weight: 900; color: #fbbf24; margin: 0.5rem 0; }
+        .end-stats { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0 1.5rem; }
+        .end-stat  { text-align: center; }
+        .end-stat-val { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+        .end-stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* ── Leaderboard tab ────────────────────────────────────────────────── */
+        .lb-table {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
         }
         .lb-row {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px 18px;
-            display: flex;
+            display: grid; grid-template-columns: 48px 1fr auto;
+            align-items: center; gap: 0.75rem; padding: 0.85rem 1.1rem;
+            border-bottom: 1px solid var(--border-light); transition: background 0.15s;
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-row:hover { background: var(--bg-card-hover); }
+        .lb-row.me { background: rgba(124,58,237,0.08); border-left: 3px solid var(--primary); }
+        .lb-rank { font-size: 1rem; text-align: center; }
+        .lb-name { font-size: 0.88rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 0.4rem; }
+        .lb-you  { font-size: 0.62rem; background: rgba(124,58,237,0.15); color: #a78bfa; padding: 0.1rem 0.35rem; border-radius: 20px; font-weight: 700; }
+        .lb-score { font-size: 0.88rem; font-weight: 700; color: #fbbf24; }
+
+        /* ── AI Feedback tab ────────────────────────────────────────────────── */
+        .feedback-panel {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.4rem 1.5rem;
+        }
+        .feedback-section { margin-bottom: 1.25rem; }
+        .feedback-section h4 { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 0.5rem; }
+        .feedback-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; }
+        .feedback-pill {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.72rem; padding: 0.22rem 0.6rem; border-radius: 20px; margin: 0.2rem;
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171;
+        }
+
+        /* ── Faculty actions ────────────────────────────────────────────────── */
+        .faculty-bar {
+            display: flex; gap: 0.6rem; padding: 0.9rem 1rem;
+            background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.2);
+            border-radius: var(--radius); margin-bottom: 1.25rem; flex-wrap: wrap;
             align-items: center;
-            gap: 14px;
         }
-        .lb-rank {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            width: 28px;
-            flex-shrink: 0;
-            text-align: center;
+        .faculty-bar .session-status {
+            font-size: 0.78rem; color: var(--text-muted); flex: 1;
         }
-        .lb-rank.gold   { color: #fbbf24; }
-        .lb-rank.silver { color: #94a3b8; }
-        .lb-rank.bronze { color: #b45309; }
-        .lb-name { flex: 1; font-weight: 600; color: var(--text); }
-        .lb-score { font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--xp-gold); }
+        .status-dot {
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+            background: var(--text-muted); margin-right: 5px;
+        }
+        .status-dot.live { background: #34d399; animation: pulse 1.4s ease infinite; }
+        @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
 
-        /* ── Live badge ── */
-        .live-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(239,68,68,.15);
-            color: var(--danger);
-            border: 1px solid rgba(239,68,68,.3);
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            padding: 3px 10px;
-            text-transform: uppercase;
-        }
-        .live-dot {
-            width: 7px;
-            height: 7px;
-            background: var(--danger);
-            border-radius: 50%;
-            animation: livePulse 1.2s ease-in-out infinite;
-            flex-shrink: 0;
-        }
-        @keyframes livePulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: .4; transform: scale(.7); }
-        }
-        .session-card.is-live {
-            border-color: rgba(239,68,68,.4);
-            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(239,68,68,.04) 100%);
-        }
+        /* Empty / skeleton */
+        .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.85rem; }
+        .empty-state .material-symbols-outlined { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.35; }
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity: 0.5; } 50%{ opacity: 1; } }
 
-        /* ── Play tab notification dot ── */
-        .tab-btn .notif-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--danger);
-            border-radius: 50%;
-            margin-left: 5px;
-            vertical-align: middle;
-            animation: livePulse 1.2s ease-in-out infinite;
-        }
-
-        /* ── Live toast ── */
-        .live-toast {
-            position: fixed;
-            bottom: 28px;
-            left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: var(--bg-card);
-            border: 1px solid rgba(239,68,68,.4);
-            border-radius: 12px;
-            padding: 14px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 800;
-            box-shadow: 0 8px 32px rgba(0,0,0,.4);
-            transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
-            min-width: 280px;
-            cursor: pointer;
-        }
-        .live-toast.show { transform: translateX(-50%) translateY(0); }
-        .live-toast-icon { font-size: 1.4rem; }
-        .live-toast-text strong { color: var(--danger); display: block; font-size: 0.85rem; }
-        .live-toast-text span { color: var(--text-secondary); font-size: 0.78rem; }
-        .live-toast-cta {
-            margin-left: auto;
-            background: var(--danger);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 14px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        /* ── Results screen ── */
-        .results-box {
-            text-align: center;
-            padding: 20px 0;
-        }
-        .results-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.85rem;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-        .results-score {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 2rem;
-            color: var(--xp-gold);
-            margin: 16px 0;
-        }
-        .results-sub { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 24px; }
-
-        /* ── Feedback tab ── */
-        .feedback-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .feedback-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-        }
-        .feedback-card-title {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        .assessment-text {
-            font-size: 0.9rem;
-            color: var(--text);
-            line-height: 1.7;
-        }
-        .stats-row {
-            display: flex;
-            justify-content: space-around;
-            gap: 8px;
-            margin-top: 4px;
-        }
-        .stat-item { text-align: center; }
-        .stat-val {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1rem;
-            color: var(--xp-gold);
-            display: block;
-            margin-bottom: 4px;
-        }
-        .stat-label { font-size: 0.7rem; color: var(--text-secondary); }
-        .area-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-        .area-pill {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-        .area-pill.weak   { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
-        .area-pill.strong { background: rgba(16,185,129,.15); color: var(--success); border: 1px solid rgba(16,185,129,.3); }
-        .reco-list { list-style: none; padding: 0; margin: 0; }
-        .reco-list li {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-            padding: 6px 0;
-            border-bottom: 1px solid var(--border);
-            line-height: 1.5;
-        }
-        .reco-list li:last-child { border-bottom: none; }
-        .reco-list li::before { content: '→ '; color: var(--primary); font-weight: 700; }
-        @media (max-width: 700px) { .feedback-grid { grid-template-columns: 1fr; } }
-
-        /* ── Empty / loading ── */
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-        .loading-text {
-            text-align: center;
-            padding: 24px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 900px) {
-            .navbar    { padding: 0 5%; }
-            .room-page { padding: 24px 5%; }
-            .room-header { flex-direction: column; }
-        }
+        @media (max-width: 640px) { .game-hud { grid-template-columns: repeat(2,1fr); } }
     </style>
 </head>
 <body>
 
-<!-- ── Navbar ── -->
-<nav class="navbar">
-    <span class="navbar-brand logo">
-        <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
-    </span>
-    <ul class="navbar-nav">
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="lessons.html">Lessons</a></li>
-        <li><a href="lesson_game.html">Play</a></li>
-        <li><a href="feedback.html">Feedback</a></li>
-        <li><a href="#" onclick="logout()">Logout</a></li>
-    </ul>
-</nav>
-
-<main class="room-page">
-
-    <!-- ── Room header ── -->
-    <div class="room-header">
-        <div class="room-header-left">
-            <h1 id="roomName">Loading…</h1>
-            <p id="roomDesc">—</p>
-        </div>
-        <div class="room-teacher-badge" id="roomTeacher">👨‍🏫 —</div>
-    </div>
-
-    <!-- ── Sub-tabs ── -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('lessons', this)">📚 Lessons</button>
-        <button class="tab-btn" onclick="switchTab('play', this)">🎮 Play</button>
-        <button class="tab-btn" onclick="switchTab('leaderboard', this)">🏆 Leaderboard</button>
-        <button class="tab-btn" onclick="switchTab('feedback', this)">📊 Feedback</button>
-    </div>
-
-    <!-- ── TAB: LESSONS ── -->
-    <div class="tab-panel active" id="tab-lessons">
-        <div class="lesson-cards" id="lessonsGrid">
-            <div class="loading-text">Loading lessons…</div>
+<!-- ── Room Header ────────────────────────────────────────────────────────── -->
+<div class="room-header">
+    <div>
+        <h1 class="room-title" id="roomTitle">Loading…</h1>
+        <div class="room-meta" id="roomMeta">
+            <div class="skeleton-line" style="width:80px;height:20px;border-radius:20px;"></div>
         </div>
     </div>
-
-    <!-- ── TAB: PLAY ── -->
-    <div class="tab-panel" id="tab-play">
-        <div id="sessionsContainer">
-            <div class="loading-text">Loading sessions…</div>
-        </div>
-    </div>
-
-    <!-- ── TAB: LEADERBOARD ── -->
-    <div class="tab-panel" id="tab-leaderboard">
-        <div class="leaderboard-list" id="leaderboardList">
-            <div class="loading-text">Loading leaderboard…</div>
-        </div>
-    </div>
-
-    <!-- ── TAB: FEEDBACK ── -->
-    <div class="tab-panel" id="tab-feedback">
-        <div id="feedbackContainer">
-            <div class="loading-text">Loading your feedback…</div>
-        </div>
-    </div>
-
-</main>
-
-<!-- ── Live Session Toast ── -->
-<div class="live-toast" id="liveToast" onclick="goToPlayTab()">
-    <div class="live-toast-icon">🔴</div>
-    <div class="live-toast-text">
-        <strong>Session is LIVE!</strong>
-        <span id="liveToastTitle">Your teacher started a session</span>
-    </div>
-    <button class="live-toast-cta">Play Now →</button>
+    <a href="classrooms.html" class="btn btn-secondary" style="font-size:0.8rem;">
+        <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span>
+        Back
+    </a>
 </div>
 
-<!-- ── Lesson Reader ── -->
-<div class="reader-overlay" id="readerOverlay" onclick="handleReaderOverlay(event)">
-    <div class="reader-box">
-        <div class="reader-lang" id="readerLang"></div>
-        <div class="reader-title" id="readerTitle"></div>
-        <div class="reader-content" id="readerContent"></div>
-        <div class="reader-close">
-            <button class="btn btn-outline" onclick="closeReader()">Close</button>
-        </div>
+<!-- ── Tabs ──────────────────────────────────────────────────────────────── -->
+<div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('lessons', this)">
+        <span class="material-symbols-outlined">menu_book</span> Lessons
+    </button>
+    <button class="tab-btn" onclick="switchTab('play', this)">
+        <span class="material-symbols-outlined">sports_esports</span> Play
+    </button>
+    <button class="tab-btn" onclick="switchTab('leaderboard', this)">
+        <span class="material-symbols-outlined">emoji_events</span> Leaderboard
+    </button>
+    <button class="tab-btn" id="feedbackTabBtn" onclick="switchTab('feedback', this)">
+        <span class="material-symbols-outlined">psychology</span> AI Feedback
+    </button>
+</div>
+
+<!-- ══════════════════════ LESSONS TAB ══════════════════════════════════════ -->
+<div id="tab-lessons" class="tab-panel active">
+    <div class="lesson-list" id="lessonList">
+        <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
+        <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
+        <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
     </div>
 </div>
 
-<!-- ── Quiz Overlay ── -->
-<div class="quiz-overlay" id="quizOverlay">
-    <div class="quiz-box">
-        <div class="quiz-header">
-            <div>
-                <div id="quizSessionTitle" style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;"></div>
-                <div class="quiz-progress" id="quizProgress">Question 1 of —</div>
+<!-- ══════════════════════ PLAY TAB ═════════════════════════════════════════ -->
+<div id="tab-play" class="tab-panel">
+    <!-- Faculty controls -->
+    <div class="faculty-bar" id="facultyBar" style="display:none;">
+        <div class="session-status" id="sessionStatus">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">No active session</span>
+        </div>
+        <button class="btn btn-primary" id="startSessionBtn" style="font-size:0.78rem;" onclick="startSession()">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">play_circle</span>
+            Start Game Session
+        </button>
+        <button class="btn btn-secondary" id="closeSessionBtn" style="font-size:0.78rem;display:none;" onclick="closeSession()">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">stop_circle</span>
+            End Session
+        </button>
+    </div>
+
+    <!-- Idle screen (student waiting) -->
+    <div class="session-idle" id="playIdle">
+        <span class="material-symbols-outlined">sports_esports</span>
+        <h3>Waiting for a Session</h3>
+        <p>Your instructor will start a game session soon. Stay tuned!</p>
+        <button class="btn btn-secondary" onclick="checkForSession()" style="font-size:0.82rem;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">refresh</span>
+            Check Now
+        </button>
+    </div>
+
+    <!-- Waiting for next question -->
+    <div class="wait-screen" id="playWait" style="display:none;">
+        <div class="spinner"></div>
+        <p style="font-size:0.88rem;color:var(--text-muted);">Waiting for next question…</p>
+    </div>
+
+    <!-- Active question -->
+    <div id="playActive" style="display:none;">
+        <div class="game-hud">
+            <div class="hud-chip hud-score">
+                <div class="hud-val" id="hudScore">0</div>
+                <div class="hud-lbl">Score</div>
             </div>
-            <div class="quiz-score" id="quizScore">0 pts</div>
+            <div class="hud-chip hud-streak">
+                <div class="hud-val" id="hudStreak">0🔥</div>
+                <div class="hud-lbl">Streak</div>
+            </div>
+            <div class="hud-chip hud-timer">
+                <div class="hud-val" id="hudTimer">30</div>
+                <div class="hud-lbl">Seconds</div>
+            </div>
+            <div class="hud-chip">
+                <div class="hud-val" id="hudQ">1/—</div>
+                <div class="hud-lbl">Question</div>
+            </div>
         </div>
-        <div class="quiz-question" id="quizQuestion">—</div>
-        <div id="quizBody"><!-- options or fill input rendered here --></div>
-        <div class="quiz-hint" id="quizHint" style="display:none;"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
-            <button class="btn btn-outline" onclick="exitQuiz()">✕ Exit</button>
-            <button class="btn btn-primary" id="quizNextBtn" onclick="nextQuestion()" style="display:none;">Next →</button>
+
+        <div class="q-card" id="qCard">
+            <div class="q-meta" id="qMeta">Question</div>
+            <div class="q-text" id="qText">—</div>
+            <div class="q-options" id="qOptions"></div>
+            <div class="q-feedback" id="qFeedback"></div>
+        </div>
+
+        <button id="nextQBtn" class="btn btn-primary" style="display:none;width:100%;justify-content:center;" onclick="nextQuestion()">
+            Next Question →
+        </button>
+    </div>
+
+    <!-- End screen -->
+    <div class="end-screen" id="playEnd" style="display:none;">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;color:#fbbf24;">emoji_events</span>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">Session Complete!</div>
+        <div class="end-score" id="endScore">0</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">points earned</div>
+        <div class="end-stats">
+            <div class="end-stat"><div class="end-stat-val" id="endCorrect">0</div><div class="end-stat-lbl">Correct</div></div>
+            <div class="end-stat"><div class="end-stat-val" id="endTotal">0</div><div class="end-stat-lbl">Total Qs</div></div>
+            <div class="end-stat"><div class="end-stat-val" id="endXP">+0</div><div class="end-stat-lbl">XP Earned</div></div>
+        </div>
+        <button class="btn btn-primary" onclick="switchTab('leaderboard', document.querySelector('[onclick*=leaderboard]'))" style="font-size:0.85rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">emoji_events</span>
+            View Leaderboard
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════ LEADERBOARD TAB ══════════════════════════════════ -->
+<div id="tab-leaderboard" class="tab-panel">
+    <div class="lb-table" id="lbTable">
+        <div style="padding:2rem;text-align:center;">
+            <div class="skeleton-line" style="width:100%;height:20px;"></div>
+            <div class="skeleton-line" style="width:100%;height:20px;"></div>
+        </div>
+    </div>
+    <button class="btn btn-secondary" style="margin-top:0.75rem;font-size:0.8rem;" onclick="loadLeaderboard()">
+        <span class="material-symbols-outlined" style="font-size:0.95rem;">refresh</span>
+        Refresh
+    </button>
+</div>
+
+<!-- ══════════════════════ AI FEEDBACK TAB ══════════════════════════════════ -->
+<div id="tab-feedback" class="tab-panel">
+    <div class="feedback-panel" id="feedbackPanel">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">
+            Complete a game session to see your AI-powered feedback here.
         </div>
     </div>
 </div>
 
+<script>window.SIDEBAR_PAGE = 'classrooms';</script>
+<script src="../js/sidebar.js"></script>
 <script>
-    const API = 'http://localhost:3000/api';
-    const params = new URLSearchParams(window.location.search);
-    const classroomId = params.get('id');
+const API    = 'http://localhost:3000/api';
+const token  = localStorage.getItem('token');
+const me     = JSON.parse(localStorage.getItem('user') || '{}');
 
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    const token = localStorage.getItem('token');
-    if (!user || !token) { window.location.href = 'login.html'; }
-    if (!classroomId) { window.location.href = 'dashboard.html'; }
+if (!me.id) { location.href = 'login.html'; }
 
-    function getAuthHeaders() {
-        return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
-    }
-    function escHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-    function relativeTime(iso) {
-        if (!iso) return '—';
-        const diff = Date.now() - new Date(iso).getTime();
-        const m = Math.floor(diff / 60000);
-        if (m < 1) return 'Just now';
-        if (m < 60) return `${m}m ago`;
-        const h = Math.floor(m / 60);
-        if (h < 24) return `${h}h ago`;
-        return `${Math.floor(h/24)}d ago`;
-    }
+const params      = new URLSearchParams(location.search);
+const classroomId = params.get('id');
+const isFaculty   = me.role === 'faculty' || params.get('role') === 'faculty';
 
-    // ── Tab switching ─────────────────────────────────────────────────────────
-    function switchTab(id, btn) {
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('tab-' + id).classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        if (id === 'leaderboard') loadLeaderboard();
-        if (id === 'feedback')    loadFeedback();
-        if (id === 'play') clearPlayNotifDot();
+let sessionId     = null;
+let questions     = [];
+let qIndex        = 0;
+let score         = 0;
+let streak        = 0;
+let correct       = 0;
+let timer         = null;
+let timerSec      = 30;
+let answered      = false;
+
+if (!classroomId) { location.href = 'classrooms.html'; }
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    // Hide AI feedback tab for faculty
+    if (isFaculty) {
+        document.getElementById('feedbackTabBtn').style.display = 'none';
+        document.getElementById('facultyBar').style.display = 'flex';
     }
 
-    function goToPlayTab() {
-        hideLiveToast();
-        const playBtn = document.querySelector('.tab-btn[onclick*="play"]');
-        switchTab('play', playBtn);
-    }
-
-    // ── Classroom info ────────────────────────────────────────────────────────
-    async function loadClassroom() {
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            const c = data.classroom;
-            document.getElementById('roomName').textContent = c.name;
-            document.getElementById('roomDesc').textContent = c.description || c.subject || 'No description';
-            document.getElementById('roomTeacher').textContent = '👨‍🏫 ' + (c.facultyName || c.faculty_name || 'Your Teacher');
-            document.title = c.name + ' — CodeArena';
-        } catch (err) {
-            document.getElementById('roomName').textContent = 'Classroom not found';
-        }
-    }
-
-    // ── Lessons ───────────────────────────────────────────────────────────────
-    async function loadLessons() {
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const lessons = data.success ? (data.lessons || []) : [];
-            const grid = document.getElementById('lessonsGrid');
-            if (!lessons.length) {
-                grid.innerHTML = `<div class="empty-state">No lessons posted yet. Check back later!</div>`;
-                return;
-            }
-            grid.innerHTML = lessons.map(l => `
-                <div class="lesson-card">
-                    <div class="lesson-card-lang">${escHtml(l.language || 'General')}</div>
-                    <div class="lesson-card-title">${escHtml(l.title)}</div>
-                    <div class="lesson-card-body">${escHtml((l.content || '').replace(/<[^>]+>/g, '')).substring(0, 120)}…</div>
-                    <button class="btn btn-outline lesson-read-btn" onclick="openReader(${JSON.stringify(l).replace(/"/g,'&quot;')})">Read Lesson →</button>
-                </div>`).join('');
-        } catch (err) {
-            document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state">Failed to load lessons.</div>`;
-        }
-    }
-
-    function openReader(lesson) {
-        document.getElementById('readerLang').textContent = lesson.language || 'General';
-        document.getElementById('readerTitle').textContent = lesson.title;
-        document.getElementById('readerContent').innerHTML = lesson.content || '';
-        document.getElementById('readerOverlay').classList.add('open');
-    }
-    function closeReader() { document.getElementById('readerOverlay').classList.remove('open'); }
-    function handleReaderOverlay(e) { if (e.target === document.getElementById('readerOverlay')) closeReader(); }
-
-    // ── Live polling ──────────────────────────────────────────────────────────
-    let pollTimer = null;
-    let knownStates = {};   // sessionId → status
-    let toastTimer = null;
-    let isQuizOpen = false;
-
-    function startPolling() {
-        if (pollTimer) return;
-        pollTimer = setInterval(pollSessions, 5000);
-    }
-    function stopPolling() {
-        clearInterval(pollTimer);
-        pollTimer = null;
-    }
-
-    async function pollSessions() {
-        if (isQuizOpen) return; // don't refresh while student is mid-quiz
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const sessions = data.success ? (data.sessions || []) : [];
-
-            let hasActive = false;
-            sessions.forEach(s => {
-                const id = s.session_id || s.id;
-                const prev = knownStates[id];
-                const curr = s.status;
-
-                // Detect pending → active (teacher just launched)
-                if (prev === 'pending' && curr === 'active') {
-                    showLiveToast(s.title);
-                    setPlayNotifDot();
-                }
-                // Detect active → closed (teacher ended session during quiz)
-                if (prev === 'active' && curr === 'closed' && isQuizOpen && activeSessionId === id) {
-                    exitQuiz(false, true); // force-exit
-                }
-
-                knownStates[id] = curr;
-                if (curr === 'active') hasActive = true;
-            });
-
-            // Re-render sessions list silently (no loading flash)
-            renderSessions(sessions);
-
-            // Update leaderboard tab if it's open
-            if (document.getElementById('tab-leaderboard').classList.contains('active')) {
-                loadLeaderboard();
-            }
-
-            // Manage notif dot
-            if (hasActive) setPlayNotifDot();
-            else clearPlayNotifDot();
-
-        } catch (_) {}
-    }
-
-    function showLiveToast(title) {
-        document.getElementById('liveToastTitle').textContent = title || 'Your teacher started a session';
-        const toast = document.getElementById('liveToast');
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(hideLiveToast, 8000);
-    }
-    function hideLiveToast() {
-        document.getElementById('liveToast').classList.remove('show');
-    }
-
-    function setPlayNotifDot() {
-        const btn = document.querySelector('.tab-btn[onclick*="play"]');
-        if (btn && !btn.querySelector('.notif-dot')) {
-            const dot = document.createElement('span');
-            dot.className = 'notif-dot';
-            btn.appendChild(dot);
-        }
-    }
-    function clearPlayNotifDot() {
-        document.querySelector('.tab-btn .notif-dot')?.remove();
-    }
-
-    // ── Sessions / Play ───────────────────────────────────────────────────────
-    let sessionQuestions = [];
-    let currentQIdx = 0;
-    let quizScore = 0;
-    let activeSessionId = null;
-    let answered = false;
-
-    async function loadSessions() {
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const sessions = data.success ? (data.sessions || []) : [];
-            // Seed known states on first load (no toast)
-            sessions.forEach(s => { knownStates[s.session_id || s.id] = s.status; });
-            renderSessions(sessions);
-        } catch (err) {
-            document.getElementById('sessionsContainer').innerHTML = `<div class="empty-state">Failed to load sessions.</div>`;
-        }
-    }
-
-    function renderSessions(sessions) {
-        const container = document.getElementById('sessionsContainer');
-        if (!sessions.length) {
-            container.innerHTML = `<div class="empty-state">No sessions yet. Your teacher will create one soon!</div>`;
-            return;
-        }
-        container.innerHTML = sessions.map(s => {
-            const sid = s.session_id || s.id;
-            const isLive = s.status === 'active';
-            return `
-            <div class="session-card${isLive ? ' is-live' : ''}">
-                <div class="session-info">
-                    <div class="session-title">${escHtml(s.title)}</div>
-                    <div class="session-meta">Mode: ${s.game_mode || 'mcq'} · ${relativeTime(s.created_at || s.createdAt)}</div>
-                </div>
-                ${isLive
-                    ? `<span class="live-badge"><span class="live-dot"></span>LIVE</span>
-                       <button class="btn btn-primary" style="font-size:0.8rem;" onclick="startSession(${sid},'${escHtml(s.title)}','${s.game_mode||'mcq'}')">▶ Play</button>`
-                    : `<span class="status-pill ${s.status}">${s.status === 'closed' ? 'Ended' : 'Waiting'}</span>`
-                }
-            </div>`;
-        }).join('');
-    }
-
-    async function startSession(sessionId, title, mode) {
-        activeSessionId = sessionId;
-        quizScore = 0;
-        currentQIdx = 0;
-        answered = false;
-        isQuizOpen = true;
-        stopPolling(); // pause polling while playing
-        document.getElementById('quizSessionTitle').textContent = title;
-        document.getElementById('quizScore').textContent = '0 pts';
-
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const session = (data.sessions || []).find(s => (s.session_id || s.id) === sessionId);
-            if (!session) throw new Error('Session not found');
-
-            const qRes = await fetch(`${API}/classrooms/${classroomId}/questions`, { headers: getAuthHeaders() });
-            const qData = await qRes.json();
-            const allQ = qData.success ? (qData.questions || []) : [];
-            const ids = session.question_ids || [];
-            sessionQuestions = ids.length
-                ? allQ.filter(q => ids.includes(q.question_id || q.id))
-                : allQ;
-
-            if (!sessionQuestions.length) {
-                alert('This session has no questions yet.');
-                isQuizOpen = false;
-                startPolling();
-                return;
-            }
-
-            document.getElementById('quizOverlay').classList.add('open');
-            renderQuestion();
-        } catch (err) {
-            alert('Failed to load session: ' + err.message);
-            isQuizOpen = false;
-            startPolling();
-        }
-    }
-
-    function renderQuestion() {
-        const q = sessionQuestions[currentQIdx];
-        answered = false;
-        document.getElementById('quizProgress').textContent = `Question ${currentQIdx + 1} of ${sessionQuestions.length}`;
-        document.getElementById('quizQuestion').textContent = q.question_text || q.questionText || '';
-        document.getElementById('quizHint').style.display = 'none';
-        document.getElementById('quizNextBtn').style.display = 'none';
-
-        const type = q.type || 'mcq';
-        const body = document.getElementById('quizBody');
-
-        if (type === 'mcq') {
-            const options = Array.isArray(q.options) ? q.options : [];
-            body.innerHTML = `<div class="quiz-options">${options.map((opt, i) => `
-                <button class="quiz-option" onclick="submitAnswer('${escHtml(String.fromCharCode(65+i))}', this)">${escHtml(opt)}</button>
-            `).join('')}</div>`;
-        } else {
-            body.innerHTML = `
-                <input type="text" class="fill-input" id="fillAnswer" placeholder="Type your answer…">
-                <button class="btn btn-primary" onclick="submitFillAnswer()" style="width:100%;">Submit Answer</button>`;
-        }
-    }
-
-    async function submitAnswer(selected, btn) {
-        if (answered) return;
-        answered = true;
-        const q = sessionQuestions[currentQIdx];
-        const correct = (q.correct_answer || q.correctAnswer || '').trim().toUpperCase();
-        const isCorrect = selected.toUpperCase() === correct;
-
-        document.querySelectorAll('.quiz-option').forEach(b => {
-            b.disabled = true;
-            const letter = String.fromCharCode(65 + [...document.querySelectorAll('.quiz-option')].indexOf(b));
-            if (letter === correct) b.classList.add('correct');
-        });
-        if (!isCorrect) {
-            btn.classList.add('wrong');
-            if (q.hint) {
-                document.getElementById('quizHint').textContent = '💡 ' + q.hint;
-                document.getElementById('quizHint').style.display = 'block';
-            }
-        } else {
-            quizScore += q.points || 10;
-            document.getElementById('quizScore').textContent = quizScore + ' pts';
-        }
-        await recordAnswer(q, selected, isCorrect);
-        document.getElementById('quizNextBtn').style.display = 'block';
-    }
-
-    async function submitFillAnswer() {
-        if (answered) return;
-        const val = (document.getElementById('fillAnswer')?.value || '').trim();
-        if (!val) return;
-        answered = true;
-        const q = sessionQuestions[currentQIdx];
-        const correct = (q.correct_answer || q.correctAnswer || '').trim();
-        const isCorrect = val.toLowerCase() === correct.toLowerCase();
-
-        document.getElementById('fillAnswer').disabled = true;
-        document.querySelector('#quizBody button')?.setAttribute('disabled','true');
-
-        if (isCorrect) {
-            document.getElementById('fillAnswer').style.borderColor = 'var(--success)';
-            quizScore += q.points || 10;
-            document.getElementById('quizScore').textContent = quizScore + ' pts';
-        } else {
-            document.getElementById('fillAnswer').style.borderColor = 'var(--danger)';
-            if (q.hint) {
-                document.getElementById('quizHint').textContent = '💡 ' + q.hint;
-                document.getElementById('quizHint').style.display = 'block';
-            }
-        }
-        await recordAnswer(q, val, isCorrect);
-        document.getElementById('quizNextBtn').style.display = 'block';
-    }
-
-    async function recordAnswer(q, answer, isCorrect) {
-        try {
-            await fetch(`${API}/classrooms/${classroomId}/sessions/${activeSessionId}/answer`, {
-                method: 'POST', headers: getAuthHeaders(),
-                body: JSON.stringify({
-                    question_id: q.question_id || q.id,
-                    answer: String(answer),
-                    is_correct: isCorrect,
-                    points_earned: isCorrect ? (q.points || 10) : 0
-                })
-            });
-        } catch (_) {}
-    }
-
-    function nextQuestion() {
-        currentQIdx++;
-        if (currentQIdx >= sessionQuestions.length) {
-            showResults();
-            return;
-        }
-        renderQuestion();
-    }
-
-    function showResults() {
-        const total = sessionQuestions.length;
-        const correct = sessionQuestions.filter((_, i) => i < currentQIdx).length; // rough
-        document.getElementById('quizQuestion').style.display = 'none';
-        document.getElementById('quizBody').innerHTML = `
-            <div class="results-box">
-                <div class="results-title">🎉 Session Complete!</div>
-                <div class="results-score">${quizScore} pts</div>
-                <div class="results-sub">You finished all ${total} questions.</div>
-                <button class="btn btn-primary" style="margin:0 auto;" onclick="exitQuiz(true)">See Leaderboard</button>
-            </div>`;
-        document.getElementById('quizHint').style.display = 'none';
-        document.getElementById('quizNextBtn').style.display = 'none';
-    }
-
-    function exitQuiz(finished = false, forced = false) {
-        isQuizOpen = false;
-        document.getElementById('quizOverlay').classList.remove('open');
-        document.getElementById('quizQuestion').style.display = '';
-        activeSessionId = null;
-        startPolling(); // resume polling
-        if (forced) {
-            setTimeout(() => alert('The teacher has ended this session.'), 150);
-        }
-        if (finished) {
-            const playBtn = document.querySelector('.tab-btn[onclick*="leaderboard"]');
-            switchTab('leaderboard', playBtn);
-        } else {
-            loadSessions();
-        }
-    }
-
-    // ── Leaderboard ───────────────────────────────────────────────────────────
-    async function loadLeaderboard() {
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/leaderboard`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const board = data.success ? (data.leaderboard || []) : [];
-            const list = document.getElementById('leaderboardList');
-            if (!board.length) {
-                list.innerHTML = `<div class="empty-state">No scores yet. Be the first to play!</div>`;
-                return;
-            }
-            const rankClasses = ['gold', 'silver', 'bronze'];
-            list.innerHTML = board.map((entry, i) => `
-                <div class="lb-row" ${entry.student_id === user.id ? 'style="border-color:var(--primary);"' : ''}>
-                    <div class="lb-rank ${rankClasses[i] || ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i+1)}</div>
-                    <div class="lb-name">${escHtml(entry.fullName || entry.full_name || 'Student')}${entry.student_id === user.id ? ' <span style="color:var(--primary);font-size:0.7rem;">(You)</span>' : ''}</div>
-                    <div class="lb-score">${entry.totalPoints || entry.total_points || 0} pts</div>
-                </div>`).join('');
-        } catch (err) {
-            document.getElementById('leaderboardList').innerHTML = `<div class="empty-state">Failed to load leaderboard.</div>`;
-        }
-    }
-
-    // ── Feedback ──────────────────────────────────────────────────────────────
-    let feedbackLoaded = false;
-    async function loadFeedback() {
-        if (feedbackLoaded) return; // only fetch once per page load
-        const container = document.getElementById('feedbackContainer');
-        container.innerHTML = '<div class="loading-text">Analyzing your performance…</div>';
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/feedback`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message || 'No feedback available yet');
-            feedbackLoaded = true;
-            renderFeedback(data);
-        } catch (err) {
-            container.innerHTML = `<div class="empty-state">📊 ${escHtml(err.message)}<br><br>
-                <small style="color:var(--text-muted);">Complete some session challenges first to get personalized feedback.</small></div>`;
-        }
-    }
-
-    function renderFeedback(data) {
-        const container = document.getElementById('feedbackContainer');
-        const { overallAssessment, weakAreas = [], strongAreas = [], recommendations = [], stats = {} } = data;
-
-        const accuracyPct = stats.accuracy != null ? Math.round(stats.accuracy) : '—';
-        const total    = stats.totalAnswered ?? '—';
-        const correct  = stats.correctAnswers ?? '—';
-
-        const weakPills   = weakAreas.length
-            ? weakAreas.map(t => `<span class="area-pill weak">⚠ ${escHtml(t)}</span>`).join('')
-            : `<span style="color:var(--text-muted);font-size:0.8rem;">None identified — great work!</span>`;
-
-        const strongPills = strongAreas.length
-            ? strongAreas.map(t => `<span class="area-pill strong">✓ ${escHtml(t)}</span>`).join('')
-            : `<span style="color:var(--text-muted);font-size:0.8rem;">Keep practicing to unlock strength areas.</span>`;
-
-        const recoItems = recommendations.length
-            ? recommendations.map(r => `<li>${escHtml(r)}</li>`).join('')
-            : `<li>Complete more sessions to receive personalised recommendations.</li>`;
-
-        container.innerHTML = `
-            <div class="feedback-grid">
-                <!-- Overall assessment -->
-                <div class="feedback-card" style="grid-column:1/-1;">
-                    <div class="feedback-card-title">🤖 AI Assessment</div>
-                    <div class="assessment-text">${escHtml(overallAssessment || 'No assessment yet.')}</div>
-                </div>
-
-                <!-- Stats -->
-                <div class="feedback-card">
-                    <div class="feedback-card-title">📈 Your Stats</div>
-                    <div class="stats-row">
-                        <div class="stat-item">
-                            <span class="stat-val">${accuracyPct}${accuracyPct !== '—' ? '%' : ''}</span>
-                            <span class="stat-label">Accuracy</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-val">${correct}</span>
-                            <span class="stat-label">Correct</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-val">${total}</span>
-                            <span class="stat-label">Answered</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recommendations -->
-                <div class="feedback-card">
-                    <div class="feedback-card-title">💡 Recommendations</div>
-                    <ul class="reco-list">${recoItems}</ul>
-                </div>
-
-                <!-- Weak areas -->
-                <div class="feedback-card">
-                    <div class="feedback-card-title">⚠ Areas to Improve</div>
-                    <div class="area-pills">${weakPills}</div>
-                </div>
-
-                <!-- Strong areas -->
-                <div class="feedback-card">
-                    <div class="feedback-card-title">✓ Strong Areas</div>
-                    <div class="area-pills">${strongPills}</div>
-                </div>
-            </div>
-            <div style="text-align:center;margin-top:8px;">
-                <button class="btn btn-outline" style="font-size:0.78rem;" onclick="refreshFeedback()">↻ Refresh Feedback</button>
-            </div>`;
-    }
-
-    function refreshFeedback() {
-        feedbackLoaded = false;
-        loadFeedback();
-    }
-
-    // ── Logout ────────────────────────────────────────────────────────────────
-    function logout() {
-        if (!confirm('Logout?')) return;
-        stopPolling();
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('isLoggedIn');
-        window.location.href = 'index.html';
-    }
-
-    // ── Init ──────────────────────────────────────────────────────────────────
-    loadClassroom();
+    await loadClassroomInfo();
     loadLessons();
-    loadSessions().then(() => startPolling());
+    checkForSession();
+    loadLeaderboard();
+});
+
+async function loadClassroomInfo() {
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const cl   = data.classroom || data;
+
+        document.title = `${cl.name || 'Classroom'} – CodeArena`;
+        document.getElementById('roomTitle').textContent = cl.name || 'Classroom';
+
+        const lang    = (cl.language || 'python').toLowerCase();
+        const faculty = cl.faculty_name || cl.facultyName || 'Instructor';
+        const count   = cl.student_count || cl.studentCount || 0;
+
+        document.getElementById('roomMeta').innerHTML = `
+            <span class="room-badge badge-lang">${lang}</span>
+            <span class="room-badge badge-teacher">👤 ${esc(faculty)}</span>
+            <span class="room-badge badge-students">👥 ${count} students</span>`;
+    } catch {
+        document.getElementById('roomTitle').textContent = 'Classroom';
+        document.getElementById('roomMeta').textContent  = '';
+    }
+}
+
+// ─── Lessons ──────────────────────────────────────────────────────────────────
+async function loadLessons() {
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        renderLessons(data.lessons || data || []);
+    } catch {
+        renderLessons([]);
+    }
+}
+
+function renderLessons(lessons) {
+    const list = document.getElementById('lessonList');
+    if (!lessons.length) {
+        list.innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">menu_book</span>
+            No lessons yet. ${isFaculty ? 'Add lessons via Manage Classroom.' : 'Ask your instructor to add lessons.'}</div>`;
+        return;
+    }
+
+    list.innerHTML = lessons.map((l, i) => `
+    <div>
+        <div class="lesson-row" onclick="toggleLesson(${i})">
+            <div class="lesson-num">${i + 1}</div>
+            <div class="lesson-info">
+                <div class="lesson-title">${esc(l.title)}</div>
+                ${l.content_preview ? `<div class="lesson-sub">${esc(l.content_preview.slice(0,80))}…</div>` : ''}
+            </div>
+            <span class="material-symbols-outlined" id="lessonChev${i}" style="color:var(--text-muted);font-size:1.1rem;">expand_more</span>
+        </div>
+        <div class="lesson-content" id="lessonContent${i}">
+            <div style="white-space:pre-wrap;">${esc(l.content || 'No content yet.')}</div>
+        </div>
+    </div>`).join('');
+}
+
+function toggleLesson(i) {
+    const content = document.getElementById(`lessonContent${i}`);
+    const chev    = document.getElementById(`lessonChev${i}`);
+    const open    = content.classList.toggle('open');
+    chev.textContent = open ? 'expand_less' : 'expand_more';
+}
+
+// ─── Session / Play ───────────────────────────────────────────────────────────
+async function checkForSession() {
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/sessions/active`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) { showIdle(); return; }
+        const data = await res.json();
+        const sess = data.session || data;
+        if (!sess || !sess.session_id) { showIdle(); return; }
+        sessionId = sess.session_id;
+        await loadQuestions();
+    } catch {
+        showIdle();
+    }
+}
+
+async function loadQuestions() {
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/sessions/active`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const qs   = data.questions || data.session?.questions || [];
+        if (!qs.length) { showWaiting(); return; }
+        questions = qs;
+        qIndex = 0; score = 0; streak = 0; correct = 0;
+        showQuestion();
+    } catch {
+        showIdle();
+    }
+}
+
+function showIdle() {
+    document.getElementById('playIdle').style.display   = 'block';
+    document.getElementById('playWait').style.display   = 'none';
+    document.getElementById('playActive').style.display = 'none';
+    document.getElementById('playEnd').style.display    = 'none';
+    if (isFaculty) {
+        document.getElementById('statusDot').className  = 'status-dot';
+        document.getElementById('statusText').textContent = 'No active session';
+        document.getElementById('startSessionBtn').style.display = 'inline-flex';
+        document.getElementById('closeSessionBtn').style.display = 'none';
+    }
+}
+
+function showWaiting() {
+    document.getElementById('playIdle').style.display   = 'none';
+    document.getElementById('playWait').style.display   = 'block';
+    document.getElementById('playActive').style.display = 'none';
+    document.getElementById('playEnd').style.display    = 'none';
+}
+
+function showQuestion() {
+    if (qIndex >= questions.length) { showEnd(); return; }
+    document.getElementById('playIdle').style.display   = 'none';
+    document.getElementById('playWait').style.display   = 'none';
+    document.getElementById('playActive').style.display = 'block';
+    document.getElementById('playEnd').style.display    = 'none';
+
+    const q = questions[qIndex];
+    document.getElementById('qMeta').textContent    = `Question ${qIndex + 1} of ${questions.length} · ${q.difficulty || 'medium'}`;
+    document.getElementById('qText').textContent    = q.question_text || q.text || '—';
+    document.getElementById('hudQ').textContent     = `${qIndex + 1}/${questions.length}`;
+    document.getElementById('qFeedback').className  = 'q-feedback';
+    document.getElementById('nextQBtn').style.display = 'none';
+    answered = false;
+
+    const opts = q.options || tryParseOptions(q);
+    document.getElementById('qOptions').innerHTML = opts.map((o, i) => `
+        <button class="q-option" onclick="selectOption(this, ${JSON.stringify(String(o))}, ${JSON.stringify(String(q.correct_answer || q.correctAnswer || opts[0]))}, ${q.question_id || q.id || 0})">
+            <span style="font-weight:700;margin-right:0.5rem;">${String.fromCharCode(65+i)}.</span>${esc(String(o))}
+        </button>`).join('');
+
+    startTimer();
+}
+
+function tryParseOptions(q) {
+    try {
+        if (q.options_json) return JSON.parse(q.options_json);
+        if (Array.isArray(q.choices)) return q.choices;
+    } catch {}
+    return ['Option A', 'Option B', 'Option C', 'Option D'];
+}
+
+function startTimer() {
+    clearInterval(timer);
+    timerSec = 30;
+    document.getElementById('hudTimer').textContent = timerSec;
+    timer = setInterval(() => {
+        timerSec--;
+        document.getElementById('hudTimer').textContent = timerSec;
+        if (timerSec <= 0) { clearInterval(timer); if (!answered) autoWrong(); }
+    }, 1000);
+}
+
+function autoWrong() {
+    answered = true;
+    streak = 0;
+    document.getElementById('hudStreak').textContent = '0🔥';
+    document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
+    const fb = document.getElementById('qFeedback');
+    fb.className  = 'q-feedback wrong';
+    fb.textContent = '⏱ Time\'s up!';
+    document.getElementById('nextQBtn').style.display = 'block';
+}
+
+async function selectOption(btn, selected, correct, questionId) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timer);
+
+    const isCorrect = String(selected).trim() === String(correct).trim();
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
+
+    if (isCorrect) {
+        score += 10; correct++;
+        streak++;
+        document.getElementById('hudScore').textContent  = score;
+        document.getElementById('hudStreak').textContent = streak + '🔥';
+    } else {
+        streak = 0;
+        document.getElementById('hudStreak').textContent = '0🔥';
+    }
+
+    const fb = document.getElementById('qFeedback');
+    fb.className  = `q-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+    fb.textContent = isCorrect ? '✓ Correct! Well done.' : `✗ Incorrect. Correct: ${correct}`;
+
+    // Submit answer to backend
+    if (sessionId && questionId) {
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/answer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ questionId, selectedAnswer: selected, isCorrect })
+            });
+        } catch {}
+    }
+
+    document.getElementById('nextQBtn').style.display = 'block';
+}
+
+function nextQuestion() {
+    qIndex++;
+    showQuestion();
+}
+
+function showEnd() {
+    clearInterval(timer);
+    document.getElementById('playIdle').style.display   = 'none';
+    document.getElementById('playWait').style.display   = 'none';
+    document.getElementById('playActive').style.display = 'none';
+    document.getElementById('playEnd').style.display    = 'block';
+
+    document.getElementById('endScore').textContent   = score;
+    document.getElementById('endCorrect').textContent = correct;
+    document.getElementById('endTotal').textContent   = questions.length;
+    const xp = score * 2;
+    document.getElementById('endXP').textContent = '+' + xp;
+    loadLeaderboard();
+}
+
+// ─── Faculty session management ───────────────────────────────────────────────
+async function startSession() {
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/sessions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ title: 'Live Quiz' })
+        });
+        const data = await res.json();
+        sessionId  = (data.session || data)?.session_id || (data.session || data)?.id;
+        document.getElementById('statusDot').className     = 'status-dot live';
+        document.getElementById('statusText').textContent  = 'Session active — students can now play';
+        document.getElementById('startSessionBtn').style.display = 'none';
+        document.getElementById('closeSessionBtn').style.display = 'inline-flex';
+        document.getElementById('playIdle').style.display  = 'none';
+        document.getElementById('playWait').style.display  = 'block';
+    } catch (err) {
+        alert('Failed to start session: ' + err.message);
+    }
+}
+
+async function closeSession() {
+    if (!sessionId) return;
+    try {
+        await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ status: 'closed' })
+        });
+        sessionId = null;
+        showIdle();
+        loadLeaderboard();
+    } catch (err) {
+        alert('Failed to close session: ' + err.message);
+    }
+}
+
+// ─── Leaderboard ──────────────────────────────────────────────────────────────
+async function loadLeaderboard() {
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/leaderboard`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        renderLeaderboard(data.leaderboard || data || []);
+    } catch {
+        renderLeaderboard([]);
+    }
+}
+
+function renderLeaderboard(entries) {
+    const table = document.getElementById('lbTable');
+    if (!entries.length) {
+        table.innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">emoji_events</span>
+            No scores yet. Play a session to appear here!</div>`;
+        return;
+    }
+
+    const medals = ['🥇','🥈','🥉'];
+    table.innerHTML = entries.slice(0,20).map((e, i) => {
+        const name  = e.full_name || e.fullName || e.name || 'Player';
+        const pts   = e.score || e.total_score || 0;
+        const isMe  = (e.user_id || e.id) === me.id;
+        return `<div class="lb-row${isMe ? ' me' : ''}">
+            <div class="lb-rank">${medals[i] || `#${i+1}`}</div>
+            <div class="lb-name">${esc(name)}${isMe ? '<span class="lb-you">you</span>' : ''}</div>
+            <div class="lb-score">${pts} pts</div>
+        </div>`;
+    }).join('');
+}
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    if (btn) btn.classList.add('active');
+
+    if (name === 'leaderboard') loadLeaderboard();
+    if (name === 'play') checkForSession();
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 </script>
 </body>
 </html>

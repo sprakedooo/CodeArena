@@ -20,10 +20,14 @@ const app = express();
 const PORT = 8080;
 
 // Serve static files from frontend directory
-app.use('/css', express.static(path.join(__dirname, 'css')));
-app.use('/js', express.static(path.join(__dirname, 'js')));
-app.use('/pages', express.static(path.join(__dirname, 'pages')));
+app.use('/css',    express.static(path.join(__dirname, 'css')));
+app.use('/js',     express.static(path.join(__dirname, 'js')));
+app.use('/pages',  express.static(path.join(__dirname, 'pages')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// Also serve pages/ at root so relative links (login.html, dashboard.html, etc.)
+// work when the user navigates from the landing page at localhost:8080/
+app.use(express.static(path.join(__dirname, 'pages')));
 
 // Root serves the marketing homepage (index)
 app.get('/', (req, res) => {
@@ -61,6 +65,28 @@ app.get('/playground', (req, res) => {
 
 app.get('/select-language', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages', 'select_language.html'));
+});
+
+// ── Catch-all: serve any page by name ────────────────────────────────────────
+// Allows clean URLs: /learn, /learn.html, /profile, /analytics, etc.
+// Must come AFTER all specific routes above.
+const fs = require('fs');
+
+app.get('/:page([a-zA-Z0-9_.-]+)', (req, res) => {
+    // Strip .html suffix so both /login and /login.html are handled
+    const name = req.params.page.replace(/\.html$/, '');
+    // Try exact .html match first, then with appended .html
+    const candidates = [
+        path.join(__dirname, 'pages', name + '.html'),
+        path.join(__dirname, 'pages', name),
+    ];
+    for (const filePath of candidates) {
+        if (fs.existsSync(filePath)) return res.sendFile(filePath);
+    }
+    // Not found — serve 404 page if it exists, otherwise plain text
+    const notFound = path.join(__dirname, 'pages', '404.html');
+    if (fs.existsSync(notFound)) return res.status(404).sendFile(notFound);
+    res.status(404).send('Page not found');
 });
 
 // Start server

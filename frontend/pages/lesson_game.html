@@ -3,2419 +3,783 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena - CodeArena</title>
+    <title>Arena – CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        .container {
-            padding: 5vh 5%;
-        }
-
-        .game-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        /* Game Stats Bar - Dark HUD */
-        .game-stats-bar {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            margin-bottom: 1.5rem;
-        }
-
-        .game-stat {
-            text-align: center;
-        }
-
-        .game-stat-value {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1rem;
-            color: var(--xp-gold);
-            text-shadow: 0 0 8px var(--warning-glow);
-        }
-
-        .game-stat-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            margin-top: 0.25rem;
-        }
-
-        /* Combo Display */
-        .combo-display {
-            position: fixed;
-            top: 100px;
-            right: 30px;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: bold;
-            font-size: 1.25rem;
-            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
-            animation: comboGlow 1s infinite;
-            display: none;
-            z-index: 100;
-            font-family: 'Press Start 2P', monospace;
-        }
-
-        .combo-display.active {
-            display: block;
-        }
-
-        @keyframes comboGlow {
-            0%, 100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 4px 30px rgba(239, 68, 68, 0.8); }
-        }
-
-        .combo-label {
-            font-size: 0.5rem;
-            letter-spacing: 2px;
-            opacity: 0.9;
-        }
-
-        .combo-multiplier {
-            font-size: 1.5rem;
-        }
-
-        /* Timer - Dark themed */
-        .timer-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .timer-bar {
-            flex: 1;
-            height: 8px;
-            background: var(--bg-surface);
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .timer-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--secondary));
-            border-radius: 4px;
-            transition: width 0.1s linear;
-        }
-
-        .timer-fill.warning {
-            background: linear-gradient(90deg, #f59e0b, #ef4444);
-        }
-
-        .timer-fill.danger {
-            background: var(--danger);
-            animation: timerPulse 0.5s infinite;
-        }
-
-        @keyframes timerPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .timer-text {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            min-width: 40px;
-            text-align: center;
-            color: var(--text);
-        }
-
-        .timer-text.warning { color: var(--warning); }
-        .timer-text.danger { color: var(--danger); }
-
-        /* Power-ups - Dark themed */
-        .powerups-bar {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .powerup-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--bg-surface);
-            border: 2px solid var(--border);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-        }
-
-        .powerup-btn:hover:not(:disabled) {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        .powerup-btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-
-        .powerup-btn.used {
-            background: var(--bg-dark);
-            text-decoration: line-through;
-            opacity: 0.3;
-        }
-
-        .powerup-icon {
-            font-size: 1.1rem;
-        }
-
-        .powerup-count {
-            background: var(--primary);
-            color: white;
-            padding: 0 6px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        /* Question Card - Dark themed */
-        .question-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .question-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--success), var(--secondary));
-        }
-
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .topic-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--primary-light);
-            color: var(--primary);
-            padding: 0.4rem 0.85rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            border: 1px solid rgba(124, 58, 237, 0.3);
-        }
-
-        .question-text {
-            font-size: 1.15rem;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            padding: 1.25rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius);
-            border-left: 4px solid var(--primary);
-            color: var(--text);
-        }
-
-        .question-text code {
-            background: var(--bg-dark);
-            color: var(--success);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'Consolas', 'Fira Code', monospace;
-            border: 1px solid var(--border);
-        }
-
-        /* Options - Dark themed */
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-        }
-
-        @media (max-width: 600px) {
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
-            .game-stats-bar {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .complete-stats {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-        }
-
-        .option-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 1.25rem;
-            background: var(--bg-surface);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-        }
-
-        .option-btn:hover:not(:disabled) {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            transform: translateX(4px);
-        }
-
-        .option-letter {
-            width: 34px;
-            height: 34px;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .option-btn.correct {
-            border-color: var(--success);
-            background: var(--success-bg);
-            box-shadow: 0 0 20px var(--success-glow);
-            animation: correctPulse 0.5s ease;
-        }
-
-        .option-btn.correct .option-letter {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
-        }
-
-        .option-btn.wrong {
-            border-color: var(--danger);
-            background: var(--danger-bg);
-            box-shadow: 0 0 20px var(--danger-glow);
-            animation: shake 0.5s ease;
-        }
-
-        .option-btn.wrong .option-letter {
-            background: var(--danger);
-            color: white;
-            border-color: var(--danger);
-        }
-
-        @keyframes correctPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        /* Points Popup */
-        .points-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            padding: 1.5rem 3rem;
-            border-radius: var(--radius-lg);
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.25rem;
-            animation: popIn 0.6s ease forwards;
-            z-index: 1000;
-            text-align: center;
-        }
-
-        .points-popup.correct {
-            background: linear-gradient(135deg, var(--success), #059669);
-            box-shadow: 0 10px 40px var(--success-glow);
-        }
-
-        .points-popup.wrong {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            box-shadow: 0 10px 40px var(--danger-glow);
-        }
-
-        .points-popup.bonus {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 10px 40px var(--warning-glow);
-        }
-
-        .points-detail {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.8rem;
-            opacity: 0.9;
-            margin-top: 0.5rem;
-        }
-
-        @keyframes popIn {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        /* Feedback - Dark themed */
-        .feedback-container {
-            margin-top: 1.5rem;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .feedback-box {
-            padding: 1.25rem;
-            border-radius: var(--radius);
-            margin-bottom: 1rem;
-            border: 1px solid;
-        }
-
-        .feedback-correct {
-            background: var(--success-bg);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: var(--success);
-        }
-
-        .feedback-wrong {
-            background: var(--danger-bg);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: var(--danger);
-        }
-
-        .hint-box {
-            background: var(--warning-bg);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: var(--radius);
-            padding: 1.25rem;
-            margin-top: 0.75rem;
-            color: var(--text);
-        }
-
-        .hint-label {
-            display: inline-block;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: var(--bg-dark);
-            padding: 3px 10px;
-            border-radius: 4px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.45rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Session Complete - Dark themed */
-        .complete-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 3rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .complete-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--xp-gold), var(--success), var(--primary), var(--secondary));
-        }
-
-        .complete-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.25rem;
-            color: var(--xp-gold);
-            text-shadow: 0 0 20px var(--warning-glow);
-            margin-bottom: 0.5rem;
-        }
-
-        .complete-subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .complete-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .complete-stat {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            padding: 1.25rem;
-            border-radius: var(--radius);
-        }
-
-        .complete-stat-value {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.1rem;
-            color: var(--xp-gold);
-            text-shadow: 0 0 8px var(--warning-glow);
-        }
-
-        .complete-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .achievement-unlocked {
-            display: inline-block;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            margin: 0.5rem;
-            box-shadow: 0 4px 15px var(--warning-glow);
-        }
-
-        .achievement-icon {
-            font-size: 1.75rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .achievement-text {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--bg-dark);
-        }
-
-        /* XP Progress Bar */
-        .xp-bar-container {
-            margin-bottom: 2rem;
-            text-align: left;
-        }
-
-        .xp-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .xp-label .xp-value {
-            color: var(--xp-gold);
-            font-weight: 600;
-        }
-
-        .xp-bar {
-            height: 14px;
-            background: var(--bg-dark);
-            border-radius: 7px;
-            overflow: hidden;
-            border: 2px solid var(--border);
-        }
-
-        .xp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--xp-gold), #f59e0b, var(--xp-gold));
-            background-size: 200% 100%;
-            border-radius: 5px;
-            transition: width 1s ease;
-            animation: goldShimmer 3s infinite;
-        }
-
-        @keyframes goldShimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Difficulty indicator */
-        .difficulty-indicator {
-            display: flex;
-            gap: 4px;
-            margin-left: auto;
-        }
-
-        .difficulty-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-        }
-
-        .difficulty-dot.beginner { background: var(--success); border-color: var(--success); }
-        .difficulty-dot.intermediate { background: var(--warning); border-color: var(--warning); }
-        .difficulty-dot.advanced { background: var(--danger); border-color: var(--danger); }
-
-        /* ── Game Mode Selector ── */
-        .mode-selector {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .mode-selector-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1rem;
-            color: var(--xp-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .mode-selector-subtitle {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .mode-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .mode-card {
-            background: var(--bg-surface);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.25rem 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .mode-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        .mode-card.selected {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        .mode-card-icon {
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .mode-card-name {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.55rem;
-            color: var(--text);
-            margin-bottom: 0.35rem;
-        }
-
-        .mode-card-desc {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        /* ── Code Snippet Block ── */
-        .code-snippet-block {
-            background: #0d1117;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.25rem;
-            margin-bottom: 1.25rem;
-            font-family: 'Consolas', 'Fira Code', monospace;
-            font-size: 0.95rem;
-            line-height: 1.7;
-            color: #e6edf3;
-            overflow-x: auto;
-            white-space: pre;
-        }
-
-        .code-snippet-block .blank-highlight {
-            background: var(--primary);
-            color: white;
-            padding: 2px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        /* ── Text Input Answer ── */
-        .text-answer-area {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-        }
-
-        .text-answer-input {
-            flex: 1;
-            padding: 0.85rem 1rem;
-            background: var(--bg-surface);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            font-family: 'Consolas', 'Fira Code', monospace;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .text-answer-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        .text-answer-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .submit-answer-btn {
-            padding: 0.85rem 1.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.6rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .submit-answer-btn:hover:not(:disabled) {
-            background: #6d28d9;
-            transform: translateY(-1px);
-        }
-
-        .submit-answer-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* ── Code Ordering ── */
-        .code-ordering-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .code-order-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-surface);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            font-family: 'Consolas', 'Fira Code', monospace;
-            font-size: 0.9rem;
-            color: #e6edf3;
-            transition: all 0.15s;
-        }
-
-        .code-order-item.dragging {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        .code-order-num {
-            width: 28px;
-            height: 28px;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            flex-shrink: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .code-order-text {
-            flex: 1;
-            white-space: pre;
-        }
-
-        .code-order-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            flex-shrink: 0;
-        }
-
-        .code-order-controls button {
-            width: 28px;
-            height: 22px;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-            padding: 0;
-        }
-
-        .code-order-controls button:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .code-order-item.correct-order {
-            border-color: var(--success);
-            background: var(--success-bg);
-        }
-
-        .code-order-item.wrong-order {
-            border-color: var(--danger);
-            background: var(--danger-bg);
-        }
-
-        .text-answer-input.correct-input {
-            border-color: var(--success);
-            box-shadow: 0 0 10px var(--success-glow);
-        }
-
-        .text-answer-input.wrong-input {
-            border-color: var(--danger);
-            box-shadow: 0 0 10px var(--danger-glow);
-        }
-
-        /* ── Drag-and-drop code ordering ── */
-        .code-order-item[draggable="true"] { cursor: grab; }
-        .code-order-item[draggable="true"]:active { cursor: grabbing; }
-        .code-order-item.drag-over {
-            border-color: var(--secondary);
-            background: rgba(6,182,212,0.12);
-            transform: scale(1.015);
-        }
-        .drag-handle {
-            color: var(--text-muted);
-            font-size: 1rem;
-            cursor: grab;
-            padding: 0 4px;
-            flex-shrink: 0;
-            user-select: none;
-        }
-        .drag-hint {
-            text-align: center;
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-            letter-spacing: 0.5px;
-        }
-
-        /* ── Custom Game Modal ── */
-        .game-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            backdrop-filter: blur(4px);
-            animation: fadeIn 0.15s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .game-modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 2rem 2rem 1.5rem;
-            max-width: 400px;
-            width: 90%;
-            position: relative;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-            animation: slideUp 0.2s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .game-modal::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        }
-        .game-modal-icon { font-size: 2rem; text-align: center; margin-bottom: 0.5rem; }
-        .game-modal-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-            color: var(--xp-gold);
-            text-align: center;
-            margin-bottom: 0.75rem;
-            letter-spacing: 1px;
-        }
-        .game-modal-msg {
-            color: var(--text-secondary);
-            text-align: center;
-            font-size: 0.875rem;
-            line-height: 1.65;
-            margin-bottom: 1.5rem;
-        }
-        .game-modal-actions { display: flex; gap: 0.75rem; justify-content: center; }
-
-        /* ── In-game Back button ── */
-        .back-game-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text-muted);
-            font-size: 0.78rem;
-            padding: 0.35rem 0.85rem;
-            cursor: pointer;
-            transition: all 0.15s;
-            display: none;
-        }
-        .back-game-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-        /* ── Loading overlay ── */
-        .question-loading {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-muted);
-        }
-        .loading-spinner {
-            width: 36px; height: 36px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 1rem;
+        /* ── Setup screen ─────────────────────────────────────────────────── */
+        .setup-screen {
+            max-width: 560px; margin: 0 auto; padding: 1rem 0 2rem;
+        }
+        .setup-header { text-align: center; margin-bottom: 2rem; }
+        .setup-header h1 { font-size: 1.45rem; font-weight: 700; color: var(--text); margin: 0 0 0.35rem; }
+        .setup-header p  { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+        .setup-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.5rem;
+            display: flex; flex-direction: column; gap: 1.1rem;
+        }
+        .form-group label {
+            display: block; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--text-muted); margin-bottom: 0.4rem;
+        }
+        .form-group select, .form-group input {
+            width: 100%; box-sizing: border-box;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.65rem 0.9rem;
+            color: var(--text); font-size: 0.9rem; outline: none;
+            transition: border-color 0.15s;
+        }
+        .form-group select:focus, .form-group input:focus { border-color: var(--primary); }
+
+        .difficulty-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.6rem; }
+        .diff-btn {
+            padding: 0.65rem 0.5rem; border: 1px solid var(--border);
+            border-radius: var(--radius-sm); background: var(--bg-surface);
+            cursor: pointer; text-align: center; transition: all 0.15s; color: var(--text-muted);
+        }
+        .diff-btn .diff-icon { font-size: 1.4rem; display: block; margin-bottom: 0.25rem; }
+        .diff-btn .diff-name { font-size: 0.78rem; font-weight: 700; text-transform: capitalize; }
+        .diff-btn .diff-sub  { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.1rem; }
+        .diff-btn.active     { border-color: var(--primary); background: rgba(124,58,237,0.1); color: var(--text); }
+        .diff-btn.active .diff-name { color: var(--primary); }
+
+        /* ── Game container ───────────────────────────────────────────────── */
+        .game-wrap { max-width: 700px; margin: 0 auto; }
+        .screen    { display: none; }
+        .screen.active { display: block; }
+
+        /* HUD bar */
+        .hud {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 0.6rem; margin-bottom: 1.25rem;
+        }
+        .hud-chip {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.65rem 0.5rem; text-align: center;
+        }
+        .hud-val { font-size: 1rem; font-weight: 800; color: var(--text); }
+        .hud-lbl { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.1rem; }
+        .hud-timer .hud-val { color: #f87171; font-family: 'Press Start 2P',monospace; font-size: 0.75rem; }
+        .hud-score .hud-val { color: #fbbf24; }
+        .hud-streak .hud-val { color: #f97316; }
+        .hud-combo  .hud-val { color: var(--secondary); }
+
+        /* Combo badge */
+        .combo-badge {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0);
+            background: linear-gradient(135deg,var(--primary),var(--secondary));
+            color: #fff; font-size: 1.3rem; font-weight: 900;
+            padding: 0.75rem 1.5rem; border-radius: 40px;
+            z-index: 500; pointer-events: none;
+            transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s;
+            opacity: 0;
+        }
+        .combo-badge.show { transform: translate(-50%,-60%) scale(1); opacity: 1; }
+
+        /* Question card */
+        .q-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem;
+        }
+        .q-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+        .q-meta { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .q-topic-pill {
+            font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.55rem;
+            border-radius: 20px; background: rgba(6,182,212,0.1); color: #22d3ee;
+            border: 1px solid rgba(6,182,212,0.25);
+        }
+        .q-text { font-size: 0.98rem; font-weight: 600; color: var(--text); line-height: 1.65; margin-bottom: 1.1rem; }
+        .q-code {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.85rem 1rem;
+            font-family: 'Courier New', monospace; font-size: 0.85rem; color: #22d3ee;
+            white-space: pre-wrap; margin-bottom: 1rem; line-height: 1.6;
+        }
+
+        /* Options */
+        .q-options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .q-option {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+            cursor: pointer; transition: all 0.15s; font-size: 0.9rem; color: var(--text);
+            text-align: left; display: flex; align-items: flex-start; gap: 0.6rem;
+        }
+        .q-option .opt-letter { font-weight: 800; flex-shrink: 0; min-width: 1.1rem; }
+        .q-option:hover:not(:disabled) { border-color: var(--primary); background: rgba(124,58,237,0.08); }
+        .q-option.selected  { border-color: var(--primary); background: rgba(124,58,237,0.1); }
+        .q-option.correct   { border-color: var(--success); background: rgba(16,185,129,0.12); color: #34d399; }
+        .q-option.wrong     { border-color: var(--danger);  background: rgba(239,68,68,0.12);  color: #f87171; }
+        .q-option:disabled  { cursor: default; }
+
+        /* Fill-blank */
+        .fill-input {
+            width: 100%; box-sizing: border-box;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.7rem 1rem;
+            font-size: 0.9rem; color: var(--text); outline: none;
+        }
+        .fill-input:focus { border-color: var(--primary); }
+        .fill-input.correct { border-color: var(--success); }
+        .fill-input.wrong   { border-color: var(--danger);  }
+
+        /* Feedback */
+        .q-feedback {
+            display: none; padding: 0.85rem 1rem; border-radius: var(--radius-sm);
+            font-size: 0.85rem; margin-top: 0.75rem; line-height: 1.5;
+        }
+        .q-feedback.correct { display: block; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+        .q-feedback.wrong   { display: block; background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
+
+        /* AI Hint section */
+        .hint-section {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem 1.15rem; margin-bottom: 0.85rem;
+        }
+        .hint-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+        .hint-header h4 { font-size: 0.82rem; font-weight: 700; color: var(--text); margin: 0; display: flex; align-items: center; gap: 0.4rem; }
+        .hint-header h4 .material-symbols-outlined { font-size: 1rem; color: var(--primary); }
+        .hint-levels { display: flex; gap: 0.35rem; }
+        .hint-lvl-btn {
+            font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.55rem;
+            border-radius: 20px; border: 1px solid var(--border); background: var(--bg-surface);
+            cursor: pointer; color: var(--text-muted); transition: all 0.15s;
+        }
+        .hint-lvl-btn:hover   { border-color: var(--primary); color: var(--primary); }
+        .hint-lvl-btn.active  { background: rgba(124,58,237,0.15); border-color: var(--primary); color: #a78bfa; }
+        .hint-lvl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .hint-text {
+            margin-top: 0.75rem; font-size: 0.83rem; color: var(--text-secondary);
+            line-height: 1.65; display: none; border-top: 1px solid var(--border-light);
+            padding-top: 0.7rem;
+        }
+        .hint-text.show { display: block; }
+        .hint-spinner {
+            display: none; font-size: 0.78rem; color: var(--text-muted);
+            align-items: center; gap: 0.5rem; margin-top: 0.6rem;
+        }
+        .hint-spinner.show { display: flex; }
+        .mini-spin {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid var(--bg-surface); border-top-color: var(--primary);
+            animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Progress bar */
+        .q-progress-bar { height: 4px; background: var(--bg-surface); border-radius: 2px; margin-bottom: 1rem; }
+        .q-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg,var(--primary),var(--secondary)); transition: width 0.35s ease; }
+
+        /* ── End screen ───────────────────────────────────────────────────── */
+        .end-screen {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 2rem; text-align: center;
+        }
+        .end-trophy { font-size: 3.5rem; display: block; margin-bottom: 0.5rem; }
+        .end-title  { font-size: 1.2rem; font-weight: 700; color: var(--text); margin: 0 0 0.25rem; }
+        .end-sub    { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.5rem; }
+        .end-stats  { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .end-stat   { text-align: center; }
+        .end-stat-val { font-size: 1.4rem; font-weight: 800; color: var(--text); }
+        .end-stat-lbl { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; }
+        .end-stat-val.gold  { color: #fbbf24; }
+        .end-stat-val.green { color: #34d399; }
+
+        .weakness-report { text-align: left; }
+        .wr-title { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 0.5rem; }
+        .wr-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .wr-pill  { font-size: 0.72rem; padding: 0.22rem 0.6rem; border-radius: 20px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+
+        /* XP toast */
+        .xp-toast {
+            position: fixed; top: 5rem; right: 1.5rem; z-index: 600;
+            background: linear-gradient(135deg,rgba(251,191,36,0.9),rgba(245,158,11,0.9));
+            color: #1a1000; font-size: 0.88rem; font-weight: 800;
+            padding: 0.55rem 1rem; border-radius: 30px; pointer-events: none;
+            opacity: 0; transform: translateY(10px);
+            transition: opacity 0.25s, transform 0.25s;
+        }
+        .xp-toast.show { opacity: 1; transform: translateY(0); }
+
+        /* Skeleton */
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity:0.5; } 50%{ opacity:1; } }
+
+        @media (max-width: 640px) {
+            .hud { grid-template-columns: repeat(3,1fr); }
+            .hud-chip:nth-child(4), .hud-chip:nth-child(5) { display: none; }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <span class="navbar-brand logo">
-            <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:55px;width:auto;object-fit:contain;vertical-align:middle;">
-        </span>
-        <ul class="navbar-nav">
-            <li><a href="dashboard.html" onclick="return navAwayGuard(event, 'dashboard.html')">Dashboard</a></li>
-            <li><a href="lessons.html" onclick="return navAwayGuard(event, 'lessons.html')">Lessons</a></li>
-            <li><a href="lesson_game.html" class="active">Play</a></li>
-            <li><a href="playground.html" onclick="return navAwayGuard(event, 'playground.html')">Playground</a></li>
-            <li><a href="feedback.html" onclick="return navAwayGuard(event, 'feedback.html')">Feedback</a></li>
-            <li>
-                <div class="nav-xp-bar">
-                    <span class="xp-icon">&#x2B50;</span>
-                    <span class="xp-amount" id="navXP">0 XP</span>
-                </div>
-            </li>
-            <li><a href="#" onclick="logout()">Logout</a></li>
-        </ul>
-    </nav>
 
-    <!-- Combo Display -->
-    <div class="combo-display" id="comboDisplay">
-        <div class="combo-label">COMBO</div>
-        <div class="combo-multiplier" id="comboMultiplier">x2</div>
-    </div>
+<!-- ── Screens ────────────────────────────────────────────────────────────── -->
 
-    <div class="container game-container">
-        <!-- Game Mode Selector -->
-        <div class="mode-selector" id="modeSelector">
-            <div class="mode-selector-title">SELECT GAME MODE</div>
-            <div class="mode-selector-subtitle">Choose how you want to be challenged</div>
-            <div class="mode-grid">
-                <div class="mode-card selected" data-mode="mixed" onclick="selectMode('mixed', this)">
-                    <div class="mode-card-icon">&#127922;</div>
-                    <div class="mode-card-name">Mixed Mode</div>
-                    <div class="mode-card-desc">All types randomly mixed</div>
-                </div>
-                <div class="mode-card" data-mode="multiple_choice" onclick="selectMode('multiple_choice', this)">
-                    <div class="mode-card-icon">&#9745;</div>
-                    <div class="mode-card-name">Multiple Choice</div>
-                    <div class="mode-card-desc">Classic 4-option format</div>
-                </div>
-                <div class="mode-card" data-mode="fill_blank" onclick="selectMode('fill_blank', this)">
-                    <div class="mode-card-icon">&#9999;</div>
-                    <div class="mode-card-name">Fill in Blank</div>
-                    <div class="mode-card-desc">Type the missing code</div>
-                </div>
-                <div class="mode-card" data-mode="output_prediction" onclick="selectMode('output_prediction', this)">
-                    <div class="mode-card-icon">&#128424;</div>
-                    <div class="mode-card-name">Output Predict</div>
-                    <div class="mode-card-desc">Predict code output</div>
-                </div>
-                <div class="mode-card" data-mode="code_ordering" onclick="selectMode('code_ordering', this)">
-                    <div class="mode-card-icon">&#128260;</div>
-                    <div class="mode-card-name">Code Ordering</div>
-                    <div class="mode-card-desc">Arrange code lines</div>
+<!-- SETUP SCREEN -->
+<div id="screenSetup" class="screen active">
+    <div class="setup-screen">
+        <div class="setup-header">
+            <h1>🎮 Arena Mode</h1>
+            <p>Adaptive solo quiz with AI-powered hints</p>
+        </div>
+        <div class="setup-card">
+            <div class="form-group">
+                <label>Language</label>
+                <select id="setupLang">
+                    <option value="python">🐍 Python</option>
+                    <option value="javascript">⚡ JavaScript</option>
+                    <option value="java">☕ Java</option>
+                    <option value="cpp">⚙️ C++</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Difficulty</label>
+                <div class="difficulty-grid">
+                    <button class="diff-btn active" data-level="beginner" onclick="selectDiff(this)">
+                        <span class="diff-icon">🌱</span>
+                        <div class="diff-name">Beginner</div>
+                        <div class="diff-sub">Foundation</div>
+                    </button>
+                    <button class="diff-btn" data-level="intermediate" onclick="selectDiff(this)">
+                        <span class="diff-icon">⚡</span>
+                        <div class="diff-name">Intermediate</div>
+                        <div class="diff-sub">Challenge</div>
+                    </button>
+                    <button class="diff-btn" data-level="advanced" onclick="selectDiff(this)">
+                        <span class="diff-icon">🔥</span>
+                        <div class="diff-name">Advanced</div>
+                        <div class="diff-sub">Expert</div>
+                    </button>
                 </div>
             </div>
-            <button class="btn btn-primary btn-lg" onclick="startGame()">&#x1F3AE; Start Game</button>
-        </div>
-
-        <!-- Back-to-modes button (shown only during active game) -->
-        <div style="margin-bottom:0.75rem; display:none;" id="backBtnRow">
-            <button class="back-game-btn" id="backGameBtn" onclick="backToModes()" style="display:inline-flex;align-items:center;gap:0.4rem;">
-                &#8592; Back to Modes
+            <div class="form-group">
+                <label>Number of Questions</label>
+                <select id="setupCount">
+                    <option value="5">5 questions (~5 min)</option>
+                    <option value="10" selected>10 questions (~10 min)</option>
+                    <option value="15">15 questions (~15 min)</option>
+                    <option value="20">20 questions (~20 min)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="startGame()" style="justify-content:center;font-size:0.92rem;padding:0.8rem;">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">play_circle</span>
+                Start Arena
             </button>
         </div>
+    </div>
+</div>
 
-        <!-- Game Stats Bar -->
-        <div class="game-stats-bar" id="gameStatsBar" style="display: none;">
-            <div class="game-stat">
-                <div class="game-stat-value" id="sessionPoints">0</div>
-                <div class="game-stat-label">Points</div>
+<!-- GAME SCREEN -->
+<div id="screenGame" class="screen">
+    <div class="game-wrap">
+        <!-- Progress bar -->
+        <div class="q-progress-bar">
+            <div class="q-progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+
+        <!-- HUD -->
+        <div class="hud">
+            <div class="hud-chip hud-score">
+                <div class="hud-val" id="hudScore">0</div>
+                <div class="hud-lbl">Score</div>
             </div>
-            <div class="game-stat">
-                <div class="game-stat-value" id="questionNum">1/10</div>
-                <div class="game-stat-label">Question</div>
+            <div class="hud-chip hud-streak">
+                <div class="hud-val" id="hudStreak">0🔥</div>
+                <div class="hud-lbl">Streak</div>
             </div>
-            <div class="game-stat">
-                <div class="game-stat-value" id="streakCount">0</div>
-                <div class="game-stat-label">Streak</div>
+            <div class="hud-chip hud-combo">
+                <div class="hud-val" id="hudCombo">×1</div>
+                <div class="hud-lbl">Multiplier</div>
             </div>
-            <div class="game-stat">
-                <div class="game-stat-value" id="accuracyDisplay">0%</div>
-                <div class="game-stat-label">Accuracy</div>
+            <div class="hud-chip hud-timer">
+                <div class="hud-val" id="hudTimer">30</div>
+                <div class="hud-lbl">Seconds</div>
             </div>
-            <div class="game-stat">
-                <span class="level-badge level-beginner" id="levelBadge">BEGINNER</span>
-                <div class="game-stat-label">Level</div>
+            <div class="hud-chip">
+                <div class="hud-val" id="hudQ">1/10</div>
+                <div class="hud-lbl">Question</div>
             </div>
         </div>
 
-        <!-- Question Card -->
-        <div class="question-card" id="questionCard" style="display: none;">
-            <!-- Timer -->
-            <div class="timer-container">
-                <div class="timer-bar">
-                    <div class="timer-fill" id="timerBar" style="width: 100%;"></div>
-                </div>
-                <div class="timer-text" id="timerText">30</div>
+        <!-- Question card -->
+        <div class="q-card">
+            <div class="q-top">
+                <span class="q-meta" id="qMeta">Question</span>
+                <span class="q-topic-pill" id="qTopic">Topic</span>
             </div>
-
-            <!-- Power-ups -->
-            <div class="powerups-bar">
-                <button class="powerup-btn" id="skipBtn" onclick="usePowerup('skip')">
-                    <span class="powerup-icon">&#9197;</span>
-                    <span>Skip</span>
-                    <span class="powerup-count" id="skipCount">2</span>
-                </button>
-                <button class="powerup-btn" id="hintBtn" onclick="usePowerup('hint')">
-                    <span class="powerup-icon">&#128161;</span>
-                    <span>50/50</span>
-                    <span class="powerup-count" id="hintCount">2</span>
-                </button>
-                <button class="powerup-btn" id="freezeBtn" onclick="usePowerup('freeze')">
-                    <span class="powerup-icon">&#10052;</span>
-                    <span>Freeze</span>
-                    <span class="powerup-count" id="freezeCount">1</span>
-                </button>
-            </div>
-
-            <!-- Question Header -->
-            <div class="question-header">
-                <span class="topic-badge" id="topicLabel">
-                    <span>&#128218;</span> Topic: Variables
-                </span>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span class="level-badge level-beginner" id="questionLevel">Beginner</span>
-                    <div class="difficulty-indicator" id="difficultyIndicator">
-                        <div class="difficulty-dot"></div>
-                        <div class="difficulty-dot"></div>
-                        <div class="difficulty-dot"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Question Text -->
-            <div class="question-text" id="questionText">
-                Loading question...
-            </div>
-
-            <!-- Options -->
-            <div class="options-grid" id="optionsList">
-                <!-- Options will be inserted here -->
-            </div>
-
-            <!-- Feedback Area -->
-            <div class="feedback-container" id="feedbackArea" style="display: none;"></div>
-
-            <!-- Navigation Buttons -->
-            <div class="mt-3 text-center" id="navButtons" style="display: none;">
-                <button class="btn btn-primary btn-lg" onclick="nextQuestion()">
-                    Next Question &rarr;
-                </button>
-            </div>
+            <div class="q-text" id="qText">—</div>
+            <div class="q-code" id="qCode" style="display:none;"></div>
+            <div class="q-options" id="qOptions"></div>
+            <div class="q-feedback" id="qFeedback"></div>
         </div>
 
-        <!-- Session Complete Card -->
-        <div class="complete-card" id="completeCard" style="display: none;">
-            <div class="complete-title" id="completeTitle">SESSION COMPLETE</div>
-            <div class="complete-subtitle">Great effort! Here's how you did:</div>
+        <!-- AI Hint section -->
+        <div class="hint-section">
+            <div class="hint-header">
+                <h4><span class="material-symbols-outlined">auto_awesome</span>AI Hint</h4>
+                <div class="hint-levels">
+                    <button class="hint-lvl-btn" id="hintBtn1" onclick="requestHint(1)" title="General nudge">Hint 1</button>
+                    <button class="hint-lvl-btn" id="hintBtn2" onclick="requestHint(2)" title="More specific help" disabled>Hint 2</button>
+                    <button class="hint-lvl-btn" id="hintBtn3" onclick="requestHint(3)" title="Step-by-step guide" disabled>Hint 3</button>
+                </div>
+            </div>
+            <div class="hint-spinner" id="hintSpinner">
+                <div class="mini-spin"></div>
+                Generating hint…
+            </div>
+            <div class="hint-text" id="hintText"></div>
+        </div>
 
-            <div class="complete-stats">
-                <div class="complete-stat">
-                    <div class="complete-stat-value" id="finalPoints">0</div>
-                    <div class="complete-stat-label">Points</div>
+        <div style="display:flex;gap:0.6rem;align-items:center;">
+            <button id="nextBtn" class="btn btn-primary" onclick="nextQuestion()" style="flex:1;justify-content:center;font-size:0.88rem;display:none;">
+                Next Question →
+            </button>
+            <button class="btn btn-secondary" onclick="quitGame()" style="font-size:0.82rem;">
+                <span class="material-symbols-outlined" style="font-size:0.95rem;">stop</span>
+                Quit
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- END SCREEN -->
+<div id="screenEnd" class="screen">
+    <div class="game-wrap">
+        <div class="end-screen">
+            <span class="end-trophy" id="endTrophy">🏆</span>
+            <div class="end-title" id="endTitle">Session Complete!</div>
+            <div class="end-sub" id="endSub">Here's how you did</div>
+
+            <div class="end-stats">
+                <div class="end-stat">
+                    <div class="end-stat-val gold" id="endScore">0</div>
+                    <div class="end-stat-lbl">Score</div>
                 </div>
-                <div class="complete-stat">
-                    <div class="complete-stat-value" id="finalCorrect">0/10</div>
-                    <div class="complete-stat-label">Correct</div>
+                <div class="end-stat">
+                    <div class="end-stat-val" id="endAccuracy">0%</div>
+                    <div class="end-stat-lbl">Accuracy</div>
                 </div>
-                <div class="complete-stat">
-                    <div class="complete-stat-value" id="finalAccuracy">0%</div>
-                    <div class="complete-stat-label">Accuracy</div>
+                <div class="end-stat">
+                    <div class="end-stat-val green" id="endXP">+0 XP</div>
+                    <div class="end-stat-lbl">Earned</div>
                 </div>
-                <div class="complete-stat">
-                    <div class="complete-stat-value" id="bestStreak">0</div>
-                    <div class="complete-stat-label">Best Streak</div>
+                <div class="end-stat">
+                    <div class="end-stat-val" id="endBest">0🔥</div>
+                    <div class="end-stat-lbl">Best Streak</div>
                 </div>
             </div>
 
-            <div id="achievementArea"></div>
-
-            <div class="xp-bar-container">
-                <div class="xp-label">
-                    <span>Level Progress</span>
-                    <span class="xp-value" id="xpProgress">0 / 500 XP</span>
-                </div>
-                <div class="xp-bar">
-                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
-                </div>
+            <!-- Weakness report -->
+            <div class="weakness-report" id="weaknessReport" style="display:none;margin-bottom:1.5rem;">
+                <div class="wr-title">Topics to Review</div>
+                <div class="wr-pills" id="wrPills"></div>
             </div>
 
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn btn-primary btn-lg" onclick="playAgain()">
-                    &#x1F3AE; Play Again
+            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="restartGame()" style="font-size:0.85rem;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">replay</span>
+                    Play Again
                 </button>
-                <button class="btn btn-outline btn-lg" onclick="goToDashboard()">
+                <a href="dashboard.html" class="btn btn-secondary" style="font-size:0.85rem;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">home</span>
                     Dashboard
-                </button>
+                </a>
+                <a href="leaderboard.html" class="btn btn-secondary" style="font-size:0.85rem;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">emoji_events</span>
+                    Leaderboard
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Custom Confirmation Modal -->
-    <div class="game-modal-overlay" id="gameModal" style="display:none;" onclick="handleModalOverlayClick(event)">
-        <div class="game-modal">
-            <div class="game-modal-icon" id="modalIcon">⚠️</div>
-            <div class="game-modal-title" id="modalTitle">CONFIRM</div>
-            <div class="game-modal-msg" id="modalMsg">Are you sure?</div>
-            <div class="game-modal-actions">
-                <button class="btn btn-ghost" id="modalCancel">Cancel</button>
-                <button class="btn btn-primary" id="modalConfirm">Confirm</button>
-            </div>
-        </div>
-    </div>
+<!-- Combo badge overlay -->
+<div class="combo-badge" id="comboBadge">🔥 COMBO!</div>
 
-    <script>
-        const API = 'http://localhost:3000/api';
+<!-- XP toast -->
+<div class="xp-toast" id="xpToast">+10 XP</div>
 
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!user || !localStorage.getItem('token')) { window.location.href = 'login.html'; throw new Error('redirect'); }
-        if (user.role === 'faculty') { window.location.href = 'faculty_dashboard.html'; throw new Error('redirect'); }
-        if (!user.selectedLanguage) { window.location.href = 'login.html'; throw new Error('redirect'); }
+<script>window.SIDEBAR_PAGE = 'play';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
 
-        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
+if (!me.id) { location.href = 'login.html'; }
 
-        // Auth helper for API requests
-        function getAuthHeaders() {
-            const headers = { 'Content-Type': 'application/json' };
-            const token = localStorage.getItem('token');
-            if (token) headers['Authorization'] = `Bearer ${token}`;
-            return headers;
-        }
+// ── State ─────────────────────────────────────────────────────────────────────
+let questions     = [];
+let qIndex        = 0;
+let score         = 0;
+let streak        = 0;
+let bestStreak    = 0;
+let multiplier    = 1;
+let correctCount  = 0;
+let sessionResults = [];
+let answered      = false;
+let timer         = null;
+let timerSec      = 30;
+let hintUsed      = 0;
+let currentHintLevel = 0;
+let setupLang     = 'python';
+let setupLevel    = 'beginner';
+let setupCount    = 10;
 
-        // ─── Client-side typed question bank ────────────────────────────
-        // Typed questions (fill_blank / output_prediction / code_ordering)
-        // are stored here so they always work regardless of DB state.
-        const LOCAL_TYPED_QUESTIONS = {
-            python: {
-                beginner: {
-                    fill_blank: [
-                        { id:'fb_py_b1', topic:'Output',    question:'Fill in the blank to print "Hello World":',           codeSnippet:'___(\"Hello World\")',                         correctAnswer:'print',    hint:'Python output function.',         explanation:'print() displays text.' },
-                        { id:'fb_py_b2', topic:'Variables', question:'Assign the value 10 to a variable called num:',        codeSnippet:'___ = 10\nprint(num)',                         correctAnswer:'num',      hint:'Variable name on left of =.',     explanation:'Variables are created by assignment.' },
-                        { id:'fb_py_b3', topic:'Strings',   question:'Fill in to get the length of a string:',              codeSnippet:'name = \"Alice\"\nprint(___(name))',            correctAnswer:'len',      hint:'Counts characters.',              explanation:'len() returns string length.' },
-                        { id:'fb_py_b4', topic:'Input',     question:'Fill in to read user input:',                         codeSnippet:'name = ___(\"Enter name: \")',                  correctAnswer:'input',    hint:'Function name describes action.', explanation:'input() reads from user.' },
-                        { id:'fb_py_b5', topic:'Types',     question:'Fill in to convert string "5" to integer:',           codeSnippet:'x = ___(\"5\")',                               correctAnswer:'int',      hint:'Type conversion function.',       explanation:'int() converts to integer.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_py_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'x = 10\ny = 3\nprint(x - y)',           correctAnswer:'7',    hint:'Subtract y from x.' },
-                        { id:'op_py_b2', topic:'Strings',   question:'What will this code output?', codeSnippet:'print(\"Hi\" * 3)',                       correctAnswer:'HiHiHi', hint:'String repetition.' },
-                        { id:'op_py_b3', topic:'Lists',     question:'What will this code output?', codeSnippet:'nums = [1, 2, 3]\nprint(len(nums))',      correctAnswer:'3',    hint:'Count the elements.' },
-                        { id:'op_py_b4', topic:'Booleans',  question:'What will this code output?', codeSnippet:'print(10 > 5)',                           correctAnswer:'True', hint:'Is 10 greater than 5?' },
-                        { id:'op_py_b5', topic:'Math',      question:'What will this code output?', codeSnippet:'print(2 ** 3)',                           correctAnswer:'8',    hint:'2 raised to power 3.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_py_b1', topic:'Loops',     question:'Arrange to print numbers 1 to 3:',
-                          codeLines:['for i in range(1, 4):','    print(i)'], correctOrder:[0,1] },
-                        { id:'co_py_b2', topic:'Functions', question:'Arrange to define and call a function:',
-                          codeLines:['def greet():','    print(\"Hello\")', 'greet()'], correctOrder:[0,1,2] },
-                        { id:'co_py_b3', topic:'Conditions',question:'Arrange an if/else block:',
-                          codeLines:['x = 5','if x > 0:','    print(\"positive\")','else:','    print(\"non-positive\")'], correctOrder:[0,1,2,3,4] },
-                        { id:'co_py_b4', topic:'Variables', question:'Arrange to swap two variables:',
-                          codeLines:['a = 1','b = 2','temp = a','a = b','b = temp','print(a, b)'], correctOrder:[0,1,2,3,4,5] },
-                    ]
-                },
-                intermediate: {
-                    fill_blank: [
-                        { id:'fb_py_m1', topic:'Lists',      question:'Fill in to add item to end of list:',         codeSnippet:'fruits = [\"apple\"]\nfruits.___(\"banana\")', correctAnswer:'append',  hint:'Adds to end of list.',      explanation:'append() adds element to end.' },
-                        { id:'fb_py_m2', topic:'Loops',      question:'Fill in to exit a loop immediately:',          codeSnippet:'for i in range(10):\n    if i==5:\n        ___', correctAnswer:'break', hint:'Exits loop immediately.',   explanation:'break exits the loop.' },
-                        { id:'fb_py_m3', topic:'Functions',  question:'Fill in keyword to return from a function:',   codeSnippet:'def add(a,b):\n    ___ a+b',                 correctAnswer:'return',  hint:'Sends value to caller.',    explanation:'return sends back a value.' },
-                        { id:'fb_py_m4', topic:'Dicts',      question:'Fill in to access dict value by key:',         codeSnippet:'d={\"x\":1}\nprint(d[___])',                  correctAnswer:'"x"',     hint:'Use the key in brackets.',  explanation:'dict[key] accesses value.' },
-                        { id:'fb_py_m5', topic:'Strings',    question:'Fill in to join list items into a string:',    codeSnippet:'words=[\"a\",\"b\"]\nprint(___.join(words))', correctAnswer:'\" \"',   hint:'Use a separator string.',   explanation:'" ".join() joins with spaces.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_py_m1', topic:'Lists',    question:'What will this code output?', codeSnippet:'a=[1,2,3]\na.append(4)\nprint(len(a))', correctAnswer:'4',       hint:'Count after append.' },
-                        { id:'op_py_m2', topic:'Loops',    question:'What will this code output?', codeSnippet:'s=0\nfor i in range(4):\n    s+=i\nprint(s)', correctAnswer:'6', hint:'Sum 0+1+2+3.' },
-                        { id:'op_py_m3', topic:'Functions',question:'What will this code output?', codeSnippet:'def sq(n): return n*n\nprint(sq(4))',       correctAnswer:'16',     hint:'4 squared.' },
-                        { id:'op_py_m4', topic:'Strings',  question:'What will this code output?', codeSnippet:'print(\"hello\".upper())',                  correctAnswer:'HELLO',  hint:'Convert to uppercase.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_py_m1', topic:'Functions', question:'Arrange to define and use a function with return:',
-                          codeLines:['def square(n):','    return n * n','result = square(5)','print(result)'], correctOrder:[0,1,2,3] },
-                        { id:'co_py_m2', topic:'Lists',     question:'Arrange to filter even numbers:',
-                          codeLines:['nums = [1,2,3,4,5]','evens = []','for n in nums:','    if n % 2 == 0:','        evens.append(n)','print(evens)'], correctOrder:[0,1,2,3,4,5] },
-                    ]
-                },
-                advanced: {
-                    fill_blank: [
-                        { id:'fb_py_a1', topic:'Lambda',   question:'Fill in to create a lambda that squares:', codeSnippet:'square = ___ x: x**2\nprint(square(4))', correctAnswer:'lambda', hint:'Anonymous function keyword.', explanation:'lambda creates anonymous functions.' },
-                        { id:'fb_py_a2', topic:'Classes',  question:'Fill in the constructor method name:',    codeSnippet:'class Dog:\n    def ___(self,name):\n        self.name=name', correctAnswer:'__init__', hint:'Called when object is created.', explanation:'__init__ is the constructor.' },
-                        { id:'fb_py_a3', topic:'Generators',question:'Fill in to create a generator:',        codeSnippet:'def gen(n):\n    for i in range(n):\n        ___ i', correctAnswer:'yield', hint:'Pauses and returns a value.', explanation:'yield makes a generator function.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_py_a1', topic:'Lambda',   question:'What will this code output?', codeSnippet:'f = lambda x: x**2\nprint(f(5))',                correctAnswer:'25',   hint:'5 squared.' },
-                        { id:'op_py_a2', topic:'List Comp',question:'What will this code output?', codeSnippet:'print([x*2 for x in range(3)])',                 correctAnswer:'[0, 2, 4]', hint:'Double each 0,1,2.' },
-                        { id:'op_py_a3', topic:'Strings',  question:'What will this code output?', codeSnippet:'print(\",\".join([\"a\",\"b\",\"c\"]))',          correctAnswer:'a,b,c', hint:'Join with comma.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_py_a1', topic:'Classes', question:'Arrange a class definition and usage:',
-                          codeLines:['class Animal:','    def __init__(self, name):','        self.name = name','    def speak(self):','        return self.name','a = Animal(\"Cat\")','print(a.speak())'], correctOrder:[0,1,2,3,4,5,6] },
-                    ]
-                }
-            },
-            javascript: {
-                beginner: {
-                    fill_blank: [
-                        { id:'fb_js_b1', topic:'Variables', question:'Declare a block-scoped variable:',          codeSnippet:'___ x = 5;',                         correctAnswer:'let',      hint:'ES6 block-scoped keyword.',    explanation:'let declares block-scoped variables.' },
-                        { id:'fb_js_b2', topic:'Output',    question:'Fill in to log "Hello" to console:',       codeSnippet:'console.___(\"Hello\");',             correctAnswer:'log',      hint:'Console output method.',       explanation:'console.log() prints to console.' },
-                        { id:'fb_js_b3', topic:'Functions', question:'Fill in the function keyword:',            codeSnippet:'___ greet() { return \"Hi\"; }',       correctAnswer:'function', hint:'Declares a named function.',   explanation:'function keyword defines functions.' },
-                        { id:'fb_js_b4', topic:'Arrays',    question:'Fill in to get array length:',             codeSnippet:'let a=[1,2,3];\nconsole.log(a.___);', correctAnswer:'length',   hint:'Property not a function.',     explanation:'.length gives array length.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_js_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'console.log(3 + 4);',              correctAnswer:'7',    hint:'Simple addition.' },
-                        { id:'op_js_b2', topic:'Strings',    question:'What will this code output?', codeSnippet:'console.log(\"Hi \"+\"World\");', correctAnswer:'Hi World', hint:'String concatenation.' },
-                        { id:'op_js_b3', topic:'Booleans',   question:'What will this code output?', codeSnippet:'console.log(5 === \"5\");',       correctAnswer:'false', hint:'Strict equality checks type.' },
-                        { id:'op_js_b4', topic:'Arrays',     question:'What will this code output?', codeSnippet:'let a=[1,2,3];\nconsole.log(a.length);', correctAnswer:'3', hint:'Count elements.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_js_b1', topic:'Loops', question:'Arrange a for loop to print 1-3:',
-                          codeLines:['for (let i=1; i<=3; i++) {','    console.log(i);','}'], correctOrder:[0,1,2] },
-                        { id:'co_js_b2', topic:'Functions', question:'Arrange to define and call a function:',
-                          codeLines:['function add(a,b) {','    return a+b;','}','console.log(add(2,3));'], correctOrder:[0,1,2,3] },
-                    ]
-                },
-                intermediate: {
-                    fill_blank: [
-                        { id:'fb_js_m1', topic:'Arrays', question:'Fill in to add item to array end:', codeSnippet:'let a=[1,2];\na.___(3);', correctAnswer:'push', hint:'Adds to end.', explanation:'push() adds to end of array.' },
-                        { id:'fb_js_m2', topic:'Arrow Fn',question:'Complete the arrow function:', codeSnippet:'const sq = x ___ x*x;', correctAnswer:'=>', hint:'Arrow syntax.', explanation:'=> creates arrow functions.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_js_m1', topic:'Arrays', question:'What will this code output?', codeSnippet:'let a=[1,2,3];\na.push(4);\nconsole.log(a.length);', correctAnswer:'4', hint:'After push.' },
-                        { id:'op_js_m2', topic:'Arrow',  question:'What will this code output?', codeSnippet:'const sq = x => x*x;\nconsole.log(sq(5));', correctAnswer:'25', hint:'5 squared.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_js_m1', topic:'Array Methods', question:'Arrange to filter even numbers:',
-                          codeLines:['let nums=[1,2,3,4,5];','let evens=nums.filter(n => n%2===0);','console.log(evens);'], correctOrder:[0,1,2] },
-                    ]
-                },
-                advanced: {
-                    fill_blank: [
-                        { id:'fb_js_a1', topic:'Promises', question:'Fill in to create a promise:', codeSnippet:'const p = new ___(resolve => resolve(1));', correctAnswer:'Promise', hint:'Async wrapper.', explanation:'Promise wraps async operations.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_js_a1', topic:'Spread', question:'What will this code output?', codeSnippet:'let a=[1,2];\nlet b=[...a,3];\nconsole.log(b.length);', correctAnswer:'3', hint:'Spread then add one.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_js_a1', topic:'Async', question:'Arrange an async/await function:',
-                          codeLines:['async function getData() {','    const res = await fetch(\"/api\");','    return res.json();','}'], correctOrder:[0,1,2,3] },
-                    ]
-                }
-            },
-            java: {
-                beginner: {
-                    fill_blank: [
-                        { id:'fb_java_b1', topic:'Output',   question:'Fill in to print "Hello":',           codeSnippet:'System.out.___(\"Hello\");',       correctAnswer:'println', hint:'Print with newline.', explanation:'println() prints with newline.' },
-                        { id:'fb_java_b2', topic:'Variables', question:'Fill in the integer type keyword:',   codeSnippet:'___ x = 5;',                       correctAnswer:'int',     hint:'Primitive integer.',  explanation:'int is the integer data type.' },
-                        { id:'fb_java_b3', topic:'Loops',     question:'Fill in the loop keyword:',           codeSnippet:'___ (int i=0;i<3;i++) {}',         correctAnswer:'for',     hint:'Counted loop.',       explanation:'for is the counted loop.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_java_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'System.out.println(3 + 4);',  correctAnswer:'7',  hint:'Simple addition.' },
-                        { id:'op_java_b2', topic:'Strings',    question:'What will this code output?', codeSnippet:'System.out.println(\"Hi\".length());', correctAnswer:'2', hint:'Count characters.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_java_b1', topic:'Class', question:'Arrange a basic Java class with main:',
-                          codeLines:['public class Main {','    public static void main(String[] args) {','        System.out.println(\"Hello\");','    }','}'], correctOrder:[0,1,2,3,4] },
-                    ]
-                },
-                intermediate: {
-                    fill_blank: [
-                        { id:'fb_java_m1', topic:'Arrays', question:'Fill in to declare an int array:', codeSnippet:'___ nums = new int[5];', correctAnswer:'int[]', hint:'Array type declaration.', explanation:'int[] declares an integer array.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_java_m1', topic:'Arrays', question:'What will this code output?', codeSnippet:'int[] a={1,2,3};\nSystem.out.println(a.length);', correctAnswer:'3', hint:'Array size.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_java_m1', topic:'Methods', question:'Arrange a method definition and call:',
-                          codeLines:['static int square(int n) {','    return n * n;','}','System.out.println(square(4));'], correctOrder:[0,1,2,3] },
-                    ]
-                },
-                advanced: {
-                    fill_blank: [
-                        { id:'fb_java_a1', topic:'OOP', question:'Fill in the inheritance keyword:', codeSnippet:'class Dog ___ Animal {}', correctAnswer:'extends', hint:'Inheritance in Java.', explanation:'extends inherits from parent class.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_java_a1', topic:'Casting', question:'What will this code output?', codeSnippet:'System.out.println((int)3.9);', correctAnswer:'3', hint:'Cast truncates.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_java_a1', topic:'Interface', question:'Arrange an interface and implementation:',
-                          codeLines:['interface Shape {','    double area();','}','class Circle implements Shape {','    public double area() { return 3.14; }','}'], correctOrder:[0,1,2,3,4,5] },
-                    ]
-                }
-            },
-            cpp: {
-                beginner: {
-                    fill_blank: [
-                        { id:'fb_cpp_b1', topic:'Output',   question:'Fill in the output stream object:', codeSnippet:'___ << \"Hello\" << endl;',     correctAnswer:'cout', hint:'C++ output stream.',   explanation:'cout outputs to console.' },
-                        { id:'fb_cpp_b2', topic:'Headers',  question:'Fill in the I/O header:',          codeSnippet:'#include <___>',               correctAnswer:'iostream', hint:'Input/output stream.', explanation:'iostream provides cin/cout.' },
-                        { id:'fb_cpp_b3', topic:'Variables',question:'Fill in the integer type:',         codeSnippet:'___ x = 10;',                  correctAnswer:'int',  hint:'Primitive integer.',   explanation:'int declares integer variables.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_cpp_b1', topic:'Arithmetic', question:'What will this code output?', codeSnippet:'cout << 5 + 3;', correctAnswer:'8', hint:'Simple addition.' },
-                        { id:'op_cpp_b2', topic:'Division',   question:'What will this code output?', codeSnippet:'cout << 7 / 2;', correctAnswer:'3', hint:'Integer division truncates.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_cpp_b1', topic:'Program', question:'Arrange a basic C++ program:',
-                          codeLines:['#include <iostream>','using namespace std;','int main() {','    cout << \"Hello\";','    return 0;','}'], correctOrder:[0,1,2,3,4,5] },
-                    ]
-                },
-                intermediate: {
-                    fill_blank: [
-                        { id:'fb_cpp_m1', topic:'Pointers', question:'Fill in to declare a pointer:', codeSnippet:'int x=5;\nint ___ p = &x;', correctAnswer:'*', hint:'Pointer dereference operator.', explanation:'* declares a pointer variable.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_cpp_m1', topic:'Loops', question:'What will this code output?', codeSnippet:'for(int i=0;i<3;i++) cout<<i;\n', correctAnswer:'012', hint:'Print i each iteration.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_cpp_m1', topic:'Functions', question:'Arrange a function definition:',
-                          codeLines:['int square(int n) {','    return n * n;','}','int main() {','    cout << square(5);','}'], correctOrder:[0,1,2,3,4,5] },
-                    ]
-                },
-                advanced: {
-                    fill_blank: [
-                        { id:'fb_cpp_a1', topic:'Templates', question:'Fill in the template keyword:', codeSnippet:'___ <typename T>\nT square(T n) { return n*n; }', correctAnswer:'template', hint:'Generic programming.', explanation:'template enables generic functions.' },
-                    ],
-                    output_prediction: [
-                        { id:'op_cpp_a1', topic:'References', question:'What will this code output?', codeSnippet:'int x=5;\nint& r=x;\nr=10;\ncout<<x;', correctAnswer:'10', hint:'Reference modifies original.' },
-                    ],
-                    code_ordering: [
-                        { id:'co_cpp_a1', topic:'Classes', question:'Arrange a C++ class:',
-                          codeLines:['class Dog {','public:','    string name;','    void bark() { cout<<\"Woof\"; }','};\n','int main() {','    Dog d;','    d.bark();','}'], correctOrder:[0,1,2,3,4,5,6,7,8] },
-                    ]
-                }
-            }
-        };
+// ── Setup ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // Pre-select user's language
+    const lang = me.selected_language || me.language || 'python';
+    const sel  = document.getElementById('setupLang');
+    if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
+});
 
-        function getLocalTypedQuestions(language, level, type) {
-            const lang = (language || 'python').toLowerCase();
-            const lvl  = (level  || 'beginner').toLowerCase();
-            const bank = LOCAL_TYPED_QUESTIONS[lang]?.[lvl]?.[type] || [];
-            return bank.map(q => ({ ...q, language: lang, level: lvl, questionType: type, options: [] }));
-        }
+function selectDiff(btn) {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
 
-        // Game state
-        let questions = [];
-        let currentIndex = 0;
-        let sessionPoints = 0;
-        let correctCount = 0;
-        let currentStreak = 0;
-        let bestStreak = 0;
-        let currentLevel = user.currentLevel || 'beginner';
-        let answered = false;
-        let selectedMode = 'mixed';
-        let gameActive = false;
-        let dragSrcIndex = null;
+async function startGame() {
+    setupLang  = document.getElementById('setupLang').value;
+    setupLevel = document.querySelector('.diff-btn.active')?.dataset.level || 'beginner';
+    setupCount = parseInt(document.getElementById('setupCount').value) || 10;
 
-        // Warn on tab close / browser nav (backup guard)
-        window.addEventListener('beforeunload', (e) => {
-            if (gameActive) { saveGameState(); e.preventDefault(); e.returnValue = ''; }
+    showScreen('game');
+    await loadQuestions();
+}
+
+// ── Load questions ────────────────────────────────────────────────────────────
+async function loadQuestions() {
+    try {
+        const res  = await fetch(`${API}/questions?language=${setupLang}&level=${setupLevel}&limit=${setupCount}`, {
+            headers: { Authorization: `Bearer ${token}` }
         });
+        const data = await res.json();
+        const qs   = data.questions || data || [];
+        questions  = shuffle(qs).slice(0, setupCount);
 
-        // ─── Custom Modal ────────────────────────────────────────────────────
-
-        function showModal({ icon = '⚠️', title = 'CONFIRM', message, confirmText = 'Yes', cancelText = 'Cancel', onConfirm, onCancel, danger = false }) {
-            document.getElementById('modalIcon').textContent = icon;
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalMsg').textContent = message;
-            const confirmBtn = document.getElementById('modalConfirm');
-            const cancelBtn  = document.getElementById('modalCancel');
-            confirmBtn.textContent = confirmText;
-            cancelBtn.textContent  = cancelText;
-            confirmBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
-            document.getElementById('gameModal').style.display = 'flex';
-
-            const cleanup = () => { document.getElementById('gameModal').style.display = 'none'; confirmBtn.onclick = null; cancelBtn.onclick = null; };
-            confirmBtn.onclick = () => { cleanup(); onConfirm && onConfirm(); };
-            cancelBtn.onclick  = () => { cleanup(); onCancel  && onCancel();  };
+        if (!questions.length) {
+            alert('No questions available for this selection. Try a different language or level.');
+            showScreen('setup');
+            return;
         }
 
-        function handleModalOverlayClick(e) {
-            if (e.target.id === 'gameModal') {
-                document.getElementById('gameModal').style.display = 'none';
-            }
-        }
-
-        // ─── Navigation Guard ────────────────────────────────────────────────
-
-        function navAwayGuard(event, destination) {
-            if (!gameActive) return true;
-            event.preventDefault();
-            showModal({
-                icon: '🚪',
-                title: 'LEAVE GAME?',
-                message: 'You\'re in the middle of a game! Your session score will be lost if you leave now. Overall level progress is saved.',
-                confirmText: 'Leave',
-                cancelText: 'Stay',
-                danger: true,
-                onConfirm: () => { gameActive = false; clearGameState(); window.location.href = destination; }
-            });
-            return false;
-        }
-
-        // ─── Game State Persistence (sessionStorage) ─────────────────────────
-
-        const STATE_KEY = () => `gameState_${user ? user.id : 'guest'}`;
-
-        function saveGameState() {
-            if (!gameActive || questions.length === 0) return;
-            const state = { questions, currentIndex, sessionPoints, correctCount, currentStreak, bestStreak, currentLevel, selectedMode, topicPerformance };
-            sessionStorage.setItem(STATE_KEY(), JSON.stringify(state));
-        }
-
-        function clearGameState() {
-            sessionStorage.removeItem(STATE_KEY());
-        }
-
-        function restoreGameState() {
-            const raw = sessionStorage.getItem(STATE_KEY());
-            if (!raw) return false;
-            try {
-                const state = JSON.parse(raw);
-                if (!state.questions || state.questions.length === 0) return false;
-                questions        = state.questions;
-                currentIndex     = state.currentIndex || 0;
-                sessionPoints    = state.sessionPoints || 0;
-                correctCount     = state.correctCount  || 0;
-                currentStreak    = state.currentStreak || 0;
-                bestStreak       = state.bestStreak    || 0;
-                currentLevel     = state.currentLevel  || user.currentLevel || 'beginner';
-                selectedMode     = state.selectedMode  || 'mixed';
-                topicPerformance = state.topicPerformance || {};
-                return true;
-            } catch { return false; }
-        }
-
-        // Timer state
-        let timerInterval = null;
-        let timeLeft = 30;
-        let timerFrozen = false;
-
-        // Power-ups
-        let powerups = {
-            skip: 2,
-            hint: 2,
-            freeze: 1
-        };
-
-        // Combo system
-        let comboMultiplier = 1;
-
-        // Code ordering state
-        let currentOrderItems = [];
-
-        // Topic performance tracking for AI feedback
-        let topicPerformance = {};
-
-        // ─── Mode Selector ───────────────────────────────────────────────
-
-        function selectMode(mode, card) {
-            selectedMode = mode;
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-        }
-
-        function startGame() {
-            // Capture what the user just picked BEFORE restoreGameState can overwrite it
-            const chosenMode = selectedMode;
-
-            // Peek at saved state to see if it matches the user's chosen mode
-            const rawState = sessionStorage.getItem(STATE_KEY());
-            let savedMode = null;
-            if (rawState) {
-                try { savedMode = JSON.parse(rawState).selectedMode; } catch {}
-            }
-
-            // Only offer to resume if saved mode matches current selection.
-            // Otherwise, discard old session and start fresh with the chosen mode.
-            if (savedMode === chosenMode && restoreGameState()) {
-                showModal({
-                    icon: '🔄',
-                    title: 'RESUME SESSION?',
-                    message: `You have an unfinished game (Q${currentIndex + 1}/10, ${sessionPoints} pts). Resume where you left off?`,
-                    confirmText: 'Resume',
-                    cancelText: 'New Game',
-                    onConfirm: () => { _activateGame(false); },
-                    onCancel:  () => {
-                        clearGameState();
-                        selectedMode = chosenMode;
-                        _activateGame(true);
-                    }
-                });
-            } else {
-                // Different mode selected (or no saved state) — always start fresh
-                clearGameState();
-                selectedMode = chosenMode;
-                _activateGame(true);
-            }
-        }
-
-        function _activateGame(fetchNew) {
-            gameActive = true;
-            document.getElementById('modeSelector').style.display = 'none';
-            document.getElementById('backBtnRow').style.display = '';
-            document.getElementById('backGameBtn').style.display = 'inline-flex';
-            document.getElementById('gameStatsBar').style.display = '';
-            document.getElementById('questionCard').style.display = '';
-            if (fetchNew) {
-                loadQuestions();
-            } else {
-                updateStats();
-                updateLevelBadge();
-                displayQuestion();
-            }
-        }
-
-        function backToModes() {
-            showModal({
-                icon: '🔙',
-                title: 'BACK TO MODES?',
-                message: 'Return to mode selection? Your current session score will be lost, but your overall level progress is saved.',
-                confirmText: 'Go Back',
-                cancelText: 'Resume',
-                danger: true,
-                onConfirm: () => {
-                    gameActive = false;
-                    clearInterval(timerInterval);
-                    clearGameState();
-                    _resetGameUI();
-                }
-            });
-        }
-
-        function _resetGameUI() {
-            currentIndex = 0; sessionPoints = 0; correctCount = 0;
-            currentStreak = 0; bestStreak = 0; comboMultiplier = 1;
-            powerups = { skip: 2, hint: 2, freeze: 1 };
-            topicPerformance = {};
-            document.getElementById('sessionPoints').textContent = '0';
-            document.getElementById('streakCount').textContent   = '0';
-            document.getElementById('accuracyDisplay').textContent = '0%';
-            document.getElementById('comboDisplay').classList.remove('active');
-            document.getElementById('modeSelector').style.display = '';
-            document.getElementById('backBtnRow').style.display   = 'none';
-            document.getElementById('gameStatsBar').style.display = 'none';
-            document.getElementById('questionCard').style.display = 'none';
-            document.getElementById('completeCard').style.display = 'none';
-        }
-
-        // ─── Load Questions ──────────────────────────────────────────────
-
-        async function loadQuestions() {
-            const optEl = document.getElementById('optionsList');
-            if (optEl) optEl.innerHTML = '<div class="question-loading"><div class="loading-spinner"></div>Loading questions...</div>';
-
-            const isTypedMode = selectedMode && selectedMode !== 'mixed' && selectedMode !== 'multiple_choice';
-
-            // Typed modes: use the embedded local question bank — no server call needed
-            if (isTypedMode) {
-                const local = getLocalTypedQuestions(user.selectedLanguage, currentLevel, selectedMode);
-                if (local.length > 0) {
-                    questions = shuffleArray(local).slice(0, 10);
-                    displayQuestion();
-                } else {
-                    showToast('No ' + selectedMode + ' questions yet for this level — using Mixed Mode', 'warning');
-                    selectedMode = 'mixed';
-                    loadQuestions();
-                }
-                return;
-            }
-
-            // MC / mixed: fetch from server
-            try {
-                const url = `${API}/questions/${user.selectedLanguage}/${currentLevel}`;
-                const res  = await fetch(url, { headers: getAuthHeaders() });
-                const data = await res.json();
-
-                let serverQs = (data.success ? data.questions : []);
-
-                if (selectedMode === 'multiple_choice') {
-                    serverQs = serverQs.filter(q => (q.questionType || 'multiple_choice') === 'multiple_choice');
-                }
-
-                if (selectedMode === 'mixed') {
-                    // Blend server MC questions with local typed questions
-                    const fb = getLocalTypedQuestions(user.selectedLanguage, currentLevel, 'fill_blank');
-                    const op = getLocalTypedQuestions(user.selectedLanguage, currentLevel, 'output_prediction');
-                    const co = getLocalTypedQuestions(user.selectedLanguage, currentLevel, 'code_ordering');
-                    const typed = shuffleArray([...fb, ...op, ...co]).slice(0, 4);
-                    const mc    = shuffleArray(serverQs.filter(q => (q.questionType||'multiple_choice')==='multiple_choice')).slice(0, 6);
-                    questions = shuffleArray([...mc, ...typed]).slice(0, 10);
-                } else {
-                    questions = shuffleArray(serverQs).slice(0, 10);
-                }
-
-                if (questions.length === 0) {
-                    document.getElementById('questionText').textContent = 'No questions available. Please try a different language or mode.';
-                    return;
-                }
-                displayQuestion();
-            } catch (err) {
-                console.error('Error loading questions:', err);
-                document.getElementById('questionText').textContent = 'Failed to load questions. Check your connection and try again.';
-            }
-        }
-
-        function showToast(msg, type = 'info') {
-            const t = document.createElement('div');
-            t.style.cssText = `position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:0.6rem 1.2rem;border-radius:8px;font-size:0.82rem;z-index:10000;animation:fadeIn 0.3s ease;background:${type === 'warning' ? '#f59e0b' : 'var(--primary)'};color:white;box-shadow:0 4px 16px rgba(0,0,0,0.4);`;
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3500);
-        }
-
-        function shuffleArray(array) {
-            const arr = [...array];
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        }
-
-        // ─── Display Question (branches by type) ────────────────────────
-
-        function displayQuestion() {
-            if (currentIndex >= questions.length) {
-                showComplete();
-                return;
-            }
-
-            const q = questions[currentIndex];
-            const qType = q.questionType || 'multiple_choice';
-            answered = false;
-
-            // Update UI
-            document.getElementById('questionNum').textContent = `${currentIndex + 1}/${questions.length}`;
-            document.getElementById('topicLabel').innerHTML = `<span>&#128218;</span> Topic: ${q.topic}`;
-            document.getElementById('questionText').innerHTML = formatCode(q.question);
-
-            // Update level badge
-            const levelBadge = document.getElementById('questionLevel');
-            levelBadge.textContent = q.level.charAt(0).toUpperCase() + q.level.slice(1);
-            levelBadge.className = `level-badge level-${q.level}`;
-
-            // Update difficulty indicator
-            updateDifficultyIndicator(q.level);
-
-            // Render answer area based on question type
-            const optionsList = document.getElementById('optionsList');
-
-            if (qType === 'fill_blank') {
-                renderFillBlank(q, optionsList);
-            } else if (qType === 'output_prediction') {
-                renderOutputPrediction(q, optionsList);
-            } else if (qType === 'code_ordering') {
-                renderCodeOrdering(q, optionsList);
-            } else {
-                renderMultipleChoice(q, optionsList);
-            }
-
-            // Hide feedback and nav
-            document.getElementById('feedbackArea').style.display = 'none';
-            document.getElementById('navButtons').style.display = 'none';
-
-            // Start timer
-            startTimer();
-
-            // Update powerup buttons (50/50 only for multiple choice)
-            updatePowerupButtons();
-            const hintBtn = document.getElementById('hintBtn');
-            if (qType !== 'multiple_choice') {
-                hintBtn.disabled = true;
-                hintBtn.title = '50/50 only available for Multiple Choice';
-            }
-        }
-
-        // ─── Render: Multiple Choice (original) ─────────────────────────
-
-        function getOptionText(opt) {
-            if (!opt) return '';
-            // Strip "A) ", "B) ", "C) ", "D) " prefix if present
-            if (/^[A-Da-d][)\.]\s/.test(opt)) return opt.slice(3);
-            return opt;
-        }
-
-        function renderMultipleChoice(q, container) {
-            container.className = 'options-grid';
-
-            // Normalise options: handle undefined, empty array, or JSON string
-            let opts = q.options;
-            if (typeof opts === 'string') {
-                try { opts = JSON.parse(opts); } catch (e) { opts = []; }
-            }
-            if (!opts || opts.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--text-muted);">
-                        <div style="font-size:1.5rem;margin-bottom:0.5rem;">⚠️</div>
-                        <div>Answer options unavailable for this question.</div>
-                        <button class="btn btn-ghost" style="margin-top:0.75rem;font-size:0.8rem;" onclick="nextQuestion()">Skip →</button>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = opts.map((opt, idx) => `
-                <button class="option-btn" onclick="selectAnswer('${String.fromCharCode(65 + idx)}', this)" data-index="${idx}">
-                    <span class="option-letter">${String.fromCharCode(65 + idx)}</span>
-                    <span class="option-text">${escapeHtml(getOptionText(opt))}</span>
-                </button>
-            `).join('');
-        }
-
-        // ─── Render: Fill in the Blank ───────────────────────────────────
-
-        function renderFillBlank(q, container) {
-            container.className = '';
-            const codeHtml = q.codeSnippet
-                ? q.codeSnippet.replace(/___/g, '<span class="blank-highlight">???</span>')
-                : '';
-            container.innerHTML = `
-                ${codeHtml ? `<div class="code-snippet-block">${escapeHtml(q.codeSnippet).replace(/___/g, '<span class="blank-highlight">???</span>')}</div>` : ''}
-                <div class="text-answer-area">
-                    <input type="text" class="text-answer-input" id="typedAnswer" placeholder="Type your answer..." autocomplete="off" />
-                    <button class="submit-answer-btn" onclick="submitTypedAnswer()">SUBMIT</button>
-                </div>
-            `;
-            // Allow Enter key to submit
-            setTimeout(() => {
-                const input = document.getElementById('typedAnswer');
-                if (input) {
-                    input.focus();
-                    input.addEventListener('keydown', e => {
-                        if (e.key === 'Enter') submitTypedAnswer();
-                    });
-                }
-            }, 50);
-        }
-
-        // ─── Render: Output Prediction ───────────────────────────────────
-
-        function renderOutputPrediction(q, container) {
-            container.className = '';
-            container.innerHTML = `
-                <div class="code-snippet-block">${escapeHtml(q.codeSnippet)}</div>
-                <div class="text-answer-area">
-                    <input type="text" class="text-answer-input" id="typedAnswer" placeholder="Type the expected output..." autocomplete="off" />
-                    <button class="submit-answer-btn" onclick="submitTypedAnswer()">SUBMIT</button>
-                </div>
-            `;
-            setTimeout(() => {
-                const input = document.getElementById('typedAnswer');
-                if (input) {
-                    input.focus();
-                    input.addEventListener('keydown', e => {
-                        if (e.key === 'Enter') submitTypedAnswer();
-                    });
-                }
-            }, 50);
-        }
-
-        // ─── Render: Code Ordering ───────────────────────────────────────
-
-        function renderCodeOrdering(q, container) {
-            container.className = '';
-            currentOrderItems = q.codeLines.map((line, idx) => ({ text: line, originalIdx: idx }));
-            for (let i = currentOrderItems.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [currentOrderItems[i], currentOrderItems[j]] = [currentOrderItems[j], currentOrderItems[i]];
-            }
-            renderOrderingList(container);
-        }
-
-        function renderOrderingList(container) {
-            if (!container) container = document.getElementById('optionsList');
-            dragSrcIndex = null;
-
-            const hint = document.createElement('p');
-            hint.className = 'drag-hint';
-            hint.textContent = '⠿ Drag lines to reorder — or tap to select then tap target';
-
-            const list = document.createElement('div');
-            list.className = 'code-ordering-list';
-            list.id = 'orderingList';
-
-            currentOrderItems.forEach((item, idx) => {
-                const div = document.createElement('div');
-                div.className = 'code-order-item';
-                div.setAttribute('draggable', 'true');
-                div.dataset.idx = idx;
-                div.innerHTML = `<span class="drag-handle">⠿</span><span class="code-order-num">${idx + 1}</span><span class="code-order-text">${escapeHtml(item.text)}</span>`;
-
-                div.addEventListener('dragstart', (e) => {
-                    if (answered) { e.preventDefault(); return; }
-                    dragSrcIndex = idx;
-                    setTimeout(() => div.classList.add('dragging'), 0);
-                    e.dataTransfer.effectAllowed = 'move';
-                });
-                div.addEventListener('dragend', () => {
-                    div.classList.remove('dragging');
-                    document.querySelectorAll('.code-order-item').forEach(el => el.classList.remove('drag-over'));
-                });
-                div.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    if (dragSrcIndex !== idx) {
-                        document.querySelectorAll('.code-order-item').forEach(el => el.classList.remove('drag-over'));
-                        div.classList.add('drag-over');
-                    }
-                });
-                div.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (dragSrcIndex === null || dragSrcIndex === idx || answered) return;
-                    [currentOrderItems[dragSrcIndex], currentOrderItems[idx]] = [currentOrderItems[idx], currentOrderItems[dragSrcIndex]];
-                    renderOrderingList(document.getElementById('optionsList'));
-                });
-                // Tap-to-swap fallback for touch/mobile
-                div.addEventListener('click', () => {
-                    if (answered) return;
-                    const allItems = document.querySelectorAll('.code-order-item');
-                    if (dragSrcIndex === null) {
-                        dragSrcIndex = idx;
-                        allItems.forEach(el => el.style.outline = '');
-                        div.style.outline = '2px solid var(--secondary)';
-                    } else if (dragSrcIndex !== idx) {
-                        [currentOrderItems[dragSrcIndex], currentOrderItems[idx]] = [currentOrderItems[idx], currentOrderItems[dragSrcIndex]];
-                        renderOrderingList(document.getElementById('optionsList'));
-                    } else {
-                        dragSrcIndex = null;
-                        div.style.outline = '';
-                    }
-                });
-
-                list.appendChild(div);
-            });
-
-            const submitWrap = document.createElement('div');
-            submitWrap.style.cssText = 'text-align:center;margin-top:1rem;';
-            submitWrap.innerHTML = `<button class="submit-answer-btn" onclick="submitCodeOrder()" style="padding:0.85rem 2.5rem;">SUBMIT ORDER</button>`;
-
-            container.innerHTML = '';
-            container.appendChild(hint);
-            container.appendChild(list);
-            container.appendChild(submitWrap);
-        }
-
-        // ─── Submit: Typed Answer (fill_blank & output_prediction) ──────
-
-        async function submitTypedAnswer() {
-            if (answered) return;
-            const input = document.getElementById('typedAnswer');
-            const typedValue = input.value.trim();
-            if (!typedValue) return;
-
-            answered = true;
-            clearInterval(timerInterval);
-
-            const q = questions[currentIndex];
-            const qType = q.questionType || 'multiple_choice';
-
-            let isCorrect = false;
-            if (qType === 'fill_blank') {
-                isCorrect = typedValue.toLowerCase() === q.correctAnswer.trim().toLowerCase();
-            } else {
-                isCorrect = typedValue === q.correctAnswer.trim();
-            }
-
-            // Visual feedback on input
-            input.disabled = true;
-            input.classList.add(isCorrect ? 'correct-input' : 'wrong-input');
-            document.querySelector('.submit-answer-btn').disabled = true;
-
-            if (!isCorrect) {
-                // Show correct answer below input
-                const answerReveal = document.createElement('div');
-                answerReveal.style.cssText = 'margin-top: 0.75rem; padding: 0.5rem 1rem; background: var(--success-bg); border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius); color: var(--success); font-family: Consolas, monospace;';
-                answerReveal.innerHTML = `Correct answer: <strong>${escapeHtml(q.correctAnswer)}</strong>`;
-                input.parentElement.after(answerReveal);
-            }
-
-            await processAnswer(isCorrect, q, typedValue, null);
-        }
-
-        // ─── Submit: Code Ordering ───────────────────────────────────────
-
-        async function submitCodeOrder() {
-            if (answered) return;
-            answered = true;
-            clearInterval(timerInterval);
-
-            const q = questions[currentIndex];
-            const submittedOrder = currentOrderItems.map(item => item.originalIdx);
-            const isCorrect = submittedOrder.every((val, idx) => val === q.correctOrder[idx]);
-
-            // Visual feedback on drag-and-drop items (no controls to hide)
-            const items = document.querySelectorAll('.code-order-item');
-            items.forEach((item, idx) => {
-                item.setAttribute('draggable', 'false');
-                item.style.cursor = 'default';
-                item.classList.add(currentOrderItems[idx].originalIdx === q.correctOrder[idx] ? 'correct-order' : 'wrong-order');
-            });
-            const submitBtn = document.querySelector('.submit-answer-btn');
-            if (submitBtn) submitBtn.disabled = true;
-
-            if (!isCorrect) {
-                // Show correct order below
-                const correctOrderHtml = q.correctOrder.map((origIdx, pos) =>
-                    `<div class="code-order-item correct-order" style="margin-top: 0.35rem;"><span class="code-order-num">${pos + 1}</span><span class="code-order-text">${escapeHtml(q.codeLines[origIdx])}</span></div>`
-                ).join('');
-                const reveal = document.createElement('div');
-                reveal.style.cssText = 'margin-top: 1rem;';
-                reveal.innerHTML = `<div style="color: var(--success); font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Correct order:</div>${correctOrderHtml}`;
-                document.getElementById('orderingList').after(reveal);
-            }
-
-            await processAnswer(isCorrect, q, null, submittedOrder);
-        }
-
-        // ─── Process Answer (shared scoring/server logic) ────────────────
-
-        async function processAnswer(isCorrect, q, selectedAnswer, submittedOrder) {
-            // Track per-topic performance for AI feedback
-            if (q.topic) {
-                if (!topicPerformance[q.topic]) {
-                    topicPerformance[q.topic] = { answered: 0, correct: 0 };
-                }
-                topicPerformance[q.topic].answered++;
-                if (isCorrect) topicPerformance[q.topic].correct++;
-            }
-
-            // Calculate points with combo and time bonus
-            let basePoints = q.level === 'beginner' ? 10 : (q.level === 'intermediate' ? 20 : 30);
-            let timeBonus = Math.floor(timeLeft / 3);
-            let totalPoints = 0;
-
-            if (isCorrect) {
-                correctCount++;
-                currentStreak++;
-                if (currentStreak > bestStreak) bestStreak = currentStreak;
-
-                if (currentStreak >= 5) comboMultiplier = 3;
-                else if (currentStreak >= 3) comboMultiplier = 2;
-                else comboMultiplier = 1;
-
-                totalPoints = (basePoints + timeBonus) * comboMultiplier;
-                sessionPoints += totalPoints;
-
-                let detail = `Base: ${basePoints}`;
-                if (timeBonus > 0) detail += ` + Time: ${timeBonus}`;
-                if (comboMultiplier > 1) detail += ` x${comboMultiplier}`;
-                showPopup(`+${totalPoints}`, 'correct', detail);
-
-                updateComboDisplay();
-            } else {
-                currentStreak = 0;
-                comboMultiplier = 1;
-                updateComboDisplay();
-                showPopup('Incorrect', 'wrong');
-            }
-
-            updateStats();
-
-            // Update nav XP live
-            document.getElementById('navXP').textContent = ((user.totalPoints || 0) + sessionPoints) + ' XP';
-
-            // Submit to server
-            try {
-                const body = {
-                    userId: user.id,
-                    questionId: q.id,
-                    language: user.selectedLanguage
-                };
-                if (submittedOrder) {
-                    body.submittedOrder = submittedOrder;
-                    body.selectedAnswer = 'order';
-                } else {
-                    body.selectedAnswer = selectedAnswer || '';
-                }
-
-                const res = await fetch(`${API}/answers/check`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
-
-                if (data.levelUp) {
-                    currentLevel = data.levelUp.newLevel;
-                    updateLevelBadge();
-                    showPopup('LEVEL UP!', 'bonus', data.levelUp.newLevel.toUpperCase());
-                    user.currentLevel = currentLevel;
-                }
-
-                // Persist stats to localStorage so dashboard survives server restarts
-                const statsKey = `gameStats_${user.selectedLanguage}`;
-                const stats = JSON.parse(localStorage.getItem(statsKey) || '{"questionsAnswered":0,"correctAnswers":0,"streak":0}');
-                stats.questionsAnswered++;
-                if (isCorrect) { stats.correctAnswers++; stats.streak++; }
-                else { stats.streak = 0; }
-                stats.accuracy = Math.round((stats.correctAnswers / stats.questionsAnswered) * 100);
-                localStorage.setItem(statsKey, JSON.stringify(stats));
-                localStorage.setItem('user', JSON.stringify(user));
-
-                showFeedback(isCorrect, q, data);
-            } catch (err) {
-                console.error('Error submitting answer:', err);
-                showFeedback(isCorrect, q, {});
-            }
-
-            document.getElementById('navButtons').style.display = 'block';
-            saveGameState();
-        }
-
-        // ─── Original selectAnswer (for multiple choice) ────────────────
-
-        async function selectAnswer(answer, button) {
-            if (answered) return;
-            answered = true;
-            clearInterval(timerInterval);
-
-            const q = questions[currentIndex];
-            const isCorrect = answer === q.correctAnswer;
-
-            // Disable all buttons
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.style.pointerEvents = 'none';
-            });
-
-            // Show correct/wrong styling
-            button.classList.add(isCorrect ? 'correct' : 'wrong');
-
-            // Highlight correct answer if wrong
-            if (!isCorrect) {
-                const correctIdx = q.correctAnswer.charCodeAt(0) - 65;
-                document.querySelectorAll('.option-btn')[correctIdx].classList.add('correct');
-            }
-
-            await processAnswer(isCorrect, q, answer, null);
-        }
-
-        // ─── Helper: escape HTML ─────────────────────────────────────────
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ─── UI Helpers ──────────────────────────────────────────────────
-
-        function updateDifficultyIndicator(level) {
-            const dots = document.querySelectorAll('.difficulty-dot');
-            dots.forEach((dot, idx) => {
-                dot.className = 'difficulty-dot';
-                if (level === 'beginner' && idx === 0) dot.classList.add('beginner');
-                if (level === 'intermediate' && idx <= 1) dot.classList.add('intermediate');
-                if (level === 'advanced') dot.classList.add('advanced');
-            });
-        }
-
-        function formatCode(text) {
-            return text.replace(/\\n/g, '<br>').replace(/`([^`]+)`/g, '<code>$1</code>');
-        }
-
-        // Timer functions
-        function startTimer() {
-            clearInterval(timerInterval);
-            timeLeft = 30;
-            timerFrozen = false;
-            updateTimerDisplay();
-
-            timerInterval = setInterval(() => {
-                if (!timerFrozen && !answered) {
-                    timeLeft--;
-                    updateTimerDisplay();
-
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        timeOut();
-                    }
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            const timerBar = document.getElementById('timerBar');
-            const timerText = document.getElementById('timerText');
-            const percent = (timeLeft / 30) * 100;
-
-            timerBar.style.width = `${percent}%`;
-            timerText.textContent = timeLeft;
-
-            timerBar.classList.remove('warning', 'danger');
-            timerText.classList.remove('warning', 'danger');
-
-            if (timeLeft <= 10) {
-                timerBar.classList.add('danger');
-                timerText.classList.add('danger');
-            } else if (timeLeft <= 15) {
-                timerBar.classList.add('warning');
-                timerText.classList.add('warning');
-            }
-        }
-
-        function timeOut() {
-            if (!answered) {
-                answered = true;
-                const q = questions[currentIndex];
-                const qType = q.questionType || 'multiple_choice';
-
-                if (qType === 'multiple_choice') {
-                    const correctIdx = q.correctAnswer.charCodeAt(0) - 65;
-                    const btns = document.querySelectorAll('.option-btn');
-                    if (btns[correctIdx]) btns[correctIdx].classList.add('correct');
-                } else if (qType === 'fill_blank' || qType === 'output_prediction') {
-                    const input = document.getElementById('typedAnswer');
-                    if (input) {
-                        input.disabled = true;
-                        input.classList.add('wrong-input');
-                    }
-                    document.querySelectorAll('.submit-answer-btn').forEach(b => b.disabled = true);
-                } else if (qType === 'code_ordering') {
-                    document.querySelectorAll('.submit-answer-btn').forEach(b => b.disabled = true);
-                    document.querySelectorAll('.code-order-item').forEach(el => {
-                        el.setAttribute('draggable', 'false');
-                        el.style.cursor = 'default';
-                    });
-                }
-
-                // Track timeout as wrong answer for topic performance
-                if (q.topic) {
-                    if (!topicPerformance[q.topic]) {
-                        topicPerformance[q.topic] = { answered: 0, correct: 0 };
-                    }
-                    topicPerformance[q.topic].answered++;
-                }
-
-                currentStreak = 0;
-                comboMultiplier = 1;
-                updateComboDisplay();
-
-                showPopup("Time's Up!", 'wrong');
-                showFeedback(false, q, { message: "Time ran out! Don't worry, keep practicing." });
-                document.getElementById('navButtons').style.display = 'block';
-                updateStats();
-            }
-        }
-
-        // Power-up functions
-        function usePowerup(type) {
-            if (answered || powerups[type] <= 0) return;
-
-            const q = questions[currentIndex];
-            const qType = q.questionType || 'multiple_choice';
-
-            switch(type) {
-                case 'skip':
-                    powerups.skip--;
-                    currentIndex++;
-                    displayQuestion();
-                    break;
-
-                case 'hint':
-                    // 50/50 only works for multiple choice
-                    if (qType !== 'multiple_choice') return;
-                    powerups.hint--;
-                    const correctIdx = q.correctAnswer.charCodeAt(0) - 65;
-                    const buttons = document.querySelectorAll('.option-btn');
-                    let removed = 0;
-                    buttons.forEach((btn, idx) => {
-                        if (idx !== correctIdx && removed < 2) {
-                            btn.style.opacity = '0.2';
-                            btn.disabled = true;
-                            removed++;
-                        }
-                    });
-                    break;
-
-                case 'freeze':
-                    powerups.freeze--;
-                    timerFrozen = true;
-                    document.getElementById('timerText').innerHTML = '&#10052;';
-                    break;
-            }
-
-            updatePowerupButtons();
-        }
-
-        function updatePowerupButtons() {
-            document.getElementById('skipCount').textContent = powerups.skip;
-            document.getElementById('hintCount').textContent = powerups.hint;
-            document.getElementById('freezeCount').textContent = powerups.freeze;
-
-            document.getElementById('skipBtn').disabled = powerups.skip <= 0;
-            document.getElementById('hintBtn').disabled = powerups.hint <= 0;
-            document.getElementById('freezeBtn').disabled = powerups.freeze <= 0;
-        }
-
-        function updateStats() {
-            document.getElementById('sessionPoints').textContent = sessionPoints;
-            document.getElementById('streakCount').textContent = currentStreak;
-            const totalAnswered = correctCount + (currentIndex + 1 - correctCount);
-            const accuracy = totalAnswered > 0 ? Math.round((correctCount / (currentIndex + 1)) * 100) : 0;
-            document.getElementById('accuracyDisplay').textContent = `${accuracy}%`;
-        }
-
-        function updateComboDisplay() {
-            const comboDisplay = document.getElementById('comboDisplay');
-            const comboMultiplierEl = document.getElementById('comboMultiplier');
-
-            if (comboMultiplier > 1) {
-                comboDisplay.classList.add('active');
-                comboMultiplierEl.textContent = `x${comboMultiplier}`;
-            } else {
-                comboDisplay.classList.remove('active');
-            }
-        }
-
-        function showPopup(text, type, detail = '') {
-            const popup = document.createElement('div');
-            popup.className = `points-popup ${type}`;
-            popup.innerHTML = `
-                <div>${text}</div>
-                ${detail ? `<div class="points-detail">${detail}</div>` : ''}
-            `;
-            document.body.appendChild(popup);
-
-            setTimeout(() => popup.remove(), 1500);
-        }
-
-        function showFeedback(isCorrect, question, serverData) {
-            const feedbackArea = document.getElementById('feedbackArea');
-            feedbackArea.style.display = 'block';
-
-            if (isCorrect) {
-                feedbackArea.innerHTML = `
-                    <div class="feedback-box feedback-correct">
-                        <strong>${serverData.message || 'Correct! Great job!'}</strong>
-                        ${question.explanation ? `<p style="color: var(--text-secondary); margin-top: 0.5rem;">${question.explanation}</p>` : ''}
-                    </div>
-                `;
-            } else {
-                const hintText = serverData.aiHint?.hint || serverData.aiHint?.topicAdvice || question.hint || 'Review this topic carefully.';
-                feedbackArea.innerHTML = `
-                    <div class="feedback-box feedback-wrong">
-                        <strong>${serverData.message || 'Not quite right.'}</strong>
-                    </div>
-                    <div class="hint-box">
-                        <span class="hint-label">AI HINT</span>
-                        <p>${hintText}</p>
-                    </div>
-                    ${question.explanation ? `
-                    <div class="feedback-box" style="background: var(--primary-light); border-color: rgba(124, 58, 237, 0.3); margin-top: 0.75rem; color: var(--text);">
-                        <strong style="color: var(--primary);">Explanation:</strong>
-                        <p style="color: var(--text-secondary); margin-top: 0.25rem;">${question.explanation}</p>
-                    </div>
-                    ` : ''}
-                `;
-            }
-        }
-
-        function updateLevelBadge() {
-            const badge = document.getElementById('levelBadge');
-            badge.textContent = currentLevel.toUpperCase();
-            badge.className = `level-badge level-${currentLevel}`;
-        }
-
-        function nextQuestion() {
-            currentIndex++;
-            displayQuestion();
-        }
-
-        function showComplete() {
-            clearInterval(timerInterval);
-            document.getElementById('questionCard').style.display = 'none';
-            document.getElementById('gameStatsBar').style.display = 'none';
-            document.getElementById('completeCard').style.display = 'block';
-
-            const accuracy = Math.round((correctCount / questions.length) * 100);
-
-            document.getElementById('finalPoints').textContent = sessionPoints;
-            document.getElementById('finalCorrect').textContent = `${correctCount}/${questions.length}`;
-            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
-            document.getElementById('bestStreak').textContent = bestStreak;
-
-            const title = document.getElementById('completeTitle');
-            if (accuracy >= 90) {
-                title.textContent = 'OUTSTANDING!';
-            } else if (accuracy >= 70) {
-                title.textContent = 'GREAT JOB!';
-            } else if (accuracy >= 50) {
-                title.textContent = 'GOOD EFFORT!';
-            } else {
-                title.textContent = 'KEEP PRACTICING!';
-            }
-
-            // Show achievements
-            const achievementArea = document.getElementById('achievementArea');
-            let achievements = [];
-            if (accuracy === 100) achievements.push({ icon: '&#127942;', text: 'Perfect Score!' });
-            if (bestStreak >= 5) achievements.push({ icon: '&#128293;', text: 'Hot Streak!' });
-            if (correctCount >= 7) achievements.push({ icon: '&#11088;', text: 'Quick Learner!' });
-
-            if (achievements.length > 0) {
-                achievementArea.innerHTML = '<div style="margin-bottom: 1.5rem;">' + achievements.map(a => `
-                    <div class="achievement-unlocked">
-                        <div class="achievement-icon">${a.icon}</div>
-                        <div class="achievement-text">${a.text}</div>
-                    </div>
-                `).join('') + '</div>';
-            }
-
-            // XP Progress
-            const currentXP = (user.totalPoints || 0) + sessionPoints;
-            const xpForLevel = 500;
-            const xpPercent = Math.min((currentXP % xpForLevel) / xpForLevel * 100, 100);
-            document.getElementById('xpProgress').textContent = `${currentXP % xpForLevel} / ${xpForLevel} XP`;
-            setTimeout(() => {
-                document.getElementById('xpFill').style.width = `${xpPercent}%`;
-            }, 500);
-
-            // Persist final points and level; clear session state
-            gameActive = false;
-            clearGameState();
-            user.totalPoints = currentXP;
-            user.currentLevel = currentLevel;
-            localStorage.setItem('user', JSON.stringify(user));
-
-            // Hide back button (game is done)
-            document.getElementById('backBtnRow').style.display = 'none';
-
-            // Update nav XP
-            document.getElementById('navXP').textContent = currentXP + ' XP';
-
-            // Generate AI feedback
-            generateFeedback();
-        }
-
-        async function generateFeedback() {
-            try {
-                await fetch(`${API}/feedback/generate`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        userId: user.id,
-                        language: user.selectedLanguage,
-                        topicPerformance: topicPerformance
-                    })
-                });
-            } catch (err) {
-                console.error('Error generating feedback:', err);
-            }
-        }
-
-        function playAgain() {
-            clearGameState();
-            _resetGameUI();
-        }
-
-        function goToDashboard() {
-            window.location.href = 'dashboard.html';
-        }
-
-        function logout() {
-            showLogoutModal('Are you sure you want to logout? Your game progress will be saved for next time.', () => {
-                localStorage.removeItem('user');
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('token');
-                window.location.href = 'index.html';
-            });
-        }
-        function showLogoutModal(message, onConfirm) {
-            const existing = document.getElementById('logoutConfirmOverlay');
-            if (existing) existing.remove();
-            const overlay = document.createElement('div');
-            overlay.id = 'logoutConfirmOverlay';
-            overlay.className = 'confirm-modal-overlay';
-            overlay.innerHTML = `
-                <div class="confirm-modal" role="dialog" aria-modal="true">
-                    <div class="confirm-modal-icon">&#x1F44B;</div>
-                    <div class="confirm-modal-title">Logout?</div>
-                    <div class="confirm-modal-message">${message}</div>
-                    <div class="confirm-modal-actions">
-                        <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
-                    </div>
-                </div>`;
-            document.body.appendChild(overlay);
-            requestAnimationFrame(() => overlay.classList.add('active'));
-            const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-            document.getElementById('logoutCancelBtn').addEventListener('click', close);
-            document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
-            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
-        }
-    </script>
+        qIndex = 0; score = 0; streak = 0; bestStreak = 0;
+        multiplier = 1; correctCount = 0; sessionResults = [];
+        showQuestion();
+    } catch (err) {
+        console.error('loadQuestions:', err);
+        alert('Could not load questions. Make sure the backend is running.');
+        showScreen('setup');
+    }
+}
+
+// ── Show question ─────────────────────────────────────────────────────────────
+function showQuestion() {
+    if (qIndex >= questions.length) { endGame(); return; }
+
+    const q = questions[qIndex];
+    answered = false;
+    hintUsed = 0;
+    currentHintLevel = 0;
+
+    // Reset UI
+    document.getElementById('qFeedback').className = 'q-feedback';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('hintText').className  = 'hint-text';
+    document.getElementById('hintText').innerHTML  = '';
+    document.getElementById('hintSpinner').className = 'hint-spinner';
+    document.getElementById('hintBtn1').className = 'hint-lvl-btn';
+    document.getElementById('hintBtn2').className = 'hint-lvl-btn';
+    document.getElementById('hintBtn3').className = 'hint-lvl-btn';
+    document.getElementById('hintBtn1').disabled = false;
+    document.getElementById('hintBtn2').disabled = true;
+    document.getElementById('hintBtn3').disabled = true;
+
+    // Progress
+    const pct = Math.round(qIndex / questions.length * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    // Question info
+    const topic = q.topic || q.category || setupLang;
+    document.getElementById('qMeta').textContent   = `Q${qIndex+1} of ${questions.length} · ${setupLevel}`;
+    document.getElementById('qTopic').textContent  = topic;
+    document.getElementById('qText').textContent   = q.question_text || q.question || q.text || '—';
+    document.getElementById('hudQ').textContent    = `${qIndex+1}/${questions.length}`;
+
+    // Code snippet
+    const codeEl = document.getElementById('qCode');
+    if (q.code_snippet || q.code) {
+        codeEl.textContent  = q.code_snippet || q.code;
+        codeEl.style.display = 'block';
+    } else {
+        codeEl.style.display = 'none';
+    }
+
+    // Options (shuffle if MCQ)
+    const opts = getOptions(q);
+    document.getElementById('qOptions').innerHTML = opts.map((o, i) =>
+        `<button class="q-option" onclick="selectOpt(this, ${JSON.stringify(String(o))}, ${JSON.stringify(correctAnswer(q))})">
+            <span class="opt-letter">${String.fromCharCode(65+i)}.</span>
+            <span>${esc(String(o))}</span>
+        </button>`
+    ).join('');
+
+    // Timer
+    startTimer(q.time_limit || 30);
+}
+
+function getOptions(q) {
+    if (q.options && Array.isArray(q.options)) return shuffle([...q.options]);
+    if (q.options_json) { try { return shuffle(JSON.parse(q.options_json)); } catch {} }
+    if (q.choices && Array.isArray(q.choices)) return shuffle([...q.choices]);
+    // Build from correct + distractors
+    const correct    = q.correct_answer || q.answer || '';
+    const distractors = q.distractors || [];
+    return shuffle([correct, ...distractors.slice(0,3)]);
+}
+
+function correctAnswer(q) {
+    return String(q.correct_answer || q.answer || q.correctAnswer || '');
+}
+
+// ── Select option ─────────────────────────────────────────────────────────────
+function selectOpt(btn, selected, correct) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timer);
+
+    const isCorrect = selected.trim() === correct.trim();
+    const q         = questions[qIndex];
+    const topic     = q.topic || q.category || setupLang;
+    sessionResults.push({ topic, isCorrect });
+
+    // Highlight
+    document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+
+    // Also highlight correct answer if wrong
+    if (!isCorrect) {
+        document.querySelectorAll('.q-option').forEach(b => {
+            const txt = b.querySelector('span:last-child')?.textContent;
+            if (txt && txt.trim() === correct.trim()) b.classList.add('correct');
+        });
+    }
+
+    if (isCorrect) {
+        streak++; correctCount++;
+        bestStreak = Math.max(bestStreak, streak);
+        if (streak >= 3) { multiplier = Math.min(4, 1 + Math.floor(streak / 3)); showCombo(); }
+        const pts = 10 * multiplier;
+        score += pts;
+        showXpToast(`+${pts}`);
+    } else {
+        streak = 0;
+        multiplier = 1;
+    }
+
+    document.getElementById('hudScore').textContent  = score;
+    document.getElementById('hudStreak').textContent = streak + '🔥';
+    document.getElementById('hudCombo').textContent  = `×${multiplier}`;
+
+    // Feedback
+    const fb = document.getElementById('qFeedback');
+    fb.className  = `q-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+    fb.textContent = isCorrect
+        ? `✓ Correct! ${streak >= 3 ? `${streak}-streak ×${multiplier} bonus!` : 'Well done.'}`
+        : `✗ Incorrect. Correct answer: ${correct}`;
+
+    // Enable hint buttons
+    document.getElementById('hintBtn1').disabled = false;
+    document.getElementById('hintBtn2').disabled = false;
+    document.getElementById('hintBtn3').disabled = false;
+
+    document.getElementById('nextBtn').style.display = 'block';
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+function startTimer(seconds) {
+    clearInterval(timer);
+    timerSec = seconds;
+    document.getElementById('hudTimer').textContent = timerSec;
+    timer = setInterval(() => {
+        timerSec--;
+        document.getElementById('hudTimer').textContent = timerSec;
+        if (timerSec <= 5) document.getElementById('hudTimer').style.color = '#f87171';
+        else               document.getElementById('hudTimer').style.color = '';
+        if (timerSec <= 0) { clearInterval(timer); timeUp(); }
+    }, 1000);
+}
+
+function timeUp() {
+    if (answered) return;
+    answered = true;
+    streak   = 0; multiplier = 1;
+    document.getElementById('hudStreak').textContent = '0🔥';
+    document.getElementById('hudCombo').textContent  = '×1';
+    document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
+
+    const q      = questions[qIndex];
+    const topic  = q.topic || q.category || setupLang;
+    sessionResults.push({ topic, isCorrect: false });
+
+    const fb = document.getElementById('qFeedback');
+    fb.className  = 'q-feedback wrong';
+    fb.textContent = '⏱ Time\'s up! Keep practicing!';
+    document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQuestion() {
+    qIndex++;
+    showQuestion();
+}
+
+// ── AI Hints ──────────────────────────────────────────────────────────────────
+async function requestHint(level) {
+    if (level <= currentHintLevel) return;
+    currentHintLevel = level;
+    hintUsed++;
+
+    const q = questions[qIndex];
+    document.getElementById('hintSpinner').className = 'hint-spinner show';
+    document.getElementById('hintText').className    = 'hint-text';
+    [`hintBtn1`,`hintBtn2`,`hintBtn3`].forEach(id => {
+        const b = document.getElementById(id);
+        b.disabled = true;
+        b.classList.remove('active');
+    });
+    document.getElementById(`hintBtn${level}`).classList.add('active');
+
+    try {
+        const res  = await fetch(`${API}/ai/hint`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+                questionText:  q.question_text || q.question || q.text,
+                topic:         q.topic || q.category || 'programming',
+                language:      setupLang,
+                level:         setupLevel,
+                hintLevel:     level,
+                studentAnswer: ''
+            })
+        });
+        const data = await res.json();
+        document.getElementById('hintSpinner').className = 'hint-spinner';
+        document.getElementById('hintText').className    = 'hint-text show';
+        document.getElementById('hintText').innerHTML    = `<strong>Level ${level} Hint:</strong> ${esc(data.hint || 'Think about the core concept of this topic.')}`;
+    } catch {
+        document.getElementById('hintSpinner').className = 'hint-spinner';
+        document.getElementById('hintText').className    = 'hint-text show';
+        document.getElementById('hintText').textContent  = 'Hint unavailable. Check your internet connection.';
+    }
+
+    // Unlock next level
+    if (level < 3) {
+        document.getElementById(`hintBtn${level + 1}`).disabled = !answered;
+    }
+    if (level >= 1) document.getElementById('hintBtn1').disabled = false;
+    if (level >= 2) document.getElementById('hintBtn2').disabled = false;
+    if (level >= 3) document.getElementById('hintBtn3').disabled = false;
+}
+
+// ── End game ──────────────────────────────────────────────────────────────────
+async function endGame() {
+    clearInterval(timer);
+    showScreen('end');
+
+    const total    = questions.length;
+    const accuracy = total > 0 ? Math.round(correctCount / total * 100) : 0;
+    const xp       = Math.round(score * 0.5);
+
+    document.getElementById('endScore').textContent    = score;
+    document.getElementById('endAccuracy').textContent = accuracy + '%';
+    document.getElementById('endXP').textContent       = `+${xp} XP`;
+    document.getElementById('endBest').textContent     = bestStreak + '🔥';
+
+    if (accuracy >= 90) {
+        document.getElementById('endTrophy').textContent = '🏆';
+        document.getElementById('endTitle').textContent  = 'Excellent!';
+        document.getElementById('endSub').textContent    = 'Outstanding performance! You\'re a coding champion!';
+    } else if (accuracy >= 70) {
+        document.getElementById('endTrophy').textContent = '🥈';
+        document.getElementById('endTitle').textContent  = 'Great Job!';
+        document.getElementById('endSub').textContent    = 'Solid work! Review the weak topics to improve.';
+    } else {
+        document.getElementById('endTrophy').textContent = '💪';
+        document.getElementById('endTitle').textContent  = 'Keep Practicing!';
+        document.getElementById('endSub').textContent    = 'Every attempt makes you stronger. Keep going!';
+    }
+
+    // Weakness report
+    const wrongTopics = [...new Set(
+        sessionResults.filter(r => !r.isCorrect).map(r => r.topic)
+    )];
+    if (wrongTopics.length) {
+        document.getElementById('weaknessReport').style.display = 'block';
+        document.getElementById('wrPills').innerHTML = wrongTopics.map(t =>
+            `<span class="wr-pill">${esc(t)}</span>`
+        ).join('');
+    } else {
+        document.getElementById('weaknessReport').style.display = 'none';
+    }
+
+    // Track session: save XP + weaknesses to DB
+    try {
+        await fetch(`${API}/ai/track-session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ xpEarned: xp, language: setupLang, results: sessionResults })
+        });
+        showXpToast(`+${xp} XP saved!`);
+    } catch {}
+}
+
+function restartGame() {
+    showScreen('setup');
+}
+
+function quitGame() {
+    endGame();
+}
+
+// ── Combo badge ───────────────────────────────────────────────────────────────
+function showCombo() {
+    const el = document.getElementById('comboBadge');
+    el.textContent = `🔥 ${streak}-STREAK! ×${multiplier}`;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1000);
+}
+
+// ── XP toast ─────────────────────────────────────────────────────────────────
+let xpHide;
+function showXpToast(msg) {
+    const el = document.getElementById('xpToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(xpHide);
+    xpHide = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ── Screen management ─────────────────────────────────────────────────────────
+function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(`screen${name.charAt(0).toUpperCase() + name.slice(1)}`).classList.add('active');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
 </body>
 </html>

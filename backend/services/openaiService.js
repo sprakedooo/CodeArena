@@ -209,4 +209,339 @@ Keep the code examples practical and relevant to ${language}. Escape all HTML sp
     return JSON.parse(jsonStr);
 }
 
-module.exports = { generateQuestion, generateFeedback, generateLesson, generateLiveHint, generateCorrectMessage };
+// ─── Coding assignment generation ────────────────────────────────────────────
+/**
+ * Ask GPT to generate a full coding assignment with test cases.
+ * Returns: { title, description, starterCode, testCases: [{label, input, expectedOutput, isHidden}] }
+ */
+async function generateCodingAssignment({ topic, language = 'python', difficulty = 'beginner' }) {
+    const client = getClient();
+
+    const prompt = `You are an experienced programming teacher creating a ${difficulty}-level ${language} coding assignment about "${topic}".
+
+Generate a practical coding problem that students must solve by writing a complete program that reads from stdin and writes to stdout.
+
+Respond with ONLY valid JSON (no markdown, no extra text):
+{
+  "title": "A concise assignment title",
+  "description": "Clear problem statement that explains:\\n- What the program should do\\n- Input format (what will be provided via stdin)\\n- Output format (what should be printed to stdout)\\n- Constraints and examples",
+  "starterCode": "Starter code with comments showing where students should write their solution. Must read from stdin.",
+  "testCases": [
+    { "label": "Basic case", "input": "exact stdin input here", "expectedOutput": "exact stdout output here", "isHidden": false },
+    { "label": "Edge case", "input": "...", "expectedOutput": "...", "isHidden": false },
+    { "label": "Hidden test 1", "input": "...", "expectedOutput": "...", "isHidden": true },
+    { "label": "Hidden test 2", "input": "...", "expectedOutput": "...", "isHidden": true },
+    { "label": "Hidden test 3", "input": "...", "expectedOutput": "...", "isHidden": true }
+  ]
+}
+
+Rules:
+- The starter code MUST use stdin (e.g. input() for Python, Scanner for Java, cin for C++, readline for JS)
+- Provide exactly 2 visible test cases and 3 hidden test cases
+- expectedOutput must match EXACTLY what the program prints (no trailing spaces, correct newlines)
+- Make the problem appropriate for ${difficulty} level ${language} programmers
+- The hidden test cases should cover edge cases that basic solutions miss`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1200,
+    });
+
+    const raw     = response.choices[0].message.content.trim();
+    const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(jsonStr);
+}
+
+// ─── Phase 1: Code Analyzer ──────────────────────────────────────────────────
+/**
+ * Analyze student-submitted code and return structured feedback.
+ * NEVER gives the full solution. Guides thinking instead.
+ *
+ * @param {object} opts
+ *   - code          {string}  student's code
+ *   - language      {string}  python | javascript | java | cpp
+ *   - level         {string}  beginner | intermediate | advanced
+ *   - topic         {string}  e.g. "For Loops"
+ *   - taskDesc      {string}  what the assignment asks for
+ *   - expectedOutput{string}  expected program output (optional)
+ *   - actualOutput  {string}  actual program output (optional)
+ * @returns {object} { summary, issues[], strengths[], hint, encouragement }
+ */
+async function analyzeCode({ code, language, level = 'beginner', topic = '', taskDesc = '', expectedOutput = '', actualOutput = '' }) {
+    const client = getClient();
+
+    const prompt = `You are a programming tutor AI for CodeArena, an educational platform.
+Your role is to GUIDE students, NOT give them the full solution.
+
+STUDENT CONTEXT:
+- Level: ${level}
+- Language: ${language}
+- Topic being practiced: ${topic || 'General programming'}
+- Task description: ${taskDesc || 'General coding exercise'}
+
+SUBMITTED CODE:
+\`\`\`${language}
+${code}
+\`\`\`
+
+${expectedOutput ? `Expected output: ${expectedOutput}` : ''}
+${actualOutput   ? `Actual output:   ${actualOutput}`   : ''}
+
+RULES:
+1. NEVER write the corrected code for the student
+2. Identify specific errors or inefficiencies
+3. Explain WHY something is wrong conceptually
+4. Give a clear, actionable hint (not the answer)
+5. Match language complexity to student level (${level})
+6. Be encouraging and supportive
+
+Respond with ONLY valid JSON (no markdown):
+{
+  "summary": "1-2 sentence overview of the code quality",
+  "issues": [
+    { "line": "approximate line or area", "problem": "what is wrong", "concept": "the underlying concept to review" }
+  ],
+  "strengths": ["what the student did well"],
+  "hint": "One clear hint pointing toward the fix without giving it away",
+  "encouragement": "A short motivating sentence"
+}
+
+If the code is correct, set issues to [] and give positive feedback.`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.6,
+        max_tokens: 600,
+    });
+
+    const raw     = response.choices[0].message.content.trim();
+    const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(jsonStr);
+}
+
+// ─── Phase 1: Progressive 3-Level Hints ──────────────────────────────────────
+/**
+ * Return a hint at a specific level (1, 2, or 3).
+ * Level 1 → conceptual nudge
+ * Level 2 → point to the specific problem
+ * Level 3 → near-solution with a gap (still no full answer)
+ *
+ * @param {object} opts
+ *   - questionText  {string}
+ *   - topic         {string}
+ *   - language      {string}
+ *   - level         {string}  student level
+ *   - hintLevel     {number}  1 | 2 | 3
+ *   - studentAnswer {string}  what the student tried (optional)
+ * @returns {string} hint text
+ */
+async function getProgressiveHint({ questionText, topic, language, level = 'beginner', hintLevel = 1, studentAnswer = '' }) {
+    const client = getClient();
+
+    const hintInstructions = {
+        1: `Give a CONCEPTUAL hint only. Remind the student of the relevant concept without mentioning the specific problem. Do NOT reference their answer. Max 2 sentences.`,
+        2: `Point to the SPECIFIC problem area. Mention what part of their approach is incorrect and what concept to reconsider. Still do NOT give the answer. Max 2 sentences.`,
+        3: `Give a NEAR-SOLUTION hint. Describe the correct approach step-by-step but leave out the final key detail the student must figure out. Max 3 sentences.`,
+    };
+
+    const prompt = `You are a patient programming tutor for a ${level}-level ${language} student.
+
+Question: "${questionText}"
+Topic: ${topic}
+${studentAnswer ? `Student's attempt: "${studentAnswer}"` : ''}
+
+Hint Level ${hintLevel} of 3:
+${hintInstructions[hintLevel] || hintInstructions[1]}
+
+CRITICAL: Never give the full answer or write complete code.
+Reply with ONLY the hint text — no labels, no formatting.`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.65,
+        max_tokens: 150,
+    });
+
+    return response.choices[0].message.content.trim();
+}
+
+// ─── Phase 1: Global AI Assistant ────────────────────────────────────────────
+/**
+ * The floating AI assistant accessible anywhere in the app.
+ * Answers programming questions and guides navigation — never does homework.
+ *
+ * @param {object} opts
+ *   - message          {string}  student's question
+ *   - studentName      {string}
+ *   - level            {string}
+ *   - language         {string}
+ *   - lastLesson       {string}  title of last completed lesson
+ *   - weakTopics       {string[]}
+ *   - conversationHistory {Array}  [{role, content}] for context
+ * @returns {string} assistant reply
+ */
+async function globalAssistant({ message, studentName = 'there', level = 'beginner', language = 'python', lastLesson = '', weakTopics = [], conversationHistory = [] }) {
+    const client = getClient();
+
+    const systemPrompt = `You are CodeArena's friendly AI learning guide — a helpful, encouraging programming tutor.
+
+STUDENT PROFILE:
+- Name: ${studentName}
+- Level: ${level}
+- Primary language: ${language}
+- Last completed lesson: ${lastLesson || 'none yet'}
+- Known weak topics: ${weakTopics.length ? weakTopics.join(', ') : 'none detected yet'}
+
+YOUR RULES:
+1. Be warm, friendly, and encouraging
+2. Match explanation complexity to the student's level (${level})
+3. NEVER write complete solutions to homework or assignments
+4. If asked for an answer, give pseudocode or partial examples only
+5. If the student seems stuck, ask a guiding question back
+6. Keep responses concise — aim for 3-5 sentences unless a detailed explanation is needed
+7. Use simple code snippets only to illustrate concepts, not to solve tasks
+8. If the student asks about navigation or features, guide them helpfully`;
+
+    const messages = [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory.slice(-6), // keep last 3 exchanges for context
+        { role: 'user', content: message },
+    ];
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages,
+        temperature: 0.75,
+        max_tokens: 350,
+    });
+
+    return response.choices[0].message.content.trim();
+}
+
+// ─── Phase 1: Teaching Insights ──────────────────────────────────────────────
+/**
+ * Generate AI teaching insights for a faculty member.
+ * Analyzes class data and returns actionable recommendations.
+ *
+ * @param {object} opts
+ *   - facultyName      {string}
+ *   - classrooms       {Array}   [{ name, studentCount, avgAccuracy, completionRate }]
+ *   - weakTopics       {Array}   [{ topic, language, errorRate }]
+ *   - atRiskCount      {number}
+ *   - totalStudents    {number}
+ *   - improvedCount    {number}
+ * @returns {object} { summary, recommendations[], topicInsights[], teachingTip }
+ */
+async function generateTeachingInsights({ facultyName = 'Professor', classrooms = [], weakTopics = [], atRiskCount = 0, totalStudents = 0, improvedCount = 0 }) {
+    const client = getClient();
+
+    const classroomSummary = classrooms.map(c =>
+        `  - ${c.name}: ${c.studentCount} students, ${c.avgAccuracy}% avg accuracy, ${c.completionRate}% completion`
+    ).join('\n') || '  - No classrooms yet';
+
+    const topicSummary = weakTopics.slice(0, 5).map(t =>
+        `  - ${t.topic} (${t.language}): ${t.errorRate}% error rate`
+    ).join('\n') || '  - No weak topics detected yet';
+
+    const prompt = `You are an AI analytics assistant for a programming education platform.
+Analyze the following teaching data and provide actionable insights.
+
+FACULTY: ${facultyName}
+TOTAL STUDENTS: ${totalStudents}
+AT-RISK STUDENTS: ${atRiskCount}
+STUDENTS IMPROVED THIS MONTH: ${improvedCount}
+
+CLASSROOMS:
+${classroomSummary}
+
+TOP WEAK TOPICS ACROSS ALL CLASSES:
+${topicSummary}
+
+Respond with ONLY valid JSON (no markdown):
+{
+  "summary": "2-3 sentence overview of teaching effectiveness and student outcomes",
+  "recommendations": [
+    { "action": "specific action to take", "reason": "why this matters", "priority": "high|medium|low" }
+  ],
+  "topicInsights": [
+    { "topic": "topic name", "insight": "specific observation about student struggles", "suggestion": "what to do about it" }
+  ],
+  "teachingTip": "One practical pedagogical tip based on the data"
+}
+
+Limit to 3 recommendations and 3 topic insights. Be specific and actionable, not generic.`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.6,
+        max_tokens: 700,
+    });
+
+    const raw     = response.choices[0].message.content.trim();
+    const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(jsonStr);
+}
+
+// ─── Phase 1: AI Next Task Recommendation ────────────────────────────────────
+/**
+ * Recommend the student's next learning task based on their progress and weaknesses.
+ * @returns {object} { nextAction, reason, link, type }
+ */
+async function recommendNextTask({ studentName, level, language, lastLesson, weakTopics = [], completedLessons = 0, totalLessons = 0 }) {
+    const client = getClient();
+
+    const prompt = `You are an adaptive learning AI for a programming education platform.
+Based on this student's profile, recommend their most valuable next action.
+
+STUDENT: ${studentName}
+LEVEL: ${level}
+LANGUAGE: ${language}
+LAST LESSON COMPLETED: ${lastLesson || 'none'}
+PROGRESS: ${completedLessons} of ${totalLessons} lessons done
+WEAK TOPICS: ${weakTopics.length ? weakTopics.join(', ') : 'none detected'}
+
+Choose ONE of these action types:
+- "continue_lesson" — continue to the next lesson in their path
+- "review_topic"    — revisit a weak topic before advancing
+- "practice"        — do a practice exercise on a weak area
+- "daily_challenge" — take today's daily challenge if they haven't
+
+Respond with ONLY valid JSON (no markdown):
+{
+  "nextAction": "short action title, max 6 words",
+  "reason": "1 sentence explaining why this is recommended",
+  "type": "continue_lesson|review_topic|practice|daily_challenge"
+}`;
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.5,
+        max_tokens: 150,
+    });
+
+    const raw     = response.choices[0].message.content.trim();
+    const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(jsonStr);
+}
+
+module.exports = {
+    // Existing
+    generateQuestion,
+    generateFeedback,
+    generateLesson,
+    generateLiveHint,
+    generateCorrectMessage,
+    generateCodingAssignment,
+    // Phase 1
+    analyzeCode,
+    getProgressiveHint,
+    globalAssistant,
+    generateTeachingInsights,
+    recommendNextTask,
+};

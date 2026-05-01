@@ -191,12 +191,12 @@ router.get('/:userId', async (req, res) => {
                 const recentActivity = [];
 
                 dbRewards.forEach(r => {
-                    totalPoints += r.points_amount || 0;
+                    totalPoints += r.xp_amount || 0;
                     if (r.badge_id && !badges.includes(r.badge_id)) {
                         badges.push(r.badge_id);
                     }
                     recentActivity.push({
-                        points: r.points_amount,
+                        points: r.xp_amount,
                         reason: r.description,
                         date: r.earned_at
                     });
@@ -323,7 +323,7 @@ router.post('/add-points', async (req, res) => {
 
     // Save to database if available
     if (dbService.isDbAvailable()) {
-        await dbService.addReward(userId, 'points', points, null, reason || 'Points earned');
+        await dbService.addReward(userId, 'xp', points, null, reason || 'Points earned');
     }
 
     // Initialize user if needed

@@ -390,9 +390,9 @@ router.post('/login', async (req, res) => {
                     email: user.email,
                     fullName: user.full_name,
                     role: user.role || 'student',
-                    totalPoints: user.total_points,
-                    currentLevel: user.current_level,
-                    badges: JSON.parse(user.badges || '[]'),
+                    totalXp: user.total_xp || 0,
+                    streak: user.streak || 0,
+                    badges: [],
                     selectedLanguage: user.selected_language
                 };
                 return res.json({

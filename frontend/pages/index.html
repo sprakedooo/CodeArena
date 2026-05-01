@@ -559,8 +559,8 @@
             <li><a href="#features">AI <span class="badge-soon">NEW</span></a></li>
         </ul>
         <div class="nav-actions">
-            <a href="login.html" class="btn-login">Log in</a>
-            <a href="intro.html?to=register.html" class="btn-signup">Sign up</a>
+            <a href="pages/login.html" class="btn-login">Log in</a>
+            <a href="pages/intro.html?to=register.html" class="btn-signup">Sign up</a>
         </div>
     </nav>
 
@@ -577,7 +577,7 @@
             <p class="hero-subtitle">
                 The most fun and user-friendly way to learn how to code, built for beginners with adaptive AI, real challenges, and instant feedback.
             </p>
-            <a href="intro.html?to=login.html" class="hero-cta">Get Started &#x2192;</a>
+            <a href="pages/intro.html?to=login.html" class="hero-cta">Get Started &#x2192;</a>
         </div>
     </section>
 
@@ -599,7 +599,7 @@
                 <div class="course-body">
                     <div class="course-title">Python</div>
                     <div class="course-desc">Learn programming fundamentals and variables, control flow, and loops with the world's most popular language.</div>
-                    <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
+                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
                 </div>
             </div>
             <div class="course-card">
@@ -607,7 +607,7 @@
                 <div class="course-body">
                     <div class="course-title">HTML</div>
                     <div class="course-desc">Create your first website with HTML, the building blocks of the web and structure for any modern site.</div>
-                    <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
+                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
                 </div>
             </div>
             <div class="course-card">
@@ -615,7 +615,7 @@
                 <div class="course-body">
                     <div class="course-title">CSS</div>
                     <div class="course-desc">Learn to use CSS creatively and properties to make your HTML pages look stunning.</div>
-                    <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
+                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
                 </div>
             </div>
             <div class="course-card">
@@ -623,7 +623,7 @@
                 <div class="course-body">
                     <div class="course-title">JavaScript</div>
                     <div class="course-desc">Learn variables, loops, functions and events to start building interactive dynamic web applications.</div>
-                    <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
+                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
                 </div>
             </div>
             <div class="course-card">
@@ -631,7 +631,7 @@
                 <div class="course-body">
                     <div class="course-title">Java</div>
                     <div class="course-desc">Learn classes, inheritance, and object-oriented programming with one of the most trusted languages.</div>
-                    <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
+                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
                 </div>
             </div>
             <div class="course-card">
@@ -639,13 +639,13 @@
                 <div class="course-body">
                     <div class="course-title">C++</div>
                     <div class="course-desc">Master pointers, memory, and performance with a language that powers games, systems, and engines.</div>
-                    <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
+                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
                 </div>
             </div>
         </div>
 
         <div class="explore-all">
-            <a href="login.html">Explore All Courses &#x2192;</a>
+            <a href="pages/login.html">Explore All Courses &#x2192;</a>
         </div>
     </section>
 
@@ -691,7 +691,7 @@
     <!-- ============ FOOTER CTA ============ -->
     <section class="footer-cta">
         <h2>Start learning for free</h2>
-        <a href="intro.html?to=register.html" class="btn-free">&#x1F3AE; Start Your Adventure</a>
+        <a href="pages/intro.html?to=register.html" class="btn-free">&#x1F3AE; Start Your Adventure</a>
         <div class="footer-bottom">
             &copy; 2026 CodeArena. Made with &#x2764;&#xFE0F; for learners everywhere.
         </div>
@@ -791,10 +791,11 @@
         if (user && localStorage.getItem('token')) {
             const loginLink  = document.querySelector('.btn-login');
             const signupLink = document.querySelector('.btn-signup');
-            if (loginLink)  { loginLink.textContent = 'Dashboard'; loginLink.href = 'dashboard.html'; }
+            if (loginLink)  { loginLink.textContent = 'Dashboard'; loginLink.href = 'pages/dashboard.html'; }
             if (signupLink) { signupLink.style.display = 'none'; }
         }
     } catch (e) {}
 </script>
+<script src="../js/theme.js"></script>
 </body>
 </html>
