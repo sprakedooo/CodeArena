@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(netstat -ano)",
+      "Bash(timeout 10 node server.js)",
+      "Bash(timeout 8 node server.js)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 3000 -State Listen | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force }; \"Done\")",
+      "Bash(npm install *)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\jubil\\\\.claude\\\\settings.json\" -Raw | ConvertFrom-Json\\).hooks.WorktreeCreate[0].hooks[0].command)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/js/sidebar.js)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(node -e \"const h=require\\('http'\\),fs=require\\('fs'\\),p=require\\('path'\\);h.createServer\\(\\(q,r\\)=>{let f=p.join\\('frontend',q.url==='/'?'pages/index.html':q.url\\);try{r.writeHead\\(200,{'Content-Type':{'html':'text/html','css':'text/css','js':'application/javascript','png':'image/png','svg':'image/svg+xml','ico':'image/x-icon'}[f.split\\('.'\\).pop\\(\\)]||'text/plain'}\\);fs.createReadStream\\(f\\).pipe\\(r\\)}catch{r.writeHead\\(404\\);r.end\\('Not found'\\)}}\\).listen\\(8081,\\(\\)=>console.log\\('Worktree server on http://localhost:8081'\\)\\)\")",
+      "Bash(PORT=8081 node server.js)",
+      "Bash(node server.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8081/pages/classroom_manage.html)",
+      "Bash(findstr :8080)",
+      "PowerShell(\\(Get-Process -Id 11492\\).Path; \\(Get-WmiObject Win32_Process -Filter \"ProcessId=11492\"\\).CommandLine; \\(Get-WmiObject Win32_Process -Filter \"ProcessId=11492\"\\).ExecutablePath)",
+      "Bash(Stop-Process -Id 11492 -Force)",
+      "Read(//c/Users/jubil/ai-cai-system/frontend/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/pages/classroom_manage.html)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 8080 -State Listen)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 8080 -State Listen | Select-Object OwningProcess | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }; Write-Host \"Killed\")",
+      "Bash(cp -r C:/Users/jubil/ai-cai-system/frontend/css/. C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/frontend/css/)",
+      "Bash(cp -r C:/Users/jubil/ai-cai-system/frontend/js/. C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/frontend/js/)",
+      "Bash(cp -r C:/Users/jubil/ai-cai-system/frontend/pages/. C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/frontend/pages/)",
+      "Bash(cp -r C:/Users/jubil/ai-cai-system/frontend/assets/. C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/frontend/assets/)",
+      "Bash(cp -r C:/Users/jubil/ai-cai-system/backend/routes/. C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/backend/routes/)",
+      "Bash(cp -r C:/Users/jubil/ai-cai-system/backend/services/. C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/backend/services/)",
+      "Bash(cp C:/Users/jubil/ai-cai-system/backend/server.js C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/backend/server.js)",
+      "Bash(cp C:/Users/jubil/ai-cai-system/backend/config/database.js C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/backend/config/database.js)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

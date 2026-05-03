@@ -3,289 +3,251 @@
  * LANGUAGE ROUTES (languageRoutes.js)
  * ============================================================================
  *
- * PURPOSE:
- * Handles programming language selection for the game-based system.
- * Students choose from Python, Java, or C++ before starting lessons.
+ * Single source of truth for the available programming languages.
+ * Defaults come from backend/config/languages.js. Admin CRUD edits go to
+ * backend/data/languages.json so they survive restarts.
  *
- * ENDPOINTS:
- * GET  /api/languages          - Get all available languages
- * POST /api/languages/select   - Select a language to study
- * GET  /api/languages/current  - Get user's current selected language
+ * Endpoints:
+ *   GET    /api/languages              — list all enabled languages (public)
+ *   GET    /api/languages/all          — list ALL (incl. disabled)  [admin]
+ *   GET    /api/languages/:code        — single language details
+ *   POST   /api/languages/select       — save user's language preference
+ *   GET    /api/languages/current/:uid — current user selection
+ *   POST   /api/languages              — create  [admin]
+ *   PUT    /api/languages/:code        — update  [admin]
+ *   DELETE /api/languages/:code        — delete  [admin]
  *
- * FOR THESIS PANELISTS:
- * Language selection is the first step in the adaptive learning flow.
- * Questions are filtered based on the selected programming language.
+ * To ADD a language permanently → edit backend/config/languages.js.
+ * To ADD a language at runtime  → POST /api/languages from the admin CMS.
  * ============================================================================
  */
 
 const express = require('express');
-const router = express.Router();
+const fs      = require('fs');
+const path    = require('path');
+const router  = express.Router();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MOCK DATA: Available programming languages
-// ─────────────────────────────────────────────────────────────────────────────
+const { DEFAULT_LANGUAGES, toPublic } = require('../config/languages');
 
-/**
- * Programming languages available in the system
- * Each language has metadata for display and question filtering
- */
-let programmingLanguages = [
-    {
-        id: 1,
-        name: 'Python',
-        code: 'python',
-        description: 'A beginner-friendly language known for its simple syntax and versatility.',
-        icon: '🐍',
-        difficulty: 'Recommended for beginners',
-        totalQuestions: 15,  // Mock count
-        topics: ['Variables', 'Data Types', 'Loops', 'Functions', 'Lists']
-    },
-    {
-        id: 2,
-        name: 'JavaScript',
-        code: 'javascript',
-        description: 'The language of the web. Build interactive sites, apps, and servers with JS.',
-        icon: '🌐',
-        difficulty: 'Beginner Friendly',
-        totalQuestions: 15,
-        topics: ['Variables', 'Functions', 'Arrays', 'DOM', 'Events']
-    },
-    {
-        id: 3,
-        name: 'Java',
-        code: 'java',
-        description: 'A powerful object-oriented language used in enterprise applications.',
-        icon: '☕',
-        difficulty: 'Intermediate',
-        totalQuestions: 15,
-        topics: ['Variables', 'Data Types', 'Loops', 'Classes', 'Objects']
-    },
-    {
-        id: 4,
-        name: 'C++',
-        code: 'cpp',
-        description: 'A high-performance language for system programming and game development.',
-        icon: '⚡',
-        difficulty: 'Advanced',
-        totalQuestions: 15,
-        topics: ['Variables', 'Pointers', 'Loops', 'Functions', 'Classes']
+const DATA_DIR  = path.join(__dirname, '..', 'data');
+const DATA_FILE = path.join(DATA_DIR, 'languages.json');
+
+// ─── Load / persist ──────────────────────────────────────────────────────────
+function ensureDataDir() {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+function loadLanguages() {
+    try {
+        if (fs.existsSync(DATA_FILE)) {
+            const raw = fs.readFileSync(DATA_FILE, 'utf8');
+            const overrides = JSON.parse(raw);
+            if (Array.isArray(overrides) && overrides.length) {
+                // Merge: defaults provide functions (runConfig), JSON
+                // overrides metadata + admin-created entries.
+                const byCode = new Map(DEFAULT_LANGUAGES.map(l => [l.code, l]));
+                overrides.forEach(o => {
+                    const existing = byCode.get(o.code);
+                    byCode.set(o.code, existing ? { ...existing, ...o } : o);
+                });
+                return Array.from(byCode.values());
+            }
+        }
+    } catch (err) {
+        console.error('[languages] Failed to load overrides, using defaults:', err.message);
     }
-];
+    return [...DEFAULT_LANGUAGES];
+}
 
-// Mock user selections (shared state for demo)
-let userLanguageSelections = {};
+function persistLanguages(languages) {
+    try {
+        ensureDataDir();
+        // Strip non-serializable bits (functions in runConfig)
+        const serializable = languages.map(l => {
+            const { runConfig, ...rest } = l;
+            return rest;
+        });
+        fs.writeFileSync(DATA_FILE, JSON.stringify(serializable, null, 2));
+    } catch (err) {
+        console.error('[languages] Failed to persist overrides:', err.message);
+    }
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get All Languages
-// GET /api/languages
-// ─────────────────────────────────────────────────────────────────────────────
+let languages = loadLanguages();
 
-/**
- * Returns all available programming languages
- * Used on the language selection page
- */
+// User selections (in-memory; persisted on user record by /select)
+const userLanguageSelections = {};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function findLang(code) {
+    if (!code) return null;
+    return languages.find(l => l.code === code.toLowerCase()) || null;
+}
+
+function enabledOnly(list) {
+    return list.filter(l => l.enabled !== false);
+}
+
+// ─── GET /api/languages — list (public, enabled only) ────────────────────────
 router.get('/', (req, res) => {
     res.json({
-        success: true,
-        message: 'Select a programming language to begin learning',
-        languages: programmingLanguages.map(lang => ({
-            id: lang.id,
-            name: lang.name,
-            code: lang.code,
-            description: lang.description,
-            icon: lang.icon,
-            difficulty: lang.difficulty,
-            totalQuestions: lang.totalQuestions
-        }))
+        success:   true,
+        message:   'Select a programming language to begin learning',
+        languages: toPublic(enabledOnly(languages)),
     });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get Language Details
-// GET /api/languages/:code
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── GET /api/languages/all — admin: includes disabled ───────────────────────
+router.get('/all', (req, res) => {
+    res.json({ success: true, languages: toPublic(languages) });
+});
 
-/**
- * Returns detailed information about a specific language
- * Including available topics and question count per level
- */
+// ─── GET /api/languages/:code ────────────────────────────────────────────────
 router.get('/:code', (req, res) => {
-    const languageCode = req.params.code.toLowerCase();
-
-    // Find the language
-    const language = programmingLanguages.find(l => l.code === languageCode);
-
-    if (!language) {
+    const lang = findLang(req.params.code);
+    if (!lang) {
         return res.status(404).json({
             success: false,
-            message: 'Language not found. Available: python, java, cpp'
+            message: `Language not found. Available: ${enabledOnly(languages).map(l => l.code).join(', ')}`,
         });
     }
-
-    // Return detailed language info
+    const [pub] = toPublic([lang]);
     res.json({
         success: true,
         language: {
-            ...language,
+            ...pub,
             levels: {
-                beginner: { questionCount: 5, description: 'Basic syntax and concepts' },
-                intermediate: { questionCount: 5, description: 'Control structures and functions' },
-                advanced: { questionCount: 5, description: 'Complex problem solving' }
-            }
-        }
+                beginner:     { description: 'Basic syntax and concepts' },
+                intermediate: { description: 'Control structures and functions' },
+                advanced:     { description: 'Complex problem solving' },
+            },
+        },
     });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Select Language
-// POST /api/languages/select
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Saves the user's language selection
- * This determines which questions will be presented
- *
- * Request Body:
- * {
- *   "userId": 1,
- *   "languageCode": "python"
- * }
- */
+// ─── POST /api/languages/select — save user choice ───────────────────────────
 router.post('/select', (req, res) => {
     const { userId, languageCode } = req.body;
-
-    // VALIDATION: Check required fields
     if (!userId || !languageCode) {
+        return res.status(400).json({ success: false, message: 'userId and languageCode are required' });
+    }
+    const lang = findLang(languageCode);
+    if (!lang || lang.enabled === false) {
         return res.status(400).json({
             success: false,
-            message: 'userId and languageCode are required'
+            message: `Invalid language. Choose: ${enabledOnly(languages).map(l => l.code).join(', ')}`,
         });
     }
-
-    // VALIDATION: Check if language exists
-    const language = programmingLanguages.find(
-        l => l.code === languageCode.toLowerCase()
-    );
-
-    if (!language) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid language. Choose: python, javascript, java, or cpp'
-        });
-    }
-
-    // Save selection
     userLanguageSelections[userId] = {
-        languageCode: language.code,
-        languageName: language.name,
-        selectedAt: new Date().toISOString()
+        languageCode: lang.code,
+        languageName: lang.name,
+        selectedAt:   new Date().toISOString(),
     };
-
-    // RESPONSE: Confirm selection
     res.json({
         success: true,
-        message: `Great choice! You selected ${language.name}. Let's start learning!`,
+        message: `Great choice! You selected ${lang.name}. Let's start learning!`,
         selection: {
-            userId: userId,
-            language: {
-                code: language.code,
-                name: language.name,
-                icon: language.icon
-            },
-            startingLevel: 'beginner',  // All users start at beginner
-            availableTopics: language.topics
-        }
+            userId,
+            language: { code: lang.code, name: lang.name, icon: lang.icon, color: lang.color },
+            startingLevel: 'beginner',
+            availableTopics: lang.topics || [],
+        },
     });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get User's Current Language
-// GET /api/languages/current/:userId
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Returns the user's currently selected language
- * Used to restore session state
- */
+// ─── GET /api/languages/current/:userId ──────────────────────────────────────
 router.get('/current/:userId', (req, res) => {
     const userId = parseInt(req.params.userId);
-
-    // Check if user has a selection
-    const selection = userLanguageSelections[userId];
-
-    if (!selection) {
-        return res.json({
-            success: true,
-            hasSelection: false,
-            message: 'No language selected yet'
-        });
-    }
-
-    // Find full language details
-    const language = programmingLanguages.find(
-        l => l.code === selection.languageCode
-    );
-
+    const sel = userLanguageSelections[userId];
+    if (!sel) return res.json({ success: true, hasSelection: false, message: 'No language selected yet' });
+    const lang = findLang(sel.languageCode);
     res.json({
         success: true,
         hasSelection: true,
         selection: {
-            languageCode: selection.languageCode,
-            languageName: selection.languageName,
-            icon: language.icon,
-            selectedAt: selection.selectedAt
-        }
+            languageCode: sel.languageCode,
+            languageName: sel.languageName,
+            icon:         lang?.icon  || '💻',
+            color:        lang?.color || '#7c3aed',
+            selectedAt:   sel.selectedAt,
+        },
     });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ADMIN CRUD ROUTES
-// ─────────────────────────────────────────────────────────────────────────────
-
-// POST /api/languages — Create a new language
+// ─── ADMIN CRUD ──────────────────────────────────────────────────────────────
+// POST /api/languages — create
 router.post('/', (req, res) => {
-    const { name, code, description, icon, difficulty, topics } = req.body;
+    const { name, code, description, icon, devicon, color, aceMode, extension,
+            difficulty, topics, template, enabled, featured } = req.body;
+
     if (!name || !code) {
         return res.status(400).json({ success: false, message: 'name and code are required' });
     }
-    if (programmingLanguages.find(l => l.code === code.toLowerCase())) {
+    if (findLang(code)) {
         return res.status(409).json({ success: false, message: 'Language code already exists' });
     }
+
     const newLang = {
-        id: Date.now(),
+        code:        code.toLowerCase(),
         name,
-        code: code.toLowerCase(),
         description: description || '',
-        icon: icon || '💻',
-        difficulty: difficulty || 'Beginner Friendly',
-        totalQuestions: 0,
-        topics: topics || []
+        icon:        icon        || '💻',
+        devicon:     devicon     || '',
+        color:       color       || '#7c3aed',
+        aceMode:     aceMode     || 'text',
+        extension:   extension   || code.toLowerCase(),
+        difficulty:  difficulty  || 'Beginner Friendly',
+        topics:      Array.isArray(topics) ? topics : [],
+        template:    template    || '',
+        enabled:     enabled !== false,
+        featured:    !!featured,
     };
-    programmingLanguages.push(newLang);
-    res.status(201).json({ success: true, language: newLang, message: 'Language created' });
+    languages.push(newLang);
+    persistLanguages(languages);
+    res.status(201).json({ success: true, language: toPublic([newLang])[0], message: 'Language created' });
 });
 
-// PUT /api/languages/:code — Update a language
+// PUT /api/languages/:code — update
 router.put('/:code', (req, res) => {
     const code = req.params.code.toLowerCase();
-    const idx = programmingLanguages.findIndex(l => l.code === code);
+    const idx  = languages.findIndex(l => l.code === code);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Language not found' });
 
-    programmingLanguages[idx] = { ...programmingLanguages[idx], ...req.body, code };
-    res.json({ success: true, language: programmingLanguages[idx], message: 'Language updated' });
+    // Don't allow code rename via this endpoint (would orphan data)
+    const { code: _ignored, runConfig: _r, ...patch } = req.body;
+    languages[idx] = { ...languages[idx], ...patch, code };
+    persistLanguages(languages);
+    res.json({ success: true, language: toPublic([languages[idx]])[0], message: 'Language updated' });
 });
 
-// DELETE /api/languages/:code — Delete a language
+// DELETE /api/languages/:code — delete (or disable for built-ins)
 router.delete('/:code', (req, res) => {
     const code = req.params.code.toLowerCase();
-    const idx = programmingLanguages.findIndex(l => l.code === code);
+    const idx  = languages.findIndex(l => l.code === code);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Language not found' });
 
-    programmingLanguages.splice(idx, 1);
+    const isBuiltIn = DEFAULT_LANGUAGES.some(l => l.code === code);
+    if (isBuiltIn) {
+        // Disable instead of remove so DB references remain valid
+        languages[idx] = { ...languages[idx], enabled: false };
+        persistLanguages(languages);
+        return res.json({ success: true, message: `Built-in language '${code}' disabled (not removed)` });
+    }
+
+    languages.splice(idx, 1);
+    persistLanguages(languages);
     res.json({ success: true, message: `Language '${code}' deleted` });
 });
 
-// Export router and data for other modules
+// ─── Internal helper for other modules (executeRoutes, etc.) ─────────────────
+function getInternalLanguage(code) {
+    return findLang(code);
+}
+function getAllInternal() {
+    return languages;
+}
+
 module.exports = router;
-module.exports.programmingLanguages = programmingLanguages;
+module.exports.getInternalLanguage = getInternalLanguage;
+module.exports.getAllInternal      = getAllInternal;
 module.exports.userLanguageSelections = userLanguageSelections;

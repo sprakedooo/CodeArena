@@ -709,17 +709,6 @@
         </div>
     </div>
 
-    <nav class="navbar">
-        <span class="navbar-brand logo">
-            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
-        </span>
-        <ul class="navbar-nav">
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="lessons.html">Lessons</a></li>
-            <li><a href="admin.html" style="color:var(--primary);">&#x1F9D1;&#x200D;&#x1F3EB; Faculty</a></li>
-            <li><a href="#" onclick="logout()">Logout</a></li>
-        </ul>
-    </nav>
 
     <div class="admin-page">
 
@@ -791,7 +780,7 @@
                             <th>Title</th>
                             <th>Language</th>
                             <th>Difficulty</th>
-                            <th>Description</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -1038,7 +1027,41 @@
         <div class="modal-box">
             <div class="modal-header">
                 <div class="modal-title" id="lessonModalTitle">ADD LESSON</div>
-                <button class="modal-close" onclick="closeModal('lesson')">&times;</button>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-ghost" style="font-size:0.75rem;padding:0.3rem 0.8rem;border:1px solid var(--primary);color:var(--primary);" onclick="toggleAIPanel('lesson')">✨ Generate with AI</button>
+                    <button class="modal-close" onclick="closeModal('lesson')">&times;</button>
+                </div>
+            </div>
+            <!-- AI Generator Panel (Lesson) -->
+            <div id="aiLessonPanel" style="display:none;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:10px;padding:1rem;margin:0 1.5rem 0.5rem;">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:0.75rem;letter-spacing:1px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> AI LESSON GENERATOR</div>
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.6rem;margin-bottom:0.75rem;">
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Topic *</label>
+                        <input type="text" id="aiLTopic" class="form-input" placeholder="e.g. For Loops in Python" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Language</label>
+                        <select id="aiLLang" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Difficulty</label>
+                        <select id="aiLDiff" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="btn btn-primary" style="font-size:0.78rem;padding:0.4rem 1rem;" onclick="generateAILesson()">⚡ Generate</button>
+                    <span id="aiLStatus" style="font-size:0.75rem;color:var(--text-muted);"></span>
+                </div>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="lessonId">
@@ -1076,9 +1099,59 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Content (HTML) *</label>
-                    <textarea id="lessonContent" class="form-textarea html-editor" placeholder="Enter HTML lesson content. Use &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;div class=&quot;code-block&quot;&gt;, &lt;div class=&quot;info-box&quot;&gt; etc."></textarea>
-                    <div class="form-hint">Supports HTML. Use class="code-block" for code, class="info-box" for notes, class="info-box tip" for tips.</div>
+                    <label class="form-label">Content *</label>
+                    <!-- Blog Editor Toolbar -->
+                    <div style="display:flex;flex-wrap:wrap;gap:0.35rem;padding:0.5rem;background:var(--bg-surface);border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;">
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;font-weight:700;" onclick="editorInsert('h2')" title="Heading 2">H2</button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;font-weight:700;" onclick="editorInsert('h3')" title="Heading 3">H3</button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;font-weight:700;" onclick="editorInsert('bold')" title="Bold"><strong>B</strong></button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;" onclick="editorInsert('italic')" title="Italic"><em>I</em></button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;" onclick="editorInsert('ul')" title="Bullet list">• List</button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;" onclick="editorInsert('ol')" title="Numbered list">1. List</button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;font-family:monospace;" onclick="editorInsert('code')" title="Inline code">&lt;code&gt;</button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;" onclick="editorInsert('infobox')" title="Info box"><span class="material-symbols-outlined" style="font-size:0.9rem;">info</span> Info</button>
+                        <button type="button" class="btn btn-primary" style="padding:0.25rem 0.7rem;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;" onclick="openSnippetModal()" title="Insert code snippet"><span class="material-symbols-outlined" style="font-size:0.9rem;">terminal</span> Code Block</button>
+                        <button type="button" class="btn btn-ghost" style="padding:0.25rem 0.55rem;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;margin-left:auto;" onclick="toggleContentPreview()" title="Preview"><span class="material-symbols-outlined" style="font-size:0.9rem;">visibility</span> Preview</button>
+                    </div>
+                    <textarea id="lessonContent" class="form-textarea html-editor"
+                        style="border-radius:0 0 8px 8px;border-top:none;font-family:'Courier New',monospace;font-size:0.82rem;min-height:220px;"
+                        placeholder="Write lesson content here. Use the toolbar above to insert headings, lists, code blocks, etc. Supports Markdown-style fences: ```python ... ``` as well as HTML."></textarea>
+                    <!-- Preview pane (hidden by default) -->
+                    <div id="contentPreview" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-top:0.5rem;max-height:300px;overflow-y:auto;" class="article-body"></div>
+                    <div class="form-hint">Use the toolbar for formatting. Code blocks: wrap in ` ``` python ... ``` `. HTML is also accepted.</div>
+                </div>
+
+                <!-- Code Snippet Sub-modal -->
+                <div id="snippetModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:none;align-items:center;justify-content:center;">
+                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;width:560px;max-width:95vw;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                            <strong style="color:var(--text);display:flex;align-items:center;gap:0.4rem;"><span class="material-symbols-outlined" style="font-size:1rem;color:var(--primary);">terminal</span> Insert Code Snippet</strong>
+                            <button onclick="closeSnippetModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;">✕</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Language</label>
+                            <select id="snippetLang" class="form-input" style="padding:0.5rem;">
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                                <option value="html">HTML</option>
+                                <option value="css">CSS</option>
+                                <option value="bash">Bash/Shell</option>
+                                <option value="plaintext">Plain Text</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Code</label>
+                            <textarea id="snippetCode" class="form-textarea" rows="8"
+                                style="font-family:'Courier New',monospace;font-size:0.82rem;"
+                                placeholder="# Enter your code here"></textarea>
+                        </div>
+                        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                            <button class="btn btn-ghost" onclick="closeSnippetModal()">Cancel</button>
+                            <button class="btn btn-primary" onclick="insertSnippet()">Insert →</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1093,7 +1166,49 @@
         <div class="modal-box">
             <div class="modal-header">
                 <div class="modal-title" id="questionModalTitle">ADD QUESTION</div>
-                <button class="modal-close" onclick="closeModal('question')">&times;</button>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-ghost" style="font-size:0.75rem;padding:0.3rem 0.8rem;border:1px solid var(--primary);color:var(--primary);" onclick="toggleAIPanel('question')">✨ Generate with AI</button>
+                    <button class="modal-close" onclick="closeModal('question')">&times;</button>
+                </div>
+            </div>
+            <!-- AI Generator Panel (Question) -->
+            <div id="aiQuestionPanel" style="display:none;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:10px;padding:1rem;margin:0 1.5rem 0.5rem;">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:0.75rem;letter-spacing:1px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> AI QUESTION GENERATOR</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.6rem;margin-bottom:0.75rem;">
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Topic *</label>
+                        <input type="text" id="aiQTopic" class="form-input" placeholder="e.g. Loops" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Language</label>
+                        <select id="aiQLang" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Difficulty</label>
+                        <select id="aiQDiff" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Type</label>
+                        <select id="aiQType" class="form-select" style="font-size:0.8rem;padding:0.4rem 0.6rem;">
+                            <option value="mcq">Multiple Choice</option>
+                            <option value="fill_blank">Fill in Blank</option>
+                            <option value="output_pred">Output Prediction</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="btn btn-primary" style="font-size:0.78rem;padding:0.4rem 1rem;" onclick="generateAIQuestion()">⚡ Generate</button>
+                    <span id="aiQStatus" style="font-size:0.75rem;color:var(--text-muted);"></span>
+                </div>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="questionId">
@@ -1197,13 +1312,15 @@
         const API = 'http://localhost:3000/api';
 
         // ── Auth helpers ──
-        // Faculty portal only accepts the adminToken — student tokens are rejected
+        // Accept either: dedicated adminToken (password gate) OR a faculty JWT (role-based login)
         function getToken() {
-            return localStorage.getItem('adminToken') || null;
+            return localStorage.getItem('adminToken') || localStorage.getItem('token') || null;
         }
 
         function isAuthenticated() {
-            return !!localStorage.getItem('adminToken');
+            if (localStorage.getItem('adminToken')) return true;
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            return !!(user && user.role === 'faculty' && localStorage.getItem('token'));
         }
 
         if (!isAuthenticated()) {
@@ -1285,7 +1402,10 @@
         async function loadLessons() {
             try {
                 const langFilter = document.getElementById('lLangFilter')?.value || '';
-                const url = langFilter ? `${API}/lessons?language=${langFilter}` : `${API}/lessons`;
+                // Faculty sees all lessons including unshared ones
+                const url = langFilter
+                    ? `${API}/lessons?language=${langFilter}&all=true`
+                    : `${API}/lessons?all=true`;
                 const res = await fetch(url, { headers: getHeaders() });
                 const data = await res.json();
                 allLessons = data.lessons || [];
@@ -1293,6 +1413,25 @@
                 document.getElementById('statLessons').textContent = allLessons.length;
             } catch (e) {
                 showToast('Failed to load lessons', true);
+            }
+        }
+
+        async function toggleLessonShare(id, currentlyShared) {
+            try {
+                const res = await fetch(`${API}/lessons/${id}/share`, {
+                    method: 'PATCH',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ isShared: !currentlyShared })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message);
+                    loadLessons();
+                } else {
+                    showToast(data.error || 'Failed to update', true);
+                }
+            } catch (e) {
+                showToast('Failed to update sharing', true);
             }
         }
 
@@ -1313,19 +1452,26 @@
             }
 
             const langLabels = { python: '&#x1F40D; Python', javascript: '&#x1F310; JS', java: '&#x2615; Java', cpp: '&#x26A1; C++' };
-            tbody.innerHTML = filtered.map(l => `
+            tbody.innerHTML = filtered.map(l => {
+                const shared = l.isShared !== false;
+                const shareLabel = shared ? '&#x1F4E2; Shared' : '&#x1F512; Private';
+                const shareStyle = shared
+                    ? 'background:rgba(16,185,129,0.15);color:#10b981;border:1px solid #10b981;'
+                    : 'background:rgba(107,114,128,0.15);color:#6b7280;border:1px solid #6b7280;';
+                return `
                 <tr>
                     <td><span style="color:var(--text-muted);font-size:0.75rem;">#${l.orderNumber || '&#x2013;'}</span></td>
                     <td><strong>${escHtml(l.title)}</strong></td>
                     <td><span style="font-size:0.75rem;">${langLabels[l.language] || l.language || '&#x2013;'}</span></td>
                     <td><span class="diff-badge diff-${l.difficulty}">${l.difficulty}</span></td>
-                    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(l.description || '&#x2013;')}</td>
+                    <td><span style="font-size:0.72rem;padding:2px 8px;border-radius:4px;${shareStyle}">${shareLabel}</span></td>
                     <td>
                         <button class="action-btn btn-edit" onclick="openLessonModal(${l.id})">Edit</button>
+                        <button class="action-btn" style="background:rgba(6,182,212,0.1);color:#06b6d4;border:1px solid #06b6d4;" onclick="toggleLessonShare(${l.id}, ${shared})">${shared ? 'Unshare' : 'Share'}</button>
                         <button class="action-btn btn-delete" onclick="deleteLesson(${l.id})">Delete</button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
         }
 
         function openLessonModal(id) {
@@ -1894,6 +2040,105 @@
         function closeModal(type) {
             document.getElementById(type + 'Modal').classList.remove('open');
             document.body.style.overflow = '';
+            // Also close AI panels
+            const panel = document.getElementById('ai' + type.charAt(0).toUpperCase() + type.slice(1) + 'Panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        // ── AI Panel toggle ──────────────────────────────────────────────────
+        function toggleAIPanel(type) {
+            const panel = document.getElementById('ai' + type.charAt(0).toUpperCase() + type.slice(1) + 'Panel');
+            if (!panel) return;
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ── AI Question Generation ───────────────────────────────────────────
+        async function generateAIQuestion() {
+            const topic      = document.getElementById('aiQTopic').value.trim();
+            const language   = document.getElementById('aiQLang').value;
+            const difficulty = document.getElementById('aiQDiff').value;
+            const type       = document.getElementById('aiQType').value;
+            const statusEl   = document.getElementById('aiQStatus');
+
+            if (!topic) { statusEl.textContent = '⚠ Please enter a topic.'; statusEl.style.color = 'var(--danger)'; return; }
+
+            statusEl.style.color = 'var(--text-muted)';
+            statusEl.textContent = '⏳ Generating…';
+
+            try {
+                const res  = await fetch(`${API}/questions/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || localStorage.getItem('token')) },
+                    body: JSON.stringify({ topic, language, difficulty, type })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                const q = data.question;
+                // Fill question modal fields
+                document.getElementById('qText').value    = q.question_text || '';
+                document.getElementById('qTopic').value   = q.topic || topic;
+                document.getElementById('qHint').value    = q.hint || '';
+                document.getElementById('qLanguage').value = language;
+                document.getElementById('qLevel').value   = difficulty;
+
+                if (q.options && q.options.length === 4) {
+                    document.getElementById('optA').value = q.options[0].replace(/^A\)\s*/i, '');
+                    document.getElementById('optB').value = q.options[1].replace(/^B\)\s*/i, '');
+                    document.getElementById('optC').value = q.options[2].replace(/^C\)\s*/i, '');
+                    document.getElementById('optD').value = q.options[3].replace(/^D\)\s*/i, '');
+                }
+                if (q.correct_answer) {
+                    const letter = q.correct_answer.toUpperCase().charAt(0);
+                    if (['A','B','C','D'].includes(letter)) document.getElementById('qCorrect').value = letter;
+                }
+
+                statusEl.style.color = 'var(--success)';
+                statusEl.textContent = '✔ Question filled in!';
+                // Hide panel after success
+                setTimeout(() => { document.getElementById('aiQuestionPanel').style.display = 'none'; statusEl.textContent = ''; }, 1500);
+            } catch (err) {
+                statusEl.style.color = 'var(--danger)';
+                statusEl.textContent = '✖ ' + (err.message || 'Generation failed');
+            }
+        }
+
+        // ── AI Lesson Generation ─────────────────────────────────────────────
+        async function generateAILesson() {
+            const topic      = document.getElementById('aiLTopic').value.trim();
+            const language   = document.getElementById('aiLLang').value;
+            const difficulty = document.getElementById('aiLDiff').value;
+            const statusEl   = document.getElementById('aiLStatus');
+
+            if (!topic) { statusEl.textContent = '⚠ Please enter a topic.'; statusEl.style.color = 'var(--danger)'; return; }
+
+            statusEl.style.color = 'var(--text-muted)';
+            statusEl.textContent = '⏳ Generating lesson…';
+
+            try {
+                const res  = await fetch(`${API}/lessons/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || localStorage.getItem('token')) },
+                    body: JSON.stringify({ topic, language, difficulty })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                const l = data.lesson;
+                // Fill lesson modal fields
+                document.getElementById('lessonTitle').value   = l.title || '';
+                document.getElementById('lessonDesc').value    = l.description || '';
+                document.getElementById('lessonContent').value = l.content || '';
+                document.getElementById('lessonLang').value    = language;
+                document.getElementById('lessonDiff').value    = l.difficulty || difficulty;
+
+                statusEl.style.color = 'var(--success)';
+                statusEl.textContent = '✔ Lesson filled in!';
+                setTimeout(() => { document.getElementById('aiLessonPanel').style.display = 'none'; statusEl.textContent = ''; }, 1500);
+            } catch (err) {
+                statusEl.style.color = 'var(--danger)';
+                statusEl.textContent = '✖ ' + (err.message || 'Generation failed');
+            }
         }
 
         document.querySelectorAll('.modal-overlay').forEach(mo => {
@@ -1922,12 +2167,100 @@
         }
 
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('token');
-            localStorage.removeItem('adminToken');
-            window.location.href = 'login.html';
+            showLogoutModal('Are you sure you want to logout of the admin panel?', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminToken');
+                window.location.href = 'index.html';
+            });
         }
+        function showLogoutModal(message, onConfirm) {
+            const existing = document.getElementById('logoutConfirmOverlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'logoutConfirmOverlay';
+            overlay.className = 'confirm-modal-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-modal" role="dialog" aria-modal="true">
+                    <div class="confirm-modal-icon">&#x1F44B;</div>
+                    <div class="confirm-modal-title">Logout?</div>
+                    <div class="confirm-modal-message">${message}</div>
+                    <div class="confirm-modal-actions">
+                        <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+            const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+            document.getElementById('logoutCancelBtn').addEventListener('click', close);
+            document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
+        }
+
+    // ── Blog Content Editor Helpers ───────────────────────────────────────────
+    function insertAtCursor(ta, text) {
+        const s = ta.selectionStart, e = ta.selectionEnd;
+        const selected = ta.value.slice(s, e);
+        ta.value = ta.value.slice(0, s) + text.replace('$SEL', selected || 'text') + ta.value.slice(e);
+        ta.selectionStart = ta.selectionEnd = s + text.replace('$SEL','').length;
+        ta.focus();
+    }
+
+    function editorInsert(type) {
+        const ta = document.getElementById('lessonContent');
+        const snippets = {
+            h2:      '\n<h2>$SEL</h2>\n',
+            h3:      '\n<h3>$SEL</h3>\n',
+            bold:    '<strong>$SEL</strong>',
+            italic:  '<em>$SEL</em>',
+            code:    '<code>$SEL</code>',
+            ul:      '\n<ul>\n  <li>$SEL</li>\n</ul>\n',
+            ol:      '\n<ol>\n  <li>$SEL</li>\n</ol>\n',
+            infobox: '\n<div class="info-box">\n  $SEL\n</div>\n',
+        };
+        if (snippets[type]) insertAtCursor(ta, snippets[type]);
+    }
+
+    function openSnippetModal() {
+        document.getElementById('snippetModal').style.display = 'flex';
+        document.getElementById('snippetCode').focus();
+    }
+    function closeSnippetModal() {
+        document.getElementById('snippetModal').style.display = 'none';
+    }
+    function insertSnippet() {
+        const lang = document.getElementById('snippetLang').value;
+        const code = document.getElementById('snippetCode').value;
+        if (!code.trim()) return;
+        const block = `\n\`\`\`${lang}\n${code}\n\`\`\`\n`;
+        insertAtCursor(document.getElementById('lessonContent'), block);
+        closeSnippetModal();
+        document.getElementById('snippetCode').value = '';
+    }
+
+    function toggleContentPreview() {
+        const ta   = document.getElementById('lessonContent');
+        const prev = document.getElementById('contentPreview');
+        if (prev.style.display === 'none' || !prev.style.display) {
+            // Render preview
+            let html = ta.value
+                .replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+                    `<div class="code-block-wrap"><div class="code-block-header"><span>${lang||'code'}</span></div><pre>${code.trim()}</pre></div>`)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+            prev.innerHTML = html || '<em style="color:var(--text-muted)">Nothing to preview yet.</em>';
+            prev.style.display = 'block';
+        } else {
+            prev.style.display = 'none';
+        }
+    }
+
     </script>
+<script src="../js/sidebar.js"></script>
+<script>window.SIDEBAR_ROLE = 'faculty'; window.SIDEBAR_PAGE = 'content';</script>
 </body>
 </html>

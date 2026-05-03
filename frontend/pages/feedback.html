@@ -6,377 +6,598 @@
     <title>AI Feedback - CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        .feedback-header {
+        .feedback-page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ── Page header ── */
+        .feedback-page-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-
-        .feedback-header h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
+        .feedback-page-header h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.9rem;
+            color: var(--white);
+            margin: 0;
         }
-
-        .ai-tag {
+        .ai-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.35rem;
             background: linear-gradient(135deg, var(--primary), #9333ea);
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
             font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* ── Stat strip ── */
+        .stat-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 720px) { .stat-strip { grid-template-columns: repeat(2, 1fr); } }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-card .stat-val {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.3rem;
+            color: var(--white);
+            margin-bottom: 0.3rem;
+        }
+        .stat-card .stat-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .stat-card.accent-xp   .stat-val { color: #fbbf24; }
+        .stat-card.accent-green .stat-val { color: #10b981; }
+        .stat-card.accent-blue  .stat-val { color: #06b6d4; }
+        .stat-card.accent-red   .stat-val { color: #ef4444; }
+
+        /* ── Section cards ── */
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 1.25rem;
+        }
+        .section-title .material-icons { font-size: 1.1rem; }
+
+        /* ── Next task hero ── */
+        .next-task-hero {
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.1));
+            border: 1px solid rgba(124,58,237,0.35);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .next-task-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .next-task-icon .material-icons { color: white; font-size: 1.5rem; }
+        .next-task-body { flex: 1; }
+        .next-task-label {
+            font-size: 0.65rem;
+            color: var(--primary);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 0.3rem;
         }
-
-        .section-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: var(--space-md);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        .assessment-box {
-            padding: 1.25rem;
-            background: var(--primary-light);
-            border: 1px solid rgba(124, 58, 237, 0.2);
-            border-radius: var(--radius);
+        .next-task-title {
             font-size: 1rem;
-            line-height: 1.6;
-            color: var(--text);
-        }
-
-        .weak-area-card {
-            padding: 1rem;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--danger);
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.75rem;
-        }
-
-        .weak-area-card .area-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .weak-area-card .area-header strong {
-            color: var(--text);
-        }
-
-        .weak-area-card .area-accuracy {
-            color: var(--danger);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .weak-area-card .area-msg {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .tip-box {
-            background: var(--warning-bg);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: var(--radius-sm);
-            padding: 0.75rem;
-            font-size: 0.85rem;
-        }
-
-        .tip-box strong {
-            color: var(--warning);
-        }
-
-        .strong-area-card {
-            padding: 1rem;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--success);
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.75rem;
-        }
-
-        .strong-area-card .area-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .strong-area-card .area-accuracy {
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .next-step-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.5rem;
-        }
-
-        .step-number {
-            background: linear-gradient(135deg, var(--primary), #9333ea);
-            color: white;
-            width: 28px;
-            height: 28px;
-            min-width: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
             font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.4rem;
         }
+        .next-task-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .next-task-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .next-task-action:hover { background: #6d28d9; }
+        @media (max-width: 600px) { .next-task-hero { flex-direction: column; text-align: center; } }
 
-        .action-bar {
-            display: flex;
+        /* ── Weakness list ── */
+        .weakness-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .weakness-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
             gap: 1rem;
-            justify-content: center;
+            padding: 0.85rem 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .weakness-topic {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+        .weakness-lang {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .weakness-bar-wrap {
+            width: 120px;
+        }
+        .weakness-bar-bg {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .weakness-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: #ef4444;
+            transition: width 0.8s ease;
+        }
+        .weakness-pct {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        .weakness-status {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+        .status-resolved { background: rgba(16,185,129,0.15); color: #10b981; }
+        .status-active   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+        .status-watch    { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+        /* ── Path progress ── */
+        .path-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .path-row {
+            padding: 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .path-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .path-name { font-size: 0.82rem; font-weight: 600; color: var(--white); }
+        .path-pct  { font-size: 0.75rem; color: var(--text-muted); }
+        .path-prog-bg {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .path-prog-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.8s ease;
         }
 
-        .encouragement-text {
+        /* ── AI Analysis bullets ── */
+        .ai-analysis-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.65rem; }
+        .ai-analysis-list li {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            font-size: 0.82rem;
             color: var(--text-secondary);
-            font-style: italic;
-            margin-top: 0.75rem;
+            line-height: 1.5;
         }
+        .ai-analysis-list li .material-icons { font-size: 1rem; margin-top: 0.1rem; flex-shrink: 0; }
+        .ai-analysis-list li.positive .material-icons { color: #10b981; }
+        .ai-analysis-list li.warning  .material-icons { color: #f59e0b; }
+        .ai-analysis-list li.info     .material-icons { color: #06b6d4; }
+        .ai-analysis-list li.action   .material-icons { color: var(--primary); }
+
+        /* ── Empty / loading ── */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        .empty-state .material-icons { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-surface) 25%, var(--border) 50%, var(--bg-surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 6px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Refresh btn */
+        .refresh-btn {
+            margin-left: auto;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            padding: 0.3rem 0.7rem;
+            font-size: 0.72rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+        .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .refresh-btn .material-icons { font-size: 0.85rem; }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <span class="navbar-brand logo">
-            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
+<script>window.SIDEBAR_PAGE = 'feedback';</script>
+
+<div class="feedback-page">
+
+    <!-- Header -->
+    <div class="feedback-page-header fade-in">
+        <h1>AI FEEDBACK</h1>
+        <span class="ai-badge">
+            <span class="material-icons" style="font-size:0.8rem;">psychology</span>
+            AI Powered
         </span>
-        <ul class="navbar-nav">
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="lessons.html">Lessons</a></li>
-            <li><a href="lesson_game.html">Play</a></li>
-            <li><a href="playground.html">Playground</a></li>
-            <li><a href="feedback.html" class="active">Feedback</a></li>
-            <li>
-                <div class="nav-xp-bar">
-                    <span class="xp-icon">&#x2B50;</span>
-                    <span class="xp-amount" id="navXP">0 XP</span>
-                </div>
-            </li>
-            <li><a href="#" onclick="logout()">Logout</a></li>
-        </ul>
-    </nav>
+        <button class="refresh-btn" onclick="loadAll()" id="refreshBtn">
+            <span class="material-icons">refresh</span> Refresh
+        </button>
+    </div>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="card">
-            <div class="feedback-header">
-                <h1>AI-Powered Feedback</h1>
-                <span class="ai-tag">&#x1F916; AI Generated</span>
-            </div>
-            <p class="text-secondary">Personalized learning insights for <strong id="languageName" style="color: var(--primary);">Python</strong></p>
+    <!-- Stat strip -->
+    <div class="stat-strip fade-in" id="statStrip">
+        <div class="stat-card accent-xp">
+            <div class="stat-val skeleton" id="statXP" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
+            <div class="stat-label">Total XP</div>
         </div>
-
-        <!-- Overall Assessment -->
-        <div class="card">
-            <div class="section-title">&#x1F4CA; Overall Assessment</div>
-            <div class="assessment-box" id="overallAssessment">
-                Loading your personalized feedback...
-            </div>
-            <p class="encouragement-text" id="encouragementMessage"></p>
+        <div class="stat-card accent-green">
+            <div class="stat-val skeleton" id="statLessons" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
+            <div class="stat-label">Lessons Done</div>
         </div>
-
-        <!-- Weak Areas -->
-        <div class="card">
-            <div class="section-title">&#x1F534; Areas Needing Improvement</div>
-            <div id="weakAreasContainer">
-                <p class="text-muted">Analyzing your performance...</p>
-            </div>
+        <div class="stat-card accent-blue">
+            <div class="stat-val skeleton" id="statStreak" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
+            <div class="stat-label">Day Streak</div>
         </div>
-
-        <!-- Strong Areas -->
-        <div class="card">
-            <div class="section-title">&#x1F7E2; Your Strengths</div>
-            <div id="strongAreasContainer">
-                <p class="text-muted">Analyzing your performance...</p>
-            </div>
+        <div class="stat-card accent-red">
+            <div class="stat-val skeleton" id="statWeaknesses" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
+            <div class="stat-label">Weak Areas</div>
         </div>
+    </div>
 
-        <!-- Next Steps -->
-        <div class="card">
-            <div class="section-title">&#x1F3AF; Recommended Next Steps</div>
-            <div id="nextStepsContainer">
-                <p class="text-muted">Generating recommendations...</p>
-            </div>
+    <!-- Next recommended task -->
+    <div id="nextTaskSection"></div>
+
+    <!-- Weak Areas -->
+    <div class="section-card fade-in">
+        <div class="section-title">
+            <span class="material-icons" style="color:#ef4444;">warning_amber</span>
+            Weak Areas to Improve
         </div>
-
-        <!-- Actions -->
-        <div class="card text-center">
-            <div class="action-bar">
-                <button class="btn btn-primary btn-lg" onclick="startPractice()">
-                    &#x1F3AE; Practice Weak Areas
-                </button>
-                <button class="btn btn-outline btn-lg" onclick="refreshFeedback()">
-                    &#x1F504; Refresh
-                </button>
+        <div id="weaknessContainer">
+            <div class="empty-state">
+                <span class="material-icons">hourglass_empty</span>
+                Loading weaknesses…
             </div>
         </div>
     </div>
 
-    <script>
-        const API = 'http://localhost:3000/api';
+    <!-- Path Progress -->
+    <div class="section-card fade-in">
+        <div class="section-title">
+            <span class="material-icons" style="color:#06b6d4;">route</span>
+            Learning Path Progress
+        </div>
+        <div id="pathContainer">
+            <div class="empty-state">
+                <span class="material-icons">hourglass_empty</span>
+                Loading paths…
+            </div>
+        </div>
+    </div>
 
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!user || !user.selectedLanguage) window.location.href = 'login.html';
+    <!-- AI Analysis -->
+    <div class="section-card fade-in">
+        <div class="section-title">
+            <span class="material-icons" style="color:var(--primary);">psychology</span>
+            AI Learning Analysis
+        </div>
+        <ul class="ai-analysis-list" id="aiAnalysisList">
+            <li class="info"><span class="material-icons">hourglass_empty</span><span>Generating analysis…</span></li>
+        </ul>
+    </div>
 
-        const languageNames = { 'python': 'Python', 'java': 'Java', 'cpp': 'C++' };
-        document.getElementById('languageName').textContent = languageNames[user.selectedLanguage] || user.selectedLanguage;
-        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
+</div>
 
-        function getAuthHeaders() {
-            const headers = { 'Content-Type': 'application/json' };
-            const token = localStorage.getItem('token');
-            if (token) headers['Authorization'] = `Bearer ${token}`;
-            return headers;
-        }
+<script>
+const API = 'http://localhost:3000/api';
 
-        loadFeedback();
+const user = JSON.parse(localStorage.getItem('user') || 'null');
+if (!user) window.location.href = 'login.html';
 
-        async function loadFeedback() {
-            try {
-                const res = await fetch(`${API}/feedback/${user.id}/${user.selectedLanguage}`, { headers: getAuthHeaders() });
-                const data = await res.json();
-                if (data.success && data.feedback) {
-                    displayFeedback(data.feedback);
-                } else {
-                    await generateFeedback();
-                }
-            } catch (err) {
-                showNoFeedback();
-            }
-        }
+function token() {
+    return localStorage.getItem('token') || '';
+}
+function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() };
+}
 
-        async function generateFeedback() {
-            try {
-                const res = await fetch(`${API}/feedback/generate`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ userId: user.id, language: user.selectedLanguage })
-                });
-                const data = await res.json();
-                if (data.success && data.feedback) {
-                    displayFeedback(data.feedback);
-                } else {
-                    showNoFeedback();
-                }
-            } catch (err) {
-                showNoFeedback();
-            }
-        }
+// ── Fill stat strip ──────────────────────────────────────────────────────────
+function fillStats(xp, lessons, streak, weakCount) {
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        el.classList.remove('skeleton');
+        el.style.height = '';
+        el.style.marginBottom = '';
+        el.textContent = val;
+    };
+    set('statXP',         xp.toLocaleString());
+    set('statLessons',    lessons);
+    set('statStreak',     streak + '🔥');
+    set('statWeaknesses', weakCount);
+}
 
-        function displayFeedback(feedback) {
-            document.getElementById('overallAssessment').textContent =
-                feedback.overallAssessment || 'Keep practicing to receive detailed feedback!';
-            document.getElementById('encouragementMessage').textContent =
-                feedback.encouragement || '';
+// ── Render next task hero ───────────────────────────────────────────────────
+function renderNextTask(task) {
+    if (!task) return;
+    const sec = document.getElementById('nextTaskSection');
+    const href = task.type === 'lesson' ? 'learn.html' :
+                 task.type === 'path'   ? 'learn.html' :
+                 task.type === 'quiz'   ? 'lesson_game.html' : 'daily_challenge.html';
+    sec.innerHTML = `
+    <div class="next-task-hero fade-in">
+        <div class="next-task-icon">
+            <span class="material-icons">auto_awesome</span>
+        </div>
+        <div class="next-task-body">
+            <div class="next-task-label">Recommended Next Step</div>
+            <div class="next-task-title">${escHtml(task.title || 'Continue Learning')}</div>
+            <div class="next-task-desc">${escHtml(task.reason || task.description || 'Based on your progress and weak areas.')}</div>
+        </div>
+        <a href="${href}">
+            <button class="next-task-action">Go Now →</button>
+        </a>
+    </div>`;
+}
 
-            const weakContainer = document.getElementById('weakAreasContainer');
-            const weakAreas = feedback.weakAreas || [];
-            if (weakAreas.length > 0) {
-                weakContainer.innerHTML = weakAreas.map(area => `
-                    <div class="weak-area-card">
-                        <div class="area-header">
-                            <strong>${area.topic}</strong>
-                            <span class="area-accuracy">${area.accuracy}%</span>
-                        </div>
-                        <p class="area-msg">${area.message}</p>
-                        <div class="tip-box">
-                            <strong>&#x1F4A1; Tip:</strong> ${area.recommendation || 'Practice more questions on this topic.'}
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                weakContainer.innerHTML = '<div class="alert alert-success">Great job! No weak areas detected.</div>';
-            }
+// ── Render weaknesses ───────────────────────────────────────────────────────
+function renderWeaknesses(weaknesses) {
+    const container = document.getElementById('weaknessContainer');
+    if (!weaknesses || weaknesses.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <span class="material-icons">check_circle</span>
+            No weak areas detected yet. Keep practicing!
+        </div>`;
+        return;
+    }
+    const sorted = [...weaknesses].sort((a, b) => (b.error_rate || 0) - (a.error_rate || 0));
+    container.innerHTML = `<div class="weakness-list">${sorted.map(w => {
+        const rate = Math.round((w.error_rate || 0) * 100);
+        const statusClass = w.resolved ? 'status-resolved' : rate >= 60 ? 'status-active' : 'status-watch';
+        const statusLabel = w.resolved ? 'Resolved' : rate >= 60 ? 'Focus' : 'Watch';
+        return `<div class="weakness-row">
+            <div>
+                <div class="weakness-topic">${escHtml(w.topic || 'Unknown')}</div>
+                <div class="weakness-lang">${escHtml(w.language || '')}</div>
+            </div>
+            <div class="weakness-bar-wrap">
+                <div class="weakness-bar-bg">
+                    <div class="weakness-bar-fill" style="width:${rate}%"></div>
+                </div>
+                <div class="weakness-pct">${rate}% error rate</div>
+            </div>
+            <span class="weakness-status ${statusClass}">${statusLabel}</span>
+        </div>`;
+    }).join('')}</div>`;
+}
 
-            const strongContainer = document.getElementById('strongAreasContainer');
-            const strongAreas = feedback.strongAreas || [];
-            if (strongAreas.length > 0) {
-                strongContainer.innerHTML = strongAreas.map(area => `
-                    <div class="strong-area-card">
-                        <div class="area-header">
-                            <strong>${area.topic}</strong>
-                            <span class="area-accuracy">${area.accuracy}%</span>
-                        </div>
-                        <p class="text-secondary" style="font-size: 0.85rem; margin-top: 0.25rem;">${area.message}</p>
-                    </div>
-                `).join('');
-            } else {
-                strongContainer.innerHTML = '<p class="text-muted">Answer more questions to identify your strengths!</p>';
-            }
+// ── Render paths ────────────────────────────────────────────────────────────
+function renderPaths(paths) {
+    const container = document.getElementById('pathContainer');
+    if (!paths || paths.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <span class="material-icons">route</span>
+            No learning paths started yet. Visit Lessons to begin!
+        </div>`;
+        return;
+    }
+    container.innerHTML = `<div class="path-list">${paths.map(p => {
+        const pct = p.progress_pct || 0;
+        return `<div class="path-row">
+            <div class="path-row-header">
+                <div class="path-name">${escHtml(p.title || 'Path')}</div>
+                <div class="path-pct">${pct}%</div>
+            </div>
+            <div class="path-prog-bg">
+                <div class="path-prog-fill" style="width:${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('')}</div>`;
+}
 
-            const stepsContainer = document.getElementById('nextStepsContainer');
-            const nextSteps = feedback.nextSteps || [];
-            if (nextSteps.length > 0) {
-                stepsContainer.innerHTML = nextSteps.map((step, idx) => `
-                    <div class="next-step-item">
-                        <span class="step-number">${idx + 1}</span>
-                        <span>${step}</span>
-                    </div>
-                `).join('');
-            } else {
-                stepsContainer.innerHTML = `
-                    <div class="next-step-item">
-                        <span class="step-number">1</span>
-                        <span>Complete more practice sessions to receive personalized recommendations</span>
-                    </div>
-                `;
-            }
-        }
+// ── Build local AI analysis bullets ────────────────────────────────────────
+function buildLocalBullets(data) {
+    const bullets = [];
+    const xp = data.user?.total_xp || 0;
+    const streak = data.user?.streak || 0;
+    const lessons = data.completedLessons || 0;
+    const weaknesses = data.weaknesses || [];
+    const lang = data.user?.selected_language || '';
 
-        function showNoFeedback() {
-            document.getElementById('overallAssessment').textContent =
-                'Complete some practice sessions to receive AI-powered feedback on your learning progress.';
-            document.getElementById('weakAreasContainer').innerHTML = '<p class="text-muted">No data yet. Start practicing!</p>';
-            document.getElementById('strongAreasContainer').innerHTML = '<p class="text-muted">No data yet. Start practicing!</p>';
-            document.getElementById('nextStepsContainer').innerHTML = `
-                <div class="next-step-item"><span class="step-number">1</span><span>Go to the dashboard and start a practice session</span></div>
-                <div class="next-step-item"><span class="step-number">2</span><span>Answer at least 10 questions to generate feedback</span></div>
-            `;
-        }
+    if (xp >= 500)
+        bullets.push({ cls: 'positive', icon: 'emoji_events', text: `Outstanding! You've earned ${xp.toLocaleString()} XP — you're in the top tier.` });
+    else if (xp >= 100)
+        bullets.push({ cls: 'positive', icon: 'star', text: `Great progress with ${xp.toLocaleString()} XP. Keep it up!` });
+    else
+        bullets.push({ cls: 'info', icon: 'info', text: `You have ${xp.toLocaleString()} XP. Complete more lessons and quizzes to level up.` });
 
-        function startPractice() { window.location.href = 'lesson_game.html'; }
-        async function refreshFeedback() {
-            document.getElementById('overallAssessment').textContent = 'Regenerating feedback...';
-            document.getElementById('weakAreasContainer').innerHTML = '<p class="text-muted">Analyzing...</p>';
-            document.getElementById('strongAreasContainer').innerHTML = '<p class="text-muted">Analyzing...</p>';
-            document.getElementById('nextStepsContainer').innerHTML = '<p class="text-muted">Generating...</p>';
-            await generateFeedback();
-        }
+    if (streak >= 7)
+        bullets.push({ cls: 'positive', icon: 'local_fire_department', text: `Incredible ${streak}-day streak! Your consistency is paying off.` });
+    else if (streak >= 3)
+        bullets.push({ cls: 'positive', icon: 'local_fire_department', text: `${streak}-day streak going strong. Consistency is key to mastery.` });
+    else
+        bullets.push({ cls: 'warning', icon: 'warning', text: `Your streak is ${streak} day(s). Try logging in daily to build momentum.` });
 
-        function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        }
-    </script>
+    if (lessons === 0)
+        bullets.push({ cls: 'action', icon: 'school', text: 'Start your first lesson today to unlock personalised feedback.' });
+    else if (lessons < 5)
+        bullets.push({ cls: 'action', icon: 'school', text: `You've completed ${lessons} lesson(s). Aim for at least 5 to get a solid foundation.` });
+    else
+        bullets.push({ cls: 'positive', icon: 'school', text: `${lessons} lessons completed — excellent dedication!` });
+
+    const activeWeak = weaknesses.filter(w => !w.resolved && (w.error_rate || 0) >= 0.5);
+    if (activeWeak.length > 0) {
+        const topics = activeWeak.slice(0, 2).map(w => w.topic).join(', ');
+        bullets.push({ cls: 'warning', icon: 'priority_high', text: `Focus on: ${topics}. These topics have a high error rate and need extra practice.` });
+    } else if (weaknesses.length > 0) {
+        bullets.push({ cls: 'positive', icon: 'check_circle', text: 'No critical weak areas right now. Keep reinforcing what you know.' });
+    }
+
+    if (lang)
+        bullets.push({ cls: 'info', icon: 'code', text: `Your selected language is ${lang.charAt(0).toUpperCase() + lang.slice(1)}. Dive deeper into ${lang === 'python' ? 'functions and OOP' : lang === 'javascript' ? 'async/await and DOM' : lang === 'java' ? 'generics and collections' : 'pointers and memory management'}.` });
+
+    return bullets;
+}
+
+function renderAiAnalysis(localBullets, aiTask) {
+    const list = document.getElementById('aiAnalysisList');
+    const items = [...localBullets];
+
+    if (aiTask && aiTask.reason) {
+        items.push({ cls: 'action', icon: 'auto_awesome', text: 'AI Recommendation: ' + aiTask.reason });
+    }
+
+    list.innerHTML = items.map(b =>
+        `<li class="${b.cls}"><span class="material-icons">${b.icon}</span><span>${escHtml(b.text)}</span></li>`
+    ).join('');
+}
+
+// ── Main loader ─────────────────────────────────────────────────────────────
+async function loadAll() {
+    const btn = document.getElementById('refreshBtn');
+    btn.querySelector('.material-icons').style.animation = 'spin 1s linear infinite';
+
+    let analyticsData = null;
+    let pathData = null;
+    let nextTask = null;
+
+    // 1. Analytics (weaknesses + path progress + user stats)
+    try {
+        const r = await fetch(`${API}/analytics/me`, { headers: authHeaders() });
+        if (r.ok) analyticsData = await r.json();
+    } catch (_) {}
+
+    // 2. Fallback: paths progress
+    if (!analyticsData) {
+        try {
+            const r = await fetch(`${API}/paths/progress/me`, { headers: authHeaders() });
+            if (r.ok) pathData = await r.json();
+        } catch (_) {}
+    }
+
+    // 3. AI next task
+    try {
+        const r = await fetch(`${API}/ai/next-task/${user.id}`, { headers: authHeaders() });
+        if (r.ok) { const d = await r.json(); nextTask = d.task || d.recommendation || null; }
+    } catch (_) {}
+
+    // Populate stats
+    if (analyticsData && analyticsData.success) {
+        const d = analyticsData;
+        fillStats(
+            d.user?.total_xp || 0,
+            d.completedLessons || 0,
+            d.user?.streak || 0,
+            (d.weaknesses || []).filter(w => !w.resolved).length
+        );
+        renderWeaknesses(d.weaknesses || []);
+        renderPaths(d.paths || []);
+        renderAiAnalysis(buildLocalBullets(d), nextTask);
+    } else if (pathData) {
+        const paths = pathData.paths || pathData.progress || [];
+        fillStats(user.total_xp || 0, 0, user.streak || 0, 0);
+        renderWeaknesses([]);
+        renderPaths(paths);
+        renderAiAnalysis(buildLocalBullets({ user, completedLessons: 0, weaknesses: [], paths }), nextTask);
+    } else {
+        // All APIs failed — use localStorage user
+        fillStats(user.total_xp || 0, 0, user.streak || 0, 0);
+        renderWeaknesses([]);
+        renderPaths([]);
+        const bullets = [
+            { cls: 'warning', icon: 'wifi_off', text: 'Could not connect to the server. Check your connection.' },
+            { cls: 'info', icon: 'info', text: 'Your local progress is saved. Reconnect to see full analysis.' }
+        ];
+        renderAiAnalysis(bullets, null);
+    }
+
+    renderNextTask(nextTask);
+    btn.querySelector('.material-icons').style.animation = '';
+}
+
+function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Add spin keyframe
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+loadAll();
+</script>
+
+<script src="../js/sidebar.js"></script>
 </body>
 </html>

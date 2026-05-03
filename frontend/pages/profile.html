@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Profile hero ─────────────────────────────────────────────────── */
+        .profile-hero {
+            background: linear-gradient(135deg,#1e1045 0%,#12203a 100%);
+            border: 1px solid rgba(124,58,237,0.2);
+            border-radius: var(--radius-lg); padding: 1.75rem 2rem;
+            display: flex; align-items: center; gap: 1.5rem;
+            margin-bottom: 1.5rem; flex-wrap: wrap;
+            position: relative; overflow: hidden;
+        }
+        .profile-hero::before {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background: radial-gradient(ellipse at top right,rgba(124,58,237,.15),transparent 60%),
+                        radial-gradient(ellipse at bottom left,rgba(6,182,212,.08),transparent 60%);
+        }
+
+        /* ── Avatar with upload ───────────────────────────────────────────── */
+        .avatar-wrap { position: relative; flex-shrink: 0; cursor: pointer; }
+        .avatar-wrap:hover .avatar-overlay { opacity: 1; }
+        .avatar-circle {
+            width: 88px; height: 88px; border-radius: 50%;
+            background: linear-gradient(135deg,var(--primary),var(--secondary));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; font-weight: 800; color: #fff;
+            border: 3px solid rgba(255,255,255,0.12);
+            overflow: hidden; position: relative;
+        }
+        .avatar-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+        .avatar-overlay {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: rgba(0,0,0,0.55);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .avatar-overlay .material-symbols-outlined { color:#fff; font-size:1.4rem; }
+        .avatar-upload-badge {
+            position: absolute; bottom: 2px; right: 2px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--primary); border: 2px solid #0d1117;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .avatar-upload-badge .material-symbols-outlined { font-size: 0.78rem; color:#fff; }
+
+        .profile-info { flex: 1; min-width: 200px; position:relative; }
+        .profile-name  { font-size: 1.35rem; font-weight: 700; color: #fff; margin: 0 0 0.2rem; }
+        .profile-email { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin: 0 0 0.55rem; }
+        .profile-badges-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .role-chip {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0.2rem 0.6rem; border-radius: 20px;
+        }
+        .role-chip.student { background: rgba(124,58,237,0.2); color:#a78bfa; border:1px solid rgba(124,58,237,0.3); }
+        .role-chip.faculty { background: rgba(6,182,212,0.15); color:#22d3ee; border:1px solid rgba(6,182,212,0.3); }
+        .lang-chip {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0.2rem 0.6rem; border-radius: 20px;
+            background: rgba(16,185,129,0.1); color: #34d399;
+            border: 1px solid rgba(16,185,129,0.25);
+        }
+
+        .profile-stats { display: flex; gap: 2rem; margin-left: auto; flex-wrap: wrap; position:relative; }
+        .pstat { text-align: center; }
+        .pstat-val { font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1.1; }
+        .pstat-val.gold  { color: #fbbf24; }
+        .pstat-val.fire  { color: #fb923c; }
+        .pstat-val.cyan  { color: #22d3ee; }
+        .pstat-val.green { color: #34d399; }
+        .pstat-lbl { font-size: 0.66rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.6px; margin-top:2px; }
+
+        /* ── Tabs ─────────────────────────────────────────────────────────── */
+        .tab-nav { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 0.55rem 1rem; border: none; background: none; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s;
+        }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-btn:hover:not(.active) { color: var(--text); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Section label ────────────────────────────────────────────────── */
+        .section-title {
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.4px;
+            color: var(--text-muted); margin: 1.4rem 0 0.8rem;
+        }
+
+        /* ── XP Progress ──────────────────────────────────────────────────── */
+        .xp-bar-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.15rem 1.25rem; margin-bottom: 1rem;
+        }
+        .xp-bar-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; }
+        .xp-level-tag { font-family:'Press Start 2P',monospace; font-size:0.62rem; color:#fbbf24; }
+        .xp-bar { height:8px; background:var(--bg-surface); border-radius:4px; overflow:hidden; }
+        .xp-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--primary),var(--secondary)); transition:width 0.6s ease; }
+        .xp-bar-lbl { font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem; }
+
+        /* ── Path progress ────────────────────────────────────────────────── */
+        .path-row { margin-bottom:0.85rem; }
+        .path-row-top { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.3rem; }
+        .path-bar { height:8px; background:var(--bg-surface); border-radius:4px; overflow:hidden; }
+        .path-bar-fill { height:100%; border-radius:4px; }
+
+        /* ── Weakness pills ───────────────────────────────────────────────── */
+        .weakness-list { display:flex; flex-wrap:wrap; gap:0.5rem; }
+        .weakness-pill {
+            display:flex; align-items:center; gap:0.35rem;
+            font-size:0.75rem; padding:0.28rem 0.7rem; border-radius:20px;
+            background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#f87171;
+        }
+        .weakness-pill .material-symbols-outlined { font-size:0.85rem; }
+
+        /* ── Badge grid ───────────────────────────────────────────────────── */
+        .badge-grid { display:flex; flex-wrap:wrap; gap:0.75rem; }
+        .badge-card {
+            display:flex; align-items:center; gap:0.6rem;
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:10px; padding:0.65rem 0.9rem;
+        }
+        .badge-ico  { font-size:1.4rem; }
+        .badge-name { font-weight:600; color:var(--text); font-size:0.83rem; }
+        .badge-desc { font-size:0.7rem; color:var(--text-muted); }
+        .badge-card.earned { border-color:var(--xp-gold,#fbbf24); background:rgba(251,191,36,0.05); }
+
+        /* ── Faculty course grid ──────────────────────────────────────────── */
+        .fcourse-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0.85rem; margin-top:0.5rem; }
+        .fcourse-card {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:1rem 1.1rem;
+            display:flex; flex-direction:column; gap:0.4rem;
+        }
+        .fcourse-card-name { font-size:0.92rem; font-weight:700; color:var(--text); }
+        .fcourse-card-meta { font-size:0.76rem; color:var(--text-muted); display:flex; gap:0.75rem; flex-wrap:wrap; }
+        .fcourse-key {
+            font-size:0.7rem; font-weight:700; letter-spacing:1px;
+            font-family:monospace; background:var(--bg-surface);
+            border:1px solid var(--border); border-radius:6px;
+            padding:0.2rem 0.5rem; color:var(--text-secondary); margin-top:0.25rem; align-self:flex-start;
+        }
+
+        /* ── Stats strip (faculty) ────────────────────────────────────────── */
+        .fstat-strip {
+            display:grid; grid-template-columns:repeat(3,1fr); gap:0.85rem; margin-bottom:1.5rem;
+        }
+        .fstat-chip {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:1rem 1.15rem;
+            display:flex; align-items:center; gap:0.75rem;
+        }
+        .fstat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .fstat-icon .material-symbols-outlined { font-size:1.25rem; }
+        .fstat-val { font-size:1.35rem; font-weight:800; color:var(--text); line-height:1.1; }
+        .fstat-lbl { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+        /* ── Settings card ────────────────────────────────────────────────── */
+        .settings-card {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius-lg); padding:1.4rem 1.5rem; margin-bottom:1rem;
+        }
+        .settings-card h3 { font-size:0.92rem; font-weight:700; color:var(--text); margin:0 0 1rem; }
+        .form-group { margin-bottom:1rem; }
+        .form-group label {
+            display:block; font-size:0.75rem; font-weight:600; color:var(--text-muted);
+            text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.35rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width:100%; box-sizing:border-box;
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:var(--radius-sm); padding:0.6rem 0.85rem;
+            color:var(--text); font-size:0.88rem; outline:none;
+            font-family:inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--primary); }
+        .form-group textarea { resize:vertical; min-height:70px; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; }
+        .danger-zone { border-color:rgba(239,68,68,0.3); }
+        .danger-zone h3 { color:#f87171; }
+
+        /* ── Misc ─────────────────────────────────────────────────────────── */
+        .empty-state { text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; }
+        .empty-state .material-symbols-outlined { font-size:2rem; display:block; margin-bottom:0.5rem; opacity:0.35; }
+        .skeleton-line { height:14px; background:var(--bg-surface); border-radius:4px; animation:shimmer 1.4s infinite; margin-bottom:0.5rem; }
+        @keyframes shimmer { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+        .toast {
+            position:fixed; bottom:1.5rem; right:1.5rem;
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:0.75rem 1.1rem;
+            font-size:0.83rem; color:var(--text); z-index:2000;
+            display:none; align-items:center; gap:0.5rem; box-shadow:var(--shadow-lg);
+        }
+        .toast.show    { display:flex; }
+        .toast.success { border-color:var(--success); }
+        .toast.error   { border-color:var(--danger);  }
+
+        @media (max-width:640px) {
+            .profile-hero  { flex-direction:column; align-items:flex-start; }
+            .profile-stats { margin-left:0; }
+            .form-row      { grid-template-columns:1fr; }
+            .fstat-strip   { grid-template-columns:1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hidden avatar file input (shared) -->
+<input type="file" id="avatarInput" accept="image/*" style="display:none">
+
+<!-- ── Profile Hero ───────────────────────────────────────────────────────── -->
+<div class="profile-hero">
+    <div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()" title="Change profile picture">
+        <div class="avatar-circle" id="avatarCircle">?</div>
+        <div class="avatar-overlay">
+            <span class="material-symbols-outlined">photo_camera</span>
+        </div>
+        <div class="avatar-upload-badge">
+            <span class="material-symbols-outlined">edit</span>
+        </div>
+    </div>
+
+    <div class="profile-info">
+        <div class="profile-name" id="profileName">Loading…</div>
+        <div class="profile-email" id="profileEmail">—</div>
+        <div class="profile-badges-row">
+            <span class="role-chip" id="roleChip">student</span>
+            <span class="lang-chip" id="langChip" style="display:none;">python</span>
+        </div>
+    </div>
+
+    <div class="profile-stats" id="profileStats">
+        <!-- filled by JS based on role -->
+    </div>
+</div>
+
+<!-- ── Tab nav (filled by JS) ─────────────────────────────────────────────── -->
+<div class="tab-nav" id="tabNav"></div>
+
+<!-- ══════════ STUDENT TABS ══════════════════════════════════════════════════ -->
+
+<div id="tab-progress" class="tab-panel">
+    <div class="xp-bar-card">
+        <div class="xp-bar-top">
+            <span style="font-size:0.85rem;font-weight:600;color:var(--text);">XP Progress</span>
+            <span class="xp-level-tag" id="xpLevelTag">LVL 1</span>
+        </div>
+        <div class="xp-bar"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div>
+        <div class="xp-bar-lbl" id="xpBarLbl">0 / 500 XP to next level</div>
+    </div>
+    <p class="section-title">Learning Paths</p>
+    <div id="pathProgress">
+        <div class="skeleton-line" style="width:100%;"></div>
+        <div class="skeleton-line" style="width:80%;"></div>
+    </div>
+    <p class="section-title">Topics Needing Practice</p>
+    <div class="weakness-list" id="weaknessList">
+        <div class="skeleton-line" style="width:100px;height:28px;border-radius:20px;"></div>
+    </div>
+</div>
+
+<div id="tab-badges" class="tab-panel">
+    <div class="badge-grid" id="badgeGrid">
+        <div class="skeleton-line" style="width:130px;height:54px;border-radius:10px;"></div>
+        <div class="skeleton-line" style="width:130px;height:54px;border-radius:10px;"></div>
+        <div class="skeleton-line" style="width:130px;height:54px;border-radius:10px;"></div>
+    </div>
+</div>
+
+<!-- ══════════ FACULTY TABS ══════════════════════════════════════════════════ -->
+
+<div id="tab-overview" class="tab-panel">
+    <div class="fstat-strip" id="fstatStrip">
+        <div class="fstat-chip">
+            <div class="fstat-icon" style="background:rgba(124,58,237,.15);">
+                <span class="material-symbols-outlined" style="color:#a78bfa;">school</span>
+            </div>
+            <div><div class="fstat-val" id="fstatCourses">—</div><div class="fstat-lbl">Courses</div></div>
+        </div>
+        <div class="fstat-chip">
+            <div class="fstat-icon" style="background:rgba(6,182,212,.12);">
+                <span class="material-symbols-outlined" style="color:#22d3ee;">group</span>
+            </div>
+            <div><div class="fstat-val" id="fstatStudents">—</div><div class="fstat-lbl">Students</div></div>
+        </div>
+        <div class="fstat-chip">
+            <div class="fstat-icon" style="background:rgba(16,185,129,.12);">
+                <span class="material-symbols-outlined" style="color:#34d399;">quiz</span>
+            </div>
+            <div><div class="fstat-val" id="fstatSessions">—</div><div class="fstat-lbl">Sessions run</div></div>
+        </div>
+    </div>
+    <p class="section-title">My Courses</p>
+    <div class="fcourse-grid" id="fcourseGrid">
+        <div class="skeleton-line" style="height:80px;border-radius:12px;"></div>
+        <div class="skeleton-line" style="height:80px;border-radius:12px;"></div>
+    </div>
+</div>
+
+<!-- ══════════ SHARED SETTINGS TAB ══════════════════════════════════════════ -->
+
+<div id="tab-settings" class="tab-panel">
+    <div class="settings-card">
+        <h3>Account Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="settingName" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="settingEmail" placeholder="your@email.com" disabled>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Bio</label>
+            <textarea id="settingBio" placeholder="Tell others a little about yourself…"></textarea>
+        </div>
+        <div class="form-group" id="langGroup">
+            <label>Preferred Language</label>
+            <select id="settingLang">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()" style="font-size:0.85rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">save</span>
+            Save Changes
+        </button>
+    </div>
+
+    <div class="settings-card">
+        <h3>Change Password</h3>
+        <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="curPassword" placeholder="Enter current password">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" placeholder="New password (min 8 chars)">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Repeat new password">
+            </div>
+        </div>
+        <button class="btn btn-secondary" onclick="changePassword()" style="font-size:0.85rem;">
+            Update Password
+        </button>
+    </div>
+
+    <div class="settings-card danger-zone">
+        <h3>Sign Out</h3>
+        <p style="font-size:0.83rem;color:var(--text-muted);margin:0 0 1rem;">
+            You'll be returned to the login screen. All your progress and data remain saved to your account.
+        </p>
+        <button class="btn btn-secondary" style="font-size:0.85rem;border-color:rgba(239,68,68,0.4);color:#f87171;" onclick="logout()">
+            <span class="material-symbols-outlined" style="font-size:1rem;">logout</span>
+            Logout
+        </button>
+    </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toastIcon">info</span>
+    <span id="toastMsg">—</span>
+</div>
+
+<script>window.SIDEBAR_PAGE = 'profile';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+let   me    = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!me.id) location.href = 'login.html';
+
+const isFaculty = me.role === 'faculty';
+const PATH_COLORS = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ef4444'];
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    buildTabs();
+    populateHero(me);
+    prefillSettings();
+
+    if (isFaculty) {
+        loadFacultyOverview();
+    } else {
+        loadProgress();
+        loadBadges();
+    }
+
+    // Fetch fresh profile from server (avatar, bio, etc.)
+    try {
+        const res  = await fetch(`${API}/profile`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.success && data.user) {
+            me = { ...me, ...data.user };
+            localStorage.setItem('user', JSON.stringify(me));
+            populateHero(me);
+            prefillSettings();
+        }
+    } catch {}
+});
+
+// ─── Tab setup ────────────────────────────────────────────────────────────────
+function buildTabs() {
+    const nav = document.getElementById('tabNav');
+    if (isFaculty) {
+        nav.innerHTML = `
+            <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+            <button class="tab-btn" onclick="switchTab('settings',this)">Settings</button>`;
+        document.getElementById('tab-overview').classList.add('active');
+        // Hide student tabs
+        document.getElementById('tab-progress').remove();
+        document.getElementById('tab-badges').remove();
+        // Hide language picker for faculty
+        document.getElementById('langGroup').style.display = 'none';
+    } else {
+        nav.innerHTML = `
+            <button class="tab-btn active" onclick="switchTab('progress',this)">Progress</button>
+            <button class="tab-btn" onclick="switchTab('badges',this)">Badges</button>
+            <button class="tab-btn" onclick="switchTab('settings',this)">Settings</button>`;
+        document.getElementById('tab-progress').classList.add('active');
+        // Hide faculty tabs
+        document.getElementById('tab-overview').remove();
+    }
+}
+
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    if (btn) btn.classList.add('active');
+}
+
+// ─── Hero population ──────────────────────────────────────────────────────────
+function populateHero(user) {
+    const name     = user.fullName || user.full_name || user.name || 'User';
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const av       = document.getElementById('avatarCircle');
+
+    if (user.avatar) {
+        av.innerHTML = `<img src="${esc(user.avatar)}" alt="Avatar">`;
+    } else {
+        av.textContent = initials;
+    }
+
+    document.getElementById('profileName').textContent  = name;
+    document.getElementById('profileEmail').textContent = user.email || '—';
+
+    const roleChip = document.getElementById('roleChip');
+    roleChip.textContent = isFaculty ? 'Faculty' : 'Student';
+    roleChip.className   = `role-chip ${isFaculty ? 'faculty' : 'student'}`;
+
+    if (!isFaculty) {
+        const langChip = document.getElementById('langChip');
+        langChip.style.display  = '';
+        langChip.textContent    = user.selectedLanguage || user.selected_language || user.language || 'python';
+    }
+
+    // Stats bar
+    const stats = document.getElementById('profileStats');
+    if (isFaculty) {
+        stats.innerHTML = `
+            <div class="pstat">
+                <div class="pstat-val cyan" id="psCoursesHero">—</div>
+                <div class="pstat-lbl">Courses</div>
+            </div>
+            <div class="pstat">
+                <div class="pstat-val green" id="psStudentsHero">—</div>
+                <div class="pstat-lbl">Students</div>
+            </div>`;
+    } else {
+        stats.innerHTML = `
+            <div class="pstat">
+                <div class="pstat-val gold" id="psXP">${(user.totalXp || user.total_xp || user.xp || 0).toLocaleString()}</div>
+                <div class="pstat-lbl">Total XP</div>
+            </div>
+            <div class="pstat">
+                <div class="pstat-val fire" id="psStreak">${(user.streak || 0)}🔥</div>
+                <div class="pstat-lbl">Streak</div>
+            </div>
+            <div class="pstat">
+                <div class="pstat-val green" id="psLessons">—</div>
+                <div class="pstat-lbl">Lessons</div>
+            </div>`;
+    }
+}
+
+// ─── Avatar upload ────────────────────────────────────────────────────────────
+document.getElementById('avatarInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2 MB', 'error'); return; }
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const dataUrl = ev.target.result;
+
+        // Show immediately
+        const av = document.getElementById('avatarCircle');
+        av.innerHTML = `<img src="${dataUrl}" alt="Avatar">`;
+
+        // Persist to backend
+        try {
+            const res  = await fetch(`${API}/profile`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ avatar: dataUrl })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error('Save failed');
+            me = { ...me, avatar: dataUrl };
+            localStorage.setItem('user', JSON.stringify(me));
+            showToast('Profile picture updated!', 'success');
+        } catch {
+            // Keep showing locally even if save failed
+            me = { ...me, avatar: dataUrl };
+            localStorage.setItem('user', JSON.stringify(me));
+            showToast('Photo saved locally (DB offline)', 'info');
+        }
+    };
+    reader.readAsDataURL(file);
+});
+
+// ─── Student: Progress ────────────────────────────────────────────────────────
+async function loadProgress() {
+    try {
+        const res  = await fetch(`${API}/paths/progress/me`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const u    = data.user || {};
+
+        document.getElementById('psXP').textContent      = (u.total_xp || 0).toLocaleString();
+        document.getElementById('psStreak').textContent  = (u.streak || 0) + '🔥';
+        document.getElementById('psLessons').textContent = data.completedLessons || 0;
+
+        const xp    = u.total_xp || 0;
+        const level = Math.floor(xp / 500) + 1;
+        const inLvl = xp % 500;
+        document.getElementById('xpLevelTag').textContent = `LVL ${level}`;
+        document.getElementById('xpBarFill').style.width  = (inLvl / 500 * 100) + '%';
+        document.getElementById('xpBarLbl').textContent   = `${inLvl} / 500 XP to Level ${level + 1}`;
+
+        buildPathProgress(data.paths || []);
+        buildWeaknesses(data.weaknesses || []);
+    } catch {
+        buildPathProgress([]);
+        buildWeaknesses([]);
+    }
+}
+
+function buildPathProgress(paths) {
+    const c = document.getElementById('pathProgress');
+    if (!paths.length) {
+        c.innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">route</span>
+            No paths started yet. <a href="learn.html" style="color:var(--primary);">Explore paths →</a></div>`;
+        return;
+    }
+    c.innerHTML = paths.map((p, i) => {
+        const color = PATH_COLORS[i % PATH_COLORS.length];
+        const pct   = p.progress_pct || 0;
+        return `<div class="path-row">
+            <div class="path-row-top">
+                <span style="font-weight:600;">${esc(p.title)}</span>
+                <span style="color:var(--text-muted);">${pct}%</span>
+            </div>
+            <div class="path-bar"><div class="path-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+        </div>`;
+    }).join('');
+}
+
+function buildWeaknesses(weaknesses) {
+    const c = document.getElementById('weaknessList');
+    if (!weaknesses.length) {
+        c.innerHTML = `<div style="font-size:0.82rem;color:var(--text-muted);">
+            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;color:#34d399;">check_circle</span>
+            No weak topics detected. Keep learning!</div>`;
+        return;
+    }
+    c.innerHTML = weaknesses.map(w =>
+        `<span class="weakness-pill">
+            <span class="material-symbols-outlined">fitness_center</span>
+            ${esc(typeof w === 'string' ? w : `${w.topic} (${w.language})`)}
+        </span>`).join('');
+}
+
+async function loadBadges() {
+    const allBadges = [
+        { id:'first_login',   icon:'🎮', name:'First Login',   desc:'Welcome to CodeArena!' },
+        { id:'fast_learner',  icon:'⚡', name:'Fast Learner',  desc:'Complete 5 lessons' },
+        { id:'perfect_score', icon:'🎯', name:'Perfect Score', desc:'Score 100% on a quiz' },
+        { id:'streak_7',      icon:'🔥', name:'7-Day Streak',  desc:'Login 7 days in a row' },
+        { id:'xp_500',        icon:'💎', name:'XP Collector',  desc:'Earn 500 XP' },
+        { id:'code_master',   icon:'🏆', name:'Code Master',   desc:'Complete a full path' },
+    ];
+    let earned = [];
+    try {
+        const res  = await fetch(`${API}/rewards/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        earned = (data.badges || []).map(b => b.badge_type || b.id || b);
+    } catch {}
+
+    document.getElementById('badgeGrid').innerHTML = allBadges.map(b => {
+        const ok = earned.includes(b.id);
+        return `<div class="badge-card${ok?' earned':''}" style="${ok?'':'opacity:.42;filter:grayscale(1);'}">
+            <span class="badge-ico">${b.icon}</span>
+            <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
+        </div>`;
+    }).join('');
+}
+
+// ─── Faculty: Overview ────────────────────────────────────────────────────────
+async function loadFacultyOverview() {
+    try {
+        const res  = await fetch(`${API}/classrooms/mine`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const classrooms = data.classrooms || [];
+
+        const totalStudents = classrooms.reduce((s, c) => s + (c.studentCount || c.student_count || 0), 0);
+
+        // Fetch session count
+        let totalSessions = 0;
+        try {
+            for (const cl of classrooms.slice(0, 10)) {
+                const sid = cl.classroom_id || cl.id;
+                const sr  = await fetch(`${API}/classrooms/${sid}/sessions`, { headers: { Authorization: `Bearer ${token}` } });
+                const sd  = await sr.json();
+                totalSessions += (sd.sessions || []).length;
+            }
+        } catch {}
+
+        // Update hero stats
+        const h1 = document.getElementById('psCoursesHero');
+        const h2 = document.getElementById('psStudentsHero');
+        if (h1) h1.textContent = classrooms.length;
+        if (h2) h2.textContent = totalStudents;
+
+        // Update overview chips
+        document.getElementById('fstatCourses').textContent  = classrooms.length;
+        document.getElementById('fstatStudents').textContent = totalStudents;
+        document.getElementById('fstatSessions').textContent = totalSessions;
+
+        // Course cards
+        const grid = document.getElementById('fcourseGrid');
+        if (!classrooms.length) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+                <span class="material-symbols-outlined">school</span>
+                No courses yet. <a href="classrooms_faculty.html" style="color:var(--primary);">Create one →</a></div>`;
+            return;
+        }
+        grid.innerHTML = classrooms.map(c => {
+            const id      = c.classroom_id || c.id;
+            const count   = c.studentCount || c.student_count || 0;
+            const key     = c.enrollment_key || c.enrollmentKey || '—';
+            const lang    = (c.language || 'python').toLowerCase();
+            const lessons = c.lessonCount || c.lesson_count || 0;
+            return `<div class="fcourse-card">
+                <div class="fcourse-card-name">${esc(c.name)}</div>
+                <div class="fcourse-card-meta">
+                    <span><span class="material-symbols-outlined" style="font-size:0.9rem;vertical-align:middle;">group</span> ${count} student${count!==1?'s':''}</span>
+                    <span><span class="material-symbols-outlined" style="font-size:0.9rem;vertical-align:middle;">menu_book</span> ${lessons} lesson${lessons!==1?'s':''}</span>
+                    <span style="text-transform:capitalize;">${lang}</span>
+                </div>
+                <div class="fcourse-key">${esc(key)}</div>
+                <a href="classroom_room.html?id=${id}&role=faculty" class="btn btn-secondary" style="font-size:0.78rem;margin-top:0.4rem;text-align:center;justify-content:center;">
+                    Open Course →
+                </a>
+            </div>`;
+        }).join('');
+    } catch {
+        document.getElementById('fcourseGrid').innerHTML =
+            `<div class="empty-state" style="grid-column:1/-1;">Could not load courses.</div>`;
+    }
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+function prefillSettings() {
+    document.getElementById('settingName').value  = me.fullName || me.full_name || me.name || '';
+    document.getElementById('settingEmail').value = me.email || '';
+    document.getElementById('settingBio').value   = me.bio || '';
+    if (!isFaculty) {
+        const lang = me.selectedLanguage || me.selected_language || me.language || 'python';
+        document.getElementById('settingLang').value = lang;
+    }
+}
+
+async function saveSettings() {
+    const name = document.getElementById('settingName').value.trim();
+    const bio  = document.getElementById('settingBio').value.trim();
+    const lang = isFaculty ? null : document.getElementById('settingLang').value;
+    if (!name) { showToast('Name cannot be empty', 'error'); return; }
+
+    const payload = { fullName: name, bio };
+    if (lang) payload.selectedLanguage = lang;
+
+    try {
+        const res = await fetch(`${API}/profile`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        const updated = { ...me, fullName: name, bio, ...(lang ? { selected_language: lang } : {}) };
+        localStorage.setItem('user', JSON.stringify(updated));
+        me = updated;
+        populateHero(me);
+        showToast('Profile updated!', 'success');
+    } catch {
+        const updated = { ...me, fullName: name, bio, ...(lang ? { selected_language: lang } : {}) };
+        localStorage.setItem('user', JSON.stringify(updated));
+        me = updated;
+        populateHero(me);
+        showToast('Saved locally (DB offline)', 'info');
+    }
+}
+
+async function changePassword() {
+    const cur  = document.getElementById('curPassword').value;
+    const newp = document.getElementById('newPassword').value;
+    const conf = document.getElementById('confirmPassword').value;
+    if (!cur || !newp) { showToast('Fill in all password fields', 'error'); return; }
+    if (newp !== conf) { showToast('New passwords do not match', 'error'); return; }
+    if (newp.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+    try {
+        const res = await fetch(`${API}/profile/password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ currentPassword: cur, newPassword: newp })
+        });
+        if (!res.ok) throw new Error((await res.json()).message || 'Failed');
+        showToast('Password changed!', 'success');
+        ['curPassword','newPassword','confirmPassword'].forEach(id => document.getElementById(id).value = '');
+    } catch (err) {
+        showToast(err.message || 'Failed to change password', 'error');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('isLoggedIn');
+    location.href = 'login.html';
+}
+
+// ─── Toast & Helpers ──────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+    const t  = document.getElementById('toast');
+    const ic = document.getElementById('toastIcon');
+    document.getElementById('toastMsg').textContent = msg;
+    ic.textContent = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

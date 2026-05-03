@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Classrooms – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Page Header ────────────────────────────────────────────────── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .page-header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+        .page-header-text p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .header-create-btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--primary); color: #fff;
+            border: none; border-radius: var(--radius-sm);
+            padding: 0.65rem 1.1rem;
+            font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.18s;
+            text-decoration: none;
+        }
+        .header-create-btn:hover { background: #6d28d9; transform: translateY(-1px); }
+        .header-create-btn .material-symbols-outlined { font-size: 1.1rem; }
+
+        /* ── Stat strip ─────────────────────────────────────────────────── */
+        .stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
+        @media (max-width: 720px) { .stat-strip { grid-template-columns: repeat(2,1fr); } }
+        .stat-chip {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem 1.15rem;
+            display: flex; align-items: center; gap: 0.85rem;
+        }
+        .stat-chip-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-chip-icon .material-symbols-outlined { font-size: 1.25rem; }
+        .stat-chip-val { font-size: 1.35rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+        .stat-chip-lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 0.15rem; }
+        .chip-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .chip-cyan   { background: rgba(6,182,212,0.15);  color: #22d3ee; }
+        .chip-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+        .chip-gold   { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+        /* ── Filter bar ─────────────────────────────────────────────────── */
+        .filter-bar {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .filter-search {
+            flex: 1; min-width: 220px;
+            position: relative;
+        }
+        .filter-search .material-symbols-outlined {
+            position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 1.05rem;
+            pointer-events: none;
+        }
+        .filter-search input {
+            width: 100%;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            padding: 0.6rem 0.75rem 0.6rem 2.4rem;
+            font-size: 0.85rem;
+            transition: border-color 0.15s;
+        }
+        .filter-search input:focus { outline: none; border-color: var(--primary); }
+        .filter-tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .filter-tab {
+            padding: 0.45rem 0.85rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-tab:hover { color: var(--text); border-color: var(--text-muted); }
+        .filter-tab.active {
+            background: var(--primary); color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* ── Classroom grid (same cards as dashboard) ──────────────────── */
+        .classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
+        .cl-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.3rem 1.4rem;
+            display: flex; flex-direction: column; gap: 0.9rem;
+            transition: all 0.18s;
+            position: relative;
+            overflow: hidden;
+        }
+        .cl-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: var(--primary);
+            opacity: 0; transition: opacity 0.18s;
+        }
+        .cl-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(124,58,237,0.18);
+        }
+        .cl-card:hover::before { opacity: 1; }
+        .cl-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+        .cl-card-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+        .cl-card-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; min-height: 2.2em; }
+        .cl-lang-badge {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 0.22rem 0.55rem; border-radius: 20px; flex-shrink: 0;
+            background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3);
+        }
+        .cl-lang-badge.javascript { background: rgba(251,191,36,0.12); color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+        .cl-lang-badge.java       { background: rgba(239,68,68,0.12);  color: #f87171; border-color: rgba(239,68,68,0.3);  }
+        .cl-lang-badge.cpp        { background: rgba(6,182,212,0.12);  color: #22d3ee; border-color: rgba(6,182,212,0.3);  }
+
+        .cl-card-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .cl-meta-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.77rem; color: var(--text-muted); }
+        .cl-meta-item .material-symbols-outlined { font-size: 0.95rem; }
+
+        .cl-key-block {
+            background: var(--bg-surface);
+            border-radius: var(--radius-sm); padding: 0.6rem 0.75rem;
+        }
+        .cl-key-label {
+            font-size: 0.65rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+        .cl-key-row { display: flex; align-items: center; justify-content: space-between; }
+        .cl-key-val {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 1.5px; color: var(--text);
+        }
+        .cl-key-copy {
+            background: transparent; border: none; cursor: pointer;
+            color: var(--text-muted); display: flex; align-items: center;
+            padding: 0.2rem; border-radius: 4px; transition: color 0.15s;
+        }
+        .cl-key-copy:hover { color: var(--primary); }
+        .cl-key-copy.copied { color: var(--success, #10b981); }
+        .cl-key-copy .material-symbols-outlined { font-size: 1rem; }
+
+        .cl-card-actions { display: flex; gap: 0.5rem; margin-top: auto; }
+        .cl-card-actions .btn { flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.55rem; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 3rem 1rem;
+            color: var(--text-muted);
+            background: var(--bg-card); border: 1px dashed var(--border);
+            border-radius: var(--radius-lg);
+            grid-column: 1 / -1;
+        }
+        .empty-state .material-symbols-outlined { font-size: 3rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
+        .empty-state h3 { font-size: 1.05rem; color: var(--text); margin-bottom: 0.4rem; }
+        .empty-state p { font-size: 0.85rem; margin-bottom: 1.25rem; }
+
+        /* Loading skeleton */
+        .skeleton-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.3rem 1.4rem;
+            display: flex; flex-direction: column; gap: 0.9rem;
+            min-height: 240px;
+        }
+        .skeleton-line {
+            height: 12px; border-radius: 4px;
+            background: linear-gradient(90deg, var(--bg-surface) 25%, var(--border) 50%, var(--bg-surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ── Modal ─────────────────────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 9000;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.75rem;
+            width: 92%; max-width: 460px;
+        }
+        .modal-card h2 {
+            font-size: 1.1rem; font-weight: 700; color: var(--text);
+            margin-bottom: 1.25rem;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block; font-size: 0.78rem; font-weight: 600;
+            color: var(--text-muted); margin-bottom: 0.4rem;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%; padding: 0.6rem 0.75rem;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            font-size: 0.85rem;
+        }
+        .form-group input:focus,
+        .form-group select:focus { outline: none; border-color: var(--primary); }
+        .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 1.25rem; }
+
+        /* ── Toast ─────────────────────────────────────────────────────── */
+        .toast {
+            position: fixed; bottom: 1.25rem; left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.75rem 1.1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.85rem; color: var(--text);
+            z-index: 9100;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: rgba(16,185,129,0.4); }
+        .toast.success .material-symbols-outlined { color: #10b981; }
+        .toast.error { border-color: rgba(239,68,68,0.4); }
+        .toast.error .material-symbols-outlined { color: #ef4444; }
+        .toast .material-symbols-outlined { font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+<!-- ── Page Header ────────────────────────────────────────────────────────── -->
+<div class="page-header">
+    <div class="page-header-text">
+        <h1>My Classrooms</h1>
+        <p>Manage your courses and track student progress.</p>
+    </div>
+    <button class="header-create-btn" onclick="openCreateModal()">
+        <span class="material-symbols-outlined">add</span>
+        New Classroom
+    </button>
+</div>
+
+<!-- ── Stat strip ─────────────────────────────────────────────────────────── -->
+<div class="stat-strip">
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-purple"><span class="material-symbols-outlined">school</span></div>
+        <div>
+            <div class="stat-chip-val" id="statClassrooms">—</div>
+            <div class="stat-chip-lbl">Classrooms</div>
+        </div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-cyan"><span class="material-symbols-outlined">group</span></div>
+        <div>
+            <div class="stat-chip-val" id="statStudents">—</div>
+            <div class="stat-chip-lbl">Total Students</div>
+        </div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-green"><span class="material-symbols-outlined">play_circle</span></div>
+        <div>
+            <div class="stat-chip-val" id="statSessions">—</div>
+            <div class="stat-chip-lbl">Sessions Run</div>
+        </div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-gold"><span class="material-symbols-outlined">menu_book</span></div>
+        <div>
+            <div class="stat-chip-val" id="statLessons">—</div>
+            <div class="stat-chip-lbl">Languages Taught</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Filter bar ─────────────────────────────────────────────────────────── -->
+<div class="filter-bar">
+    <div class="filter-search">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" id="searchInput" placeholder="Search by name or description…" autocomplete="off">
+    </div>
+    <div class="filter-tabs" id="langTabs">
+        <span class="filter-tab active" data-lang="all">All</span>
+        <!-- language pills injected dynamically from /api/languages -->
+    </div>
+</div>
+
+<!-- ── Classroom grid ─────────────────────────────────────────────────────── -->
+<div id="classroomGrid" class="classroom-grid">
+    <div class="skeleton-card"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:40%"></div><div class="skeleton-line" style="width:80%"></div></div>
+    <div class="skeleton-card"><div class="skeleton-line" style="width:55%"></div><div class="skeleton-line" style="width:35%"></div><div class="skeleton-line" style="width:75%"></div></div>
+    <div class="skeleton-card"><div class="skeleton-line" style="width:65%"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:70%"></div></div>
+</div>
+
+<!-- ── Create Modal ───────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-card">
+        <h2>Create New Classroom</h2>
+        <div class="form-group">
+            <label>Classroom Name <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="clName" placeholder="e.g. Python 101 - Section A" maxlength="100">
+        </div>
+        <div class="form-group">
+            <label>Primary Language</label>
+            <select id="clLanguage">
+                <!-- options injected dynamically from /api/languages -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description (optional)</label>
+            <input type="text" id="clDesc" placeholder="Short description…" maxlength="200">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="createClassroom()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">add</span>
+                Create
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toastIcon">info</span>
+    <span id="toastMsg">—</span>
+</div>
+
+<script>window.SIDEBAR_ROLE = 'faculty'; window.SIDEBAR_PAGE = 'classrooms';</script>
+<script src="../js/sidebar.js"></script>
+<script src="../js/languages.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+// ── Auth guard
+if (!user.id) { location.href = 'login.html'; }
+if (user.role !== 'faculty') { location.href = 'dashboard.html'; }
+
+// ── State
+let allClassrooms = [];
+let activeLang   = 'all';
+let searchTerm   = '';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Populate language tabs and modal dropdown from /api/languages
+    const langs = await Languages.load();
+    const tabs = document.getElementById('langTabs');
+    langs.forEach(l => {
+        const pill = document.createElement('span');
+        pill.className = 'filter-tab';
+        pill.dataset.lang = l.code;
+        pill.textContent = l.name;
+        tabs.appendChild(pill);
+    });
+    Languages.fillSelect(document.getElementById('clLanguage'));
+
+    loadClassrooms();
+
+    // Search input
+    const search = document.getElementById('searchInput');
+    search.addEventListener('input', () => {
+        searchTerm = search.value.trim().toLowerCase();
+        applyFilter();
+    });
+
+    // Language tabs
+    document.getElementById('langTabs').addEventListener('click', (e) => {
+        const tab = e.target.closest('.filter-tab');
+        if (!tab) return;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeLang = tab.dataset.lang;
+        applyFilter();
+    });
+
+    // Modal close on overlay click
+    document.getElementById('createModal').addEventListener('click', function(e) {
+        if (e.target === this) closeCreateModal();
+    });
+
+    // ESC closes modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeCreateModal();
+    });
+});
+
+// ─── Load Classrooms ──────────────────────────────────────────────────────────
+async function loadClassrooms() {
+    try {
+        const res = await fetch(`${API}/classrooms/mine`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        allClassrooms = data.classrooms || data || [];
+        updateStats(allClassrooms);
+        applyFilter();
+    } catch (err) {
+        console.error('loadClassrooms:', err);
+        document.getElementById('classroomGrid').innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">error_outline</span>
+            <h3>Could not load courses</h3>
+            <p>Make sure the backend server is running on port 3000.</p>
+        </div>`;
+    }
+}
+
+function updateStats(classrooms) {
+    document.getElementById('statClassrooms').textContent = classrooms.length;
+    const totalStudents = classrooms.reduce((s, c) => s + (c.student_count || c.studentCount || 0), 0);
+    document.getElementById('statStudents').textContent = totalStudents;
+    const totalSessions = classrooms.reduce((s, c) => s + (c.session_count || 0), 0);
+    document.getElementById('statSessions').textContent = totalSessions;
+    const langs = new Set(classrooms.map(c => (c.language || 'python').toLowerCase()));
+    document.getElementById('statLessons').textContent = langs.size;
+}
+
+// ─── Filter & Render ──────────────────────────────────────────────────────────
+function applyFilter() {
+    let filtered = allClassrooms;
+    if (activeLang !== 'all') {
+        filtered = filtered.filter(c => (c.language || 'python').toLowerCase() === activeLang);
+    }
+    if (searchTerm) {
+        filtered = filtered.filter(c =>
+            (c.name || '').toLowerCase().includes(searchTerm) ||
+            (c.description || '').toLowerCase().includes(searchTerm)
+        );
+    }
+    renderClassrooms(filtered);
+}
+
+function renderClassrooms(classrooms) {
+    const grid = document.getElementById('classroomGrid');
+
+    const BANNER = {
+        python:     { from: '#1a3a5c', to: '#2e6da4' },
+        javascript: { from: '#3b2f00', to: '#7a6200' },
+        java:       { from: '#3a1500', to: '#7a3000' },
+        cpp:        { from: '#132840', to: '#2a5080' },
+        default:    { from: '#1e1045', to: '#4c1d95' },
+    };
+
+    if (!classrooms.length) {
+        if (allClassrooms.length === 0) {
+            grid.innerHTML = `<div class="empty-state">
+                <span class="material-symbols-outlined">school</span>
+                <h3>No courses yet</h3>
+                <p>Create your first course to start teaching and tracking student progress.</p>
+                <button class="header-create-btn" onclick="openCreateModal()">
+                    <span class="material-symbols-outlined">add</span>
+                    Create Your First Classroom
+                </button>
+            </div>`;
+        } else {
+            grid.innerHTML = `<div class="empty-state">
+                <span class="material-symbols-outlined">search_off</span>
+                <h3>No courses match your filter</h3>
+                <p>Try a different search term or language.</p>
+            </div>`;
+        }
+        return;
+    }
+
+    grid.innerHTML = classrooms.map(c => {
+        const lang  = (c.language || 'python').toLowerCase();
+        const bKey  = BANNER[lang] ? lang : 'default';
+        const { from, to } = BANNER[bKey];
+        const key   = c.enrollment_key || c.enrollmentKey || '????-????';
+        const count = c.student_count  || c.studentCount  || 0;
+        const id    = c.classroom_id   || c.id;
+        const desc  = c.description    || '';
+        return `
+        <div class="cl-card" style="padding:0;overflow:hidden;">
+            <div style="height:100px;background:linear-gradient(135deg,${from},${to});position:relative;display:flex;align-items:flex-end;padding:0.8rem 1rem;flex-shrink:0;">
+                <div style="position:absolute;inset:0;opacity:0.1;background-image:radial-gradient(circle at 20% 50%,rgba(255,255,255,0.8) 2px,transparent 2px),radial-gradient(circle at 80% 20%,rgba(255,255,255,0.8) 2px,transparent 2px);background-size:55px 55px;"></div>
+                <span style="position:absolute;top:0.6rem;right:0.75rem;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:0.2rem 0.55rem;border-radius:20px;background:rgba(0,0,0,0.3);color:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.15);">${lang}</span>
+                <span style="font-size:1.05rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.5);position:relative;z-index:1;">${esc(c.name)}</span>
+            </div>
+            <div style="padding:1rem 1.1rem;display:flex;flex-direction:column;gap:0.65rem;flex:1;">
+                ${desc ? `<div class="cl-card-desc">${esc(desc)}</div>` : ''}
+                <div class="cl-card-meta">
+                    <span class="cl-meta-item">
+                        <span class="material-symbols-outlined">group</span>
+                        ${count} student${count !== 1 ? 's' : ''}
+                    </span>
+                    <span class="cl-meta-item">
+                        <span class="material-symbols-outlined">schedule</span>
+                        ${formatDate(c.created_at || c.createdAt)}
+                    </span>
+                </div>
+                <div class="cl-key-block">
+                    <div class="cl-key-label">Enrollment Key</div>
+                    <div class="cl-key-row">
+                        <span class="cl-key-val">${key}</span>
+                        <button class="cl-key-copy" onclick="copyKey(this,'${key}')" title="Copy key">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="cl-card-actions">
+                    <a href="classroom_manage.html?id=${id}" class="btn btn-primary" style="flex:1;">
+                        <span class="material-symbols-outlined" style="font-size:0.95rem;">edit</span>
+                        Manage
+                    </a>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function copyKey(btn, key) {
+    navigator.clipboard.writeText(key).then(() => {
+        btn.classList.add('copied');
+        const ic = btn.querySelector('.material-symbols-outlined');
+        ic.textContent = 'check';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            ic.textContent = 'content_copy';
+        }, 1500);
+        showToast('Enrollment key copied!', 'success');
+    });
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return 'Recently';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Recently';
+    const diff = Date.now() - d.getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days < 1) return 'Today';
+    if (days < 7) return `${days}d ago`;
+    if (days < 30) return `${Math.floor(days/7)}w ago`;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ─── Create classroom modal ───────────────────────────────────────────────────
+function openCreateModal()  {
+    document.getElementById('createModal').classList.add('open');
+    setTimeout(() => document.getElementById('clName').focus(), 100);
+}
+function closeCreateModal() {
+    document.getElementById('createModal').classList.remove('open');
+}
+
+async function createClassroom() {
+    const name     = document.getElementById('clName').value.trim();
+    const language = document.getElementById('clLanguage').value;
+    const desc     = document.getElementById('clDesc').value.trim();
+    if (!name) { showToast('Classroom name is required', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API}/classrooms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ name, language, description: desc })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed');
+        closeCreateModal();
+        document.getElementById('clName').value = '';
+        document.getElementById('clDesc').value = '';
+        const key = data.classroom?.enrollment_key || '';
+        showToast(`Classroom "${name}" created!${key ? ' Key: ' + key : ''}`, 'success');
+        loadClassrooms();
+    } catch (err) {
+        showToast(err.message || 'Failed to create classroom', 'error');
+    }
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+    const t  = document.getElementById('toast');
+    const ic = document.getElementById('toastIcon');
+    document.getElementById('toastMsg').textContent = msg;
+    ic.textContent = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

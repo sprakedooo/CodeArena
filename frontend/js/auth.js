@@ -94,9 +94,33 @@ function getCurrentUser() {
  */
 function redirectToDashboard(role) {
     if (role === 'faculty') {
-        window.location.href = 'dashboard_faculty.html';
+        window.location.href = 'faculty_dashboard.html';
     } else {
-        window.location.href = 'dashboard_student.html';
+        window.location.href = 'dashboard.html';
+    }
+}
+
+/**
+ * Guards a page to allow only a specific role.
+ * Call on page load with the required role ('student' or 'faculty').
+ * Redirects away if the logged-in user doesn't have that role.
+ */
+function requireRole(role) {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user) { window.location.href = 'login.html'; return; }
+    if (user.role !== role) {
+        window.location.href = user.role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html';
+    }
+}
+
+/**
+ * Requires the user to be logged in (any role).
+ * Redirects to login if no session exists.
+ */
+function requireAuth() {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user || !localStorage.getItem('token')) {
+        window.location.href = 'login.html';
     }
 }
 

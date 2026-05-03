@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-dark);
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .verify-box {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 1.5rem;
+        }
+
+        .verify-logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 0.4rem;
+        }
+        .verify-logo .brk  { color: var(--text-muted); }
+        .verify-logo .code { color: var(--primary); }
+        .verify-logo .arena{ color: var(--success); }
+
+        .verify-tagline {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        .verify-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verify-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success));
+        }
+
+        .verify-icon {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .verify-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 0.6rem;
+            letter-spacing: 1px;
+        }
+
+        .verify-desc {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .verify-desc strong {
+            color: var(--secondary);
+        }
+
+        /* OTP input boxes */
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .otp-inputs input {
+            width: 48px;
+            height: 56px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: monospace;
+            background: var(--bg-surface);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            caret-color: transparent;
+        }
+
+        .otp-inputs input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+
+        .otp-inputs input.filled {
+            border-color: var(--secondary);
+        }
+
+        .otp-inputs input.error {
+            border-color: var(--danger);
+        }
+
+        .resend-row {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .resend-row a, .resend-row button.resend-btn {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 0.82rem;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .resend-row button.resend-btn:disabled {
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: default;
+        }
+
+        #countdown {
+            color: var(--secondary);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="verify-box">
+        <div class="verify-logo">
+            <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:140px;width:auto;object-fit:contain;">
+        </div>
+        <p class="verify-tagline">Almost there!</p>
+
+        <div class="verify-card">
+            <div class="verify-icon">📧</div>
+            <div class="verify-title">CHECK YOUR EMAIL</div>
+            <p class="verify-desc">
+                We sent a 6-digit verification code to<br>
+                <strong id="displayEmail">your email</strong>.
+                <br>Enter it below to activate your account.
+            </p>
+
+            <div id="alertBox"></div>
+
+            <div class="otp-inputs" id="otpInputs">
+                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg" id="verifyBtn" disabled>
+                Verify Email
+            </button>
+
+            <div class="resend-row" style="margin-top: 1.2rem;">
+                Didn't receive it?
+                <button class="resend-btn" id="resendBtn" disabled>
+                    Resend in <span id="countdown">60</span>s
+                </button>
+            </div>
+
+            <div class="resend-row" style="margin-top: 0.5rem;">
+                <a href="register.html">← Back to Register</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        // Get email from URL param
+        const params = new URLSearchParams(window.location.search);
+        const email = params.get('email') || '';
+        document.getElementById('displayEmail').textContent = email || 'your email';
+
+        // ── OTP input behaviour ──────────────────────────────────────────────
+        const boxes = Array.from(document.querySelectorAll('#otpInputs input'));
+        const verifyBtn = document.getElementById('verifyBtn');
+
+        boxes.forEach((box, idx) => {
+            box.addEventListener('input', (e) => {
+                // Allow only digits
+                box.value = box.value.replace(/\D/g, '').slice(0, 1);
+                box.classList.toggle('filled', box.value.length === 1);
+                if (box.value && idx < boxes.length - 1) boxes[idx + 1].focus();
+                checkAllFilled();
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && idx > 0) {
+                    boxes[idx - 1].value = '';
+                    boxes[idx - 1].classList.remove('filled');
+                    boxes[idx - 1].focus();
+                    checkAllFilled();
+                }
+                if (e.key === 'ArrowLeft' && idx > 0) boxes[idx - 1].focus();
+                if (e.key === 'ArrowRight' && idx < boxes.length - 1) boxes[idx + 1].focus();
+                if (e.key === 'Enter' && !verifyBtn.disabled) verifyBtn.click();
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+                text.split('').forEach((ch, i) => {
+                    if (boxes[i]) {
+                        boxes[i].value = ch;
+                        boxes[i].classList.add('filled');
+                    }
+                });
+                const nextEmpty = boxes.findIndex(b => !b.value);
+                (nextEmpty === -1 ? boxes[boxes.length - 1] : boxes[nextEmpty]).focus();
+                checkAllFilled();
+            });
+        });
+
+        function checkAllFilled() {
+            const all = boxes.every(b => b.value.length === 1);
+            verifyBtn.disabled = !all;
+        }
+
+        function getOTP() {
+            return boxes.map(b => b.value).join('');
+        }
+
+        function setError(msg) {
+            document.getElementById('alertBox').innerHTML =
+                `<div class="alert alert-error">${msg}</div>`;
+            boxes.forEach(b => b.classList.add('error'));
+        }
+
+        function clearError() {
+            document.getElementById('alertBox').innerHTML = '';
+            boxes.forEach(b => b.classList.remove('error'));
+        }
+
+        // ── Verify button ───────────────────────────────────────────────────
+        verifyBtn.addEventListener('click', async () => {
+            clearError();
+            const otp = getOTP();
+            verifyBtn.textContent = 'Verifying…';
+            verifyBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API}/auth/verify-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('alertBox').innerHTML =
+                        '<div class="alert alert-success">✅ Email verified! Redirecting…</div>';
+                    clearUserProgress();
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    setTimeout(() => {
+                        if (data.user.role === 'faculty') {
+                            window.location.href = 'faculty_dashboard.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }, 1000);
+                } else {
+                    setError(data.message || 'Invalid code. Please try again.');
+                    verifyBtn.textContent = 'Verify Email';
+                    verifyBtn.disabled = false;
+                }
+            } catch (err) {
+                setError('Cannot connect to server. Please try again.');
+                verifyBtn.textContent = 'Verify Email';
+                verifyBtn.disabled = false;
+            }
+        });
+
+        // ── Resend countdown ─────────────────────────────────────────────────
+        const resendBtn = document.getElementById('resendBtn');
+        const countdownEl = document.getElementById('countdown');
+        let seconds = 60;
+
+        function startCountdown() {
+            resendBtn.disabled = true;
+            resendBtn.textContent = '';
+            resendBtn.innerHTML = 'Resend in <span id="countdown">' + seconds + '</span>s';
+            const el = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                seconds--;
+                el.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = 'Resend Code';
+                    seconds = 60;
+                }
+            }, 1000);
+        }
+
+        startCountdown();
+
+        resendBtn.addEventListener('click', async () => {
+            if (resendBtn.disabled) return;
+            resendBtn.disabled = true;
+            clearError();
+
+            try {
+                const res = await fetch(`${API}/auth/resend-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('alertBox').innerHTML =
+                        '<div class="alert alert-success">New code sent! Check your email.</div>';
+                    boxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); });
+                    verifyBtn.disabled = true;
+                    startCountdown();
+                } else {
+                    document.getElementById('alertBox').innerHTML =
+                        `<div class="alert alert-error">${data.message}</div>`;
+                    resendBtn.disabled = false;
+                }
+            } catch (err) {
+                document.getElementById('alertBox').innerHTML =
+                    '<div class="alert alert-error">Cannot connect to server.</div>';
+                resendBtn.disabled = false;
+            }
+        });
+
+        function clearUserProgress() {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('completedLessons') ||
+                    key.startsWith('quizProgress') ||
+                    key.startsWith('lessonProgress') ||
+                    key.startsWith('gameStats') ||
+                    key.startsWith('streak') ||
+                    key.startsWith('lastPlayed')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+        }
+
+        // Auto-focus first box
+        boxes[0].focus();
+    </script>
+</body>
+</html>

@@ -36,6 +36,8 @@ const adaptiveEngine = require('../services/adaptiveEngine');
 
 // Import database service
 const dbService = require('../services/dbService');
+const { incrementMockProgress } = require('./progressRoutes');
+const { generateLiveHint, generateCorrectMessage } = require('../services/openaiService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // IN-MEMORY TRACKING (Mock Database)
@@ -151,11 +153,20 @@ router.post('/check', async (req, res) => {
     };
     userAnswerHistory[userId].push(answerRecord);
 
-    // Save to database if available
+    // Save to database if available, with fallback to mock on any error
+    let savedToDb = false;
     if (dbService.isDbAvailable()) {
-        const pointsEarned = isCorrect ? aiService.calculatePoints(question.level) : 0;
-        await dbService.saveAnswer(userId, questionId, selectedAnswer, isCorrect, pointsEarned, isCorrect ? null : question.hint);
-        await dbService.incrementProgress(userId, question.language, isCorrect);
+        try {
+            const pointsEarned = isCorrect ? aiService.calculatePoints(question.level) : 0;
+            await dbService.saveAnswer(userId, questionId, selectedAnswer, isCorrect, pointsEarned, isCorrect ? null : question.hint);
+            await dbService.incrementProgress(userId, question.language, isCorrect);
+            savedToDb = true;
+        } catch (dbErr) {
+            console.warn('DB save failed, using mock progress:', dbErr.message);
+        }
+    }
+    if (!savedToDb) {
+        incrementMockProgress(userId, question.language, isCorrect, question.topic);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -179,11 +190,23 @@ router.post('/check', async (req, res) => {
         const currentStreak = streakTracker[userId][question.language];
         const levelUp = adaptiveEngine.checkLevelAdvancement(currentStreak, question.level);
 
+        // Generate AI correct message (with rule-based fallback)
+        let correctMsg = aiService.getCorrectAnswerMessage();
+        try {
+            correctMsg = await generateCorrectMessage({
+                questionText: question.questionText,
+                correctAnswer: question.correctAnswer,
+                topic: question.topic,
+                language: question.language,
+                level: question.level
+            });
+        } catch (e) { /* fallback to rule-based */ }
+
         // Build response for correct answer
         const response = {
             success: true,
             correct: true,
-            message: aiService.getCorrectAnswerMessage(),
+            message: correctMsg,
             pointsEarned: pointsEarned,
             explanation: question.explanation,
             streak: currentStreak
@@ -211,26 +234,32 @@ router.post('/check', async (req, res) => {
         streakTracker[userId][question.language] = 0;
     }
 
-    // Generate AI hint for the specific topic
-    const aiHint = aiService.generateHint(question.topic, question.language, question.level);
-
-    // Get encouragement message
-    const encouragement = aiService.getEncouragementMessage();
+    // Generate OpenAI hint with rule-based fallback
+    let aiHintText = aiService.generateHint(question.topic, question.language, question.level);
+    let encouragement = aiService.getEncouragementMessage();
+    try {
+        aiHintText = await generateLiveHint({
+            questionText: question.questionText,
+            correctAnswer: question.correctAnswer,
+            selectedAnswer: selectedAnswer,
+            topic: question.topic,
+            language: question.language,
+            level: question.level
+        });
+    } catch (e) { /* fallback to rule-based */ }
 
     // Build response for wrong answer
     res.json({
         success: true,
         correct: false,
         message: encouragement,
-        // AI-GENERATED HINT - Core thesis feature
         aiHint: {
-            hint: question.hint,  // Question-specific hint
-            topicAdvice: aiHint,  // AI-generated topic advice
+            hint: question.hint,
+            topicAdvice: aiHintText,
             topic: question.topic
         },
         correctAnswer: question.correctAnswer,
         explanation: question.explanation,
-        // Track weak area
         weakArea: {
             topic: question.topic,
             language: question.language,

@@ -8,8 +8,8 @@
     <style>
         /* Widescreen container override */
         .container {
-            max-width: 1600px;
-            padding: var(--space-md) var(--space-lg);
+            max-width: 100%;
+            padding: 5vh 18%;
         }
 
         /* Top Bar */
@@ -80,9 +80,6 @@
         }
 
         @media (min-width: 1800px) {
-            .container {
-                max-width: 1800px;
-            }
             .pg-ide {
                 grid-template-columns: 220px 1fr 30%;
             }
@@ -431,25 +428,6 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <span class="navbar-brand logo">
-            <span class="logo-bracket">&lt;</span><span class="logo-code">Code</span><span class="logo-arena">Arena</span><span class="logo-bracket">/&gt;</span>
-        </span>
-        <ul class="navbar-nav">
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="lessons.html">Lessons</a></li>
-            <li><a href="lesson_game.html">Play</a></li>
-            <li><a href="playground.html" class="active">Playground</a></li>
-            <li><a href="feedback.html">Feedback</a></li>
-            <li>
-                <div class="nav-xp-bar">
-                    <span class="xp-icon">&#x2B50;</span>
-                    <span class="xp-amount" id="navXP">0 XP</span>
-                </div>
-            </li>
-            <li><a href="#" onclick="logout()">Logout</a></li>
-        </ul>
-    </nav>
 
     <div class="container">
         <!-- Starter info (shown when code is pre-loaded from a lesson) -->
@@ -493,6 +471,7 @@
                 <div class="pg-editor-actions">
                     <button class="pg-btn-run" id="runBtn" onclick="runCode()">&#x25B6; Run</button>
                     <button class="pg-btn-secondary" onclick="copyCode()">&#x1F4CB; Copy</button>
+                    <button class="pg-btn-secondary" onclick="analyzeCode()" id="analyzeBtn" title="AI Code Review" style="background:rgba(124,58,237,0.15);color:#a78bfa;border-color:rgba(124,58,237,0.3);">&#x2728; AI Review</button>
                     <div class="pg-actions-right">
                         <span class="pg-shortcut-hint">Ctrl+Enter to run</span>
                         <button class="pg-btn-secondary" onclick="resetCode()">&#x21BA; Reset</button>
@@ -514,6 +493,36 @@
                 </div>
             </div>
         </div>
+
+        <!-- AI Code Analyzer Panel -->
+        <div id="aiAnalyzerPanel" style="display:none;margin-top:1rem;background:var(--bg-card);border:1px solid rgba(124,58,237,0.3);border-radius:16px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.1rem;background:rgba(124,58,237,0.08);border-bottom:1px solid rgba(124,58,237,0.2);">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-size:1.1rem;">✨</span>
+                    <strong style="font-size:0.9rem;color:var(--text);">AI Code Review</strong>
+                    <span style="font-size:0.7rem;color:var(--text-muted);background:var(--bg-surface);padding:0.15rem 0.5rem;border-radius:20px;border:1px solid var(--border);">Powered by GPT</span>
+                </div>
+                <button onclick="document.getElementById('aiAnalyzerPanel').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.1rem;line-height:1;">×</button>
+            </div>
+            <div id="aiAnalyzerBody" style="padding:1.1rem 1.25rem;">
+                <div id="aiAnalyzerLoading" style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;">
+                    <div style="width:28px;height:28px;border-radius:50%;border:3px solid var(--bg-surface);border-top-color:#7c3aed;animation:pg-spin 0.8s linear infinite;margin:0 auto 0.75rem;"></div>
+                    Analyzing your code with AI…
+                </div>
+                <div id="aiAnalyzerResult" style="display:none;"></div>
+            </div>
+        </div>
+        <style>
+            @keyframes pg-spin { to { transform: rotate(360deg); } }
+            .ai-review-section { margin-bottom: 1rem; }
+            .ai-review-section h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin: 0 0 0.4rem; }
+            .ai-review-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65; }
+            .ai-review-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; font-weight: 700; padding: 0.22rem 0.6rem; border-radius: 20px; margin-bottom: 0.5rem; }
+            .badge-correct  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+            .badge-warning  { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+            .badge-error    { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3);  }
+            .ai-review-improvement { background: var(--bg-surface); border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid var(--primary); line-height: 1.55; margin-top: 0.35rem; }
+        </style>
     </div>
 
     <!-- Ace Editor CDN -->
@@ -755,12 +764,146 @@
             exec: function() { runCode(); }
         });
 
+        // ── AI Code Analyzer ───────────────────────────────────────────────
+        async function analyzeCode() {
+            const code = editor.getValue().trim();
+            if (!code || code.length < 10) {
+                alert('Write some code first before requesting a review!');
+                return;
+            }
+            const lang   = currentLang || 'python';
+            const panel  = document.getElementById('aiAnalyzerPanel');
+            const loading = document.getElementById('aiAnalyzerLoading');
+            const result  = document.getElementById('aiAnalyzerResult');
+            const btn    = document.getElementById('analyzeBtn');
+
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            loading.style.display = 'block';
+            result.style.display  = 'none';
+            btn.disabled = true;
+            btn.textContent = '⏳ Analyzing…';
+
+            try {
+                const res  = await fetch(`${API}/ai/analyze-code`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ code, language: lang, level: 'beginner', topic: 'general' })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Analysis failed');
+                renderAnalysis(data.analysis || data);
+            } catch (err) {
+                loading.style.display = 'none';
+                result.style.display  = 'block';
+                result.innerHTML = `<div style="color:#f87171;font-size:0.85rem;">⚠ ${err.message || 'AI analysis unavailable. Check your API key.'}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✨ AI Review';
+            }
+        }
+
+        function renderAnalysis(a) {
+            const loading = document.getElementById('aiAnalyzerLoading');
+            const result  = document.getElementById('aiAnalyzerResult');
+            loading.style.display = 'none';
+            result.style.display  = 'block';
+
+            if (!a || typeof a === 'string') {
+                result.innerHTML = `<div class="ai-review-text">${escHtml(String(a || 'No analysis available.'))}</div>`;
+                return;
+            }
+
+            const overall  = a.overall_score || a.score || a.overallScore;
+            const feedback = a.feedback || a.summary || '';
+            const issues   = a.issues || a.errors || [];
+            const suggestions = a.suggestions || a.improvements || [];
+            const correct  = a.correct_parts || a.strengths || [];
+
+            let html = '';
+
+            // Score badge
+            if (overall !== undefined) {
+                const pct   = typeof overall === 'string' ? parseInt(overall) : overall;
+                const cls   = pct >= 80 ? 'badge-correct' : pct >= 50 ? 'badge-warning' : 'badge-error';
+                const label = pct >= 80 ? '✓ Good Code' : pct >= 50 ? '⚠ Needs Work' : '✗ Issues Found';
+                html += `<div style="margin-bottom:0.85rem;"><span class="ai-review-badge ${cls}">${label} · ${pct}/100</span></div>`;
+            }
+
+            // Summary
+            if (feedback) {
+                html += `<div class="ai-review-section">
+                    <h4>Summary</h4>
+                    <div class="ai-review-text">${escHtml(String(feedback))}</div>
+                </div>`;
+            }
+
+            // Strengths
+            if (correct.length) {
+                html += `<div class="ai-review-section">
+                    <h4>✅ Strengths</h4>
+                    ${correct.map(c => `<div class="ai-review-improvement" style="border-left-color:#10b981;">${escHtml(String(c))}</div>`).join('')}
+                </div>`;
+            }
+
+            // Issues
+            if (issues.length) {
+                html += `<div class="ai-review-section">
+                    <h4>🔴 Issues</h4>
+                    ${issues.map(i => `<div class="ai-review-improvement" style="border-left-color:#ef4444;">${escHtml(String(i))}</div>`).join('')}
+                </div>`;
+            }
+
+            // Suggestions
+            if (suggestions.length) {
+                html += `<div class="ai-review-section">
+                    <h4>💡 Suggestions</h4>
+                    ${suggestions.map(s => `<div class="ai-review-improvement">${escHtml(String(s))}</div>`).join('')}
+                </div>`;
+            }
+
+            if (!html) html = `<div class="ai-review-text">${escHtml(JSON.stringify(a, null, 2))}</div>`;
+            result.innerHTML = html;
+        }
+
+        function escHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
+            showLogoutModal('Are you sure you want to logout? Any unsaved code in the editor will be lost.', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        }
+        function showLogoutModal(message, onConfirm) {
+            const existing = document.getElementById('logoutConfirmOverlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'logoutConfirmOverlay';
+            overlay.className = 'confirm-modal-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-modal" role="dialog" aria-modal="true">
+                    <div class="confirm-modal-icon">&#x1F44B;</div>
+                    <div class="confirm-modal-title">Logout?</div>
+                    <div class="confirm-modal-message">${message}</div>
+                    <div class="confirm-modal-actions">
+                        <button type="button" class="btn btn-outline" id="logoutCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="logoutConfirmBtn">Logout</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('active'));
+            const close = () => { overlay.classList.remove('active'); setTimeout(() => overlay.remove(), 200); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+            document.getElementById('logoutCancelBtn').addEventListener('click', close);
+            document.getElementById('logoutConfirmBtn').addEventListener('click', () => { close(); onConfirm && onConfirm(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
         }
     </script>
+<script src="../js/sidebar.js"></script>
+<script>window.SIDEBAR_PAGE = 'practice';</script>
 </body>
 </html>

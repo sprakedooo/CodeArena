@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .page-header { margin-bottom: 1.75rem; }
+        .page-header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 0.3rem; }
+        .page-header p  { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+
+        .section-title {
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.4px;
+            color: var(--text-muted); margin: 1.6rem 0 0.8rem;
+        }
+
+        /* Language filter tabs */
+        .lang-tabs {
+            display: flex; gap: 0.35rem; border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem; overflow-x: auto;
+        }
+        .lang-tab {
+            padding: 0.55rem 1rem; border: none; background: none; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            border-bottom: 2px solid transparent; margin-bottom: -1px;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .lang-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .lang-tab:hover:not(.active) { color: var(--text); }
+
+        /* Podium */
+        .podium {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 0.75rem; margin-bottom: 2rem; padding: 1.5rem 0 0;
+        }
+        .podium-slot {
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+            flex: 1; max-width: 160px;
+        }
+        .podium-avatar {
+            width: 56px; height: 56px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 800; color: #fff;
+            position: relative;
+        }
+        .podium-avatar .crown {
+            position: absolute; top: -14px; font-size: 1.2rem; line-height: 1;
+        }
+        .podium-name { font-size: 0.78rem; font-weight: 700; color: var(--text); text-align: center; }
+        .podium-xp   { font-size: 0.72rem; color: var(--text-muted); }
+        .podium-rank { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .podium-block {
+            width: 100%; border-radius: 8px 8px 0 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; font-weight: 900;
+        }
+        .slot-1 .podium-avatar { background: linear-gradient(135deg,#fbbf24,#f59e0b); width: 68px; height: 68px; font-size: 1.4rem; }
+        .slot-1 .podium-block  { height: 80px; background: linear-gradient(180deg,rgba(251,191,36,0.25),rgba(251,191,36,0.08)); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
+        .slot-2 .podium-avatar { background: linear-gradient(135deg,#9ca3af,#6b7280); }
+        .slot-2 .podium-block  { height: 60px; background: linear-gradient(180deg,rgba(156,163,175,0.2),rgba(156,163,175,0.05)); border: 1px solid rgba(156,163,175,0.25); color: #9ca3af; }
+        .slot-3 .podium-avatar { background: linear-gradient(135deg,#cd7c32,#a05a20); }
+        .slot-3 .podium-block  { height: 45px; background: linear-gradient(180deg,rgba(205,124,50,0.2),rgba(205,124,50,0.05)); border: 1px solid rgba(205,124,50,0.25); color: #cd7c32; }
+
+        /* Table */
+        .lb-table {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+        }
+        .lb-row {
+            display: grid; grid-template-columns: 48px 1fr auto auto;
+            align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--border-light);
+            transition: background 0.15s;
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-row:hover      { background: var(--bg-card-hover); }
+        .lb-row.me         { background: rgba(124,58,237,0.07); border-left: 3px solid var(--primary); }
+        .lb-rank {
+            font-size: 0.82rem; font-weight: 800; color: var(--text-muted);
+            text-align: center;
+        }
+        .lb-rank.top { color: #fbbf24; }
+        .lb-user { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+        .lb-avatar {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 700; color: #fff;
+            background: var(--primary);
+        }
+        .lb-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lb-you  { font-size: 0.65rem; background: rgba(124,58,237,0.15); color: #a78bfa; padding: 0.1rem 0.4rem; border-radius: 20px; margin-left: 0.35rem; font-weight: 700; }
+        .lb-xp   { font-size: 0.88rem; font-weight: 700; color: #fbbf24; white-space: nowrap; }
+        .lb-badge{ font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
+
+        .lb-header {
+            padding: 0.65rem 1.2rem; background: var(--bg-surface);
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--text-muted);
+            display: grid; grid-template-columns: 48px 1fr auto auto; gap: 0.75rem;
+        }
+
+        /* My rank card */
+        .my-rank-card {
+            background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08));
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: var(--radius); padding: 1rem 1.2rem;
+            display: flex; align-items: center; gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .my-rank-icon { font-size: 2rem; }
+        .my-rank-info { flex: 1; }
+        .my-rank-info .rank-num { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+        .my-rank-info .rank-sub { font-size: 0.78rem; color: var(--text-muted); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 3rem 1rem;
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+        .empty-state .material-symbols-outlined { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.35; }
+
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity: 0.5; } 50%{ opacity: 1; } }
+
+        @media (max-width: 600px) {
+            .lb-row { grid-template-columns: 40px 1fr auto; }
+            .lb-header { grid-template-columns: 40px 1fr auto; }
+            .lb-badge { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+    <h1>🏆 Leaderboard</h1>
+    <p>See how you rank against other CodeArena learners.</p>
+</div>
+
+<!-- ── Language Filter ────────────────────────────────────────────────────── -->
+<div class="lang-tabs">
+    <button class="lang-tab active" data-lang="all" onclick="switchLang('all', this)">🌐 All</button>
+    <button class="lang-tab" data-lang="python"     onclick="switchLang('python', this)">🐍 Python</button>
+    <button class="lang-tab" data-lang="javascript" onclick="switchLang('javascript', this)">⚡ JavaScript</button>
+    <button class="lang-tab" data-lang="java"       onclick="switchLang('java', this)">☕ Java</button>
+    <button class="lang-tab" data-lang="cpp"        onclick="switchLang('cpp', this)">⚙️ C++</button>
+</div>
+
+<!-- ── My Rank ────────────────────────────────────────────────────────────── -->
+<div class="my-rank-card" id="myRankCard" style="display:none;">
+    <div class="my-rank-icon">🎖️</div>
+    <div class="my-rank-info">
+        <div class="rank-num" id="myRankNum">#—</div>
+        <div class="rank-sub" id="myRankSub">Your ranking</div>
+    </div>
+    <div style="text-align:right;">
+        <div style="font-size:1rem;font-weight:700;color:#fbbf24;" id="myXPDisplay">— XP</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">Your XP</div>
+    </div>
+</div>
+
+<!-- ── Podium ─────────────────────────────────────────────────────────────── -->
+<div class="podium" id="podium">
+    <div class="skeleton-line" style="width:80px;height:120px;border-radius:8px;"></div>
+    <div class="skeleton-line" style="width:80px;height:160px;border-radius:8px;"></div>
+    <div class="skeleton-line" style="width:80px;height:100px;border-radius:8px;"></div>
+</div>
+
+<!-- ── Full Rankings ──────────────────────────────────────────────────────── -->
+<p class="section-title">Full Rankings</p>
+<div class="lb-table" id="lbTable">
+    <div class="lb-header">
+        <div>Rank</div>
+        <div>Player</div>
+        <div>XP</div>
+        <div>Badges</div>
+    </div>
+    <div style="padding:2rem;text-align:center;">
+        <div class="skeleton-line" style="width:100%;height:20px;"></div>
+        <div class="skeleton-line" style="width:100%;height:20px;"></div>
+        <div class="skeleton-line" style="width:100%;height:20px;"></div>
+    </div>
+</div>
+
+<script>window.SIDEBAR_PAGE = 'leaderboard';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API    = 'http://localhost:3000/api';
+const token  = localStorage.getItem('token');
+const me     = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!me.id) { location.href = 'login.html'; }
+
+let currentLang = 'all';
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadLeaderboard('all');
+});
+
+function switchLang(lang, btn) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    loadLeaderboard(lang);
+}
+
+async function loadLeaderboard(lang) {
+    document.getElementById('podium').innerHTML = `
+        <div class="skeleton-line" style="width:80px;height:120px;border-radius:8px;"></div>
+        <div class="skeleton-line" style="width:80px;height:160px;border-radius:8px;"></div>
+        <div class="skeleton-line" style="width:80px;height:100px;border-radius:8px;"></div>`;
+    document.getElementById('lbTable').innerHTML = `<div class="lb-header">
+        <div>Rank</div><div>Player</div><div>XP</div><div>Badges</div></div>
+        <div style="padding:2rem;text-align:center;">
+            <div class="skeleton-line" style="width:100%;height:20px;"></div>
+            <div class="skeleton-line" style="width:100%;height:20px;"></div>
+        </div>`;
+
+    try {
+        const url = lang === 'all'
+            ? `${API}/leaderboard`
+            : `${API}/leaderboard?language=${lang}`;
+        const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        let players = [];
+
+        if (res.ok) {
+            const data = await res.json();
+            players = data.leaderboard || data.players || data || [];
+        } else {
+            // Fallback: use local user data
+            players = [{ user_id: me.id, full_name: me.fullName || me.name || 'You', total_xp: me.xp || 0, badge_count: 0 }];
+        }
+
+        renderLeaderboard(players);
+    } catch {
+        // Offline fallback
+        const fallback = [{ user_id: me.id, full_name: me.fullName || me.name || 'You', total_xp: me.xp || 0, badge_count: 0 }];
+        renderLeaderboard(fallback);
+    }
+}
+
+function renderLeaderboard(players) {
+    // Sort by XP desc
+    players = [...players].sort((a, b) => (b.total_xp || b.xp || 0) - (a.total_xp || a.xp || 0));
+
+    // My rank
+    const myIdx = players.findIndex(p => (p.user_id || p.id) === me.id);
+    const myRankCard = document.getElementById('myRankCard');
+    if (myIdx >= 0) {
+        myRankCard.style.display = 'flex';
+        document.getElementById('myRankNum').textContent  = `#${myIdx + 1}`;
+        document.getElementById('myRankSub').textContent  = `out of ${players.length} players`;
+        document.getElementById('myXPDisplay').textContent = ((players[myIdx].total_xp || players[myIdx].xp || 0)).toLocaleString() + ' XP';
+    } else {
+        myRankCard.style.display = 'none';
+    }
+
+    // Podium (top 3)
+    renderPodium(players.slice(0, 3));
+
+    // Table
+    renderTable(players);
+}
+
+function renderPodium(top) {
+    const podium = document.getElementById('podium');
+    if (!top.length) { podium.innerHTML = ''; return; }
+
+    const order = [top[1], top[0], top[2]]; // 2nd, 1st, 3rd visual order
+    const slotClass = ['slot-2', 'slot-1', 'slot-3'];
+    const medals    = ['🥈', '🥇', '🥉'];
+    const crowns    = ['', '👑', ''];
+    const rankNums  = [2, 1, 3];
+
+    podium.innerHTML = order.map((p, i) => {
+        if (!p) return '';
+        const name   = p.full_name || p.fullName || p.name || 'Player';
+        const xp     = (p.total_xp || p.xp || 0).toLocaleString();
+        const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        return `
+        <div class="podium-slot ${slotClass[i]}">
+            <div class="podium-avatar">
+                ${crowns[i] ? `<span class="crown">${crowns[i]}</span>` : ''}
+                ${initials}
+            </div>
+            <div class="podium-name">${esc(name.split(' ')[0])}</div>
+            <div class="podium-xp">${xp} XP</div>
+            <div class="podium-block">${medals[i]}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderTable(players) {
+    const table = document.getElementById('lbTable');
+    if (!players.length) {
+        table.innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">emoji_events</span>
+            No rankings yet. Start learning to earn XP!</div>`;
+        return;
+    }
+
+    const rows = players.slice(0,50).map((p, i) => {
+        const rank    = i + 1;
+        const name    = p.full_name || p.fullName || p.name || 'Player';
+        const xp      = (p.total_xp || p.xp || 0).toLocaleString();
+        const badges  = p.badge_count || 0;
+        const isMe    = (p.user_id || p.id) === me.id;
+        const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+        const colors   = ['#7c3aed','#06b6d4','#10b981','#f59e0b','#ef4444'];
+        const bg       = colors[(p.user_id || p.id || i) % colors.length];
+        return `
+        <div class="lb-row${isMe ? ' me' : ''}">
+            <div class="lb-rank${rank <= 3 ? ' top' : ''}">${rankIcon}</div>
+            <div class="lb-user">
+                <div class="lb-avatar" style="background:${bg};">${initials}</div>
+                <span class="lb-name">${esc(name)}${isMe ? `<span class="lb-you">you</span>` : ''}</span>
+            </div>
+            <div class="lb-xp">${xp} <span style="font-size:0.7rem;color:var(--text-muted);">XP</span></div>
+            <div class="lb-badge">${badges} 🏅</div>
+        </div>`;
+    }).join('');
+
+    table.innerHTML = `<div class="lb-header">
+        <div>Rank</div><div>Player</div><div>XP</div><div>Badges</div>
+    </div>${rows}`;
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

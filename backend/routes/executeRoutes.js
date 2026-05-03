@@ -3,18 +3,18 @@
  * CODE EXECUTION ROUTES (executeRoutes.js)
  * ============================================================================
  *
- * PURPOSE:
- * Executes student code locally using installed language runtimes.
- * Supports Python, Java, and C++.
+ * Generic, config-driven code executor. The list of supported languages and
+ * their compile/run commands live in backend/config/languages.js (`runConfig`).
  *
- * ENDPOINTS:
- * POST /api/execute - Execute code in a given language
+ * To support a new language for execution:
+ *   1. Make sure the language exists in backend/config/languages.js
+ *   2. Add a `runConfig` object to that language entry
+ *   3. (Optional) Place a portable compiler in <project-root>/compilers/<key>/
  *
- * EXECUTION:
- * Uses Node.js child_process to run code via locally installed compilers:
- * - Python: py launcher (Windows) or python3/python
- * - Java: javac + java
- * - C++: g++
+ * That's it — this file does not need to change.
+ *
+ * Endpoint:
+ *   POST /api/execute  { language, code }
  * ============================================================================
  */
 
@@ -25,312 +25,214 @@ const path = require('path');
 const os = require('os');
 const router = express.Router();
 
-const TIMEOUT = 10000; // 10 second execution timeout
-const MAX_OUTPUT = 10000; // Max output characters
-const MAX_CODE_LENGTH = 50000; // 50KB max code size
+const { getInternalLanguage, getAllInternal } = require('./languageRoutes');
 
-// Dangerous patterns that should not appear in student code
+// ─── Bundled compiler discovery ──────────────────────────────────────────────
+const COMPILERS_DIR = path.join(__dirname, '..', '..', 'compilers');
+
+function bundled(relPath) {
+    const full = path.join(COMPILERS_DIR, relPath);
+    return fs.existsSync(full) ? full : null;
+}
+
+const BUNDLED = {
+    python: bundled('python/python.exe'),
+    javac:  bundled('java/bin/javac.exe'),
+    java:   bundled('java/bin/java.exe'),
+    gpp:    bundled('cpp/bin/g++.exe'),
+    node:   process.execPath, // Node always available — running this server
+};
+
+// ─── Limits ──────────────────────────────────────────────────────────────────
+const TIMEOUT         = 10000;  // 10s execution timeout
+const MAX_OUTPUT      = 10000;  // max output chars
+const MAX_CODE_LENGTH = 50000;  // 50KB max code
+
+// ─── Security: dangerous pattern check (language-agnostic best-effort) ───────
 const DANGEROUS_PATTERNS = [
-    // File system access
     /\b(os\.system|subprocess|__import__|eval|exec)\b/i,
     /\b(Runtime\.getRuntime|ProcessBuilder)\b/,
     /\bsystem\s*\(/,
     /\bpopen\s*\(/,
-    // Network access
     /\b(socket|urllib|requests|httplib|http\.client)\b/i,
     /\b(ServerSocket|URLConnection|HttpURLConnection)\b/,
-    // Dangerous file operations
     /\b(rmdir|unlink|remove|shutil\.rmtree)\b/i,
     /\b(File\.delete|Files\.delete|FileUtils)\b/,
-    // Process/command execution
-    /\bchild_process\b/
+    /\bchild_process\b/,
 ];
 
-/**
- * Check code for dangerous patterns
- * @returns {string|null} Warning message or null if safe
- */
 function checkDangerousPatterns(code) {
     for (const pattern of DANGEROUS_PATTERNS) {
-        if (pattern.test(code)) {
-            return `Code contains potentially dangerous operations. Pattern matched: ${pattern.source}`;
-        }
+        if (pattern.test(code)) return `Code contains potentially dangerous operations. Pattern matched: ${pattern.source}`;
     }
     return null;
 }
 
-/**
- * Create a unique temp directory for each execution
- */
+// ─── Temp dir helpers ────────────────────────────────────────────────────────
 function createTempDir() {
     const dir = path.join(os.tmpdir(), 'codearena_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
     fs.mkdirSync(dir, { recursive: true });
     return dir;
 }
 
-/**
- * Clean up temp directory
- */
 function cleanupDir(dir) {
-    try {
-        fs.rmSync(dir, { recursive: true, force: true });
-    } catch (e) {
-        // Ignore cleanup errors
-    }
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
 }
 
-/**
- * Truncate output if too long
- */
 function truncate(str, max) {
-    if (str && str.length > max) {
-        return str.slice(0, max) + '\n... (output truncated)';
-    }
+    if (str && str.length > max) return str.slice(0, max) + '\n... (output truncated)';
     return str || '';
 }
 
-/**
- * Execute Python code
- */
-function executePython(code, tempDir) {
+// ─── Try a list of commands until one resolves (handles ENOENT) ──────────────
+function execWithFallback(commands, args, options) {
     return new Promise((resolve) => {
-        const filePath = path.join(tempDir, 'main.py');
-        fs.writeFileSync(filePath, code, 'utf8');
-
-        // Try 'py' (Windows launcher), then 'python3', then 'python'
-        const commands = ['py', 'python3', 'python'];
-        let tried = 0;
-
-        function tryNext() {
-            if (tried >= commands.length) {
-                resolve({
-                    success: false,
-                    output: '',
-                    stderr: 'Python is not installed or not found in PATH. Please install Python.',
-                    exitCode: 1
-                });
+        let i = 0;
+        const tryNext = () => {
+            if (i >= commands.length) {
+                resolve({ enoent: true });
                 return;
             }
-
-            const cmd = commands[tried];
-            tried++;
-
-            const proc = execFile(cmd, [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-                if (error && error.code === 'ENOENT') {
-                    // Command not found, try next
-                    tryNext();
-                    return;
-                }
-
-                resolve({
-                    success: true,
-                    output: truncate(stdout, MAX_OUTPUT),
-                    stderr: truncate(stderr, MAX_OUTPUT),
-                    exitCode: error ? error.code || 1 : 0
-                });
+            const cmd = commands[i++];
+            execFile(cmd, args, options, (error, stdout, stderr) => {
+                if (error && error.code === 'ENOENT') return tryNext();
+                resolve({ error, stdout, stderr });
             });
-        }
-
+        };
         tryNext();
     });
 }
 
-/**
- * Execute JavaScript (Node.js) code
- */
-function executeJavaScript(code, tempDir) {
-    return new Promise((resolve) => {
-        const filePath = path.join(tempDir, 'main.js');
-        fs.writeFileSync(filePath, code, 'utf8');
+// ─── Generic runner driven by runConfig ──────────────────────────────────────
+async function executeWithConfig(lang, code, tempDir) {
+    const cfg = lang.runConfig;
+    if (!cfg) {
+        return {
+            success: false,
+            output: '',
+            stderr: `Execution is not configured for ${lang.name}.`,
+            exitCode: 1,
+        };
+    }
 
-        execFile('node', [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-            if (error && error.code === 'ENOENT') {
-                resolve({
-                    success: false,
-                    output: '',
-                    stderr: 'Node.js is not installed or not found in PATH.',
-                    exitCode: 1
-                });
-                return;
-            }
-            resolve({
-                success: true,
-                output: truncate(stdout, MAX_OUTPUT),
-                stderr: truncate(stderr, MAX_OUTPUT),
-                exitCode: error ? error.code || 1 : 0
-            });
-        });
-    });
+    // 1. Resolve filename — for Java, derive from public class name in the code
+    let filename  = cfg.filename;
+    let className = null;
+    if (cfg.classNameFromCode) {
+        const m = code.match(/public\s+class\s+(\w+)/);
+        className = m ? m[1] : 'Main';
+        filename  = `${className}.${lang.extension}`;
+    }
+    if (!filename) filename = `main.${lang.extension}`;
+
+    const srcPath = path.join(tempDir, filename);
+    const outPath = cfg.outputFilename ? path.join(tempDir, cfg.outputFilename) : null;
+    fs.writeFileSync(srcPath, code, 'utf8');
+
+    // Build compile/run command lists (bundled first, then fallbacks)
+    const compileCmds = [
+        BUNDLED[cfg.bundledKey],
+        ...(cfg.fallbackCmds || []),
+    ].filter(Boolean);
+
+    const runCmds = cfg.runBundledKey
+        ? [BUNDLED[cfg.runBundledKey], ...(cfg.runFallbackCmds || [])].filter(Boolean)
+        : compileCmds;
+
+    const execOpts = { timeout: TIMEOUT, maxBuffer: 1024 * 1024 };
+
+    // 2. Compile (if needed)
+    if (cfg.compile) {
+        const compileArgs = cfg.compile(srcPath, outPath, tempDir, className);
+        const compileRes  = await execWithFallback(compileCmds, compileArgs, execOpts);
+        if (compileRes.enoent) {
+            return { success: false, output: '', stderr: cfg.errorHint || 'Compiler not installed.', exitCode: 1 };
+        }
+        if (compileRes.error) {
+            return {
+                success:  true,
+                output:   '',
+                stderr:   truncate(compileRes.stderr || compileRes.error.message, MAX_OUTPUT),
+                exitCode: 1,
+            };
+        }
+    }
+
+    // 3. Run
+    let runArgs;
+    let runCmdList = runCmds;
+
+    if (cfg.runBinary === 'output' && outPath) {
+        // Run the compiled binary directly (e.g. C++)
+        runCmdList = [outPath];
+        runArgs    = [];
+    } else {
+        runArgs = cfg.run ? cfg.run(srcPath, outPath, tempDir, className) : [srcPath];
+    }
+
+    const runRes = await execWithFallback(runCmdList, runArgs, execOpts);
+    if (runRes.enoent) {
+        return { success: false, output: '', stderr: cfg.errorHint || 'Runtime not installed.', exitCode: 1 };
+    }
+    return {
+        success:  true,
+        output:   truncate(runRes.stdout, MAX_OUTPUT),
+        stderr:   truncate(runRes.stderr, MAX_OUTPUT),
+        exitCode: runRes.error ? (runRes.error.code || 1) : 0,
+    };
 }
 
-/**
- * Execute Java code
- */
-function executeJava(code, tempDir) {
-    return new Promise((resolve) => {
-        // Java requires the class name to match the filename
-        // Extract public class name or default to Main
-        const classMatch = code.match(/public\s+class\s+(\w+)/);
-        const className = classMatch ? classMatch[1] : 'Main';
-        const filePath = path.join(tempDir, className + '.java');
-        fs.writeFileSync(filePath, code, 'utf8');
-
-        // Compile
-        execFile('javac', [filePath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (compileErr, compileOut, compileStderr) => {
-            if (compileErr) {
-                if (compileErr.code === 'ENOENT') {
-                    resolve({
-                        success: false,
-                        output: '',
-                        stderr: 'Java compiler (javac) is not installed or not found in PATH.',
-                        exitCode: 1
-                    });
-                    return;
-                }
-                resolve({
-                    success: true,
-                    output: '',
-                    stderr: truncate(compileStderr || compileErr.message, MAX_OUTPUT),
-                    exitCode: 1
-                });
-                return;
-            }
-
-            // Run
-            execFile('java', ['-cp', tempDir, className], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (runErr, stdout, stderr) => {
-                resolve({
-                    success: true,
-                    output: truncate(stdout, MAX_OUTPUT),
-                    stderr: truncate(stderr, MAX_OUTPUT),
-                    exitCode: runErr ? runErr.code || 1 : 0
-                });
-            });
-        });
-    });
-}
-
-/**
- * Execute C++ code
- */
-function executeCpp(code, tempDir) {
-    return new Promise((resolve) => {
-        const srcPath = path.join(tempDir, 'main.cpp');
-        const outPath = path.join(tempDir, 'main.exe');
-        fs.writeFileSync(srcPath, code, 'utf8');
-
-        // Compile with g++ using execFile (safer than exec)
-        execFile('g++', ['-static', srcPath, '-o', outPath], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (compileErr, compileOut, compileStderr) => {
-            if (compileErr) {
-                if (compileErr.code === 'ENOENT') {
-                    resolve({
-                        success: false,
-                        output: '',
-                        stderr: 'C++ compiler (g++) is not installed or not found in PATH.',
-                        exitCode: 1
-                    });
-                    return;
-                }
-                resolve({
-                    success: true,
-                    output: '',
-                    stderr: truncate(compileStderr || compileErr.message, MAX_OUTPUT),
-                    exitCode: 1
-                });
-                return;
-            }
-
-            // Run the compiled executable using execFile (safer than exec)
-            execFile(outPath, [], { timeout: TIMEOUT, maxBuffer: 1024 * 1024 }, (runErr, stdout, stderr) => {
-                resolve({
-                    success: true,
-                    output: truncate(stdout, MAX_OUTPUT),
-                    stderr: truncate(stderr, MAX_OUTPUT),
-                    exitCode: runErr ? runErr.code || 1 : 0
-                });
-            });
-        });
-    });
-}
-
-/**
- * POST /api/execute
- * Execute code locally using installed language runtimes
- *
- * Request Body:
- * {
- *   "language": "python" | "java" | "cpp",
- *   "code": "print('Hello')"
- * }
- */
+// ─── POST /api/execute ───────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
     const { language, code } = req.body;
 
     if (!language || !code) {
-        return res.status(400).json({
-            success: false,
-            message: 'Language and code are required.'
-        });
+        return res.status(400).json({ success: false, message: 'Language and code are required.' });
     }
-
-    const supported = ['python', 'javascript', 'java', 'cpp'];
-    if (!supported.includes(language)) {
-        return res.status(400).json({
-            success: false,
-            message: `Unsupported language: ${language}. Use python, javascript, java, or cpp.`
-        });
-    }
-
-    // SECURITY: Code length limit
     if (code.length > MAX_CODE_LENGTH) {
+        return res.status(400).json({ success: false, message: `Code exceeds maximum length of ${MAX_CODE_LENGTH} characters.` });
+    }
+
+    const lang = getInternalLanguage(language);
+    if (!lang) {
+        const supported = getAllInternal().filter(l => l.runConfig).map(l => l.code).join(', ');
         return res.status(400).json({
             success: false,
-            message: `Code exceeds maximum length of ${MAX_CODE_LENGTH} characters.`
+            message: `Unsupported language: ${language}. Supported: ${supported}`,
+        });
+    }
+    if (!lang.runConfig) {
+        return res.status(400).json({
+            success: false,
+            message: `${lang.name} is available for lessons but not for code execution.`,
         });
     }
 
-    // SECURITY: Check for dangerous patterns
     const dangerWarning = checkDangerousPatterns(code);
     if (dangerWarning) {
         return res.status(400).json({
             success: false,
             message: 'Code contains disallowed operations for security reasons.',
-            detail: dangerWarning
+            detail:  dangerWarning,
         });
     }
 
     const tempDir = createTempDir();
-
     try {
-        let result;
-
-        switch (language) {
-            case 'python':
-                result = await executePython(code, tempDir);
-                break;
-            case 'javascript':
-                result = await executeJavaScript(code, tempDir);
-                break;
-            case 'java':
-                result = await executeJava(code, tempDir);
-                break;
-            case 'cpp':
-                result = await executeCpp(code, tempDir);
-                break;
-        }
-
+        const result = await executeWithConfig(lang, code, tempDir);
         res.json({
-            success: result.success,
-            output: result.output,
-            stderr: result.stderr,
+            success:  result.success,
+            output:   result.output,
+            stderr:   result.stderr,
             exitCode: result.exitCode,
-            language: language
+            language: lang.code,
         });
     } catch (err) {
         res.status(500).json({
             success: false,
             message: 'Code execution failed unexpectedly.',
-            output: '',
-            stderr: err.message || 'Internal error'
+            output:  '',
+            stderr:  err.message || 'Internal error',
         });
     } finally {
         cleanupDir(tempDir);

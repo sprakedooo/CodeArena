@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .welcome-banner { margin-bottom: 1.75rem; }
+        .welcome-banner h1 { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+        .welcome-banner p { color: var(--text-secondary); font-size: 0.88rem; }
+
+        .section-title {
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.4px;
+            color: var(--text-muted); margin: 1.6rem 0 0.8rem;
+        }
+
+        /* Stat strip */
+        .stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
+        .stat-chip {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem 1.15rem;
+            display: flex; align-items: center; gap: 0.85rem;
+        }
+        .stat-chip-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-chip-icon .material-symbols-outlined { font-size: 1.25rem; }
+        .stat-chip-val { font-size: 1.35rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+        .stat-chip-lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 0.15rem; }
+        .chip-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .chip-cyan   { background: rgba(6,182,212,0.15);  color: #22d3ee; }
+        .chip-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+        .chip-gold   { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+        /* Quick actions */
+        .quick-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.85rem; margin-bottom: 0.5rem; }
+        .quick-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.1rem 1rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            text-decoration: none; color: var(--text);
+            transition: all 0.18s; cursor: pointer;
+        }
+        .quick-card:hover { border-color: var(--primary); background: var(--bg-card-hover); transform: translateY(-1px); }
+        .quick-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .quick-icon .material-symbols-outlined { font-size: 1.2rem; }
+        .quick-label { font-size: 0.85rem; font-weight: 600; }
+        .quick-sub   { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+        /* Classroom grid */
+        .classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .cl-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.3rem 1.4rem;
+            display: flex; flex-direction: column; gap: 0.9rem;
+            transition: all 0.18s;
+        }
+        .cl-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--glow-primary); }
+        .cl-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+        .cl-card-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .cl-lang-badge {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 0.22rem 0.55rem; border-radius: 20px; flex-shrink: 0;
+            background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3);
+        }
+        .cl-lang-badge.js  { background: rgba(251,191,36,0.12); color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+        .cl-lang-badge.java{ background: rgba(239,68,68,0.12);  color: #f87171; border-color: rgba(239,68,68,0.3);  }
+        .cl-lang-badge.cpp { background: rgba(6,182,212,0.12);  color: #22d3ee; border-color: rgba(6,182,212,0.3);  }
+
+        .cl-card-meta { display: flex; align-items: center; gap: 1rem; }
+        .cl-meta-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.77rem; color: var(--text-muted); }
+        .cl-meta-item .material-symbols-outlined { font-size: 0.95rem; }
+
+        .cl-key-chip {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
+            padding: 0.28rem 0.65rem; border-radius: 6px;
+            background: var(--bg-surface); border: 1px dashed var(--border);
+            color: var(--text-muted); font-family: 'Courier New', monospace;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .cl-key-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .cl-key-chip.copied { border-color: var(--success); color: var(--success); }
+
+        .cl-card-actions { display: flex; gap: 0.5rem; }
+        .cl-card-actions .btn { flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; }
+
+        /* AI Insights panel */
+        .insights-panel {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.4rem 1.5rem;
+        }
+        .insights-header {
+            display: flex; align-items: center; gap: 0.6rem;
+            margin-bottom: 1.1rem;
+        }
+        .insights-header .material-symbols-outlined { font-size: 1.3rem; color: var(--primary); }
+        .insights-header h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0; }
+
+        .insights-spinner { text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.82rem; }
+        .spinner-ring {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 3px solid var(--bg-surface); border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .insight-item { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
+        .insight-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0.22rem 0.55rem; border-radius: 20px; width: fit-content;
+        }
+        .badge-high   { background: rgba(239,68,68,0.15);  color: #f87171; }
+        .badge-medium { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .badge-low    { background: rgba(16,185,129,0.15); color: #34d399; }
+        .badge-info   { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .insight-text { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55; }
+
+        .topics-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+        .topic-pill {
+            font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 20px;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        .tip-box {
+            background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2);
+            border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-top: 0.75rem;
+            font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55;
+        }
+        .tip-box strong { color: var(--primary); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 2.5rem 1rem;
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+        .empty-state .material-symbols-outlined { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.75rem;
+            width: 100%; max-width: 420px;
+        }
+        .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 1.1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select {
+            width: 100%; background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.6rem 0.85rem; color: var(--text);
+            font-size: 0.88rem; outline: none; box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+        .modal-actions { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+        .modal-actions .btn { flex: 1; justify-content: center; }
+
+        /* Error / toast */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.75rem 1.1rem;
+            font-size: 0.83rem; color: var(--text); z-index: 2000;
+            display: none; align-items: center; gap: 0.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show { display: flex; }
+        .toast.success { border-color: var(--success); }
+        .toast.error   { border-color: var(--danger); }
+
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity: 0.5; } 50%{ opacity: 1; } }
+
+        @media (max-width: 720px) {
+            .stat-strip { grid-template-columns: repeat(2,1fr); }
+            .quick-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Welcome Banner ──────────────────────────────────────────────────────── -->
+<div class="welcome-banner">
+    <h1 id="welcomeMsg">Welcome, Professor! 🎓</h1>
+    <p id="welcomeSub">Manage your classrooms and track student progress.</p>
+</div>
+
+<!-- ── Stat Strip ──────────────────────────────────────────────────────────── -->
+<div class="stat-strip">
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-purple">
+            <span class="material-symbols-outlined">meeting_room</span>
+        </div>
+        <div>
+            <div class="stat-chip-val" id="statClassrooms">—</div>
+            <div class="stat-chip-lbl">Classrooms</div>
+        </div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-cyan">
+            <span class="material-symbols-outlined">group</span>
+        </div>
+        <div>
+            <div class="stat-chip-val" id="statStudents">—</div>
+            <div class="stat-chip-lbl">Total Students</div>
+        </div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-green">
+            <span class="material-symbols-outlined">sports_esports</span>
+        </div>
+        <div>
+            <div class="stat-chip-val" id="statSessions">—</div>
+            <div class="stat-chip-lbl">Sessions Run</div>
+        </div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-gold">
+            <span class="material-symbols-outlined">workspace_premium</span>
+        </div>
+        <div>
+            <div class="stat-chip-val" id="statAvgScore">—</div>
+            <div class="stat-chip-lbl">Avg Accuracy</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Quick Actions ───────────────────────────────────────────────────────── -->
+<p class="section-title">Quick Actions</p>
+<div class="quick-grid">
+    <button class="quick-card" onclick="openCreateModal()">
+        <div class="quick-icon chip-purple"><span class="material-symbols-outlined">add_circle</span></div>
+        <div>
+            <div class="quick-label">Create Classroom</div>
+            <div class="quick-sub">Set up a new class</div>
+        </div>
+    </button>
+    <a href="admin.html" class="quick-card">
+        <div class="quick-icon chip-cyan"><span class="material-symbols-outlined">edit_note</span></div>
+        <div>
+            <div class="quick-label">Manage Content</div>
+            <div class="quick-sub">Lessons &amp; questions</div>
+        </div>
+    </a>
+    <a href="profile.html" class="quick-card">
+        <div class="quick-icon chip-green"><span class="material-symbols-outlined">person</span></div>
+        <div>
+            <div class="quick-label">Your Profile</div>
+            <div class="quick-sub">Settings &amp; account</div>
+        </div>
+    </a>
+</div>
+
+<!-- ── Classrooms ─────────────────────────────────────────────────────────── -->
+<p class="section-title" id="classrooms" style="scroll-margin-top: 80px;">My Classrooms</p>
+<div id="classroomGrid" class="classroom-grid">
+    <!-- skeleton -->
+    <div class="cl-card"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:40%"></div></div>
+    <div class="cl-card"><div class="skeleton-line" style="width:55%"></div><div class="skeleton-line" style="width:35%"></div></div>
+</div>
+
+<!-- ── AI Teaching Insights ───────────────────────────────────────────────── -->
+<p class="section-title">AI Teaching Insights</p>
+<div class="insights-panel">
+    <div class="insights-header">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        <h3>AI-Powered Classroom Intelligence</h3>
+        <button class="btn btn-secondary" style="margin-left:auto;font-size:0.75rem;padding:0.4rem 0.75rem;" onclick="loadInsights(true)">
+            <span class="material-symbols-outlined" style="font-size:0.9rem;">refresh</span>
+            Refresh
+        </button>
+    </div>
+    <div id="insightsContent">
+        <div class="insights-spinner">
+            <div class="spinner-ring"></div>
+            Generating insights with AI…
+        </div>
+    </div>
+</div>
+
+<!-- ── Create Classroom Modal ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+        <div class="modal-title">Create New Classroom</div>
+        <div class="form-group">
+            <label>Classroom Name</label>
+            <input type="text" id="clName" placeholder="e.g. Python Fundamentals — Section A" maxlength="80">
+        </div>
+        <div class="form-group">
+            <label>Language</label>
+            <select id="clLanguage">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description (optional)</label>
+            <input type="text" id="clDesc" placeholder="Short description…" maxlength="200">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="createClassroom()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">add</span>
+                Create
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toastIcon">info</span>
+    <span id="toastMsg">—</span>
+</div>
+
+<script>window.SIDEBAR_ROLE = 'faculty'; window.SIDEBAR_PAGE = 'dashboard';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+// ── Auth guard
+if (!user.id) { location.href = 'login.html'; }
+if (user.role !== 'faculty') { location.href = 'dashboard.html'; }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const firstName = (user.fullName || user.name || 'Professor').split(' ')[0];
+    document.getElementById('welcomeMsg').textContent = `Welcome back, ${firstName}! 🎓`;
+
+    loadClassrooms();
+    loadInsights(false);
+});
+
+// ─── Load Classrooms ──────────────────────────────────────────────────────────
+async function loadClassrooms() {
+    try {
+        const res = await fetch(`${API}/classrooms/mine`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const classrooms = data.classrooms || data || [];
+        renderClassrooms(classrooms);
+        updateStats(classrooms);
+    } catch (err) {
+        console.error('loadClassrooms:', err);
+        document.getElementById('classroomGrid').innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">error_outline</span>
+            Could not load classrooms. Is the backend running?</div>`;
+    }
+}
+
+function updateStats(classrooms) {
+    document.getElementById('statClassrooms').textContent = classrooms.length;
+    const total = classrooms.reduce((s, c) => s + (c.student_count || c.studentCount || 0), 0);
+    document.getElementById('statStudents').textContent   = total;
+    const sessions = classrooms.reduce((s, c) => s + (c.session_count || 0), 0);
+    document.getElementById('statSessions').textContent   = sessions || '—';
+    document.getElementById('statAvgScore').textContent   = '—';
+}
+
+function renderClassrooms(classrooms) {
+    const grid = document.getElementById('classroomGrid');
+    if (!classrooms.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+            <span class="material-symbols-outlined">meeting_room</span>
+            No classrooms yet. Create your first one!
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = classrooms.map(c => {
+        const lang = (c.language || 'python').toLowerCase();
+        const key  = c.enrollment_key || c.enrollmentKey || '????-????';
+        const count = c.student_count || c.studentCount || 0;
+        const langClass = lang === 'javascript' ? 'js' : lang === 'java' ? 'java' : lang === 'cpp' ? 'cpp' : '';
+        return `
+        <div class="cl-card">
+            <div class="cl-card-header">
+                <div class="cl-card-name">${esc(c.name)}</div>
+                <span class="cl-lang-badge ${langClass}">${lang}</span>
+            </div>
+            <div class="cl-card-meta">
+                <span class="cl-meta-item">
+                    <span class="material-symbols-outlined">group</span>
+                    ${count} student${count !== 1 ? 's' : ''}
+                </span>
+                ${c.description ? `<span class="cl-meta-item">${esc(c.description).slice(0,40)}…</span>` : ''}
+            </div>
+            <div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.5px;">Enrollment Key</div>
+                <span class="cl-key-chip" onclick="copyKey(this,'${key}')" title="Click to copy">${key}</span>
+            </div>
+            <div class="cl-card-actions">
+                <a href="classroom_manage.html?id=${c.classroom_id || c.id}" class="btn btn-secondary">
+                    <span class="material-symbols-outlined" style="font-size:0.95rem;">edit</span>
+                    Manage
+                </a>
+                <a href="classroom_room.html?id=${c.classroom_id || c.id}&role=faculty" class="btn btn-primary">
+                    <span class="material-symbols-outlined" style="font-size:0.95rem;">meeting_room</span>
+                    Enter
+                </a>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function copyKey(el, key) {
+    navigator.clipboard.writeText(key).then(() => {
+        el.textContent = 'Copied!';
+        el.classList.add('copied');
+        setTimeout(() => { el.textContent = key; el.classList.remove('copied'); }, 1800);
+    });
+}
+
+// ─── AI Teaching Insights ─────────────────────────────────────────────────────
+async function loadInsights(forceRefresh) {
+    const container = document.getElementById('insightsContent');
+    container.innerHTML = `<div class="insights-spinner"><div class="spinner-ring"></div>Generating insights with AI…</div>`;
+
+    try {
+        const res = await fetch(`${API}/ai/teaching-insights`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed');
+        renderInsights(data.insights);
+    } catch (err) {
+        container.innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">smart_toy</span>
+            AI insights unavailable. Create classrooms first, then try again.</div>`;
+    }
+}
+
+function renderInsights(ins) {
+    const container = document.getElementById('insightsContent');
+    if (!ins) { container.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">info</span>No insights yet.</div>`; return; }
+
+    const recommendations = ins.recommendations || [];
+    const weakTopics = ins.weak_topics || ins.weakTopics || [];
+    const tip = ins.teaching_tip || ins.teachingTip || '';
+    const summary = ins.summary || '';
+
+    let html = '';
+
+    if (summary) {
+        html += `<div class="insight-item">
+            <span class="insight-badge badge-info"><span class="material-symbols-outlined" style="font-size:0.85rem;">summarize</span> Summary</span>
+            <div class="insight-text">${esc(summary)}</div>
+        </div>`;
+    }
+
+    if (recommendations.length) {
+        html += `<div style="margin-bottom:0.6rem;font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;">Recommendations</div>`;
+        html += recommendations.map(r => {
+            const priority = (r.priority || 'medium').toLowerCase();
+            const cls = priority === 'high' ? 'badge-high' : priority === 'low' ? 'badge-low' : 'badge-medium';
+            return `<div class="insight-item">
+                <span class="insight-badge ${cls}">
+                    <span class="material-symbols-outlined" style="font-size:0.85rem;">${priority === 'high' ? 'priority_high' : 'info'}</span>
+                    ${priority.charAt(0).toUpperCase() + priority.slice(1)} Priority
+                </span>
+                <div class="insight-text">${esc(r.action || r.text || String(r))}</div>
+            </div>`;
+        }).join('');
+    }
+
+    if (weakTopics.length) {
+        html += `<div style="margin-bottom:0.4rem;font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;">Common Weak Topics</div>
+        <div class="topics-grid">${weakTopics.map(t => `<span class="topic-pill">${esc(String(t))}</span>`).join('')}</div>`;
+    }
+
+    if (tip) {
+        html += `<div class="tip-box"><strong>💡 Teaching Tip:</strong> ${esc(tip)}</div>`;
+    }
+
+    if (!html) {
+        html = `<div class="empty-state"><span class="material-symbols-outlined">school</span>Add students to your classrooms to get AI-powered insights.</div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+// ─── Create classroom modal ───────────────────────────────────────────────────
+function openCreateModal()  { document.getElementById('createModal').classList.add('open'); }
+function closeCreateModal() { document.getElementById('createModal').classList.remove('open'); }
+
+async function createClassroom() {
+    const name     = document.getElementById('clName').value.trim();
+    const language = document.getElementById('clLanguage').value;
+    const desc     = document.getElementById('clDesc').value.trim();
+    if (!name) { showToast('Classroom name is required', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API}/classrooms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ name, language, description: desc })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed');
+        closeCreateModal();
+        document.getElementById('clName').value = '';
+        document.getElementById('clDesc').value = '';
+        showToast(`Classroom "${name}" created! Key: ${data.classroom?.enrollment_key || ''}`, 'success');
+        loadClassrooms();
+    } catch (err) {
+        showToast(err.message || 'Failed to create classroom', 'error');
+    }
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+    const t  = document.getElementById('toast');
+    const ic = document.getElementById('toastIcon');
+    document.getElementById('toastMsg').textContent = msg;
+    ic.textContent = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal on overlay click
+document.getElementById('createModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCreateModal();
+});
+</script>
+</body>
+</html>

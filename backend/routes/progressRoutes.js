@@ -208,10 +208,10 @@ router.get('/:userId/:language', async (req, res) => {
     const language = req.params.language.toLowerCase();
 
     // Validate language
-    if (!['python', 'java', 'cpp'].includes(language)) {
+    if (!['python', 'javascript', 'java', 'cpp'].includes(language)) {
         return res.status(400).json({
             success: false,
-            message: 'Invalid language. Use: python, java, or cpp'
+            message: 'Invalid language. Use: python, javascript, java, or cpp'
         });
     }
 
@@ -252,9 +252,13 @@ router.get('/:userId/:language', async (req, res) => {
     if (!userProgress[userId]) {
         userProgress[userId] = {
             python: createEmptyProgress(),
+            javascript: createEmptyProgress(),
             java: createEmptyProgress(),
             cpp: createEmptyProgress()
         };
+    }
+    if (!userProgress[userId][language]) {
+        userProgress[userId][language] = createEmptyProgress();
     }
 
     const langProgress = userProgress[userId][language];
@@ -315,7 +319,7 @@ router.get('/:userId/:language', async (req, res) => {
  *   "isCorrect": true
  * }
  */
-router.post('/update', (req, res) => {
+router.post('/update', async (req, res) => {
     const { userId, language, topic, isCorrect } = req.body;
 
     // VALIDATION
@@ -326,7 +330,49 @@ router.post('/update', (req, res) => {
         });
     }
 
-    // Initialize if needed
+    const lang = language.toLowerCase();
+
+    // Try database first
+    if (dbService.isDbAvailable()) {
+        try {
+            const dbProgress = await dbService.incrementProgress(userId, lang, isCorrect);
+            if (dbProgress) {
+                const langProgress = {
+                    questionsAnswered: dbProgress.questions_answered,
+                    correctAnswers: dbProgress.correct_answers,
+                    consecutiveCorrect: dbProgress.consecutive_correct,
+                    accuracy: parseFloat(dbProgress.accuracy_percent) || 0,
+                    level: dbProgress.current_level
+                };
+
+                const levelAdvancement = checkLevelAdvancement(langProgress);
+
+                if (levelAdvancement.shouldAdvance) {
+                    await dbService.updateProgress(userId, lang, {
+                        current_level: levelAdvancement.newLevel,
+                        consecutive_correct: 0
+                    });
+                    langProgress.level = levelAdvancement.newLevel;
+                }
+
+                return res.json({
+                    success: true,
+                    updated: true,
+                    currentStats: {
+                        questionsAnswered: langProgress.questionsAnswered,
+                        accuracy: langProgress.accuracy,
+                        consecutiveCorrect: langProgress.consecutiveCorrect,
+                        level: langProgress.level
+                    },
+                    levelAdvancement: levelAdvancement
+                });
+            }
+        } catch (error) {
+            console.error('Database progress update error:', error);
+        }
+    }
+
+    // Fallback to in-memory mock data
     if (!userProgress[userId]) {
         userProgress[userId] = {
             python: createEmptyProgress(),
@@ -335,23 +381,20 @@ router.post('/update', (req, res) => {
         };
     }
 
-    const langProgress = userProgress[userId][language.toLowerCase()];
+    const langProgress = userProgress[userId][lang];
 
-    // Update question counts
     langProgress.questionsAnswered++;
     if (isCorrect) {
         langProgress.correctAnswers++;
         langProgress.consecutiveCorrect++;
     } else {
-        langProgress.consecutiveCorrect = 0;  // Reset streak
+        langProgress.consecutiveCorrect = 0;
     }
 
-    // Update accuracy
     langProgress.accuracy = Math.round(
         (langProgress.correctAnswers / langProgress.questionsAnswered) * 100
     );
 
-    // Update topic progress
     if (!langProgress.topicProgress[topic]) {
         langProgress.topicProgress[topic] = { answered: 0, correct: 0 };
     }
@@ -360,18 +403,15 @@ router.post('/update', (req, res) => {
         langProgress.topicProgress[topic].correct++;
     }
 
-    // Update last active
     langProgress.lastActive = new Date().toISOString().split('T')[0];
 
-    // Check for level advancement
     const levelAdvancement = checkLevelAdvancement(langProgress);
 
     if (levelAdvancement.shouldAdvance) {
         langProgress.level = levelAdvancement.newLevel;
-        langProgress.consecutiveCorrect = 0;  // Reset for new level
+        langProgress.consecutiveCorrect = 0;
     }
 
-    // RESPONSE
     res.json({
         success: true,
         updated: true,
@@ -522,5 +562,37 @@ function checkLevelAdvancement(progress) {
 }
 
 // Export router and data
+// Shared helper so answerRoutes can update mock progress without going through HTTP
+function incrementMockProgress(userId, language, isCorrect, topic) {
+    const lang = language.toLowerCase();
+    if (!userProgress[userId]) {
+        userProgress[userId] = {
+            python: createEmptyProgress(),
+            javascript: createEmptyProgress(),
+            java: createEmptyProgress(),
+            cpp: createEmptyProgress()
+        };
+    }
+    if (!userProgress[userId][lang]) {
+        userProgress[userId][lang] = createEmptyProgress();
+    }
+    const p = userProgress[userId][lang];
+    p.questionsAnswered++;
+    if (isCorrect) {
+        p.correctAnswers++;
+        p.consecutiveCorrect++;
+    } else {
+        p.consecutiveCorrect = 0;
+    }
+    p.accuracy = Math.round((p.correctAnswers / p.questionsAnswered) * 100);
+    if (topic) {
+        if (!p.topicProgress[topic]) p.topicProgress[topic] = { answered: 0, correct: 0 };
+        p.topicProgress[topic].answered++;
+        if (isCorrect) p.topicProgress[topic].correct++;
+    }
+    p.lastActive = new Date().toISOString().split('T')[0];
+}
+
 module.exports = router;
 module.exports.userProgress = userProgress;
+module.exports.incrementMockProgress = incrementMockProgress;

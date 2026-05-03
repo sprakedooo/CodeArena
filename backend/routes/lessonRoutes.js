@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireFaculty } = require('../middleware/authMiddleware');
+const openaiService = require('../services/openaiService');
 
 let mockLessons = [
 
@@ -1302,13 +1303,18 @@ string <span class="function">greet</span>(string name) {
 // ROUTES
 // ─────────────────────────────────────────────────────────────────────────────
 
-// GET /api/lessons?language=python
+// GET /api/lessons?language=python&all=true (all=true is faculty-only for admin view)
 router.get('/', (req, res) => {
-    const { language } = req.query;
+    const { language, all } = req.query;
     let lessons = mockLessons;
 
     if (language) {
-        lessons = mockLessons.filter(l => l.language === language.toLowerCase());
+        lessons = lessons.filter(l => l.language === language.toLowerCase());
+    }
+
+    // Students only see shared lessons; faculty see all (all=true flag)
+    if (all !== 'true') {
+        lessons = lessons.filter(l => l.isShared !== false);
     }
 
     // Strip heavy HTML content for list view
@@ -1322,6 +1328,19 @@ router.get('/:id', (req, res) => {
     const lesson = mockLessons.find(l => l.id === id);
     if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
     res.json({ lesson });
+});
+
+// POST /api/lessons/generate — AI lesson generation (CMS)
+router.post('/generate', requireFaculty, async (req, res) => {
+    const { topic, language = 'python', difficulty = 'beginner' } = req.body;
+    if (!topic) return res.status(400).json({ success: false, message: 'Topic is required' });
+    try {
+        const lesson = await openaiService.generateLesson({ topic, language, difficulty });
+        return res.json({ success: true, lesson });
+    } catch (err) {
+        console.error('CMS lesson generation error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to generate lesson: ' + err.message });
+    }
 });
 
 // POST /api/lessons
@@ -1339,10 +1358,22 @@ router.post('/', requireFaculty, (req, res) => {
         difficulty: difficulty || 'beginner',
         orderNumber: orderNumber || mockLessons.length + 1,
         topics: topics || [],
+        isShared: false,  // Faculty-created lessons are unshared by default
         createdBy: 1
     };
     mockLessons.push(newLesson);
     res.status(201).json({ lesson: newLesson, message: 'Lesson created successfully' });
+});
+
+// PATCH /api/lessons/:id/share — toggle lesson sharing (faculty only)
+router.patch('/:id/share', requireFaculty, (req, res) => {
+    const id = parseInt(req.params.id);
+    const idx = mockLessons.findIndex(l => l.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Lesson not found' });
+
+    const { isShared } = req.body;
+    mockLessons[idx].isShared = isShared === true || isShared === 'true';
+    res.json({ lesson: mockLessons[idx], message: `Lesson ${mockLessons[idx].isShared ? 'shared' : 'unshared'} successfully` });
 });
 
 // PUT /api/lessons/:id

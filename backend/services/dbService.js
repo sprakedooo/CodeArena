@@ -68,10 +68,11 @@ async function createUser(userData) {
     if (!dbAvailable) return null;
 
     try {
+        const role = userData.role === 'faculty' ? 'faculty' : 'student';
         const result = await db.query(
-            `INSERT INTO users (email, password, full_name, selected_language)
-             VALUES (?, ?, ?, ?)`,
-            [userData.email, userData.password, userData.fullName, userData.selectedLanguage || null]
+            `INSERT INTO users (email, password, full_name, role, selected_language)
+             VALUES (?, ?, ?, ?, ?)`,
+            [userData.email, userData.password, userData.fullName, role, userData.selectedLanguage || null]
         );
         return { id: result.insertId, ...userData };
     } catch (error) {
@@ -88,7 +89,7 @@ async function updateUserLogin(userId) {
 
     try {
         await db.query(
-            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = ?',
+            'UPDATE users SET last_activity_at = CURRENT_TIMESTAMP WHERE user_id = ?',
             [userId]
         );
     } catch (error) {
@@ -169,9 +170,9 @@ async function saveAnswer(userId, questionId, selectedAnswer, isCorrect, pointsE
 
     try {
         const result = await db.query(
-            `INSERT INTO user_answers (user_id, question_id, selected_answer, is_correct, points_earned, hint_shown)
+            `INSERT INTO user_answers (user_id, question_id, selected_answer, is_correct, points_earned, hint_level_used)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [userId, questionId, selectedAnswer, isCorrect, pointsEarned, hintShown]
+            [userId, questionId, selectedAnswer, isCorrect, pointsEarned, hintShown || 0]
         );
         return result.insertId;
     } catch (error) {
@@ -330,15 +331,15 @@ async function addReward(userId, rewardType, pointsAmount = 0, badgeId = null, d
 
     try {
         const result = await db.query(
-            `INSERT INTO rewards (user_id, reward_type, points_amount, badge_id, description)
+            `INSERT INTO rewards (user_id, reward_type, xp_amount, badge_id, description)
              VALUES (?, ?, ?, ?, ?)`,
             [userId, rewardType, pointsAmount, badgeId, description]
         );
 
-        // Update user's total points
+        // Update user's total XP
         if (pointsAmount > 0) {
             await db.query(
-                `UPDATE users SET total_points = total_points + ? WHERE user_id = ?`,
+                `UPDATE users SET total_xp = total_xp + ? WHERE user_id = ?`,
                 [pointsAmount, userId]
             );
         }
