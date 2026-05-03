@@ -5,101 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Classroom — CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        /* ── Faculty Navbar ── */
-        .faculty-nav {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
+        /* ══════════════════════════════════════════
+           PAGE SHELL
+        ══════════════════════════════════════════ */
+        .manage-page {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px 28px 64px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ══════════════════════════════════════════
+           BREADCRUMB
+        ══════════════════════════════════════════ */
+        .breadcrumb {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 18%;
-            height: 64px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .faculty-nav .logo {
-            font-family: 'Press Start 2P', monospace;
+            gap: 6px;
             font-size: 0.8rem;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
         }
-        .logo-bracket { color: var(--secondary); }
-        .logo-code    { color: var(--primary); }
-        .logo-arena   { color: var(--text); }
-        .faculty-badge {
-            background: var(--primary-light);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            border-radius: 4px;
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .faculty-nav-links {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        .faculty-nav-links a {
+        .breadcrumb a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 6px;
-            transition: color 0.2s, background 0.2s;
+            transition: color 0.15s;
         }
-        .faculty-nav-links a:hover { color: var(--text); background: var(--bg-surface); }
-        .faculty-nav-links .logout-link {
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            border-radius: 6px;
-            padding: 5px 14px;
-        }
-        .faculty-nav-links .logout-link:hover { background: rgba(239,68,68,.1); color: var(--danger); }
+        .breadcrumb a:hover { color: var(--primary); }
+        .breadcrumb-sep { color: var(--border); }
 
-        /* ── Page ── */
-        .manage-page { padding: 40px 18%; min-height: calc(100vh - 64px); }
-
-        /* ── Classroom header ── */
-        .classroom-header {
+        /* ══════════════════════════════════════════
+           CLASSROOM HERO HEADER
+        ══════════════════════════════════════════ */
+        .classroom-hero {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 32px;
+            align-items: center;
+            gap: 24px;
         }
-        .classroom-header-left h1 {
+        .classroom-hero-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.8rem;
+        }
+        .classroom-hero-body { flex: 1; min-width: 0; }
+        .classroom-hero-name {
             font-family: 'Press Start 2P', monospace;
             font-size: 1rem;
             color: var(--text);
             margin: 0 0 6px;
+            line-height: 1.4;
         }
-        .classroom-header-left p {
+        .classroom-hero-desc {
+            font-size: 0.875rem;
             color: var(--text-secondary);
-            font-size: 0.85rem;
             margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .classroom-hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
         }
         .key-badge {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: var(--bg-surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px 16px;
         }
         .key-badge-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
+            font-size: 0.68rem;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -107,192 +102,366 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.75rem;
             color: var(--secondary);
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
         .copy-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--text-secondary);
-            transition: color 0.2s;
+            transition: color 0.15s;
+            padding: 0;
+            line-height: 1;
         }
         .copy-btn:hover { color: var(--primary); }
+        .hero-stats {
+            display: flex;
+            gap: 12px;
+        }
+        .hero-stat {
+            text-align: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            min-width: 70px;
+        }
+        .hero-stat-val {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            display: block;
+        }
+        .hero-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+            display: block;
+        }
 
-        /* ── Sub-tabs ── */
+        /* ══════════════════════════════════════════
+           TAB NAVIGATION
+        ══════════════════════════════════════════ */
         .tab-nav {
             display: flex;
-            gap: 4px;
-            border-bottom: 1px solid var(--border);
+            gap: 6px;
             margin-bottom: 28px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px;
         }
         .tab-btn {
+            flex: 1;
             background: none;
             border: none;
-            border-bottom: 2px solid transparent;
+            border-radius: 8px;
             color: var(--text-secondary);
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
-            padding: 10px 20px;
-            margin-bottom: -1px;
-            transition: color 0.2s, border-color 0.2s;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: color 0.15s, background 0.15s;
+            white-space: nowrap;
         }
-        .tab-btn:hover { color: var(--text); }
-        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-btn .material-symbols-outlined { font-size: 1rem; }
+        .tab-btn:hover { color: var(--text); background: var(--bg-card); }
+        .tab-btn.active {
+            color: var(--primary);
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            font-weight: 600;
+        }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* ── Section header ── */
+        /* ══════════════════════════════════════════
+           SECTION HEADER
+        ══════════════════════════════════════════ */
         .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 20px;
+            gap: 12px;
         }
+        .section-header-left { display: flex; align-items: center; gap: 10px; }
         .section-header h2 {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--text);
             margin: 0;
         }
+        .count-badge {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 2px 10px;
+        }
 
-        /* ── Tables ── */
+        /* ══════════════════════════════════════════
+           STUDENTS TABLE
+        ══════════════════════════════════════════ */
         .table-wrap {
             overflow-x: auto;
             border: 1px solid var(--border);
             border-radius: 12px;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
         thead th {
             background: var(--bg-surface);
-            color: var(--text-secondary);
-            font-size: 0.72rem;
-            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px 14px;
+            letter-spacing: 0.6px;
+            padding: 14px 18px;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
-        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
         tbody tr:last-child { border-bottom: none; }
         tbody tr:hover { background: var(--bg-card-hover); }
-        tbody td { padding: 12px 14px; color: var(--text); vertical-align: middle; }
+        tbody td { padding: 14px 18px; color: var(--text); vertical-align: middle; }
 
-        /* ── Cards for lessons ── */
+        .avatar-cell { display: flex; align-items: center; gap: 12px; }
+        .avatar-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .student-name { font-weight: 600; color: var(--text); }
+        .student-email { font-size: 0.78rem; color: var(--text-muted); margin-top: 1px; }
+
+        .status-active {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(16,185,129,.12);
+            color: var(--success);
+            border: 1px solid rgba(16,185,129,.25);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .status-active::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ══════════════════════════════════════════
+           LESSON CARDS
+        ══════════════════════════════════════════ */
         .lesson-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
         }
         .lesson-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px;
-        }
-        .lesson-card-lang {
-            font-size: 0.68rem;
-            color: var(--secondary);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        .lesson-card-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 6px;
-        }
-        .lesson-card-preview {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 12px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .lesson-card-actions { display: flex; gap: 6px; }
-
-        /* ── Sessions ── */
-        .session-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px 22px;
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 12px;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .session-info { flex: 1; }
-        .session-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
-        .session-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
-        .status-pill {
-            font-size: 0.68rem;
+        .lesson-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px rgba(124,58,237,.08);
+        }
+        .lesson-card-header { display: flex; align-items: center; justify-content: space-between; }
+        .lesson-card-lang {
+            font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             padding: 3px 10px;
             border-radius: 20px;
+            background: rgba(6,182,212,.12);
+            color: var(--secondary);
+            border: 1px solid rgba(6,182,212,.2);
         }
-        .status-pill.pending      { background: rgba(245,158,11,.15); color: var(--warning); }
-        .status-pill.active       { background: rgba(16,185,129,.15);  color: var(--success); }
-        .status-pill.closed       { background: var(--bg-surface); color: var(--text-muted); }
+        .lesson-card-title {
+            font-size: 0.925rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.35;
+        }
+        .lesson-card-preview {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+        .lesson-card-actions { display: flex; gap: 8px; margin-top: auto; }
+
+        /* ══════════════════════════════════════════
+           CHALLENGE TABLE EXTRAS
+        ══════════════════════════════════════════ */
         .level-pill {
             display: inline-block;
-            padding: 2px 10px;
+            padding: 3px 10px;
             border-radius: 20px;
             font-size: 0.7rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .level-pill.beginner     { background: rgba(16,185,129,.15); color: var(--success); }
-        .level-pill.intermediate { background: rgba(245,158,11,.15);  color: var(--warning); }
-        .level-pill.advanced     { background: rgba(239,68,68,.15);   color: var(--danger); }
+        .level-pill.beginner     { background: rgba(16,185,129,.12); color: var(--success);  border: 1px solid rgba(16,185,129,.22); }
+        .level-pill.intermediate { background: rgba(245,158,11,.12);  color: var(--warning);  border: 1px solid rgba(245,158,11,.22); }
+        .level-pill.advanced     { background: rgba(239,68,68,.12);   color: var(--danger);   border: 1px solid rgba(239,68,68,.22); }
 
-        /* ── Live monitor panel ── */
-        .monitor-panel {
-            margin-top: 12px;
+        .type-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
             background: var(--bg-surface);
-            border: 1px solid rgba(16,185,129,.25);
-            border-radius: 10px;
-            padding: 16px 20px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px 8px;
+        }
+        .pts-badge {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: var(--xp-gold);
+        }
+
+        /* ══════════════════════════════════════════
+           SESSION CARDS
+        ══════════════════════════════════════════ */
+        .sessions-list { display: flex; flex-direction: column; gap: 16px; }
+        .session-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .session-card-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+        }
+        .session-card.live {
+            border-color: rgba(16,185,129,.35);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16,185,129,.03) 100%);
+        }
+        .session-info { flex: 1; min-width: 0; }
+        .session-title {
+            font-size: 0.975rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(16,185,129,.15);
+            color: var(--success);
+            border: 1px solid rgba(16,185,129,.3);
+            border-radius: 20px;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 2px 9px;
+        }
+        .live-dot {
+            width: 6px; height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: livePulse 1.2s ease-in-out infinite;
+        }
+        .session-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+        .status-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+        .status-pill.pending  { background: rgba(245,158,11,.12); color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
+        .status-pill.active   { background: rgba(16,185,129,.12); color: var(--success); border: 1px solid rgba(16,185,129,.25); }
+        .status-pill.closed   { background: var(--bg-surface);    color: var(--text-muted); border: 1px solid var(--border); }
+        .session-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        /* ══════════════════════════════════════════
+           LIVE MONITOR PANEL
+        ══════════════════════════════════════════ */
+        .monitor-panel {
+            background: rgba(16,185,129,.04);
+            border-top: 1px solid rgba(16,185,129,.2);
+            padding: 20px 24px;
         }
         .monitor-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
         .monitor-title {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 700;
             color: var(--success);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .monitor-refresh {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
+        .monitor-refresh { font-size: 0.72rem; color: var(--text-muted); }
         .monitor-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 0;
+            gap: 14px;
+            padding: 10px 0;
             border-bottom: 1px solid var(--border);
         }
         .monitor-row:last-child { border-bottom: none; }
         .monitor-name {
             width: 160px;
             flex-shrink: 0;
-            font-size: 0.82rem;
+            font-size: 0.83rem;
             font-weight: 600;
             color: var(--text);
             white-space: nowrap;
@@ -327,25 +496,92 @@
             text-align: right;
         }
 
-        /* ── Empty / loading ── */
+        /* ══════════════════════════════════════════
+           ASSIGNMENT CARDS
+        ══════════════════════════════════════════ */
+        .assignments-list { display: flex; flex-direction: column; gap: 14px; }
+        .assignment-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+        }
+        .assignment-icon {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            background: rgba(124,58,237,.12);
+            border: 1px solid rgba(124,58,237,.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--primary);
+        }
+        .assignment-icon .material-symbols-outlined { font-size: 1.3rem; }
+        .assignment-body { flex: 1; min-width: 0; }
+        .assignment-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .lang-chip {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 2px 9px;
+            border-radius: 6px;
+        }
+        .assignment-title {
+            font-size: 0.975rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .assignment-sub { font-size: 0.8rem; color: var(--text-secondary); }
+        .assignment-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .assignment-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+            align-items: flex-start;
+        }
+
+        /* ══════════════════════════════════════════
+           EMPTY / LOADING
+        ══════════════════════════════════════════ */
         .empty-state {
             text-align: center;
-            padding: 48px 20px;
+            padding: 56px 24px;
             color: var(--text-muted);
-            font-size: 0.85rem;
         }
+        .empty-state-icon { font-size: 2.5rem; margin-bottom: 14px; opacity: 0.45; }
+        .empty-state-title { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+        .empty-state-sub { font-size: 0.8rem; }
         .loading-text {
             text-align: center;
-            padding: 24px;
+            padding: 32px;
             color: var(--text-muted);
             font-size: 0.85rem;
         }
 
-        /* ── Modal ── */
+        /* ══════════════════════════════════════════
+           MODAL
+        ══════════════════════════════════════════ */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.65);
+            background: rgba(0,0,0,.6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -358,16 +594,16 @@
         .modal-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 32px;
             width: 100%;
             max-width: 520px;
             max-height: 90vh;
             overflow-y: auto;
-            transform: translateY(16px);
+            transform: translateY(18px) scale(.98);
             transition: transform 0.2s;
         }
-        .modal-overlay.open .modal-box { transform: translateY(0); }
+        .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
         .modal-title {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.8rem;
@@ -377,10 +613,11 @@
         .modal-field { margin-bottom: 16px; }
         .modal-field label {
             display: block;
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
             margin-bottom: 6px;
         }
         .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
@@ -391,58 +628,115 @@
             50%       { opacity: .4; transform: scale(.7); }
         }
 
-        @media (max-width: 900px) {
-            .faculty-nav { padding: 0 5%; }
-            .manage-page { padding: 24px 5%; }
-            .classroom-header { flex-direction: column; gap: 12px; }
+        /* ══════════════════════════════════════════
+           TEST CASE ROWS
+        ══════════════════════════════════════════ */
+        .tc-row { background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:10px; }
+        .tc-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+        .tc-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .tc-row-fields textarea { resize:vertical; font-family:monospace; font-size:0.82rem; min-height:80px; }
+
+        /* ══════════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════════ */
+        @media (max-width: 960px) {
+            .manage-page { padding: 20px 16px 48px; }
+            .classroom-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .classroom-hero-right { align-items: flex-start; }
+            .hero-stats { flex-wrap: wrap; }
+            .tab-btn span.material-symbols-outlined { display: none; }
+        }
+        @media (max-width: 640px) {
+            .tab-nav { gap: 2px; padding: 4px; }
+            .tab-btn { font-size: 0.75rem; padding: 9px 8px; }
+            .lesson-cards { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-
 <main class="manage-page">
 
-    <!-- ── Classroom Header ── -->
-    <div class="classroom-header">
-        <div class="classroom-header-left">
-            <h1 id="classroomName">Loading…</h1>
-            <p id="classroomDesc">—</p>
+    <!-- ── Breadcrumb ── -->
+    <nav class="breadcrumb">
+        <a href="classrooms_faculty.html">My Classrooms</a>
+        <span class="breadcrumb-sep">›</span>
+        <span id="breadcrumbName">Manage Classroom</span>
+    </nav>
+
+    <!-- ── Classroom Hero Header ── -->
+    <div class="classroom-hero">
+        <div class="classroom-hero-icon">🏫</div>
+        <div class="classroom-hero-body">
+            <h1 class="classroom-hero-name" id="classroomName">Loading…</h1>
+            <p class="classroom-hero-desc" id="classroomDesc">—</p>
         </div>
-        <div class="key-badge">
-            <span class="key-badge-label">Enrollment Key</span>
-            <span class="key-badge-val" id="enrollmentKey">—</span>
-            <button class="copy-btn" title="Copy key" onclick="copyKey()">⎘</button>
+        <div class="classroom-hero-right">
+            <div class="key-badge">
+                <span class="key-badge-label">Enrollment Key</span>
+                <span class="key-badge-val" id="enrollmentKey">—</span>
+                <button class="copy-btn" title="Copy key" onclick="copyKey()">⎘</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-val" id="statStudents">—</span>
+                    <span class="hero-stat-label">Students</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-val" id="statLessons">—</span>
+                    <span class="hero-stat-label">Lessons</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-val" id="statChallenges">—</span>
+                    <span class="hero-stat-label">Challenges</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-val" id="statSessions">—</span>
+                    <span class="hero-stat-label">Sessions</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ── Sub-tabs ── -->
+    <!-- ── Tab Navigation ── -->
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('students', this)">Students</button>
-        <button class="tab-btn" onclick="switchTab('lessons', this)">Lessons</button>
-        <button class="tab-btn" onclick="switchTab('challenges', this)">Challenges</button>
-        <button class="tab-btn" onclick="switchTab('sessions', this)">Sessions</button>
-        <button class="tab-btn" onclick="switchTab('assignments', this)"><span class="material-symbols-outlined" style="font-size:0.95rem;vertical-align:middle;margin-right:0.25rem;">assignment</span>Assignments</button>
+        <button class="tab-btn active" onclick="switchTab('students', this)">
+            <span class="material-symbols-outlined">group</span>Students
+        </button>
+        <button class="tab-btn" onclick="switchTab('lessons', this)">
+            <span class="material-symbols-outlined">menu_book</span>Lessons
+        </button>
+        <button class="tab-btn" onclick="switchTab('challenges', this)">
+            <span class="material-symbols-outlined">quiz</span>Challenges
+        </button>
+        <button class="tab-btn" onclick="switchTab('sessions', this)">
+            <span class="material-symbols-outlined">sports_esports</span>Sessions
+        </button>
+        <button class="tab-btn" onclick="switchTab('assignments', this)">
+            <span class="material-symbols-outlined">assignment</span>Assignments
+        </button>
     </div>
 
     <!-- ── TAB: STUDENTS ── -->
     <div class="tab-panel active" id="tab-students">
         <div class="section-header">
-            <h2>Enrolled Students</h2>
+            <div class="section-header-left">
+                <h2>Enrolled Students</h2>
+                <span class="count-badge" id="studentsCount">0</span>
+            </div>
         </div>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
+                        <th>Student</th>
                         <th>Enrolled</th>
                         <th>Status</th>
-                        <th></th>
+                        <th style="width:80px;"></th>
                     </tr>
                 </thead>
                 <tbody id="studentsBody">
-                    <tr><td colspan="5" class="loading-text">Loading students…</td></tr>
+                    <tr><td colspan="4" class="loading-text">Loading students…</td></tr>
                 </tbody>
             </table>
         </div>
@@ -451,8 +745,13 @@
     <!-- ── TAB: LESSONS ── -->
     <div class="tab-panel" id="tab-lessons">
         <div class="section-header">
-            <h2>Classroom Lessons</h2>
-            <button class="btn btn-primary" onclick="openModal('lesson')">+ Add Lesson</button>
+            <div class="section-header-left">
+                <h2>Classroom Lessons</h2>
+                <span class="count-badge" id="lessonsCount">0</span>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('lesson')">
+                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>Add Lesson
+            </button>
         </div>
         <div class="lesson-cards" id="lessonsGrid">
             <div class="loading-text" style="grid-column:1/-1;">Loading lessons…</div>
@@ -462,8 +761,13 @@
     <!-- ── TAB: CHALLENGES ── -->
     <div class="tab-panel" id="tab-challenges">
         <div class="section-header">
-            <h2>Challenges / Questions</h2>
-            <button class="btn btn-primary" onclick="openModal('question')">+ Add Challenge</button>
+            <div class="section-header-left">
+                <h2>Challenges / Questions</h2>
+                <span class="count-badge" id="challengesCount">0</span>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('question')">
+                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>Add Challenge
+            </button>
         </div>
         <div class="table-wrap">
             <table>
@@ -474,7 +778,7 @@
                         <th>Difficulty</th>
                         <th>Points</th>
                         <th>Topic</th>
-                        <th></th>
+                        <th style="width:100px;"></th>
                     </tr>
                 </thead>
                 <tbody id="questionsBody">
@@ -487,10 +791,15 @@
     <!-- ── TAB: SESSIONS ── -->
     <div class="tab-panel" id="tab-sessions">
         <div class="section-header">
-            <h2>Game Sessions</h2>
-            <button class="btn btn-primary" onclick="openModal('session')">+ Create Session</button>
+            <div class="section-header-left">
+                <h2>Game Sessions</h2>
+                <span class="count-badge" id="sessionsCount">0</span>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('session')">
+                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>Create Session
+            </button>
         </div>
-        <div id="sessionsContainer">
+        <div class="sessions-list" id="sessionsContainer">
             <div class="loading-text">Loading sessions…</div>
         </div>
     </div>
@@ -498,10 +807,15 @@
     <!-- ── TAB: ASSIGNMENTS ── -->
     <div class="tab-panel" id="tab-assignments">
         <div class="section-header">
-            <h2>Coding Assignments</h2>
-            <button class="btn btn-primary" onclick="openAssignmentModal()">+ New Assignment</button>
+            <div class="section-header-left">
+                <h2>Coding Assignments</h2>
+                <span class="count-badge" id="assignmentsCount">0</span>
+            </div>
+            <button class="btn btn-primary" onclick="openAssignmentModal()">
+                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>New Assignment
+            </button>
         </div>
-        <div id="assignmentsContainer">
+        <div class="assignments-list" id="assignmentsContainer">
             <div class="loading-text">Loading assignments…</div>
         </div>
     </div>
@@ -516,55 +830,19 @@
             <button class="btn btn-outline" onclick="toggleLessonAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
         </div>
         <input type="hidden" id="lessonEditId">
-
-        <!-- AI Panel -->
         <div id="lessonAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
             <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Lesson Generator</div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
-                    <input type="text" class="form-input" id="lessonAITopic" placeholder="e.g. For Loops" style="font-size:0.82rem;">
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label>
-                    <select class="form-input" id="lessonAILang" style="font-size:0.82rem;">
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
-                    <select class="form-input" id="lessonAIDiff" style="font-size:0.82rem;">
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                    </select>
-                </div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="lessonAITopic" placeholder="e.g. For Loops" style="font-size:0.82rem;"></div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="lessonAILang" style="font-size:0.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="lessonAIDiff" style="font-size:0.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
             </div>
             <button class="btn btn-primary" id="lessonAIGenBtn" onclick="generateAILesson()" style="font-size:0.8rem;">⚡ Generate Lesson</button>
             <span id="lessonAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
         </div>
-
-        <div class="modal-field">
-            <label>Title *</label>
-            <input type="text" class="form-input" id="lessonTitle" placeholder="Lesson title">
-        </div>
-        <div class="modal-field">
-            <label>Language</label>
-            <select class="form-input" id="lessonLang">
-                <option value="">All / General</option>
-                <option value="python">Python</option>
-                <option value="javascript">JavaScript</option>
-                <option value="java">Java</option>
-                <option value="cpp">C++</option>
-            </select>
-        </div>
-        <div class="modal-field">
-            <label>Content *</label>
-            <textarea class="form-input" id="lessonContent" rows="6" placeholder="Lesson content (HTML or plain text)…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea>
-        </div>
+        <div class="modal-field"><label>Title *</label><input type="text" class="form-input" id="lessonTitle" placeholder="Lesson title"></div>
+        <div class="modal-field"><label>Language</label><select class="form-input" id="lessonLang"><option value="">All / General</option><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+        <div class="modal-field"><label>Content *</label><textarea class="form-input" id="lessonContent" rows="7" placeholder="Lesson content…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea></div>
         <div class="err-msg" id="lessonErr"></div>
         <div class="modal-actions">
             <button class="btn btn-outline" onclick="closeModal('lessonModal')">Cancel</button>
@@ -578,46 +856,17 @@
     <div class="modal-box">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
             <div class="modal-title" id="questionModalTitle" style="margin:0;">Add Challenge</div>
-            <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;">
-                <span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI
-            </button>
+            <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
         </div>
-
-        <!-- AI Generator panel (hidden by default) -->
         <div id="aiGenPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
             <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Question Generator</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
-                    <input type="text" class="form-input" id="aiTopic" placeholder="e.g. For Loops, Variables…" style="font-size:0.82rem;">
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label>
-                    <select class="form-input" id="aiLanguage" style="font-size:0.82rem;">
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                    </select>
-                </div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="aiTopic" placeholder="e.g. For Loops…" style="font-size:0.82rem;"></div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="aiLanguage" style="font-size:0.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
-                    <select class="form-input" id="aiDifficulty" style="font-size:0.82rem;">
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Type</label>
-                    <select class="form-input" id="aiType" style="font-size:0.82rem;">
-                        <option value="mcq">Multiple Choice</option>
-                        <option value="fill_blank">Fill in the Blank</option>
-                        <option value="output_pred">Output Prediction</option>
-                    </select>
-                </div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="aiDifficulty" style="font-size:0.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Type</label><select class="form-input" id="aiType" style="font-size:0.82rem;"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option></select></div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
                 <button class="btn btn-primary" id="aiGenerateBtn" onclick="generateQuestion()" style="font-size:0.78rem;">✨ Generate</button>
@@ -625,64 +874,23 @@
                 <span id="aiGenStatus" style="font-size:0.75rem;color:var(--text-muted);margin-left:4px;"></span>
             </div>
         </div>
-
         <input type="hidden" id="questionEditId">
-        <div class="modal-field">
-            <label>Question *</label>
-            <textarea class="form-input" id="questionText" rows="3" placeholder="Question text…" style="resize:vertical;font-family:inherit;"></textarea>
-        </div>
-        <div class="modal-field">
-            <label>Type</label>
-            <select class="form-input" id="questionType" onchange="toggleMCQOptions()">
-                <option value="mcq">Multiple Choice (MCQ)</option>
-                <option value="fill_blank">Fill in the Blank</option>
-                <option value="output_pred">Output Prediction</option>
-                <option value="ordering">Code Ordering</option>
-            </select>
-        </div>
+        <div class="modal-field"><label>Question *</label><textarea class="form-input" id="questionText" rows="3" placeholder="Question text…" style="resize:vertical;font-family:inherit;"></textarea></div>
+        <div class="modal-field"><label>Type</label><select class="form-input" id="questionType" onchange="toggleMCQOptions()"><option value="mcq">Multiple Choice (MCQ)</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option><option value="ordering">Code Ordering</option></select></div>
         <div id="mcqOptionsGroup">
-            <div class="modal-field">
-                <label>Option A</label>
-                <input type="text" class="form-input" id="optA" placeholder="Option A">
-            </div>
-            <div class="modal-field">
-                <label>Option B</label>
-                <input type="text" class="form-input" id="optB" placeholder="Option B">
-            </div>
-            <div class="modal-field">
-                <label>Option C</label>
-                <input type="text" class="form-input" id="optC" placeholder="Option C">
-            </div>
-            <div class="modal-field">
-                <label>Option D</label>
-                <input type="text" class="form-input" id="optD" placeholder="Option D">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="modal-field"><label>Option A</label><input type="text" class="form-input" id="optA" placeholder="Option A"></div>
+                <div class="modal-field"><label>Option B</label><input type="text" class="form-input" id="optB" placeholder="Option B"></div>
+                <div class="modal-field"><label>Option C</label><input type="text" class="form-input" id="optC" placeholder="Option C"></div>
+                <div class="modal-field"><label>Option D</label><input type="text" class="form-input" id="optD" placeholder="Option D"></div>
             </div>
         </div>
-        <div class="modal-field">
-            <label>Correct Answer *</label>
-            <input type="text" class="form-input" id="correctAnswer" placeholder="e.g. A  or  exact text for other types">
-        </div>
-        <div class="modal-field">
-            <label>Hint</label>
-            <input type="text" class="form-input" id="questionHint" placeholder="Optional hint">
-        </div>
+        <div class="modal-field"><label>Correct Answer *</label><input type="text" class="form-input" id="correctAnswer" placeholder="e.g. A  or  exact text"></div>
+        <div class="modal-field"><label>Hint</label><input type="text" class="form-input" id="questionHint" placeholder="Optional hint"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div class="modal-field">
-                <label>Difficulty</label>
-                <select class="form-input" id="questionDiff">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                </select>
-            </div>
-            <div class="modal-field">
-                <label>Points</label>
-                <input type="number" class="form-input" id="questionPoints" value="10" min="1" max="100">
-            </div>
-            <div class="modal-field">
-                <label>Topic</label>
-                <input type="text" class="form-input" id="questionTopic" placeholder="e.g. Loops">
-            </div>
+            <div class="modal-field"><label>Difficulty</label><select class="form-input" id="questionDiff"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+            <div class="modal-field"><label>Points</label><input type="number" class="form-input" id="questionPoints" value="10" min="1" max="100"></div>
+            <div class="modal-field"><label>Topic</label><input type="text" class="form-input" id="questionTopic" placeholder="e.g. Loops"></div>
         </div>
         <div class="err-msg" id="questionErr"></div>
         <div class="modal-actions">
@@ -696,30 +904,64 @@
 <div class="modal-overlay" id="sessionModal" onclick="handleOverlayClick(event,'sessionModal')">
     <div class="modal-box">
         <div class="modal-title">Create Session</div>
-        <div class="modal-field">
-            <label>Session Title *</label>
-            <input type="text" class="form-input" id="sessionTitle" placeholder="e.g. Week 3 Quiz">
-        </div>
-        <div class="modal-field">
-            <label>Game Mode</label>
-            <select class="form-input" id="sessionMode">
-                <option value="mcq">Multiple Choice</option>
-                <option value="fill_blank">Fill in the Blank</option>
-                <option value="output_pred">Output Prediction</option>
-                <option value="ordering">Code Ordering</option>
-            </select>
-        </div>
-        <div class="modal-field">
-            <label>Select Challenges</label>
-            <div id="sessionQuestionPicker" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--bg-surface);">
-                <div class="loading-text" style="padding:12px;">Loading challenges…</div>
-            </div>
-        </div>
+        <div class="modal-field"><label>Session Title *</label><input type="text" class="form-input" id="sessionTitle" placeholder="e.g. Week 3 Quiz"></div>
+        <div class="modal-field"><label>Game Mode</label><select class="form-input" id="sessionMode"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option><option value="ordering">Code Ordering</option></select></div>
+        <div class="modal-field"><label>Select Challenges</label><div id="sessionQuestionPicker" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--bg-surface);"><div class="loading-text" style="padding:12px;">Loading challenges…</div></div></div>
         <div class="err-msg" id="sessionErr"></div>
         <div class="modal-actions">
             <button class="btn btn-outline" onclick="closeModal('sessionModal')">Cancel</button>
             <button class="btn btn-primary" id="sessionSaveBtn" onclick="createSession()">Create Session</button>
         </div>
+    </div>
+</div>
+
+<!-- ── Assignment Modal ── -->
+<div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box" style="max-width:760px;width:95vw;max-height:90vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+            <div class="modal-title" id="assignModalTitle" style="margin:0;">New Coding Assignment</div>
+            <button class="btn btn-outline" onclick="toggleAssignAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
+        </div>
+        <div id="assignAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
+            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Assignment Generator</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="assignAITopic" placeholder="e.g. Fibonacci…" style="font-size:0.82rem;"></div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="assignAILang" style="font-size:0.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="assignAIDiff" style="font-size:0.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+            </div>
+            <button class="btn btn-primary" id="assignAIGenBtn" onclick="generateAIAssignment()" style="font-size:0.8rem;">⚡ Generate Assignment</button>
+            <span id="assignAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="modal-field" style="grid-column:1/-1;"><label>Title *</label><input type="text" class="form-input" id="assignTitle" placeholder="e.g. Two Sum Problem"></div>
+            <div class="modal-field" style="grid-column:1/-1;"><label>Problem Description</label><textarea class="form-input" id="assignDesc" rows="3" placeholder="Describe the problem…" style="resize:vertical;"></textarea></div>
+            <div class="modal-field"><label>Language</label><select class="form-input" id="assignLang"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+            <div class="modal-field"><label>Max Points</label><input type="number" class="form-input" id="assignMaxPoints" value="100" min="1"></div>
+            <div class="modal-field"><label>Scoring Mode</label><select class="form-input" id="assignScoringMode"><option value="per_test">Per test case (partial credit)</option><option value="all_or_nothing">All or nothing</option></select></div>
+            <div class="modal-field"><label>Deadline (optional)</label><input type="date" class="form-input" id="assignDeadline"></div>
+            <div class="modal-field" style="grid-column:1/-1;"><label>Starter Code (optional)</label><textarea class="form-input" id="assignStarterCode" rows="4" placeholder="# Starter code…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea></div>
+        </div>
+        <div style="margin-top:20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <label style="font-weight:600;font-size:0.85rem;">Test Cases *</label>
+                <button class="btn btn-outline" style="font-size:0.75rem;" onclick="addTestCaseRow()">+ Add Test Case</button>
+            </div>
+            <div id="testCasesBody"></div>
+        </div>
+        <div class="err-msg" id="assignErr"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
+            <button class="btn btn-primary" id="assignSaveBtn" onclick="saveAssignment()">Save Assignment</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Submissions Modal ── -->
+<div class="modal-overlay" id="submissionsModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box" style="max-width:800px;width:95vw;max-height:90vh;overflow-y:auto;">
+        <div class="modal-title">Student Submissions</div>
+        <div id="submissionsBody"><div class="loading-text">Loading…</div></div>
+        <div class="modal-actions"><button class="btn btn-outline" onclick="document.getElementById('submissionsModal').classList.remove('open')">Close</button></div>
     </div>
 </div>
 
@@ -732,17 +974,15 @@
     const token = localStorage.getItem('token');
     if (!user || !token) { window.location.href = 'login.html'; }
     if (user && user.role !== 'faculty') { window.location.href = 'dashboard.html'; }
-    if (!classroomId) { window.location.href = 'faculty_dashboard.html'; }
+    if (!classroomId) { window.location.href = 'classrooms_faculty.html'; }
 
     function getAuthHeaders() {
         return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
     }
-
     function escHtml(str) {
         if (!str) return '';
         return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
-
     function relativeTime(iso) {
         if (!iso) return '—';
         const diff = Date.now() - new Date(iso).getTime();
@@ -753,8 +993,13 @@
         if (h < 24) return `${h}h ago`;
         return `${Math.floor(h/24)}d ago`;
     }
+    function initials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(/\s+/);
+        return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+    }
 
-    // ── Tab switching ─────────────────────────────────────────────────────────
+    // ── Tab switching ────────────────────────────────────────────────────────
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
@@ -762,7 +1007,7 @@
         if (btn) btn.classList.add('active');
     }
 
-    // ── Load classroom info ───────────────────────────────────────────────────
+    // ── Classroom info ───────────────────────────────────────────────────────
     let classroomData = null;
     let classroomQuestions = [];
 
@@ -772,10 +1017,12 @@
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
             classroomData = data.classroom;
-            document.getElementById('classroomName').textContent = classroomData.name;
+            const name = classroomData.name;
+            document.getElementById('classroomName').textContent = name;
+            document.getElementById('breadcrumbName').textContent = name;
             document.getElementById('classroomDesc').textContent = classroomData.description || classroomData.subject || 'No description';
             document.getElementById('enrollmentKey').textContent = classroomData.enrollmentKey || classroomData.enrollment_key || '—';
-            document.title = `${classroomData.name} — CodeArena`;
+            document.title = `${name} — CodeArena`;
         } catch (err) {
             document.getElementById('classroomName').textContent = 'Classroom not found';
         }
@@ -786,47 +1033,46 @@
         navigator.clipboard.writeText(key).then(() => showToast('Enrollment key copied!'));
     }
 
-    function showToast(msg) {
+    function showToast(msg, type = 'success') {
+        const colors = { success: 'var(--success)', danger: 'var(--danger)' };
         const t = document.createElement('div');
         t.textContent = msg;
-        t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--success);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.82rem;z-index:999;';
+        t.style.cssText = `position:fixed;bottom:28px;right:28px;background:${colors[type]||colors.success};color:#fff;padding:12px 20px;border-radius:10px;font-size:0.83rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.25);`;
         document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2200);
+        setTimeout(() => t.remove(), 2400);
     }
 
-    // ── Students ──────────────────────────────────────────────────────────────
+    // ── Students ─────────────────────────────────────────────────────────────
     async function loadStudents() {
         try {
             const res = await fetch(`${API}/classrooms/${classroomId}/students`, { headers: getAuthHeaders() });
             const data = await res.json();
             const students = data.success ? (data.students || []) : [];
+            document.getElementById('studentsCount').textContent = students.length;
+            document.getElementById('statStudents').textContent = students.length;
             const tbody = document.getElementById('studentsBody');
             if (!students.length) {
-                tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No students enrolled yet. Share the enrollment key!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-title">No students yet</div><div class="empty-state-sub">Share the enrollment key to get started</div></div></td></tr>`;
                 return;
             }
-            tbody.innerHTML = students.map(s => `
-                <tr>
-                    <td><strong>${escHtml(s.fullName || s.full_name || 'Unknown')}</strong></td>
-                    <td style="color:var(--text-secondary);">${escHtml(s.email || '—')}</td>
-                    <td style="color:var(--text-muted);">${relativeTime(s.enrolledAt || s.enrolled_at)}</td>
-                    <td><span style="color:var(--success);font-size:0.75rem;font-weight:600;">${s.status || 'active'}</span></td>
-                    <td>
-                        <button class="btn btn-outline" style="font-size:0.72rem;padding:3px 10px;color:var(--danger);border-color:var(--danger);"
-                            onclick="removeStudent(${s.id || s.student_id}, '${escHtml(s.fullName || s.full_name || '')}')">Remove</button>
-                    </td>
-                </tr>`).join('');
+            tbody.innerHTML = students.map(s => {
+                const name = s.fullName || s.full_name || 'Unknown';
+                return `<tr>
+                    <td><div class="avatar-cell"><div class="avatar-circle">${initials(name)}</div><div><div class="student-name">${escHtml(name)}</div><div class="student-email">${escHtml(s.email || '—')}</div></div></div></td>
+                    <td style="color:var(--text-secondary);font-size:0.82rem;">${relativeTime(s.enrolledAt || s.enrolled_at)}</td>
+                    <td><span class="status-active">${s.status || 'active'}</span></td>
+                    <td><button class="btn btn-outline" style="font-size:0.72rem;padding:4px 12px;color:var(--danger);border-color:var(--danger);" onclick="removeStudent(${s.id || s.student_id}, '${escHtml(name)}')">Remove</button></td>
+                </tr>`;
+            }).join('');
         } catch (err) {
-            document.getElementById('studentsBody').innerHTML = `<tr><td colspan="5" class="loading-text" style="color:var(--danger);">Failed to load students.</td></tr>`;
+            document.getElementById('studentsBody').innerHTML = `<tr><td colspan="4" class="loading-text" style="color:var(--danger);">Failed to load students.</td></tr>`;
         }
     }
 
     async function removeStudent(studentId, name) {
         if (!confirm(`Remove ${name} from this classroom?`)) return;
         try {
-            await fetch(`${API}/classrooms/${classroomId}/students/${studentId}`, {
-                method: 'DELETE', headers: getAuthHeaders()
-            });
+            await fetch(`${API}/classrooms/${classroomId}/students/${studentId}`, { method: 'DELETE', headers: getAuthHeaders() });
             loadStudents();
         } catch (err) { alert('Failed to remove student.'); }
     }
@@ -839,6 +1085,8 @@
             const res = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: getAuthHeaders() });
             const data = await res.json();
             lessonsList = data.success ? (data.lessons || []) : [];
+            document.getElementById('lessonsCount').textContent = lessonsList.length;
+            document.getElementById('statLessons').textContent = lessonsList.length;
             renderLessons();
         } catch (err) {
             document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load lessons.</div>`;
@@ -848,16 +1096,16 @@
     function renderLessons() {
         const grid = document.getElementById('lessonsGrid');
         if (!lessonsList.length) {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No lessons yet. Add the first one!</div>`;
+            grid.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state"><div class="empty-state-icon">📖</div><div class="empty-state-title">No lessons yet</div><div class="empty-state-sub">Add your first lesson to this classroom</div></div></div>`;
             return;
         }
         grid.innerHTML = lessonsList.map(l => `
             <div class="lesson-card">
-                <div class="lesson-card-lang">${l.language || 'General'}</div>
+                <div class="lesson-card-header"><span class="lesson-card-lang">${l.language || 'General'}</span></div>
                 <div class="lesson-card-title">${escHtml(l.title)}</div>
-                <div class="lesson-card-preview">${escHtml(l.content || '').replace(/<[^>]+>/g, '').substring(0, 100)}…</div>
+                <div class="lesson-card-preview">${escHtml(l.content || '').replace(/<[^>]+>/g, '').substring(0, 120)}…</div>
                 <div class="lesson-card-actions">
-                    <button class="btn btn-outline" style="flex:1;font-size:0.78rem;" onclick="editLesson(${l.lesson_id || l.id})">Edit</button>
+                    <button class="btn btn-outline" style="flex:1;font-size:0.78rem;" onclick="editLesson(${l.lesson_id || l.id})">✏ Edit</button>
                     <button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="deleteLesson(${l.lesson_id || l.id})">Delete</button>
                 </div>
             </div>`).join('');
@@ -878,15 +1126,9 @@
             document.getElementById('questionEditId').value = '';
             document.getElementById('questionText').value = '';
             document.getElementById('questionType').value = 'mcq';
-            document.getElementById('optA').value = '';
-            document.getElementById('optB').value = '';
-            document.getElementById('optC').value = '';
-            document.getElementById('optD').value = '';
-            document.getElementById('correctAnswer').value = '';
-            document.getElementById('questionHint').value = '';
+            ['optA','optB','optC','optD','correctAnswer','questionHint','questionTopic'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('questionDiff').value = 'beginner';
             document.getElementById('questionPoints').value = '10';
-            document.getElementById('questionTopic').value = '';
             document.getElementById('questionErr').style.display = 'none';
             toggleMCQOptions();
             document.getElementById('questionModal').classList.add('open');
@@ -899,13 +1141,8 @@
         }
     }
 
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('open');
-    }
-
-    function handleOverlayClick(e, id) {
-        if (e.target === document.getElementById(id)) closeModal(id);
-    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function handleOverlayClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
     async function saveLesson() {
         const id = document.getElementById('lessonEditId').value;
@@ -913,36 +1150,17 @@
         const language = document.getElementById('lessonLang').value;
         const content = document.getElementById('lessonContent').value.trim();
         const errEl = document.getElementById('lessonErr');
-
-        if (!title || !content) {
-            errEl.textContent = 'Title and content are required.';
-            errEl.style.display = 'block';
-            return;
-        }
-
+        if (!title || !content) { errEl.textContent = 'Title and content are required.'; errEl.style.display = 'block'; return; }
         const btn = document.getElementById('lessonSaveBtn');
-        btn.disabled = true; btn.textContent = 'Saving…';
-        errEl.style.display = 'none';
-
+        btn.disabled = true; btn.textContent = 'Saving…'; errEl.style.display = 'none';
         try {
-            const url = id
-                ? `${API}/classrooms/${classroomId}/lessons/${id}`
-                : `${API}/classrooms/${classroomId}/lessons`;
-            const method = id ? 'PUT' : 'POST';
-            const res = await fetch(url, {
-                method, headers: getAuthHeaders(),
-                body: JSON.stringify({ title, language, content })
-            });
+            const url = id ? `${API}/classrooms/${classroomId}/lessons/${id}` : `${API}/classrooms/${classroomId}/lessons`;
+            const res = await fetch(url, { method: id ? 'PUT' : 'POST', headers: getAuthHeaders(), body: JSON.stringify({ title, language, content }) });
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
-            closeModal('lessonModal');
-            loadLessons();
-        } catch (err) {
-            errEl.textContent = err.message || 'Failed to save lesson.';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.textContent = 'Save Lesson';
-        }
+            closeModal('lessonModal'); loadLessons();
+        } catch (err) { errEl.textContent = err.message || 'Failed to save lesson.'; errEl.style.display = 'block'; }
+        finally { btn.disabled = false; btn.textContent = 'Save Lesson'; }
     }
 
     function editLesson(id) {
@@ -959,10 +1177,8 @@
 
     async function deleteLesson(id) {
         if (!confirm('Delete this lesson?')) return;
-        try {
-            await fetch(`${API}/classrooms/${classroomId}/lessons/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
-            loadLessons();
-        } catch (err) { alert('Failed to delete lesson.'); }
+        try { await fetch(`${API}/classrooms/${classroomId}/lessons/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); loadLessons(); }
+        catch (err) { alert('Failed to delete lesson.'); }
     }
 
     // ── Questions ─────────────────────────────────────────────────────────────
@@ -971,6 +1187,8 @@
             const res = await fetch(`${API}/classrooms/${classroomId}/questions`, { headers: getAuthHeaders() });
             const data = await res.json();
             classroomQuestions = data.success ? (data.questions || []) : [];
+            document.getElementById('challengesCount').textContent = classroomQuestions.length;
+            document.getElementById('statChallenges').textContent = classroomQuestions.length;
             renderQuestions();
         } catch (err) {
             document.getElementById('questionsBody').innerHTML = `<tr><td colspan="6" class="loading-text" style="color:var(--danger);">Failed to load challenges.</td></tr>`;
@@ -980,180 +1198,84 @@
     function renderQuestions() {
         const tbody = document.getElementById('questionsBody');
         if (!classroomQuestions.length) {
-            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No challenges yet.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">❓</div><div class="empty-state-title">No challenges yet</div><div class="empty-state-sub">Add questions to use in game sessions</div></div></td></tr>`;
             return;
         }
+        const typeLabel = { mcq:'MCQ', fill_blank:'Fill Blank', output_pred:'Output', ordering:'Ordering' };
         tbody.innerHTML = classroomQuestions.map(q => `
             <tr>
-                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(q.question_text || q.questionText || '')}">${escHtml((q.question_text || q.questionText || '').substring(0, 60))}…</td>
-                <td style="color:var(--text-secondary);font-size:0.78rem;">${q.type || 'mcq'}</td>
-                <td><span class="level-pill ${q.difficulty || 'beginner'}">${q.difficulty || 'beginner'}</span></td>
-                <td style="color:var(--xp-gold);font-weight:600;">${q.points || 10}</td>
-                <td style="color:var(--text-secondary);">${escHtml(q.topic || '—')}</td>
-                <td>
-                    <button class="btn btn-outline" style="font-size:0.72rem;padding:3px 10px;margin-right:4px;" onclick="editQuestion(${q.question_id || q.id})">Edit</button>
-                    <button class="btn btn-outline" style="font-size:0.72rem;padding:3px 10px;color:var(--danger);border-color:var(--danger);" onclick="deleteQuestion(${q.question_id || q.id})">Delete</button>
-                </td>
+                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(q.question_text||q.questionText||'')}">${escHtml((q.question_text||q.questionText||'').substring(0,70))}…</td>
+                <td><span class="type-chip">${typeLabel[q.type]||q.type||'MCQ'}</span></td>
+                <td><span class="level-pill ${q.difficulty||'beginner'}">${q.difficulty||'beginner'}</span></td>
+                <td><span class="pts-badge">${q.points||10} pts</span></td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${escHtml(q.topic||'—')}</td>
+                <td><div style="display:flex;gap:6px;justify-content:flex-end;">
+                    <button class="btn btn-outline" style="font-size:0.72rem;padding:4px 12px;" onclick="editQuestion(${q.question_id||q.id})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:0.72rem;padding:4px 12px;color:var(--danger);border-color:var(--danger);" onclick="deleteQuestion(${q.question_id||q.id})">Del</button>
+                </div></td>
             </tr>`).join('');
     }
 
     function toggleMCQOptions() {
-        const type = document.getElementById('questionType').value;
-        document.getElementById('mcqOptionsGroup').style.display = type === 'mcq' ? 'block' : 'none';
+        document.getElementById('mcqOptionsGroup').style.display = document.getElementById('questionType').value === 'mcq' ? 'block' : 'none';
     }
 
-    // ── AI Question Generator ─────────────────────────────────────────────────
-    function openAIGenPanel() {
-        document.getElementById('aiGenPanel').style.display = 'block';
-        document.getElementById('aiGenBtn').style.display = 'none';
-        document.getElementById('questionErr').style.display = 'none';
-        document.getElementById('aiTopic').focus();
-    }
-    function closeAIGenPanel() {
-        document.getElementById('aiGenPanel').style.display = 'none';
-        document.getElementById('aiGenBtn').style.display = 'flex';
-        document.getElementById('aiGenStatus').textContent = '';
-    }
+    function openAIGenPanel() { document.getElementById('aiGenPanel').style.display='block'; document.getElementById('aiGenBtn').style.display='none'; document.getElementById('questionErr').style.display='none'; document.getElementById('aiTopic').focus(); }
+    function closeAIGenPanel() { document.getElementById('aiGenPanel').style.display='none'; document.getElementById('aiGenBtn').style.display='flex'; document.getElementById('aiGenStatus').textContent=''; }
 
     async function generateQuestion() {
-        const topic      = document.getElementById('aiTopic').value.trim();
-        const language   = document.getElementById('aiLanguage').value;
-        const difficulty = document.getElementById('aiDifficulty').value;
-        const type       = document.getElementById('aiType').value;
-        const statusEl   = document.getElementById('aiGenStatus');
-        const genBtn     = document.getElementById('aiGenerateBtn');
-
-        if (!topic) { statusEl.textContent = 'Enter a topic first.'; statusEl.style.color = 'var(--danger)'; return; }
-
-        genBtn.disabled = true;
-        statusEl.style.color = 'var(--text-muted)';
-        statusEl.textContent = 'Generating…';
-
+        const topic=document.getElementById('aiTopic').value.trim(), language=document.getElementById('aiLanguage').value, difficulty=document.getElementById('aiDifficulty').value, type=document.getElementById('aiType').value;
+        const statusEl=document.getElementById('aiGenStatus'), genBtn=document.getElementById('aiGenerateBtn');
+        if (!topic) { statusEl.textContent='Enter a topic first.'; statusEl.style.color='var(--danger)'; return; }
+        genBtn.disabled=true; statusEl.style.color='var(--text-muted)'; statusEl.textContent='Generating…';
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/questions/generate`, {
-                method: 'POST', headers: getAuthHeaders(),
-                body: JSON.stringify({ topic, language, difficulty, type })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-
-            const q = data.question;
-
-            // Fill in the form fields
-            document.getElementById('questionText').value     = q.question_text || '';
-            document.getElementById('questionType').value     = q.type || type;
-            document.getElementById('correctAnswer').value    = q.correct_answer || '';
-            document.getElementById('questionHint').value     = q.hint || '';
-            document.getElementById('questionDiff').value     = q.difficulty || difficulty;
-            document.getElementById('questionPoints').value   = q.type === 'advanced' ? 30 : q.type === 'intermediate' ? 20 : 10;
-            document.getElementById('questionTopic').value    = q.topic || topic;
-            toggleMCQOptions();
-
-            // Fill MCQ options
-            if (q.type === 'mcq' && Array.isArray(q.options)) {
-                const opts = q.options.map(o => o.replace(/^[A-D]\)\s*/i, ''));
-                document.getElementById('optA').value = opts[0] || '';
-                document.getElementById('optB').value = opts[1] || '';
-                document.getElementById('optC').value = opts[2] || '';
-                document.getElementById('optD').value = opts[3] || '';
-            }
-
-            // Clear any leftover validation error
-            const errEl = document.getElementById('questionErr');
-            errEl.style.display = 'none';
-
-            statusEl.style.color = 'var(--success)';
-            statusEl.textContent = '✔ Question filled in!';
-            setTimeout(closeAIGenPanel, 1200);
-        } catch (err) {
-            statusEl.style.color = 'var(--danger)';
-            statusEl.textContent = err.message || 'Generation failed.';
-        } finally {
-            genBtn.disabled = false;
-        }
+            const res=await fetch(`${API}/classrooms/${classroomId}/questions/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty,type})});
+            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            const q=data.question;
+            document.getElementById('questionText').value=q.question_text||''; document.getElementById('questionType').value=q.type||type;
+            document.getElementById('correctAnswer').value=q.correct_answer||''; document.getElementById('questionHint').value=q.hint||'';
+            document.getElementById('questionDiff').value=q.difficulty||difficulty; document.getElementById('questionPoints').value=q.type==='advanced'?30:q.type==='intermediate'?20:10;
+            document.getElementById('questionTopic').value=q.topic||topic; toggleMCQOptions();
+            if (q.type==='mcq'&&Array.isArray(q.options)) { const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/i,'')); ['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||''); }
+            document.getElementById('questionErr').style.display='none';
+            statusEl.style.color='var(--success)'; statusEl.textContent='✔ Done!'; setTimeout(closeAIGenPanel,1200);
+        } catch(err) { statusEl.style.color='var(--danger)'; statusEl.textContent=err.message||'Failed.'; }
+        finally { genBtn.disabled=false; }
     }
 
     async function saveQuestion() {
-        const id = document.getElementById('questionEditId').value;
-        const question_text = document.getElementById('questionText').value.trim();
-        const type = document.getElementById('questionType').value;
-        const correct_answer = document.getElementById('correctAnswer').value.trim();
-        const hint = document.getElementById('questionHint').value.trim();
-        const difficulty = document.getElementById('questionDiff').value;
-        const points = parseInt(document.getElementById('questionPoints').value) || 10;
-        const topic = document.getElementById('questionTopic').value.trim();
-        const errEl = document.getElementById('questionErr');
-
-        if (!question_text || !correct_answer) {
-            errEl.textContent = 'Question and correct answer are required.';
-            errEl.style.display = 'block';
-            return;
-        }
-
-        let options = null;
-        if (type === 'mcq') {
-            const a = document.getElementById('optA').value.trim();
-            const b = document.getElementById('optB').value.trim();
-            const c = document.getElementById('optC').value.trim();
-            const d = document.getElementById('optD').value.trim();
-            options = [a && `A) ${a}`, b && `B) ${b}`, c && `C) ${c}`, d && `D) ${d}`].filter(Boolean);
-        }
-
-        const btn = document.getElementById('questionSaveBtn');
-        btn.disabled = true; btn.textContent = 'Saving…';
-        errEl.style.display = 'none';
-
+        const id=document.getElementById('questionEditId').value, question_text=document.getElementById('questionText').value.trim(), type=document.getElementById('questionType').value;
+        const correct_answer=document.getElementById('correctAnswer').value.trim(), hint=document.getElementById('questionHint').value.trim();
+        const difficulty=document.getElementById('questionDiff').value, points=parseInt(document.getElementById('questionPoints').value)||10, topic=document.getElementById('questionTopic').value.trim();
+        const errEl=document.getElementById('questionErr');
+        if (!question_text||!correct_answer) { errEl.textContent='Question and correct answer are required.'; errEl.style.display='block'; return; }
+        let options=null;
+        if (type==='mcq') { const [a,b,c,d]=['optA','optB','optC','optD'].map(x=>document.getElementById(x).value.trim()); options=[a&&`A) ${a}`,b&&`B) ${b}`,c&&`C) ${c}`,d&&`D) ${d}`].filter(Boolean); }
+        const btn=document.getElementById('questionSaveBtn'); btn.disabled=true; btn.textContent='Saving…'; errEl.style.display='none';
         try {
-            const url = id
-                ? `${API}/classrooms/${classroomId}/questions/${id}`
-                : `${API}/classrooms/${classroomId}/questions`;
-            const method = id ? 'PUT' : 'POST';
-            const res = await fetch(url, {
-                method, headers: getAuthHeaders(),
-                body: JSON.stringify({ question_text, type, options, correct_answer, hint, difficulty, points, topic })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            closeModal('questionModal');
-            loadQuestions();
-        } catch (err) {
-            errEl.textContent = err.message || 'Failed to save challenge.';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.textContent = 'Save Challenge';
-        }
+            const url=id?`${API}/classrooms/${classroomId}/questions/${id}`:`${API}/classrooms/${classroomId}/questions`;
+            const res=await fetch(url,{method:id?'PUT':'POST',headers:getAuthHeaders(),body:JSON.stringify({question_text,type,options,correct_answer,hint,difficulty,points,topic})});
+            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            closeModal('questionModal'); loadQuestions();
+        } catch(err) { errEl.textContent=err.message||'Failed to save challenge.'; errEl.style.display='block'; }
+        finally { btn.disabled=false; btn.textContent='Save Challenge'; }
     }
 
     function editQuestion(id) {
-        const q = classroomQuestions.find(x => (x.question_id || x.id) === id);
-        if (!q) return;
-        document.getElementById('questionModalTitle').textContent = 'Edit Challenge';
-        document.getElementById('questionEditId').value = id;
-        document.getElementById('questionText').value = q.question_text || q.questionText || '';
-        document.getElementById('questionType').value = q.type || 'mcq';
-        document.getElementById('correctAnswer').value = q.correct_answer || q.correctAnswer || '';
-        document.getElementById('questionHint').value = q.hint || '';
-        document.getElementById('questionDiff').value = q.difficulty || 'beginner';
-        document.getElementById('questionPoints').value = q.points || 10;
-        document.getElementById('questionTopic').value = q.topic || '';
+        const q=classroomQuestions.find(x=>(x.question_id||x.id)===id); if (!q) return;
+        document.getElementById('questionModalTitle').textContent='Edit Challenge'; document.getElementById('questionEditId').value=id;
+        document.getElementById('questionText').value=q.question_text||q.questionText||''; document.getElementById('questionType').value=q.type||'mcq';
+        document.getElementById('correctAnswer').value=q.correct_answer||q.correctAnswer||''; document.getElementById('questionHint').value=q.hint||'';
+        document.getElementById('questionDiff').value=q.difficulty||'beginner'; document.getElementById('questionPoints').value=q.points||10; document.getElementById('questionTopic').value=q.topic||'';
         toggleMCQOptions();
-        if (q.type === 'mcq' && Array.isArray(q.options)) {
-            const opts = q.options.map(o => o.replace(/^[A-D]\)\s*/, ''));
-            document.getElementById('optA').value = opts[0] || '';
-            document.getElementById('optB').value = opts[1] || '';
-            document.getElementById('optC').value = opts[2] || '';
-            document.getElementById('optD').value = opts[3] || '';
-        }
-        document.getElementById('questionErr').style.display = 'none';
-        document.getElementById('questionModal').classList.add('open');
+        if (q.type==='mcq'&&Array.isArray(q.options)) { const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/,'')); ['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||''); }
+        document.getElementById('questionErr').style.display='none'; document.getElementById('questionModal').classList.add('open');
     }
 
     async function deleteQuestion(id) {
         if (!confirm('Delete this challenge?')) return;
-        try {
-            await fetch(`${API}/classrooms/${classroomId}/questions/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
-            loadQuestions();
-        } catch (err) { alert('Failed to delete challenge.'); }
+        try { await fetch(`${API}/classrooms/${classroomId}/questions/${id}`,{method:'DELETE',headers:getAuthHeaders()}); loadQuestions(); }
+        catch(err) { alert('Failed to delete challenge.'); }
     }
 
     // ── Sessions ──────────────────────────────────────────────────────────────
@@ -1161,202 +1283,249 @@
 
     async function loadSessions() {
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            sessionsList = data.success ? (data.sessions || []) : [];
+            const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{headers:getAuthHeaders()});
+            const data=await res.json(); sessionsList=data.success?(data.sessions||[]):[];
+            document.getElementById('sessionsCount').textContent=sessionsList.length;
+            document.getElementById('statSessions').textContent=sessionsList.length;
             renderSessions();
-        } catch (err) {
-            document.getElementById('sessionsContainer').innerHTML = `<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`;
-        }
+        } catch(err) { document.getElementById('sessionsContainer').innerHTML=`<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`; }
     }
 
     function renderSessions() {
-        const container = document.getElementById('sessionsContainer');
-        if (!sessionsList.length) {
-            container.innerHTML = `<div class="empty-state">No sessions yet. Create one and students can join with the classroom key.</div>`;
-            return;
-        }
-        container.innerHTML = sessionsList.map(s => {
-            const sid = s.session_id || s.id;
-            const isLive = s.status === 'active';
-            return `
-            <div style="margin-bottom:16px;">
-                <div class="session-card" style="${isLive ? 'border-color:rgba(16,185,129,.4);background:linear-gradient(135deg,var(--bg-card) 0%,rgba(16,185,129,.04) 100%);margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;' : ''}">
+        const container=document.getElementById('sessionsContainer');
+        if (!sessionsList.length) { container.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🎮</div><div class="empty-state-title">No sessions yet</div><div class="empty-state-sub">Create a session and students can join with the classroom key</div></div>`; return; }
+        container.innerHTML=sessionsList.map(s => {
+            const sid=s.session_id||s.id, isLive=s.status==='active';
+            return `<div class="session-card ${isLive?'live':''}">
+                <div class="session-card-main">
                     <div class="session-info">
-                        <div class="session-title">
-                            ${isLive ? `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:0.62rem;font-weight:700;letter-spacing:1px;padding:2px 8px;margin-right:8px;vertical-align:middle;"><span style="width:6px;height:6px;background:var(--success);border-radius:50%;display:inline-block;animation:livePulse 1.2s ease-in-out infinite;"></span>LIVE</span>` : ''}
-                            ${escHtml(s.title)}
-                        </div>
-                        <div class="session-meta">Mode: ${s.game_mode || '—'} · Created ${relativeTime(s.created_at || s.createdAt)}
-                            ${isLive ? `<span id="answerCount-${sid}" style="margin-left:10px;color:var(--success);">· Loading responses…</span>` : ''}
-                        </div>
+                        <div class="session-title">${isLive?`<span class="live-badge"><span class="live-dot"></span>LIVE</span>`:''} ${escHtml(s.title)}</div>
+                        <div class="session-meta">Mode: ${s.game_mode||'—'} · Created ${relativeTime(s.created_at||s.createdAt)}${isLive?`<span id="answerCount-${sid}" style="color:var(--success);margin-left:8px;">· Loading…</span>`:''}</div>
                     </div>
                     <span class="status-pill ${s.status}">${s.status}</span>
-                    ${s.status === 'pending' ? `<button class="btn btn-primary" style="font-size:0.78rem;" onclick="setSessionStatus(${sid},'active')">▶ Launch</button>` : ''}
-                    ${isLive ? `<button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="setSessionStatus(${sid},'closed')">■ End Session</button>` : ''}
+                    <div class="session-actions">
+                        ${s.status==='pending'?`<button class="btn btn-primary" style="font-size:0.78rem;" onclick="setSessionStatus(${sid},'active')">▶ Launch</button>`:''}
+                        ${isLive?`<button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="setSessionStatus(${sid},'closed')">■ End</button>`:''}
+                    </div>
                 </div>
-                ${isLive ? `
-                <div class="monitor-panel" id="monitor-${sid}">
-                    <div class="monitor-header">
-                        <span class="monitor-title">📡 Live Student Monitor</span>
-                        <span class="monitor-refresh" id="monitorRefresh-${sid}">Refreshing…</span>
-                    </div>
-                    <div id="monitorRows-${sid}">
-                        <div class="loading-text" style="padding:8px 0;">Waiting for students…</div>
-                    </div>
-                </div>` : ''}
+                ${isLive?`<div class="monitor-panel" id="monitor-${sid}"><div class="monitor-header"><span class="monitor-title">📡 Live Student Monitor</span><span class="monitor-refresh" id="monitorRefresh-${sid}">Refreshing…</span></div><div id="monitorRows-${sid}"><div class="loading-text" style="padding:8px 0;">Waiting for students…</div></div></div>`:''}
             </div>`;
         }).join('');
     }
 
     function renderSessionQuestionPicker() {
-        const picker = document.getElementById('sessionQuestionPicker');
-        if (!classroomQuestions.length) {
-            picker.innerHTML = `<div style="color:var(--text-muted);font-size:0.8rem;">No challenges available. Add some in the Challenges tab first.</div>`;
-            return;
-        }
-        picker.innerHTML = classroomQuestions.map(q => `
-            <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:0.83rem;color:var(--text);">
-                <input type="checkbox" value="${q.question_id || q.id}" style="accent-color:var(--primary);">
-                <span>${escHtml((q.question_text || q.questionText || '').substring(0, 60))}…</span>
-            </label>`).join('');
+        const picker=document.getElementById('sessionQuestionPicker');
+        if (!classroomQuestions.length) { picker.innerHTML=`<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0;">No challenges yet. Add some in the Challenges tab first.</div>`; return; }
+        picker.innerHTML=classroomQuestions.map(q=>`<label style="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:0.83rem;color:var(--text);border-bottom:1px solid var(--border);"><input type="checkbox" value="${q.question_id||q.id}" style="accent-color:var(--primary);width:15px;height:15px;"><span>${escHtml((q.question_text||q.questionText||'').substring(0,70))}…</span></label>`).join('');
     }
 
     async function createSession() {
-        const title = document.getElementById('sessionTitle').value.trim();
-        const game_mode = document.getElementById('sessionMode').value;
-        const checked = [...document.querySelectorAll('#sessionQuestionPicker input[type=checkbox]:checked')].map(c => parseInt(c.value));
-        const errEl = document.getElementById('sessionErr');
-
-        if (!title) { errEl.textContent = 'Session title is required.'; errEl.style.display = 'block'; return; }
-        if (!checked.length) { errEl.textContent = 'Select at least one challenge.'; errEl.style.display = 'block'; return; }
-
-        const btn = document.getElementById('sessionSaveBtn');
-        btn.disabled = true; btn.textContent = 'Creating…';
-        errEl.style.display = 'none';
-
+        const title=document.getElementById('sessionTitle').value.trim(), game_mode=document.getElementById('sessionMode').value;
+        const checked=[...document.querySelectorAll('#sessionQuestionPicker input[type=checkbox]:checked')].map(c=>parseInt(c.value));
+        const errEl=document.getElementById('sessionErr');
+        if (!title) { errEl.textContent='Session title is required.'; errEl.style.display='block'; return; }
+        if (!checked.length) { errEl.textContent='Select at least one challenge.'; errEl.style.display='block'; return; }
+        const btn=document.getElementById('sessionSaveBtn'); btn.disabled=true; btn.textContent='Creating…'; errEl.style.display='none';
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, {
-                method: 'POST', headers: getAuthHeaders(),
-                body: JSON.stringify({ title, game_mode, question_ids: checked })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            closeModal('sessionModal');
-            loadSessions();
-        } catch (err) {
-            errEl.textContent = err.message || 'Failed to create session.';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.textContent = 'Create Session';
-        }
+            const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({title,game_mode,question_ids:checked})});
+            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            closeModal('sessionModal'); loadSessions();
+        } catch(err) { errEl.textContent=err.message||'Failed.'; errEl.style.display='block'; }
+        finally { btn.disabled=false; btn.textContent='Create Session'; }
     }
 
-    async function setSessionStatus(id, status) {
-        try {
-            await fetch(`${API}/classrooms/${classroomId}/sessions/${id}`, {
-                method: 'PATCH', headers: getAuthHeaders(),
-                body: JSON.stringify({ status })
-            });
-            await loadSessions();
-            if (status === 'active') startLivePolling();
-            if (status === 'closed') stopLivePolling();
-        } catch (err) { alert('Failed to update session.'); }
+    async function setSessionStatus(id,status) {
+        try { await fetch(`${API}/classrooms/${classroomId}/sessions/${id}`,{method:'PATCH',headers:getAuthHeaders(),body:JSON.stringify({status})}); await loadSessions(); if (status==='active') startLivePolling(); if (status==='closed') stopLivePolling(); }
+        catch(err) { alert('Failed to update session.'); }
     }
 
-    // ── Live polling (faculty side) ───────────────────────────────────────────
-    let livePoll = null;
-
-    function startLivePolling() {
-        if (livePoll) return;
-        livePoll = setInterval(pollLiveSessions, 5000);
-        pollLiveSessions(); // immediate first tick
-    }
-    function stopLivePolling() { clearInterval(livePoll); livePoll = null; }
+    let livePoll=null;
+    function startLivePolling() { if (livePoll) return; livePoll=setInterval(pollLiveSessions,5000); pollLiveSessions(); }
+    function stopLivePolling() { clearInterval(livePoll); livePoll=null; }
 
     async function pollLiveSessions() {
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const fresh = data.success ? (data.sessions || []) : [];
-
-            // Only re-render if status changed to avoid flicker
-            const activeSessions = fresh.filter(s => s.status === 'active');
-
-            // Update session list reference quietly
-            sessionsList = fresh;
-
-            // For each active session: fetch answer count + monitor data
-            for (const s of activeSessions) {
-                const sid = s.session_id || s.id;
-                fetchAnswerCount(sid);
-                fetchMonitor(sid);
-            }
-
-            // Stop polling when no active sessions remain
-            if (!activeSessions.length) stopLivePolling();
-        } catch (_) {}
+            const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{headers:getAuthHeaders()});
+            const data=await res.json(); const fresh=data.success?(data.sessions||[]):[];
+            sessionsList=fresh; const active=fresh.filter(s=>s.status==='active');
+            for (const s of active) { const sid=s.session_id||s.id; fetchAnswerCount(sid); fetchMonitor(sid); }
+            if (!active.length) stopLivePolling();
+        } catch(_) {}
     }
 
     async function fetchAnswerCount(sessionId) {
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/analytics`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const el = document.getElementById(`answerCount-${sessionId}`);
-            if (el && data.success) {
-                const count = data.analytics?.totalAnswers || data.analytics?.answersInSession || 0;
-                el.textContent = `· ${count} response${count !== 1 ? 's' : ''} so far`;
-            }
-        } catch (_) {}
+            const res=await fetch(`${API}/classrooms/${classroomId}/analytics`,{headers:getAuthHeaders()});
+            const data=await res.json(); const el=document.getElementById(`answerCount-${sessionId}`);
+            if (el&&data.success) { const count=data.analytics?.totalAnswers||0; el.textContent=`· ${count} response${count!==1?'s':''} so far`; }
+        } catch(_) {}
     }
 
     async function fetchMonitor(sessionId) {
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/monitor`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const rowsEl = document.getElementById(`monitorRows-${sessionId}`);
-            const refreshEl = document.getElementById(`monitorRefresh-${sessionId}`);
+            const res=await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/monitor`,{headers:getAuthHeaders()});
+            const data=await res.json(); const rowsEl=document.getElementById(`monitorRows-${sessionId}`); const refreshEl=document.getElementById(`monitorRefresh-${sessionId}`);
             if (!rowsEl) return;
-
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            if (refreshEl) refreshEl.textContent = `Last updated ${now}`;
-
-            if (!data.success) { rowsEl.innerHTML = `<div style="color:var(--text-muted);font-size:0.8rem;padding:6px 0;">Monitor unavailable.</div>`; return; }
-
-            const { monitor = [], totalQuestions = 0 } = data;
-            if (!monitor.length) {
-                rowsEl.innerHTML = `<div style="color:var(--text-muted);font-size:0.8rem;padding:6px 0;">No students have joined yet.</div>`;
-                return;
-            }
-
-            // Sort by points desc
-            const sorted = [...monitor].sort((a, b) => (b.points || 0) - (a.points || 0));
-            rowsEl.innerHTML = sorted.map(m => {
-                const answered = m.answered || 0;
-                const total    = totalQuestions || 1;
-                const pct      = Math.min(100, Math.round((answered / total) * 100));
-                const barColor = m.correct / Math.max(answered, 1) >= 0.7 ? 'var(--success)' : m.correct / Math.max(answered, 1) >= 0.4 ? 'var(--warning)' : 'var(--danger)';
-                return `
-                <div class="monitor-row">
-                    <div class="monitor-name" title="${escHtml(m.fullName || m.full_name || 'Student')}">${escHtml(m.fullName || m.full_name || 'Student')}</div>
-                    <div class="monitor-bar-wrap">
-                        <div class="monitor-bar-fill" style="width:${pct}%;background:${barColor};"></div>
-                    </div>
-                    <div class="monitor-stats">${answered}/${total} · ${m.correct || 0} correct</div>
-                    <div class="monitor-pts">${m.points || 0} pts</div>
-                </div>`;
+            if (refreshEl) refreshEl.textContent=`Last updated ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
+            if (!data.success) { rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:0.8rem;padding:6px 0;">Monitor unavailable.</div>`; return; }
+            const {monitor=[],totalQuestions=0}=data;
+            if (!monitor.length) { rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0;">No students joined yet.</div>`; return; }
+            const sorted=[...monitor].sort((a,b)=>(b.points||0)-(a.points||0));
+            rowsEl.innerHTML=sorted.map(m=>{
+                const answered=m.answered||0,total=totalQuestions||1,pct=Math.min(100,Math.round((answered/total)*100));
+                const barColor=m.correct/Math.max(answered,1)>=0.7?'var(--success)':m.correct/Math.max(answered,1)>=0.4?'var(--warning)':'var(--danger)';
+                return `<div class="monitor-row"><div class="monitor-name" title="${escHtml(m.fullName||m.full_name||'Student')}">${escHtml(m.fullName||m.full_name||'Student')}</div><div class="monitor-bar-wrap"><div class="monitor-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><div class="monitor-stats">${answered}/${total} · ${m.correct||0} correct</div><div class="monitor-pts">${m.points||0} pts</div></div>`;
             }).join('');
-        } catch (_) {}
+        } catch(_) {}
     }
 
-    // ── Logout ────────────────────────────────────────────────────────────────
-    function logout() {
-        if (!confirm('Logout?')) return;
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('isLoggedIn');
-        window.location.href = 'index.html';
+    // ── Assignments ───────────────────────────────────────────────────────────
+    let assignmentsList=[];
+
+    async function loadAssignments() {
+        try {
+            const res=await fetch(`${API}/assignments?classroomId=${classroomId}`,{headers:getAuthHeaders()});
+            const data=await res.json(); assignmentsList=data.success?(data.assignments||[]):[];
+            document.getElementById('assignmentsCount').textContent=assignmentsList.length;
+            renderAssignments();
+        } catch(err) { document.getElementById('assignmentsContainer').innerHTML=`<div class="empty-state">Failed to load assignments.</div>`; }
     }
+
+    function renderAssignments() {
+        const container=document.getElementById('assignmentsContainer');
+        if (!assignmentsList.length) { container.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No assignments yet</div><div class="empty-state-sub">Create a coding assignment with automated test-case grading</div></div>`; return; }
+        const langColors={python:'#3b82f6',javascript:'#f59e0b',java:'#ef4444',cpp:'#8b5cf6'};
+        container.innerHTML=assignmentsList.map(a=>{
+            const aid=a.assignment_id||a.id, lang=a.language||'python', lc=langColors[lang]||'#6b7280';
+            const deadline=a.deadline?new Date(a.deadline).toLocaleDateString():'No deadline', subCount=a.submission_count||0;
+            return `<div class="assignment-card">
+                <div class="assignment-icon"><span class="material-symbols-outlined">terminal</span></div>
+                <div class="assignment-body">
+                    <div class="assignment-meta-row">
+                        <span class="lang-chip" style="background:${lc}18;color:${lc};border:1px solid ${lc}30;">${lang}</span>
+                        <span style="font-size:0.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;"><span class="material-symbols-outlined" style="font-size:0.85rem;">calendar_today</span>${deadline}</span>
+                        <span style="font-size:0.72rem;color:var(--xp-gold);font-weight:700;">${a.max_points||a.maxPoints||100} pts</span>
+                    </div>
+                    <div class="assignment-title">${escHtml(a.title)}</div>
+                    <div class="assignment-sub">${a.total_tests||0} test cases · ${subCount} submission${subCount!==1?'s':''}</div>
+                    ${a.description?`<div class="assignment-desc">${escHtml(a.description.substring(0,140))}${a.description.length>140?'…':''}</div>`:''}
+                </div>
+                <div class="assignment-actions">
+                    <button class="btn btn-outline" style="font-size:0.78rem;display:inline-flex;align-items:center;gap:5px;" onclick="viewSubmissions(${aid})"><span class="material-symbols-outlined" style="font-size:0.9rem;">bar_chart</span>Submissions</button>
+                    <button class="btn btn-outline" style="font-size:0.78rem;" onclick="editAssignment(${aid})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="deleteAssignment(${aid})">Delete</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function deleteAssignment(id) {
+        if (!confirm('Delete this assignment? All student submissions will be lost.')) return;
+        try { await fetch(`${API}/assignments/${id}`,{method:'DELETE',headers:getAuthHeaders()}); showToast('Assignment deleted'); loadAssignments(); }
+        catch { alert('Failed to delete assignment.'); }
+    }
+
+    let editingAssignmentId=null, testCaseCount=0;
+
+    function openAssignmentModal(assignmentData=null) {
+        editingAssignmentId=assignmentData?(assignmentData.assignment_id||assignmentData.id):null;
+        document.getElementById('assignModalTitle').textContent=assignmentData?'Edit Assignment':'New Coding Assignment';
+        document.getElementById('assignTitle').value=assignmentData?.title||''; document.getElementById('assignDesc').value=assignmentData?.description||'';
+        document.getElementById('assignLang').value=assignmentData?.language||'python'; document.getElementById('assignMaxPoints').value=assignmentData?.max_points||assignmentData?.maxPoints||100;
+        document.getElementById('assignScoringMode').value=assignmentData?.scoring_mode||assignmentData?.scoringMode||'per_test';
+        document.getElementById('assignDeadline').value=assignmentData?.deadline?assignmentData.deadline.split('T')[0]:'';
+        document.getElementById('assignStarterCode').value=assignmentData?.starter_code||assignmentData?.starterCode||'';
+        document.getElementById('assignErr').style.display='none';
+        testCaseCount=0; document.getElementById('testCasesBody').innerHTML='';
+        if (assignmentData?.testCases) assignmentData.testCases.forEach(tc=>addTestCaseRow(tc)); else addTestCaseRow();
+        document.getElementById('assignModal').classList.add('open');
+    }
+
+    async function editAssignment(id) {
+        try { const res=await fetch(`${API}/assignments/${id}`,{headers:getAuthHeaders()}); const data=await res.json(); if (data.success) openAssignmentModal({...data.assignment,testCases:data.testCases}); }
+        catch { alert('Failed to load assignment.'); }
+    }
+
+    function addTestCaseRow(tc=null) {
+        testCaseCount++; const n=testCaseCount; const row=document.createElement('div');
+        row.className='tc-row'; row.id=`tc-row-${n}`;
+        row.innerHTML=`<div class="tc-row-header"><span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">Test ${n}</span><div style="display:flex;align-items:center;gap:12px;"><label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="tc-hidden-${n}" ${tc?.is_hidden||tc?.isHidden?'checked':''} style="accent-color:var(--primary);">Hidden</label><button onclick="removeTestCase(${n})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;line-height:1;">×</button></div></div><div class="tc-row-fields"><div><label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Input (stdin)</label><textarea class="form-input tc-input" id="tc-input-${n}" rows="3" placeholder="e.g. 5\n3">${escHtml(tc?.input||'')}</textarea></div><div><label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Expected Output</label><textarea class="form-input tc-output" id="tc-output-${n}" rows="3" placeholder="e.g. 8">${escHtml(tc?.expected_output||tc?.expectedOutput||'')}</textarea></div></div>`;
+        document.getElementById('testCasesBody').appendChild(row);
+    }
+
+    function removeTestCase(n) { document.getElementById(`tc-row-${n}`)?.remove(); }
+
+    function collectTestCases() {
+        const tcs=[];
+        document.querySelectorAll('.tc-row').forEach(row=>{ const n=row.id.replace('tc-row-',''); const input=document.getElementById(`tc-input-${n}`)?.value||'',expectedOutput=document.getElementById(`tc-output-${n}`)?.value||''; if (input||expectedOutput) tcs.push({input,expectedOutput,isHidden:document.getElementById(`tc-hidden-${n}`)?.checked||false}); });
+        return tcs;
+    }
+
+    async function saveAssignment() {
+        const title=document.getElementById('assignTitle').value.trim(), description=document.getElementById('assignDesc').value.trim(), language=document.getElementById('assignLang').value;
+        const maxPoints=parseInt(document.getElementById('assignMaxPoints').value)||100, scoringMode=document.getElementById('assignScoringMode').value;
+        const deadline=document.getElementById('assignDeadline').value||null, starterCode=document.getElementById('assignStarterCode').value, testCases=collectTestCases();
+        const errEl=document.getElementById('assignErr');
+        if (!title) { errEl.textContent='Title is required.'; errEl.style.display='block'; return; }
+        if (!testCases.length) { errEl.textContent='Add at least one test case.'; errEl.style.display='block'; return; }
+        const btn=document.getElementById('assignSaveBtn'); btn.disabled=true; btn.textContent='Saving…'; errEl.style.display='none';
+        try {
+            const url=editingAssignmentId?`${API}/assignments/${editingAssignmentId}`:`${API}/assignments`;
+            const res=await fetch(url,{method:editingAssignmentId?'PUT':'POST',headers:getAuthHeaders(),body:JSON.stringify({classroomId,title,description,language,maxPoints,scoringMode,deadline,starterCode,testCases,status:'published'})});
+            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            document.getElementById('assignModal').classList.remove('open'); showToast(editingAssignmentId?'Assignment updated!':'Assignment created!'); loadAssignments();
+        } catch(err) { errEl.textContent=err.message||'Failed.'; errEl.style.display='block'; }
+        finally { btn.disabled=false; btn.textContent='Save Assignment'; }
+    }
+
+    function toggleLessonAIPanel() { const p=document.getElementById('lessonAIPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+
+    async function generateAILesson() {
+        const topic=document.getElementById('lessonAITopic').value.trim(), language=document.getElementById('lessonAILang').value, difficulty=document.getElementById('lessonAIDiff').value;
+        if (!topic) { alert('Please enter a topic first.'); return; }
+        const btn=document.getElementById('lessonAIGenBtn'), status=document.getElementById('lessonAIStatus');
+        btn.disabled=true; btn.textContent='⏳ Generating…'; status.textContent='Calling AI…';
+        try {
+            const res=await fetch(`${API}/lessons/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty})});
+            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            document.getElementById('lessonTitle').value=data.lesson.title||''; document.getElementById('lessonLang').value=language; document.getElementById('lessonContent').value=data.lesson.content||'';
+            document.getElementById('lessonAIPanel').style.display='none'; status.textContent=''; showToast('✨ Lesson generated! Review and save.');
+        } catch(err) { status.textContent='❌ '+err.message; }
+        finally { btn.disabled=false; btn.textContent='⚡ Generate Lesson'; }
+    }
+
+    function toggleAssignAIPanel() { const p=document.getElementById('assignAIPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+
+    async function generateAIAssignment() {
+        const topic=document.getElementById('assignAITopic').value.trim(), language=document.getElementById('assignAILang').value, difficulty=document.getElementById('assignAIDiff').value;
+        if (!topic) { alert('Please enter a topic first.'); return; }
+        const btn=document.getElementById('assignAIGenBtn'), status=document.getElementById('assignAIStatus');
+        btn.disabled=true; btn.textContent='⏳ Generating…'; status.textContent='Calling AI…';
+        try {
+            const res=await fetch(`${API}/assignments/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty})});
+            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            const a=data.assignment;
+            document.getElementById('assignTitle').value=a.title||''; document.getElementById('assignDesc').value=a.description||''; document.getElementById('assignLang').value=language; document.getElementById('assignStarterCode').value=a.starterCode||a.starter_code||'';
+            testCaseCount=0; document.getElementById('testCasesBody').innerHTML='';
+            const tcs=a.testCases||a.test_cases||[]; tcs.forEach(tc=>addTestCaseRow({input:tc.input||'',expected_output:tc.expectedOutput||tc.expected_output||'',isHidden:tc.isHidden||tc.is_hidden||false}));
+            if (!tcs.length) addTestCaseRow();
+            document.getElementById('assignAIPanel').style.display='none'; status.textContent=''; showToast(`✨ Generated with ${tcs.length} test cases!`);
+        } catch(err) { status.textContent='❌ '+err.message; }
+        finally { btn.disabled=false; btn.textContent='⚡ Generate Assignment'; }
+    }
+
+    async function viewSubmissions(assignmentId) {
+        document.getElementById('submissionsModal').classList.add('open');
+        document.getElementById('submissionsBody').innerHTML='<div class="loading-text">Loading submissions…</div>';
+        try {
+            const res=await fetch(`${API}/assignments/${assignmentId}/submissions`,{headers:getAuthHeaders()});
+            const data=await res.json(); const subs=data.success?(data.submissions||[]):[];
+            if (!subs.length) { document.getElementById('submissionsBody').innerHTML='<div class="empty-state"><div class="empty-state-icon">📬</div><div class="empty-state-title">No submissions yet</div></div>'; return; }
+            document.getElementById('submissionsBody').innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:0.72rem;color:var(--text-muted);text-align:left;border-bottom:2px solid var(--border);"><th style="padding:10px 12px;">Student</th><th style="padding:10px 12px;">Score</th><th style="padding:10px 12px;">Tests Passed</th><th style="padding:10px 12px;">Time</th><th style="padding:10px 12px;">Submitted</th></tr></thead><tbody>${subs.map(s=>{const pct=s.total_tests>0?Math.round((s.passed_tests/s.total_tests)*100):0;const color=pct===100?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';return `<tr style="border-bottom:1px solid var(--border);font-size:0.83rem;"><td style="padding:12px;"><strong>${escHtml(s.studentName||s.full_name||'Student')}</strong><br><span style="color:var(--text-muted);font-size:0.75rem;">${escHtml(s.email||'')}</span></td><td style="padding:12px;font-weight:700;color:${color};">${s.score} pts</td><td style="padding:12px;color:${color};">${s.passed_tests}/${s.total_tests} (${pct}%)</td><td style="padding:12px;color:var(--text-muted);">${s.execution_time_ms||0}ms</td><td style="padding:12px;color:var(--text-muted);">${relativeTime(s.submitted_at)}</td></tr>`;}).join('')}</tbody></table>`;
+        } catch { document.getElementById('submissionsBody').innerHTML='<div class="empty-state">Failed to load submissions.</div>'; }
+    }
+
+    function logout() { if (!confirm('Logout?')) return; localStorage.removeItem('user'); localStorage.removeItem('token'); localStorage.removeItem('isLoggedIn'); window.location.href='index.html'; }
 
     // ── Init ──────────────────────────────────────────────────────────────────
     loadClassroom();
@@ -1365,437 +1534,9 @@
     loadQuestions();
     loadSessions();
     loadAssignments();
-
-    // ── ASSIGNMENTS ───────────────────────────────────────────────────────────
-    let assignmentsList = [];
-
-    async function loadAssignments() {
-        try {
-            const res = await fetch(`${API}/assignments?classroomId=${classroomId}`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            assignmentsList = data.success ? (data.assignments || []) : [];
-            renderAssignments();
-        } catch (err) {
-            document.getElementById('assignmentsContainer').innerHTML = `<div class="empty-state">Failed to load assignments.</div>`;
-        }
-    }
-
-    function renderAssignments() {
-        const container = document.getElementById('assignmentsContainer');
-        if (!assignmentsList.length) {
-            container.innerHTML = `<div class="empty-state">No assignments yet. Create one to get started!</div>`;
-            return;
-        }
-        container.innerHTML = assignmentsList.map(a => {
-            const aid = a.assignment_id || a.id;
-            const lang = a.language || 'python';
-            const langColors = { python:'#3b82f6', javascript:'#f59e0b', java:'#ef4444', cpp:'#8b5cf6' };
-            const deadline = a.deadline ? new Date(a.deadline).toLocaleDateString() : 'No deadline';
-            const subCount = a.submission_count || 0;
-            return `
-            <div class="session-card" style="margin-bottom:16px;flex-direction:column;align-items:flex-start;gap:12px;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%;gap:12px;">
-                    <div style="flex:1;">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                            <span style="background:${langColors[lang]||'#6b7280'}22;color:${langColors[lang]||'#6b7280'};border:1px solid ${langColors[lang]||'#6b7280'}44;border-radius:6px;font-size:0.7rem;font-weight:700;padding:2px 8px;text-transform:uppercase;">${lang}</span>
-                            <span style="font-size:0.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:0.25rem;"><span class="material-symbols-outlined" style="font-size:0.85rem;">calendar_today</span> ${deadline}</span>
-                            <span style="font-size:0.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:0.25rem;"><span class="material-symbols-outlined" style="font-size:0.85rem;">emoji_events</span> ${a.max_points || a.maxPoints || 100} pts</span>
-                        </div>
-                        <div class="session-title">${escHtml(a.title)}</div>
-                        <div class="session-meta" style="margin-top:4px;">${a.total_tests || 0} test cases · ${subCount} submission${subCount !== 1 ? 's' : ''} · ${a.scoring_mode || a.scoringMode || 'per_test'}</div>
-                    </div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
-                        <button class="btn btn-outline" style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.3rem;" onclick="viewSubmissions(${aid})"><span class="material-symbols-outlined" style="font-size:0.9rem;">bar_chart</span> Submissions</button>
-                        <button class="btn btn-outline" style="font-size:0.75rem;" onclick="editAssignment(${aid})">Edit</button>
-                        <button class="btn btn-outline" style="font-size:0.75rem;color:var(--danger);border-color:var(--danger);" onclick="deleteAssignment(${aid})">Delete</button>
-                    </div>
-                </div>
-                ${a.description ? `<p style="font-size:0.82rem;color:var(--text-secondary);margin:0;line-height:1.5;">${escHtml(a.description.substring(0, 120))}${a.description.length > 120 ? '…' : ''}</p>` : ''}
-            </div>`;
-        }).join('');
-    }
-
-    async function deleteAssignment(id) {
-        if (!confirm('Delete this assignment? All student submissions will be lost.')) return;
-        try {
-            await fetch(`${API}/assignments/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
-            showToast('Assignment deleted');
-            loadAssignments();
-        } catch { alert('Failed to delete assignment.'); }
-    }
-
-    // ── Assignment Modal ──────────────────────────────────────────────────────
-    let editingAssignmentId = null;
-    let testCaseCount = 0;
-
-    function openAssignmentModal(assignmentData = null) {
-        editingAssignmentId = assignmentData ? (assignmentData.assignment_id || assignmentData.id) : null;
-        document.getElementById('assignModalTitle').textContent = assignmentData ? 'Edit Assignment' : 'New Coding Assignment';
-        document.getElementById('assignTitle').value = assignmentData?.title || '';
-        document.getElementById('assignDesc').value = assignmentData?.description || '';
-        document.getElementById('assignLang').value = assignmentData?.language || 'python';
-        document.getElementById('assignMaxPoints').value = assignmentData?.max_points || assignmentData?.maxPoints || 100;
-        document.getElementById('assignScoringMode').value = assignmentData?.scoring_mode || assignmentData?.scoringMode || 'per_test';
-        document.getElementById('assignDeadline').value = assignmentData?.deadline ? assignmentData.deadline.split('T')[0] : '';
-        document.getElementById('assignStarterCode').value = assignmentData?.starter_code || assignmentData?.starterCode || '';
-        document.getElementById('assignErr').style.display = 'none';
-
-        // Load test cases
-        testCaseCount = 0;
-        document.getElementById('testCasesBody').innerHTML = '';
-        if (assignmentData?.testCases) {
-            assignmentData.testCases.forEach(tc => addTestCaseRow(tc));
-        } else {
-            addTestCaseRow(); // start with one empty row
-        }
-        document.getElementById('assignModal').classList.add('open');
-    }
-
-    async function editAssignment(id) {
-        try {
-            const res = await fetch(`${API}/assignments/${id}`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            if (data.success) {
-                openAssignmentModal({ ...data.assignment, testCases: data.testCases });
-            }
-        } catch { alert('Failed to load assignment.'); }
-    }
-
-    function addTestCaseRow(tc = null) {
-        testCaseCount++;
-        const n = testCaseCount;
-        const row = document.createElement('div');
-        row.className = 'tc-row';
-        row.id = `tc-row-${n}`;
-        row.innerHTML = `
-            <div class="tc-row-header">
-                <span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">Test ${n}</span>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
-                        <input type="checkbox" id="tc-hidden-${n}" ${tc?.is_hidden || tc?.isHidden ? 'checked' : ''} style="accent-color:var(--primary);">
-                        Hidden (judges only)
-                    </label>
-                    <button onclick="removeTestCase(${n})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem;line-height:1;">×</button>
-                </div>
-            </div>
-            <div class="tc-row-fields">
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Input (stdin)</label>
-                    <textarea class="form-input tc-input" id="tc-input-${n}" rows="3" placeholder="e.g. 5\n3">${escHtml(tc?.input || tc?.input || '')}</textarea>
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Expected Output</label>
-                    <textarea class="form-input tc-output" id="tc-output-${n}" rows="3" placeholder="e.g. 8">${escHtml(tc?.expected_output || tc?.expectedOutput || '')}</textarea>
-                </div>
-            </div>`;
-        document.getElementById('testCasesBody').appendChild(row);
-    }
-
-    function removeTestCase(n) {
-        document.getElementById(`tc-row-${n}`)?.remove();
-    }
-
-    function collectTestCases() {
-        const tcs = [];
-        document.querySelectorAll('.tc-row').forEach(row => {
-            const n = row.id.replace('tc-row-', '');
-            const input = document.getElementById(`tc-input-${n}`)?.value || '';
-            const expectedOutput = document.getElementById(`tc-output-${n}`)?.value || '';
-            if (input || expectedOutput) {
-                tcs.push({ input, expectedOutput, isHidden: document.getElementById(`tc-hidden-${n}`)?.checked || false });
-            }
-        });
-        return tcs;
-    }
-
-    async function saveAssignment() {
-        const title = document.getElementById('assignTitle').value.trim();
-        const description = document.getElementById('assignDesc').value.trim();
-        const language = document.getElementById('assignLang').value;
-        const maxPoints = parseInt(document.getElementById('assignMaxPoints').value) || 100;
-        const scoringMode = document.getElementById('assignScoringMode').value;
-        const deadline = document.getElementById('assignDeadline').value || null;
-        const starterCode = document.getElementById('assignStarterCode').value;
-        const testCases = collectTestCases();
-        const errEl = document.getElementById('assignErr');
-
-        if (!title) { errEl.textContent = 'Title is required.'; errEl.style.display = 'block'; return; }
-        if (!testCases.length) { errEl.textContent = 'Add at least one test case.'; errEl.style.display = 'block'; return; }
-
-        const btn = document.getElementById('assignSaveBtn');
-        btn.disabled = true; btn.textContent = 'Saving…';
-        errEl.style.display = 'none';
-
-        try {
-            const url = editingAssignmentId ? `${API}/assignments/${editingAssignmentId}` : `${API}/assignments`;
-            const method = editingAssignmentId ? 'PUT' : 'POST';
-            const res = await fetch(url, {
-                method, headers: getAuthHeaders(),
-                body: JSON.stringify({ classroomId, title, description, language, maxPoints, scoringMode, deadline, starterCode, testCases, status: 'published' })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            document.getElementById('assignModal').classList.remove('open');
-            showToast(editingAssignmentId ? 'Assignment updated!' : 'Assignment created!');
-            loadAssignments();
-        } catch (err) {
-            errEl.textContent = err.message || 'Failed to save assignment.';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.textContent = 'Save Assignment';
-        }
-    }
-
-    // ── AI Lesson Generator ───────────────────────────────────────────────────
-    function toggleLessonAIPanel() {
-        const p = document.getElementById('lessonAIPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
-    async function generateAILesson() {
-        const topic = document.getElementById('lessonAITopic').value.trim();
-        const language = document.getElementById('lessonAILang').value;
-        const difficulty = document.getElementById('lessonAIDiff').value;
-        if (!topic) { alert('Please enter a topic first.'); return; }
-
-        const btn = document.getElementById('lessonAIGenBtn');
-        const status = document.getElementById('lessonAIStatus');
-        btn.disabled = true; btn.textContent = '⏳ Generating…';
-        status.textContent = 'Calling GPT-4o mini…';
-
-        try {
-            const res = await fetch(`${API}/lessons/generate`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ topic, language, difficulty })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            const lesson = data.lesson;
-            document.getElementById('lessonTitle').value = lesson.title || '';
-            document.getElementById('lessonLang').value = language;
-            document.getElementById('lessonContent').value = lesson.content || '';
-            document.getElementById('lessonAIPanel').style.display = 'none';
-            status.textContent = '';
-            showToast('✨ Lesson generated! Review and save.');
-        } catch (err) {
-            status.textContent = '❌ Failed: ' + err.message;
-        } finally {
-            btn.disabled = false; btn.textContent = '⚡ Generate Lesson';
-        }
-    }
-
-    // ── AI Assignment Generator ───────────────────────────────────────────────
-    function toggleAssignAIPanel() {
-        const p = document.getElementById('assignAIPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
-    async function generateAIAssignment() {
-        const topic = document.getElementById('assignAITopic').value.trim();
-        const language = document.getElementById('assignAILang').value;
-        const difficulty = document.getElementById('assignAIDiff').value;
-        if (!topic) { alert('Please enter a topic first.'); return; }
-
-        const btn = document.getElementById('assignAIGenBtn');
-        const status = document.getElementById('assignAIStatus');
-        btn.disabled = true; btn.textContent = '⏳ Generating…';
-        status.textContent = 'Calling GPT-4o mini…';
-
-        try {
-            const res = await fetch(`${API}/assignments/generate`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ topic, language, difficulty })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            const a = data.assignment;
-
-            // Fill in form fields
-            document.getElementById('assignTitle').value = a.title || '';
-            document.getElementById('assignDesc').value = a.description || '';
-            document.getElementById('assignLang').value = language;
-            document.getElementById('assignStarterCode').value = a.starterCode || a.starter_code || '';
-
-            // Fill in test cases
-            testCaseCount = 0;
-            document.getElementById('testCasesBody').innerHTML = '';
-            const tcs = a.testCases || a.test_cases || [];
-            tcs.forEach(tc => addTestCaseRow({
-                input: tc.input || '',
-                expected_output: tc.expectedOutput || tc.expected_output || '',
-                isHidden: tc.isHidden || tc.is_hidden || false,
-                label: tc.label || ''
-            }));
-            if (!tcs.length) addTestCaseRow();
-
-            document.getElementById('assignAIPanel').style.display = 'none';
-            status.textContent = '';
-            showToast(`✨ Assignment generated with ${tcs.length} test cases! Review and save.`);
-        } catch (err) {
-            status.textContent = '❌ Failed: ' + err.message;
-        } finally {
-            btn.disabled = false; btn.textContent = '⚡ Generate Assignment';
-        }
-    }
-
-    // ── Submissions Viewer ────────────────────────────────────────────────────
-    async function viewSubmissions(assignmentId) {
-        document.getElementById('submissionsModal').classList.add('open');
-        document.getElementById('submissionsBody').innerHTML = '<div class="loading-text">Loading submissions…</div>';
-        try {
-            const res = await fetch(`${API}/assignments/${assignmentId}/submissions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            const subs = data.success ? (data.submissions || []) : [];
-            if (!subs.length) {
-                document.getElementById('submissionsBody').innerHTML = '<div class="empty-state">No submissions yet.</div>';
-                return;
-            }
-            const maxPts = subs[0]?.total_tests > 0 ? subs[0].score : 100;
-            document.getElementById('submissionsBody').innerHTML = `
-                <table style="width:100%;border-collapse:collapse;">
-                    <thead>
-                        <tr style="font-size:0.75rem;color:var(--text-muted);text-align:left;border-bottom:1px solid var(--border);">
-                            <th style="padding:8px 10px;">Student</th>
-                            <th style="padding:8px 10px;">Score</th>
-                            <th style="padding:8px 10px;">Tests Passed</th>
-                            <th style="padding:8px 10px;">Time</th>
-                            <th style="padding:8px 10px;">Submitted</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${subs.map((s, i) => {
-                            const pct = s.total_tests > 0 ? Math.round((s.passed_tests / s.total_tests) * 100) : 0;
-                            const color = pct === 100 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
-                            return `<tr style="border-bottom:1px solid var(--border);font-size:0.82rem;">
-                                <td style="padding:10px;"><strong>${escHtml(s.studentName || s.full_name || 'Student')}</strong><br><span style="color:var(--text-muted);font-size:0.75rem;">${escHtml(s.email || '')}</span></td>
-                                <td style="padding:10px;font-weight:700;color:${color};">${s.score} pts</td>
-                                <td style="padding:10px;color:${color};">${s.passed_tests}/${s.total_tests} <span style="color:var(--text-muted);">(${pct}%)</span></td>
-                                <td style="padding:10px;color:var(--text-muted);">${s.execution_time_ms || 0}ms</td>
-                                <td style="padding:10px;color:var(--text-muted);">${relativeTime(s.submitted_at)}</td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>`;
-        } catch {
-            document.getElementById('submissionsBody').innerHTML = '<div class="empty-state">Failed to load submissions.</div>';
-        }
-    }
 </script>
 
-<!-- ── Assignment Modal ── -->
-<div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal-box" style="max-width:760px;width:95vw;max-height:90vh;overflow-y:auto;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-            <div class="modal-title" id="assignModalTitle" style="margin:0;">New Coding Assignment</div>
-            <button class="btn btn-outline" onclick="toggleAssignAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
-        </div>
-
-        <!-- AI Panel -->
-        <div id="assignAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
-            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Assignment Generator</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label>
-                    <input type="text" class="form-input" id="assignAITopic" placeholder="e.g. Fibonacci, Sorting…" style="font-size:0.82rem;">
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label>
-                    <select class="form-input" id="assignAILang" style="font-size:0.82rem;">
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
-                    <select class="form-input" id="assignAIDiff" style="font-size:0.82rem;">
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn btn-primary" id="assignAIGenBtn" onclick="generateAIAssignment()" style="font-size:0.8rem;">⚡ Generate Assignment</button>
-            <span id="assignAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="modal-field" style="grid-column:1/-1;">
-                <label>Title *</label>
-                <input type="text" class="form-input" id="assignTitle" placeholder="e.g. Two Sum Problem">
-            </div>
-            <div class="modal-field" style="grid-column:1/-1;">
-                <label>Problem Description</label>
-                <textarea class="form-input" id="assignDesc" rows="3" placeholder="Describe the problem, input/output format, constraints…" style="resize:vertical;"></textarea>
-            </div>
-            <div class="modal-field">
-                <label>Language</label>
-                <select class="form-input" id="assignLang">
-                    <option value="python">Python</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="java">Java</option>
-                    <option value="cpp">C++</option>
-                </select>
-            </div>
-            <div class="modal-field">
-                <label>Max Points</label>
-                <input type="number" class="form-input" id="assignMaxPoints" value="100" min="1">
-            </div>
-            <div class="modal-field">
-                <label>Scoring Mode</label>
-                <select class="form-input" id="assignScoringMode">
-                    <option value="per_test">Per test case (partial credit)</option>
-                    <option value="all_or_nothing">All or nothing</option>
-                </select>
-            </div>
-            <div class="modal-field">
-                <label>Deadline (optional)</label>
-                <input type="date" class="form-input" id="assignDeadline">
-            </div>
-            <div class="modal-field" style="grid-column:1/-1;">
-                <label>Starter Code (optional)</label>
-                <textarea class="form-input" id="assignStarterCode" rows="4" placeholder="# Starter code that students see when they open the assignment…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea>
-            </div>
-        </div>
-
-        <div style="margin-top:20px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                <label style="font-weight:600;font-size:0.85rem;">Test Cases *</label>
-                <button class="btn btn-outline" style="font-size:0.75rem;" onclick="addTestCaseRow()">+ Add Test Case</button>
-            </div>
-            <div id="testCasesBody"></div>
-        </div>
-
-        <div class="err-msg" id="assignErr"></div>
-        <div class="modal-actions">
-            <button class="btn btn-outline" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
-            <button class="btn btn-primary" id="assignSaveBtn" onclick="saveAssignment()">Save Assignment</button>
-        </div>
-    </div>
-</div>
-
-<!-- ── Submissions Viewer Modal ── -->
-<div class="modal-overlay" id="submissionsModal" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal-box" style="max-width:800px;width:95vw;max-height:90vh;overflow-y:auto;">
-        <div class="modal-title">Student Submissions</div>
-        <div id="submissionsBody"><div class="loading-text">Loading…</div></div>
-        <div class="modal-actions">
-            <button class="btn btn-outline" onclick="document.getElementById('submissionsModal').classList.remove('open')">Close</button>
-        </div>
-    </div>
-</div>
-
-<style>
-.tc-row { background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
-.tc-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-.tc-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.tc-row-fields textarea { resize:vertical; font-family:monospace; font-size:0.8rem; min-height:72px; }
-</style>
 <script src="../js/sidebar.js"></script>
 <script>window.SIDEBAR_ROLE = 'faculty'; window.SIDEBAR_PAGE = 'classrooms';</script>
-
 </body>
 </html>

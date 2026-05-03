@@ -59,6 +59,7 @@ const profileRoutes = require('./routes/profileRoutes');         // User profile
 const dailyChallengeRoutes = require('./routes/dailyChallengeRoutes'); // Daily Challenge
 const aiRoutes             = require('./routes/aiRoutes');             // Phase 1 AI endpoints
 const learningPathRoutes   = require('./routes/learningPathRoutes');   // Phase 1 Learning Paths
+const contributionRoutes   = require('./routes/contributionRoutes');   // Faculty contributions (blogs & courses)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2: INITIALIZE EXPRESS APPLICATION
@@ -154,6 +155,9 @@ app.use('/api/ai', aiRoutes);
 
 // Phase 1 — Learning Paths: /api/paths/...
 app.use('/api/paths', learningPathRoutes);
+
+// Faculty Contributions (blogs & courses): /api/contributions/...
+app.use('/api/contributions', contributionRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INLINE HELPERS  (must be declared before use)

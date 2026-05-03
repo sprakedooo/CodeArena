@@ -422,6 +422,70 @@ YOUR RULES:
     return response.choices[0].message.content.trim();
 }
 
+// ─── Phase 1: Faculty AI Assistant ───────────────────────────────────────────
+/**
+ * AI assistant for faculty users — focused on teaching strategies, course design,
+ * and educator recommendations rather than student-facing tutoring.
+ *
+ * @param {object} opts
+ *   - message            {string}
+ *   - facultyName        {string}
+ *   - classrooms         {Array}   list of classroom names
+ *   - totalStudents      {number}
+ *   - conversationHistory {Array}  [{role, content}]
+ * @returns {string} assistant reply
+ */
+async function facultyAssistant({ message, facultyName = 'Professor', classrooms = [], totalStudents = 0, conversationHistory = [] }) {
+    const client = getClient();
+
+    const classroomList = classrooms.length
+        ? classrooms.join(', ')
+        : 'no courses created yet';
+
+    const systemPrompt = `You are CodeArena's AI Teaching Advisor — a knowledgeable, practical assistant for programming educators.
+
+FACULTY PROFILE:
+- Name: ${facultyName}
+- Courses: ${classroomList}
+- Total enrolled students: ${totalStudents}
+
+YOUR PURPOSE:
+You help this faculty member become a more effective programming educator. You do NOT tutor students — you advise the teacher.
+
+YOUR EXPERTISE AREAS:
+1. Teaching strategies for programming concepts (loops, functions, OOP, algorithms, etc.)
+2. Course design: lesson sequencing, pacing, scaffolding difficulty
+3. Assessment design: quiz question writing, rubric creation, formative vs summative assessment
+4. Student engagement and motivation techniques
+5. Identifying and supporting at-risk or struggling students
+6. Active learning methods: pair programming, code review, project-based learning
+7. Classroom management for coding sessions
+8. CodeArena platform tips: sessions, challenges, lessons, analytics
+
+YOUR RULES:
+1. Always address the faculty as an educator and professional — never as a learner
+2. Give concrete, actionable recommendations (not vague advice)
+3. Keep responses focused and practical — 3-5 sentences unless detail is needed
+4. When discussing student struggles, frame advice around what the TEACHER can do
+5. Suggest specific teaching techniques by name when relevant (e.g. "think-aloud modeling", "worked examples", "interleaving")
+6. Be collegial and respectful — this is a peer conversation, not a tutoring session`;
+
+    const messages = [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory.slice(-6),
+        { role: 'user', content: message },
+    ];
+
+    const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages,
+        temperature: 0.7,
+        max_tokens: 400,
+    });
+
+    return response.choices[0].message.content.trim();
+}
+
 // ─── Phase 1: Teaching Insights ──────────────────────────────────────────────
 /**
  * Generate AI teaching insights for a faculty member.
@@ -461,16 +525,18 @@ ${classroomSummary}
 TOP WEAK TOPICS ACROSS ALL CLASSES:
 ${topicSummary}
 
+IMPORTANT: Write ALL text in second person, directly addressing the faculty as "you" / "your". Never refer to them by name or say "Faculty [name]". Use "you have", "your students", "you can", etc.
+
 Respond with ONLY valid JSON (no markdown):
 {
-  "summary": "2-3 sentence overview of teaching effectiveness and student outcomes",
+  "summary": "2-3 sentence overview written in second person (e.g. 'You have demonstrated...')",
   "recommendations": [
-    { "action": "specific action to take", "reason": "why this matters", "priority": "high|medium|low" }
+    { "action": "specific action written in second person (e.g. 'Consider focusing on...')", "reason": "why this matters", "priority": "high|medium|low" }
   ],
   "topicInsights": [
-    { "topic": "topic name", "insight": "specific observation about student struggles", "suggestion": "what to do about it" }
+    { "topic": "topic name", "insight": "observation written in second person", "suggestion": "what you can do about it" }
   ],
-  "teachingTip": "One practical pedagogical tip based on the data"
+  "teachingTip": "One practical tip written in second person (e.g. 'Try using...')"
 }
 
 Limit to 3 recommendations and 3 topic insights. Be specific and actionable, not generic.`;
@@ -542,6 +608,7 @@ module.exports = {
     analyzeCode,
     getProgressiveHint,
     globalAssistant,
+    facultyAssistant,
     generateTeachingInsights,
     recommendNextTask,
 };

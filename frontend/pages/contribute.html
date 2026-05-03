@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribute – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Page header ───────────────────────────────────────────────────── */
+        .contrib-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;
+        }
+        .contrib-header h1 { font-size: 1.35rem; font-weight: 700; margin: 0; }
+        .contrib-header p  { font-size: 0.82rem; color: var(--text-muted); margin: 0.15rem 0 0; }
+
+        /* ── Type tabs ─────────────────────────────────────────────────────── */
+        .type-tabs {
+            display: flex; gap: 0.3rem; margin-bottom: 1.25rem;
+            background: var(--bg-surface); border-radius: 10px;
+            padding: 0.3rem; width: fit-content;
+        }
+        .type-tab {
+            padding: 0.42rem 1.1rem; border-radius: 7px; border: none;
+            cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            background: none; color: var(--text-muted); transition: all 0.15s;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .type-tab.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .type-tab:hover:not(.active) { color: var(--text); }
+        .type-tab .tab-count {
+            font-size: 0.65rem; background: rgba(124,58,237,0.2); color: #a78bfa;
+            border-radius: 20px; padding: 0.05rem 0.4rem; font-weight: 700;
+        }
+
+        /* ── Contribution cards ────────────────────────────────────────────── */
+        .contrib-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .contrib-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+        .contrib-card:hover { border-color: rgba(124,58,237,0.4); transform: translateY(-2px); }
+
+        .contrib-card-cover {
+            height: 130px; background: linear-gradient(135deg, #1e1045, #12203a);
+            position: relative; overflow: hidden; flex-shrink: 0;
+        }
+        .contrib-card-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .contrib-card-cover-placeholder {
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        .contrib-card-cover-placeholder .material-symbols-outlined {
+            font-size: 2.5rem; opacity: 0.25; color: var(--primary);
+        }
+        .type-badge {
+            position: absolute; top: 0.6rem; left: 0.6rem;
+            font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
+            text-transform: uppercase; padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+        }
+        .type-badge.blog   { background: rgba(6,182,212,0.2);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); }
+        .type-badge.course { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+        .status-badge {
+            position: absolute; top: 0.6rem; right: 0.6rem;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+            padding: 0.18rem 0.48rem; border-radius: 20px;
+        }
+        .status-badge.published { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+        .status-badge.draft     { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+
+        .contrib-card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
+        .contrib-card-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0 0 0.35rem; line-height: 1.3; }
+        .contrib-card-desc  { font-size: 0.78rem; color: var(--text-muted); margin: 0 0 0.75rem; line-height: 1.5; flex: 1;
+                               display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .contrib-card-meta  { display: flex; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: var(--text-muted);
+                               flex-wrap: wrap; margin-bottom: 0.85rem; }
+        .contrib-card-meta span { display: flex; align-items: center; gap: 0.25rem; }
+        .contrib-card-meta .material-symbols-outlined { font-size: 0.82rem; }
+
+        .contrib-card-actions { display: flex; gap: 0.5rem; }
+        .contrib-card-actions .btn { flex: 1; font-size: 0.76rem; padding: 0.45rem 0.75rem; }
+
+        /* ── Empty state ───────────────────────────────────────────────────── */
+        .empty-contrib {
+            grid-column: 1/-1; text-align: center; padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+        .empty-contrib .material-symbols-outlined { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.3; }
+        .empty-contrib p { font-size: 0.85rem; margin: 0 0 1.25rem; }
+
+        /* ── Modal ─────────────────────────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            display: none; align-items: flex-start; justify-content: center;
+            z-index: 3000; padding: 2rem 1rem; overflow-y: auto;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); width: 100%; max-width: 680px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            animation: modal-in 0.2s ease;
+        }
+        @keyframes modal-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .modal-header {
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+        .modal-close-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); border-radius: 6px; padding: 0.2rem;
+            display: flex; transition: color 0.15s;
+        }
+        .modal-close-btn:hover { color: var(--text); }
+        .modal-body { padding: 1.4rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .modal-footer {
+            padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+            display: flex; justify-content: flex-end; gap: 0.6rem;
+        }
+
+        /* Type selector inside modal */
+        .type-selector { display: flex; gap: 0.6rem; }
+        .type-option {
+            flex: 1; padding: 0.85rem 1rem; border-radius: var(--radius);
+            border: 2px solid var(--border); cursor: pointer; text-align: center;
+            transition: all 0.15s; background: var(--bg-surface);
+        }
+        .type-option:hover { border-color: rgba(124,58,237,0.4); }
+        .type-option.selected { border-color: var(--primary); background: rgba(124,58,237,0.08); }
+        .type-option .type-opt-icon { font-size: 1.8rem; display: block; margin-bottom: 0.35rem; }
+        .type-option .type-opt-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+        .type-option .type-opt-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+        /* Form controls */
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group label {
+            font-size: 0.73rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.6rem 0.85rem;
+            color: var(--text); font-size: 0.88rem; outline: none; font-family: inherit;
+            width: 100%; box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+        .form-group textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+
+        /* Section builder (for course type) */
+        .section-builder { display: flex; flex-direction: column; gap: 0.65rem; }
+        .section-item {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.9rem 1rem; position: relative;
+        }
+        .section-item-header {
+            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem;
+        }
+        .section-num {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(124,58,237,0.2); color: #a78bfa;
+            font-size: 0.65rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .section-title-input {
+            flex: 1; background: transparent; border: none;
+            border-bottom: 1px solid var(--border); border-radius: 0;
+            padding: 0.2rem 0.4rem; color: var(--text); font-size: 0.85rem;
+            font-weight: 600; outline: none;
+        }
+        .section-title-input:focus { border-bottom-color: var(--primary); }
+        .section-remove-btn {
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+            padding: 0.15rem; border-radius: 4px; transition: color 0.15s;
+            display: flex; align-items: center;
+        }
+        .section-remove-btn:hover { color: #f87171; }
+        .section-content-input {
+            width: 100%; box-sizing: border-box; min-height: 80px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.55rem 0.75rem;
+            color: var(--text); font-size: 0.82rem; font-family: inherit;
+            resize: vertical; outline: none; line-height: 1.5;
+        }
+        .section-content-input:focus { border-color: var(--primary); }
+        .add-section-btn {
+            display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+            padding: 0.55rem; border: 1px dashed var(--border);
+            border-radius: var(--radius); background: none; cursor: pointer;
+            color: var(--text-muted); font-size: 0.8rem; font-weight: 600;
+            transition: border-color 0.15s, color 0.15s; width: 100%;
+        }
+        .add-section-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Content area (blog) */
+        .blog-content-hint {
+            font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;
+            font-style: italic;
+        }
+
+        /* ── Code-insert toolbar ───────────────────────────────────────────── */
+        .content-toolbar {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.28rem 0.55rem;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+        .content-toolbar + textarea,
+        .content-toolbar + .section-content-input {
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+        }
+        .code-insert-btn {
+            display: inline-flex; align-items: center; gap: 0.28rem;
+            background: none; border: 1px solid var(--border); border-radius: 5px;
+            color: var(--text-muted); font-size: 0.68rem; font-family: inherit;
+            padding: 0.2rem 0.55rem; cursor: pointer; transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .code-insert-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(124,58,237,0.06); }
+
+        /* ── Global code-picker popover ────────────────────────────────────── */
+        #codePicker {
+            position: fixed; z-index: 6000;
+            display: none; align-items: center; gap: 0.55rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.55rem 0.75rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+        }
+        #codePicker label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+        #codePicker select {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            color: var(--text); font-size: 0.78rem; border-radius: 5px;
+            padding: 0.28rem 0.5rem; outline: none; cursor: pointer;
+        }
+        #codePicker .cp-insert {
+            background: var(--primary); color: #fff; border: none; border-radius: 5px;
+            font-size: 0.73rem; font-family: inherit; font-weight: 700;
+            padding: 0.28rem 0.75rem; cursor: pointer; transition: opacity 0.15s;
+        }
+        #codePicker .cp-insert:hover { opacity: 0.88; }
+        #codePicker .cp-cancel {
+            background: none; border: 1px solid var(--border); border-radius: 5px;
+            color: var(--text-muted); font-size: 0.72rem; font-family: inherit;
+            padding: 0.28rem 0.55rem; cursor: pointer; transition: color 0.15s;
+        }
+        #codePicker .cp-cancel:hover { color: var(--text); }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.75rem 1.1rem;
+            font-size: 0.83rem; color: var(--text); z-index: 4000;
+            display: none; align-items: center; gap: 0.5rem; box-shadow: var(--shadow-lg);
+        }
+        .toast.show    { display: flex; }
+        .toast.success { border-color: var(--success); }
+        .toast.error   { border-color: var(--danger); }
+
+        @media (max-width: 640px) {
+            .form-row { grid-template-columns: 1fr; }
+            .type-selector { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Modal ──────────────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="contribModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">New Contribution</div>
+            <button class="modal-close-btn" onclick="closeModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Step 1: Choose type (hidden in edit mode) -->
+            <div id="typeStep">
+                <label style="font-size:0.73rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:0.65rem;">Content Type</label>
+                <div class="type-selector">
+                    <div class="type-option selected" data-type="blog" onclick="selectType('blog')">
+                        <span class="type-opt-icon">📝</span>
+                        <div class="type-opt-name">Blog Post</div>
+                        <div class="type-opt-desc">Article-style content — share concepts, guides, and insights</div>
+                    </div>
+                    <div class="type-option" data-type="course" onclick="selectType('course')">
+                        <span class="type-opt-icon">🎓</span>
+                        <div class="type-opt-name">Course</div>
+                        <div class="type-opt-desc">Structured lessons — organized into sections for deeper learning</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Common fields -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="fTitle" placeholder="e.g. Understanding Python Lists">
+                </div>
+                <div class="form-group">
+                    <label>Language</label>
+                    <select id="fLanguage">
+                        <option value="general">General / All Languages</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="fDescription" rows="2" placeholder="Brief summary of what learners will get from this content…"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tags</label>
+                    <input type="text" id="fTags" placeholder="loops, functions, beginner">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="fStatus">
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Blog content -->
+            <div id="blogFields">
+                <div class="form-group">
+                    <label>Content *</label>
+                    <div class="content-toolbar">
+                        <span style="font-size:0.65rem;color:var(--text-muted);flex:1;">Formatting tools</span>
+                        <button type="button" class="code-insert-btn" onclick="openCodePicker(this,'fContent')">
+                            <span class="material-symbols-outlined" style="font-size:0.82rem;">code</span> Insert Code Block
+                        </button>
+                    </div>
+                    <textarea id="fContent" rows="10" placeholder="Write your blog post here…&#10;&#10;ALL CAPS lines become section headers. Blank lines separate paragraphs. Use the 'Insert Code Block' button above to add syntax-highlighted code."></textarea>
+                    <div class="blog-content-hint">Tip: ALL CAPS lines → section headers &nbsp;|&nbsp; ```lang … ``` → code block &nbsp;|&nbsp; students see a "Try it" button for runnable code.</div>
+                </div>
+            </div>
+
+            <!-- Course sections -->
+            <div id="courseFields" style="display:none;">
+                <label style="font-size:0.73rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:0.65rem;">Course Sections</label>
+                <div class="section-builder" id="sectionBuilder"></div>
+                <button class="add-section-btn" onclick="addSection()" style="margin-top:0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">add</span>
+                    Add Section
+                </button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="saveBtn" onclick="saveContribution()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">save</span>
+                Publish
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Page content (injected by sidebar.js) ──────────────────────────────── -->
+<div class="contrib-header">
+    <div>
+        <h1>My Contributions</h1>
+        <p>Blog posts and courses you've created for students</p>
+    </div>
+    <button class="btn btn-primary" onclick="openCreate()" style="display:flex;align-items:center;gap:0.4rem;">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>
+        New Contribution
+    </button>
+</div>
+
+<div class="type-tabs">
+    <button class="type-tab active" data-filter="all" onclick="setFilter('all',this)">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;">grid_view</span> All
+        <span class="tab-count" id="cntAll">0</span>
+    </button>
+    <button class="type-tab" data-filter="blog" onclick="setFilter('blog',this)">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;">article</span> Blog Posts
+        <span class="tab-count" id="cntBlog">0</span>
+    </button>
+    <button class="type-tab" data-filter="course" onclick="setFilter('course',this)">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;">school</span> Courses
+        <span class="tab-count" id="cntCourse">0</span>
+    </button>
+</div>
+
+<div class="contrib-grid" id="contribGrid">
+    <!-- filled by JS -->
+    <div class="empty-contrib">
+        <span class="material-symbols-outlined">hourglass_empty</span>
+        <p>Loading your contributions…</p>
+    </div>
+</div>
+
+<!-- ── Global code-block picker ─────────────────────────────────────────────── -->
+<div id="codePicker">
+    <label>Language:</label>
+    <select id="codePickerLang">
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="plaintext">Plain text</option>
+    </select>
+    <button class="cp-insert" onclick="doInsertCode()">Insert</button>
+    <button class="cp-cancel" onclick="closeCodePicker()">✕</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toastIcon">info</span>
+    <span id="toastMsg">—</span>
+</div>
+
+<script>window.SIDEBAR_PAGE = 'contribute'; window.SIDEBAR_ROLE = 'faculty';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+if (me.id === undefined || me.id === null || me.role !== 'faculty') location.href = 'login.html';
+
+let allContribs = [];
+let currentFilter = 'all';
+let editingId = null;
+let currentType = 'blog';
+let sections = []; // for course type
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadContribs() {
+    try {
+        const res  = await fetch(`${API}/contributions/mine`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        allContribs = data.contributions || [];
+    } catch { allContribs = []; }
+    renderCounts();
+    renderGrid();
+}
+
+function renderCounts() {
+    const blogs   = allContribs.filter(c => c.type === 'blog').length;
+    const courses = allContribs.filter(c => c.type === 'course').length;
+    document.getElementById('cntAll').textContent    = allContribs.length;
+    document.getElementById('cntBlog').textContent   = blogs;
+    document.getElementById('cntCourse').textContent = courses;
+}
+
+function renderGrid() {
+    const grid = document.getElementById('contribGrid');
+    let list = currentFilter === 'all' ? allContribs : allContribs.filter(c => c.type === currentFilter);
+    if (!list.length) {
+        grid.innerHTML = `<div class="empty-contrib">
+            <span class="material-symbols-outlined">${currentFilter === 'blog' ? 'article' : currentFilter === 'course' ? 'school' : 'edit_note'}</span>
+            <p>No ${currentFilter === 'all' ? '' : currentFilter + ' '}contributions yet.</p>
+            <button class="btn btn-primary" onclick="openCreate()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">add</span> Create one
+            </button>
+        </div>`;
+        return;
+    }
+    grid.innerHTML = list.map(c => `
+        <div class="contrib-card">
+            <div class="contrib-card-cover">
+                ${c.cover_image ? `<img src="${esc(c.cover_image)}" alt="">` : `<div class="contrib-card-cover-placeholder"><span class="material-symbols-outlined">${c.type === 'blog' ? 'article' : 'school'}</span></div>`}
+                <span class="type-badge ${c.type}">${c.type === 'blog' ? 'Blog Post' : 'Course'}</span>
+                <span class="status-badge ${c.status}">${c.status}</span>
+            </div>
+            <div class="contrib-card-body">
+                <div class="contrib-card-title">${esc(c.title)}</div>
+                <div class="contrib-card-desc">${esc(c.description || 'No description provided.')}</div>
+                <div class="contrib-card-meta">
+                    <span><span class="material-symbols-outlined">translate</span>${langLabel(c.language)}</span>
+                    <span><span class="material-symbols-outlined">visibility</span>${c.view_count || 0} views</span>
+                    <span><span class="material-symbols-outlined">calendar_today</span>${fmtDate(c.created_at)}</span>
+                </div>
+                <div class="contrib-card-actions">
+                    <button class="btn btn-secondary" style="flex:1;" onclick="openEdit(${c.contribution_id})">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;">edit</span> Edit
+                    </button>
+                    <a href="contribution_view.html?id=${c.contribution_id}" target="_blank" class="btn btn-secondary" style="flex:1;">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;">open_in_new</span> Preview
+                    </a>
+                    <button class="btn btn-secondary" style="flex:1;color:#f87171;border-color:rgba(239,68,68,0.3);" onclick="deleteContrib(${c.contribution_id}, '${esc(c.title)}')">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;">delete</span> Delete
+                    </button>
+                </div>
+            </div>
+        </div>`).join('');
+}
+
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.type-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid();
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openCreate() {
+    editingId = null; currentType = 'blog'; sections = [{ title: '', content: '' }];
+    document.getElementById('modalTitle').textContent = 'New Contribution';
+    document.getElementById('saveBtn').innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">send</span> Publish`;
+    document.getElementById('typeStep').style.display = '';
+    clearForm();
+    selectType('blog');
+    renderSections();
+    document.getElementById('contribModal').classList.add('open');
+}
+
+async function openEdit(id) {
+    editingId = id;
+    const c = allContribs.find(x => x.contribution_id === id);
+    if (!c) return;
+    document.getElementById('modalTitle').textContent = 'Edit Contribution';
+    document.getElementById('saveBtn').innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">save</span> Save Changes`;
+    document.getElementById('typeStep').style.display = 'none';
+
+    currentType = c.type;
+    document.getElementById('fTitle').value       = c.title || '';
+    document.getElementById('fDescription').value = c.description || '';
+    document.getElementById('fLanguage').value    = c.language || 'general';
+    document.getElementById('fTags').value        = c.tags || '';
+    document.getElementById('fStatus').value      = c.status || 'published';
+
+    if (c.type === 'blog') {
+        showBlog(); document.getElementById('fContent').value = c.content || '';
+    } else {
+        try { sections = JSON.parse(c.content || '[]'); } catch { sections = [{ title: '', content: '' }]; }
+        if (!sections.length) sections = [{ title: '', content: '' }];
+        showCourse(); renderSections();
+    }
+    document.getElementById('contribModal').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('contribModal').classList.remove('open');
+}
+
+function clearForm() {
+    ['fTitle','fDescription','fTags','fContent'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('fLanguage').value = 'general';
+    document.getElementById('fStatus').value   = 'published';
+}
+
+function selectType(type) {
+    currentType = type;
+    document.querySelectorAll('.type-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.type === type);
+    });
+    if (type === 'blog') showBlog(); else showCourse();
+}
+
+function showBlog()   { document.getElementById('blogFields').style.display=''; document.getElementById('courseFields').style.display='none'; }
+function showCourse() { document.getElementById('blogFields').style.display='none'; document.getElementById('courseFields').style.display=''; }
+
+// ── Section builder ───────────────────────────────────────────────────────────
+function addSection() {
+    sections.push({ title: '', content: '' });
+    renderSections();
+}
+
+function removeSection(i) {
+    sections.splice(i, 1);
+    if (!sections.length) sections.push({ title: '', content: '' });
+    renderSections();
+}
+
+function renderSections() {
+    const builder = document.getElementById('sectionBuilder');
+    builder.innerHTML = sections.map((s, i) => `
+        <div class="section-item">
+            <div class="section-item-header">
+                <div class="section-num">${i+1}</div>
+                <input class="section-title-input" placeholder="Section title…"
+                    value="${esc(s.title)}" oninput="sections[${i}].title=this.value">
+                ${sections.length > 1 ? `<button class="section-remove-btn" onclick="removeSection(${i})">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">delete</span>
+                </button>` : ''}
+            </div>
+            <div class="content-toolbar">
+                <span style="font-size:0.65rem;color:var(--text-muted);flex:1;">Section content</span>
+                <button type="button" class="code-insert-btn" onclick="openCodePicker(this,'sectionContent_${i}')">
+                    <span class="material-symbols-outlined" style="font-size:0.82rem;">code</span> Insert Code Block
+                </button>
+            </div>
+            <textarea id="sectionContent_${i}" class="section-content-input"
+                placeholder="Write this section's content…&#10;&#10;Use ALL CAPS for sub-headers. Click 'Insert Code Block' above to add code examples — students will see a 'Try it' button."
+                oninput="sections[${i}].content=this.value">${esc(s.content)}</textarea>
+        </div>`).join('');
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveContribution() {
+    const title = document.getElementById('fTitle').value.trim();
+    if (!title) { showToast('Title is required', 'error'); return; }
+
+    let content = '';
+    if (currentType === 'blog') {
+        content = document.getElementById('fContent').value.trim();
+        if (!content) { showToast('Content is required for blog posts', 'error'); return; }
+    } else {
+        // Read current section values from DOM
+        document.querySelectorAll('.section-item').forEach((el, i) => {
+            sections[i].title   = el.querySelector('.section-title-input').value;
+            sections[i].content = el.querySelector('.section-content-input').value;
+        });
+        if (!sections.some(s => s.title.trim())) { showToast('Add at least one section title', 'error'); return; }
+        content = JSON.stringify(sections);
+    }
+
+    const payload = {
+        type: currentType, title,
+        description: document.getElementById('fDescription').value.trim(),
+        content,
+        language: document.getElementById('fLanguage').value,
+        tags:     document.getElementById('fTags').value.trim(),
+        status:   document.getElementById('fStatus').value,
+    };
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+
+    try {
+        const url    = editingId ? `${API}/contributions/${editingId}` : `${API}/contributions`;
+        const method = editingId ? 'PUT' : 'POST';
+        const res    = await fetch(url, {
+            method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+
+        // Parse response safely — server may return non-JSON on unexpected errors
+        let data;
+        const raw = await res.text();
+        try { data = JSON.parse(raw); }
+        catch { throw new Error(`Server error (${res.status})`); }
+
+        if (!res.ok || (!data.success && data.contribution_id === undefined)) {
+            throw new Error(data.error || data.message || 'Save failed');
+        }
+
+        showToast(editingId ? 'Updated successfully!' : 'Published successfully!', 'success');
+        closeModal();
+        loadContribs();
+    } catch (err) {
+        showToast(err.message || 'Save failed', 'error');
+    } finally { btn.disabled = false; }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+async function deleteContrib(id, title) {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    try {
+        const res = await fetch(`${API}/contributions/${id}`, {
+            method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        showToast('Deleted', 'success');
+        loadContribs();
+    } catch { showToast('Delete failed', 'error'); }
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function langLabel(l) {
+    return { general:'General', python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' }[l] || l || 'General';
+}
+function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg, type='info') {
+    const t = document.getElementById('toast');
+    const icons = { success:'check_circle', error:'error', info:'info' };
+    document.getElementById('toastIcon').textContent = icons[type] || 'info';
+    document.getElementById('toastMsg').textContent  = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── Code-block insertion ──────────────────────────────────────────────────────
+let _cpTargetId = null;
+
+function openCodePicker(btn, taId) {
+    _cpTargetId = taId;
+    const picker = document.getElementById('codePicker');
+    const rect   = btn.getBoundingClientRect();
+    // Position below the button, flush-left aligned
+    const top  = rect.bottom + window.scrollY + 6;
+    const left = Math.min(rect.left, window.innerWidth - 310); // prevent overflow
+    picker.style.top  = top + 'px';
+    picker.style.left = left + 'px';
+    picker.style.display = 'flex';
+    // Close when clicking outside
+    setTimeout(() => document.addEventListener('click', _cpOutside, { once: true }), 0);
+}
+
+function _cpOutside(e) {
+    const picker = document.getElementById('codePicker');
+    if (picker && !picker.contains(e.target)) {
+        closeCodePicker();
+    } else {
+        // Re-attach if click was inside
+        document.addEventListener('click', _cpOutside, { once: true });
+    }
+}
+
+function closeCodePicker() {
+    document.getElementById('codePicker').style.display = 'none';
+    _cpTargetId = null;
+}
+
+function doInsertCode() {
+    if (!_cpTargetId) return;
+    const ta   = document.getElementById(_cpTargetId);
+    const lang = document.getElementById('codePickerLang').value;
+    if (!ta) return;
+    _insertCodeAtCursor(ta, lang);
+    closeCodePicker();
+    ta.focus();
+}
+
+function _insertCodeAtCursor(ta, lang) {
+    const snippet  = '```' + lang + '\n// your code here\n```';
+    const start    = ta.selectionStart;
+    const end      = ta.selectionEnd;
+    const val      = ta.value;
+    // Ensure blank line before code fence (unless at start of field)
+    const needsBefore = start > 0 && val.slice(0, start).trimEnd() !== '';
+    const before   = needsBefore ? '\n\n' : '';
+    // Ensure newline after closing fence
+    const afterChar = val[end];
+    const after    = (afterChar && afterChar !== '\n') ? '\n\n' : '\n';
+    const insert   = before + snippet + after;
+    ta.value = val.slice(0, start) + insert + val.slice(end);
+    // Place cursor on the "// your code here" line so faculty can type immediately
+    const cursorPos = start + before.length + ('```' + lang + '\n').length;
+    ta.selectionStart = ta.selectionEnd = cursorPos;
+    // Sync sections[] if this is a section textarea
+    ta.dispatchEvent(new Event('input'));
+}
+
+loadContribs();
+</script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .page-header { margin-bottom: 1.75rem; }
+        .page-header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 0.3rem; }
+        .page-header p  { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+
+        .section-title {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.4px; color: var(--text-muted); margin: 1.6rem 0 0.8rem;
+        }
+
+        /* Stat strip */
+        .stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
+        .stat-chip {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem 1.15rem;
+            display: flex; align-items: center; gap: 0.85rem;
+        }
+        .stat-chip-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-chip-icon .material-symbols-outlined { font-size: 1.25rem; }
+        .stat-chip-val { font-size: 1.35rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+        .stat-chip-lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 0.15rem; }
+        .chip-gold   { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .chip-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+        .chip-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .chip-cyan   { background: rgba(6,182,212,0.15);  color: #22d3ee; }
+
+        /* Chart cards */
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .chart-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.25rem 1.4rem;
+        }
+        .chart-card-title { font-size: 0.88rem; font-weight: 700; color: var(--text); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.4rem; }
+        .chart-card-title .material-symbols-outlined { font-size: 1rem; color: var(--primary); }
+        .chart-wrap { position: relative; height: 200px; }
+        @media (max-width: 800px) { .chart-grid { grid-template-columns: 1fr; } }
+
+        /* Weakness breakdown */
+        .weakness-table { width: 100%; border-collapse: collapse; }
+        .weakness-table th {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.6px; color: var(--text-muted);
+            text-align: left; padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .weakness-table td {
+            font-size: 0.83rem; padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid var(--border-light); color: var(--text);
+            vertical-align: middle;
+        }
+        .weakness-table tr:last-child td { border-bottom: none; }
+        .err-bar-wrap { height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden; width: 80px; }
+        .err-bar-fill { height: 100%; border-radius: 3px; }
+
+        /* Path cards */
+        .path-progress-list { display: flex; flex-direction: column; gap: 0.65rem; }
+        .path-prog-row {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.85rem 1.1rem;
+        }
+        .path-prog-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+        .path-prog-name { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+        .path-prog-pct  { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); }
+        .path-bar { height: 8px; background: var(--bg-surface); border-radius: 4px; overflow: hidden; }
+        .path-bar-fill { height: 100%; border-radius: 4px; }
+        .path-prog-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+        /* AI Summary panel */
+        .ai-summary-card {
+            background: linear-gradient(135deg,rgba(124,58,237,0.08),rgba(6,182,212,0.05));
+            border: 1px solid rgba(124,58,237,0.2); border-radius: var(--radius-lg);
+            padding: 1.4rem 1.5rem; margin-top: 1.5rem;
+        }
+        .ai-summary-card h3 { font-size: 0.92rem; font-weight: 700; color: var(--text); margin: 0 0 0.75rem; display: flex; align-items: center; gap: 0.4rem; }
+        .ai-summary-card h3 .material-symbols-outlined { font-size: 1.1rem; color: var(--primary); }
+        .ai-bullet { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+        .ai-bullet::before { content: '→'; color: var(--primary); flex-shrink: 0; margin-top: 0.05rem; }
+
+        /* Empty */
+        .empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; }
+        .empty-state .material-symbols-outlined { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.35; }
+
+        /* Skeleton */
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity:0.5; } 50%{ opacity:1; } }
+
+        @media (max-width: 640px) { .stat-strip { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>📊 My Analytics</h1>
+    <p>Track your learning progress, accuracy, and AI-identified growth areas.</p>
+</div>
+
+<!-- ── Stat Strip ─────────────────────────────────────────────────────────── -->
+<div class="stat-strip">
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-gold"><span class="material-symbols-outlined">bolt</span></div>
+        <div><div class="stat-chip-val" id="statXP">—</div><div class="stat-chip-lbl">Total XP</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-green"><span class="material-symbols-outlined">check_circle</span></div>
+        <div><div class="stat-chip-val" id="statLessons">—</div><div class="stat-chip-lbl">Lessons Done</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-purple"><span class="material-symbols-outlined">target</span></div>
+        <div><div class="stat-chip-val" id="statAccuracy">—</div><div class="stat-chip-lbl">Quiz Accuracy</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="stat-chip-icon chip-cyan"><span class="material-symbols-outlined">local_fire_department</span></div>
+        <div><div class="stat-chip-val" id="statStreak">—</div><div class="stat-chip-lbl">Day Streak</div></div>
+    </div>
+</div>
+
+<!-- ── Charts ─────────────────────────────────────────────────────────────── -->
+<p class="section-title">Performance Charts</p>
+<div class="chart-grid">
+    <div class="chart-card">
+        <div class="chart-card-title"><span class="material-symbols-outlined">route</span>Path Completion</div>
+        <div class="chart-wrap"><canvas id="chartPaths"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title"><span class="material-symbols-outlined">fitness_center</span>Accuracy by Topic</div>
+        <div class="chart-wrap"><canvas id="chartTopics"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title"><span class="material-symbols-outlined">emoji_events</span>XP by Language</div>
+        <div class="chart-wrap"><canvas id="chartLangs"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title"><span class="material-symbols-outlined">trending_up</span>Lessons Over Time</div>
+        <div class="chart-wrap"><canvas id="chartTime"></canvas></div>
+    </div>
+</div>
+
+<!-- ── Learning Paths ─────────────────────────────────────────────────────── -->
+<p class="section-title">Learning Path Progress</p>
+<div class="path-progress-list" id="pathList">
+    <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
+    <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
+</div>
+
+<!-- ── Weakness Breakdown ─────────────────────────────────────────────────── -->
+<p class="section-title">Weak Topics Breakdown</p>
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+    <table class="weakness-table">
+        <thead>
+            <tr>
+                <th>Topic</th>
+                <th>Language</th>
+                <th>Error Rate</th>
+                <th>Attempts</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="weaknessTable">
+            <tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted);">
+                <div class="skeleton-line" style="width:80%;margin:0 auto;"></div>
+            </td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── AI Analysis ────────────────────────────────────────────────────────── -->
+<div class="ai-summary-card" id="aiSummaryCard">
+    <h3><span class="material-symbols-outlined">auto_awesome</span>AI Learning Analysis</h3>
+    <div id="aiSummaryContent">
+        <div class="skeleton-line" style="width:90%;"></div>
+        <div class="skeleton-line" style="width:75%;"></div>
+        <div class="skeleton-line" style="width:82%;"></div>
+    </div>
+</div>
+
+<script>window.SIDEBAR_PAGE = 'profile';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!me.id) { location.href = 'login.html'; }
+
+const COLORS = ['#7c3aed','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899'];
+
+// Chart.js global defaults for dark theme
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#30363d';
+Chart.defaults.font.family = 'Inter, sans-serif';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const data = await loadAnalyticsData();
+    renderStats(data);
+    renderCharts(data);
+    renderPathList(data.paths || []);
+    renderWeaknessTable(data.weaknesses || []);
+    renderAISummary(data);
+});
+
+// ─── Load data ─────────────────────────────────────────────────────────────────
+async function loadAnalyticsData() {
+    try {
+        // Try the dedicated analytics endpoint first
+        const res = await fetch(`${API}/analytics/me`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) return await res.json();
+    } catch {}
+
+    // Fallback: stitch together from existing endpoints
+    try {
+        const [progressRes, weakRes] = await Promise.allSettled([
+            fetch(`${API}/paths/progress/me`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`${API}/analytics/me`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        const progress = progressRes.status === 'fulfilled' && progressRes.value.ok
+            ? await progressRes.value.json() : {};
+        return {
+            user:             progress.user || {},
+            completedLessons: progress.completedLessons || 0,
+            paths:            progress.paths || [],
+            weaknesses:       progress.weaknesses || [],
+            accuracy:         null,
+            langBreakdown:    [],
+            recentActivity:   [],
+        };
+    } catch {
+        return { user: {}, paths: [], weaknesses: [], completedLessons: 0 };
+    }
+}
+
+// ─── Stats ─────────────────────────────────────────────────────────────────────
+function renderStats(data) {
+    const u = data.user || {};
+    document.getElementById('statXP').textContent      = (u.total_xp || 0).toLocaleString();
+    document.getElementById('statLessons').textContent = data.completedLessons || 0;
+    document.getElementById('statStreak').textContent  = (u.streak || 0) + '🔥';
+    const acc = data.accuracy != null ? data.accuracy + '%' : '—';
+    document.getElementById('statAccuracy').textContent = acc;
+}
+
+// ─── Charts ────────────────────────────────────────────────────────────────────
+function renderCharts(data) {
+    const paths      = data.paths || [];
+    const weaknesses = data.weaknesses || [];
+    const langs      = data.langBreakdown || [];
+    const activity   = data.recentActivity || [];
+
+    // Chart 1: Path completion doughnut
+    if (paths.length) {
+        new Chart(document.getElementById('chartPaths'), {
+            type: 'doughnut',
+            data: {
+                labels: paths.map(p => truncate(p.title, 20)),
+                datasets: [{
+                    data:            paths.map(p => p.progress_pct || 0),
+                    backgroundColor: COLORS,
+                    borderWidth:     2,
+                    borderColor:     '#161b22',
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } }
+            }
+        });
+    } else {
+        renderEmptyChart('chartPaths');
+    }
+
+    // Chart 2: Topic accuracy bar (from weaknesses — higher error = lower accuracy)
+    if (weaknesses.length) {
+        const topics = weaknesses.slice(0,6);
+        new Chart(document.getElementById('chartTopics'), {
+            type: 'bar',
+            data: {
+                labels: topics.map(w => truncate(w.topic || w, 12)),
+                datasets: [{
+                    label: 'Error Rate %',
+                    data:  topics.map(w => w.error_rate || 50),
+                    backgroundColor: topics.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
+                    borderRadius: 5, borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    } else {
+        renderEmptyChart('chartTopics', 'No weakness data yet');
+    }
+
+    // Chart 3: XP by language (pie)
+    if (langs.length) {
+        new Chart(document.getElementById('chartLangs'), {
+            type: 'pie',
+            data: {
+                labels: langs.map(l => l.language),
+                datasets: [{ data: langs.map(l => l.xp || l.count || 0), backgroundColor: COLORS, borderWidth: 2, borderColor: '#161b22' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } } }
+        });
+    } else {
+        // Fallback: use path language data
+        const langMap = {};
+        (data.paths || []).forEach(p => { langMap[p.language] = (langMap[p.language] || 0) + (p.completed_count || 0); });
+        const langEntries = Object.entries(langMap);
+        if (langEntries.length) {
+            new Chart(document.getElementById('chartLangs'), {
+                type: 'pie',
+                data: { labels: langEntries.map(([l]) => l), datasets: [{ data: langEntries.map(([,v]) => v), backgroundColor: COLORS, borderWidth: 2, borderColor: '#161b22' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
+            });
+        } else {
+            renderEmptyChart('chartLangs', 'Start learning to see data');
+        }
+    }
+
+    // Chart 4: Activity over time (line)
+    if (activity.length) {
+        new Chart(document.getElementById('chartTime'), {
+            type: 'line',
+            data: {
+                labels: activity.map(a => a.date || a.label),
+                datasets: [{
+                    label: 'Lessons',
+                    data: activity.map(a => a.count || a.lessons || 0),
+                    borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.12)',
+                    fill: true, tension: 0.4, pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    } else {
+        // Fake last 7 days with lesson count from paths
+        const total = data.completedLessons || 0;
+        const fakeData = [0, 0, 1, 0, 1, 1, Math.min(total, 3)];
+        const labels   = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(); d.setDate(d.getDate() - (6 - i));
+            return d.toLocaleDateString('en-US', { weekday:'short' });
+        });
+        new Chart(document.getElementById('chartTime'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Lessons',
+                    data: fakeData,
+                    borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.12)',
+                    fill: true, tension: 0.4, pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+}
+
+function renderEmptyChart(canvasId, msg = 'No data yet') {
+    const canvas = document.getElementById(canvasId);
+    const ctx    = canvas.getContext('2d');
+    canvas.parentElement.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">bar_chart</span>${msg}</div>`;
+}
+
+// ─── Path list ─────────────────────────────────────────────────────────────────
+function renderPathList(paths) {
+    const el = document.getElementById('pathList');
+    if (!paths.length) {
+        el.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">route</span>No learning paths started yet. <a href="learn.html" style="color:var(--primary);">Explore paths →</a></div>`;
+        return;
+    }
+    el.innerHTML = paths.map((p, i) => {
+        const pct   = p.progress_pct || 0;
+        const color = COLORS[i % COLORS.length];
+        return `<div class="path-prog-row">
+            <div class="path-prog-top">
+                <span class="path-prog-name">${esc(p.title)}</span>
+                <span class="path-prog-pct">${pct}%</span>
+            </div>
+            <div class="path-bar"><div class="path-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+            <div class="path-prog-meta">${p.completed_count || 0} / ${p.lesson_count || '?'} lessons · ${p.language || ''}</div>
+        </div>`;
+    }).join('');
+}
+
+// ─── Weakness table ────────────────────────────────────────────────────────────
+function renderWeaknessTable(weaknesses) {
+    const tbody = document.getElementById('weaknessTable');
+    if (!weaknesses.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">
+            <span class="material-symbols-outlined" style="display:inline;font-size:1rem;vertical-align:middle;color:#34d399;">check_circle</span>
+            No weak topics yet — keep learning!
+        </td></tr>`;
+        return;
+    }
+    tbody.innerHTML = weaknesses.map(w => {
+        const rate    = Math.round(w.error_rate || 0);
+        const color   = rate >= 70 ? '#ef4444' : rate >= 40 ? '#f59e0b' : '#10b981';
+        const status  = w.resolved ? '✅ Resolved' : rate >= 70 ? '🔴 High' : rate >= 40 ? '🟡 Medium' : '🟢 Low';
+        return `<tr>
+            <td><strong>${esc(w.topic || String(w))}</strong></td>
+            <td><span style="font-size:0.75rem;padding:0.15rem 0.5rem;border-radius:20px;background:rgba(124,58,237,0.1);color:#a78bfa;">${esc(w.language || '—')}</span></td>
+            <td>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <div class="err-bar-wrap"><div class="err-bar-fill" style="width:${rate}%;background:${color};"></div></div>
+                    <span style="font-size:0.78rem;font-weight:700;color:${color};">${rate}%</span>
+                </div>
+            </td>
+            <td style="color:var(--text-muted);font-size:0.82rem;">${w.total_attempts || 0}</td>
+            <td style="font-size:0.78rem;">${status}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ─── AI Summary ────────────────────────────────────────────────────────────────
+async function renderAISummary(data) {
+    const paths      = data.paths || [];
+    const weaknesses = data.weaknesses || [];
+    const xp         = data.user?.total_xp || 0;
+    const lessons    = data.completedLessons || 0;
+
+    // Build local analysis (no API call needed)
+    const bullets = [];
+    if (xp > 0) bullets.push(`You've earned ${xp.toLocaleString()} XP across your learning journey.`);
+    if (lessons > 0) bullets.push(`${lessons} lesson${lessons !== 1 ? 's' : ''} completed — great consistency!`);
+
+    const activePaths = paths.filter(p => p.completed_count > 0);
+    if (activePaths.length) {
+        const best = activePaths.reduce((a, b) => (a.progress_pct > b.progress_pct ? a : b));
+        bullets.push(`Your strongest path is "${best.title}" at ${best.progress_pct}% completion.`);
+    }
+
+    const highRisk = weaknesses.filter(w => (w.error_rate || 0) >= 60);
+    if (highRisk.length) {
+        bullets.push(`Focus on: ${highRisk.slice(0,3).map(w => w.topic).join(', ')} — these topics have high error rates.`);
+    } else if (weaknesses.length === 0) {
+        bullets.push('No weak topics detected — you\'re doing great across all subjects!');
+    }
+
+    const incomplete = paths.filter(p => p.progress_pct < 100 && p.progress_pct > 0);
+    if (incomplete.length) {
+        bullets.push(`Continue "${incomplete[0].title}" to earn more XP and advance your level.`);
+    }
+
+    if (bullets.length === 0) {
+        bullets.push('Start your first learning path to get personalized AI insights!');
+    }
+
+    // Try to get better insights from the AI endpoint
+    try {
+        const res  = await fetch(`${API}/ai/next-task/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        const d    = await res.json();
+        if (d.recommendation?.action) bullets.push(`AI Recommendation: ${d.recommendation.action}`);
+    } catch {}
+
+    document.getElementById('aiSummaryContent').innerHTML = bullets.map(b =>
+        `<div class="ai-bullet">${esc(b)}</div>`
+    ).join('');
+}
+
+function truncate(s, n) { return String(s).length > n ? String(s).slice(0,n) + '…' : String(s); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

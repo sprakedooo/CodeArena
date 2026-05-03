@@ -345,6 +345,22 @@ CREATE TABLE feedback (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS contributions (
+    contribution_id   INT AUTO_INCREMENT PRIMARY KEY,
+    faculty_id        INT NOT NULL,
+    type              ENUM('blog','course') NOT NULL DEFAULT 'blog',
+    title             VARCHAR(255) NOT NULL,
+    description       TEXT,
+    content           LONGTEXT,
+    language          VARCHAR(30) DEFAULT 'general',
+    tags              VARCHAR(500) DEFAULT '',
+    cover_image       TEXT,
+    status            ENUM('published','draft') DEFAULT 'published',
+    view_count        INT DEFAULT 0,
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- ============================================================================
 -- INDEXES
 -- ============================================================================
@@ -504,3 +520,5 @@ greet("Juan", "Hi")     # Hi, Juan</code></pre>
 -- DONE
 -- ============================================================================
 SELECT 'CodeArena Phase 1 schema created successfully!' AS status;
+
+-- Faculty Contributions (blogs and courses for Learn Programming page)

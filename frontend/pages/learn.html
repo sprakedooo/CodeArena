@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Programming – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* ── Page layout ───────────────────────────────────────────────────────── */
+        .learn-wrap { max-width: 1100px; margin: 0 auto; }
+
+        /* ── Hero ──────────────────────────────────────────────────────────────── */
+        .learn-hero {
+            background: linear-gradient(135deg, #1e1045 0%, #12203a 100%);
+            border: 1px solid rgba(124,58,237,0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem 2.25rem 1.75rem;
+            margin-bottom: 1.75rem;
+            position: relative; overflow: hidden;
+        }
+        .learn-hero::before {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background: radial-gradient(ellipse at top right,rgba(124,58,237,.18),transparent 60%),
+                        radial-gradient(ellipse at bottom left,rgba(6,182,212,.08),transparent 60%);
+        }
+        .learn-hero-inner { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+        .learn-hero h1 {
+            font-size: 1.45rem; font-weight: 800; color: #fff; margin: 0 0 0.35rem;
+        }
+        .learn-hero p {
+            font-size: 0.85rem; color: rgba(255,255,255,0.5); margin: 0;
+        }
+        .hero-stats {
+            display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
+        }
+        .hero-stat {
+            text-align: center;
+        }
+        .hero-stat-val { font-size: 1.35rem; font-weight: 800; color: #fff; line-height: 1; }
+        .hero-stat-lbl { font-size: 0.65rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.15rem; }
+
+        /* ── Filters bar ───────────────────────────────────────────────────────── */
+        .learn-filters {
+            display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .filter-search {
+            flex: 1; min-width: 200px;
+            display: flex; align-items: center; gap: 0.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.5rem 0.85rem;
+            transition: border-color 0.15s;
+        }
+        .filter-search:focus-within { border-color: rgba(124,58,237,0.5); }
+        .filter-search .material-symbols-outlined { font-size: 1rem; color: var(--text-muted); }
+        .filter-search input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text); font-size: 0.85rem;
+        }
+        .filter-search input::placeholder { color: var(--text-muted); }
+        .filter-tabs {
+            display: flex; gap: 0.3rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.25rem;
+        }
+        .filter-tab {
+            font-size: 0.78rem; font-weight: 600; padding: 0.32rem 0.85rem;
+            border-radius: calc(var(--radius) - 2px); border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .filter-tab .material-symbols-outlined { font-size: 0.82rem; }
+        .filter-tab.active { background: var(--primary); color: #fff; }
+        .filter-tab:not(.active):hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .filter-select {
+            font-size: 0.82rem; padding: 0.45rem 0.85rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); color: var(--text); cursor: pointer; outline: none;
+            transition: border-color 0.15s;
+        }
+        .filter-select:focus { border-color: rgba(124,58,237,0.5); }
+
+        /* ── Section header ────────────────────────────────────────────────────── */
+        .section-head {
+            display: flex; align-items: center; gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .section-head h2 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
+        .section-count {
+            font-size: 0.72rem; font-weight: 700;
+            background: rgba(124,58,237,0.18); color: #a78bfa;
+            border-radius: 20px; padding: 0.12rem 0.55rem; min-width: 22px; text-align: center;
+        }
+        .section-block { margin-bottom: 2.25rem; }
+
+        /* ── Card grid ─────────────────────────────────────────────────────────── */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1rem;
+        }
+
+        /* ── Content card ──────────────────────────────────────────────────────── */
+        .content-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+            transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
+            cursor: pointer; text-decoration: none; display: flex; flex-direction: column;
+        }
+        .content-card:hover {
+            border-color: rgba(124,58,237,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.3);
+        }
+
+        /* Cover image / placeholder */
+        .card-cover {
+            height: 116px;
+            background: linear-gradient(135deg, #1a0e3a 0%, #0e1a30 100%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; flex-shrink: 0;
+        }
+        .card-cover::after {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background: radial-gradient(ellipse at top right,rgba(124,58,237,.22),transparent 60%),
+                        radial-gradient(ellipse at bottom left,rgba(6,182,212,.10),transparent 60%);
+        }
+        .card-cover-icon {
+            font-size: 2.8rem; position: relative; z-index: 1; opacity: 0.35;
+        }
+        .card-cover img { width:100%; height:100%; object-fit:cover; position:relative; z-index:1; }
+
+        /* Type badge */
+        .card-type-badge {
+            position: absolute; top: 0.55rem; left: 0.55rem; z-index: 2;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; padding: 0.15rem 0.5rem; border-radius: 20px;
+            display: flex; align-items: center; gap: 0.22rem;
+        }
+        .card-type-badge .material-symbols-outlined { font-size: 0.72rem; }
+        .card-type-badge.blog   { background: rgba(6,182,212,0.22); color:#22d3ee; border:1px solid rgba(6,182,212,0.4); }
+        .card-type-badge.course { background: rgba(124,58,237,0.22); color:#a78bfa; border:1px solid rgba(124,58,237,0.4); }
+
+        /* Card body */
+        .card-body { padding: 1rem 1.1rem 1.1rem; flex: 1; display: flex; flex-direction: column; }
+        .card-title {
+            font-size: 0.9rem; font-weight: 700; color: var(--text);
+            margin: 0 0 0.4rem; line-height: 1.35;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .card-desc {
+            font-size: 0.78rem; color: var(--text-muted);
+            line-height: 1.55; margin: 0 0 0.7rem; flex: 1;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .tag-strip { display: flex; gap: 0.28rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+        .tag-pill {
+            font-size: 0.62rem; font-weight: 600; padding: 0.1rem 0.42rem;
+            border-radius: 20px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text-muted);
+        }
+        .card-footer { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .card-author {
+            display: flex; align-items: center; gap: 0.32rem;
+            font-size: 0.7rem; color: var(--text-muted); flex: 1; min-width: 0;
+            overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+        }
+        .card-author-avatar {
+            width: 17px; height: 17px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.48rem; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .card-author-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+        .card-meta {
+            display: flex; align-items: center; gap: 0.22rem;
+            font-size: 0.68rem; color: var(--text-muted); white-space: nowrap;
+        }
+        .card-meta .material-symbols-outlined { font-size: 0.8rem; }
+        .card-lang-pill {
+            font-size: 0.64rem; font-weight: 600; padding: 0.1rem 0.4rem;
+            border-radius: 20px; background: rgba(255,255,255,0.07);
+            border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap;
+        }
+
+        /* ── Empty state ───────────────────────────────────────────────────────── */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .empty-state .material-symbols-outlined {
+            font-size: 2.5rem; display: block; margin-bottom: 0.7rem; opacity: 0.3;
+        }
+
+        /* ── Skeleton ──────────────────────────────────────────────────────────── */
+        .skel { background: var(--bg-surface); border-radius: var(--radius-lg); animation: shimmer 1.4s infinite; }
+        @keyframes shimmer { 0%,100%{opacity:.4} 50%{opacity:.85} }
+        .skel-card { height: 230px; }
+
+        /* ── No-results full-page ──────────────────────────────────────────────── */
+        .no-results {
+            text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 0.88rem;
+        }
+        .no-results .material-symbols-outlined { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.25; }
+    </style>
+</head>
+<body>
+
+<div class="learn-wrap">
+
+    <!-- Hero -->
+    <div class="learn-hero">
+        <div class="learn-hero-inner">
+            <div>
+                <h1>Learn Programming</h1>
+                <p>Self-paced content created by your faculty — blog posts, guides, and structured courses.</p>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-val" id="heroBlogs">—</div>
+                    <div class="hero-stat-lbl">Blog Posts</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-val" id="heroCourses">—</div>
+                    <div class="hero-stat-lbl">Courses</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="learn-filters">
+        <div class="filter-search">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" id="searchInput" placeholder="Search by title, description, or tag…">
+        </div>
+        <div class="filter-tabs" id="typeTabs">
+            <button class="filter-tab active" data-type="all">
+                <span class="material-symbols-outlined">dashboard</span>All
+            </button>
+            <button class="filter-tab" data-type="blog">
+                <span class="material-symbols-outlined">article</span>Blog Posts
+            </button>
+            <button class="filter-tab" data-type="course">
+                <span class="material-symbols-outlined">school</span>Courses
+            </button>
+        </div>
+        <select class="filter-select" id="langFilter">
+            <option value="all">All Languages</option>
+            <option value="general">General</option>
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+        </select>
+    </div>
+
+    <!-- Blog Posts section -->
+    <div class="section-block" id="blogSection">
+        <div class="section-head">
+            <span class="material-symbols-outlined" style="color:#22d3ee;font-size:1.15rem;">article</span>
+            <h2>Blog Posts</h2>
+            <span class="section-count" id="blogCount">—</span>
+        </div>
+        <div id="blogGrid" class="content-grid">
+            <!-- skeleton -->
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+        </div>
+    </div>
+
+    <!-- Courses section -->
+    <div class="section-block" id="courseSection">
+        <div class="section-head">
+            <span class="material-symbols-outlined" style="color:#a78bfa;font-size:1.15rem;">school</span>
+            <h2>Courses</h2>
+            <span class="section-count" id="courseCount">—</span>
+        </div>
+        <div id="courseGrid" class="content-grid">
+            <!-- skeleton -->
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+        </div>
+    </div>
+
+    <!-- Global no-results -->
+    <div id="noResults" class="no-results" style="display:none;">
+        <span class="material-symbols-outlined">search_off</span>
+        No content matches your search. Try different keywords or filters.
+    </div>
+
+</div>
+
+<script>window.SIDEBAR_PAGE = 'learn';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+if (!token) location.href = 'login.html';
+
+let allContributions = [];
+let activeType  = 'all';
+let activeLang  = 'all';
+let searchQuery = '';
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+async function load() {
+    try {
+        const res  = await fetch(`${API}/contributions`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        allContributions = data.contributions || [];
+    } catch {
+        allContributions = [];
+    }
+    // Hero stats (all, unfiltered)
+    const blogs   = allContributions.filter(c => c.type === 'blog').length;
+    const courses = allContributions.filter(c => c.type === 'course').length;
+    document.getElementById('heroBlogs').textContent   = blogs;
+    document.getElementById('heroCourses').textContent = courses;
+
+    renderAll();
+}
+
+// ── Derive filtered list + render ─────────────────────────────────────────────
+function renderAll() {
+    let list = allContributions;
+
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(c =>
+            (c.title       || '').toLowerCase().includes(q) ||
+            (c.description || '').toLowerCase().includes(q) ||
+            (c.tags        || '').toLowerCase().includes(q) ||
+            (c.author_name || '').toLowerCase().includes(q)
+        );
+    }
+    if (activeLang !== 'all') {
+        list = list.filter(c => c.language === activeLang);
+    }
+
+    const blogs   = list.filter(c => c.type === 'blog');
+    const courses = list.filter(c => c.type === 'course');
+
+    const showBlog   = activeType !== 'course';
+    const showCourse = activeType !== 'blog';
+    const noBlog     = showBlog   && blogs.length   === 0;
+    const noCourse   = showCourse && courses.length === 0;
+
+    document.getElementById('blogSection').style.display   = showBlog   ? '' : 'none';
+    document.getElementById('courseSection').style.display = showCourse ? '' : 'none';
+
+    if (showBlog)   renderSection('blog',   blogs);
+    if (showCourse) renderSection('course', courses);
+
+    // Show global no-results only when both sections are visible and empty
+    const globalEmpty = (activeType === 'all') ? (noBlog && noCourse) : false;
+    document.getElementById('noResults').style.display = (globalEmpty || (!showBlog && !showCourse)) ? '' : 'none';
+}
+
+function renderSection(type, items) {
+    const gridEl  = document.getElementById(type === 'blog' ? 'blogGrid'  : 'courseGrid');
+    const countEl = document.getElementById(type === 'blog' ? 'blogCount' : 'courseCount');
+    countEl.textContent = items.length;
+
+    if (!items.length) {
+        gridEl.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">${type === 'blog' ? 'article' : 'school'}</span>
+                No ${type === 'blog' ? 'blog posts' : 'courses'} available yet.<br>
+                <span style="font-size:0.78rem;">Check back later — faculty members can contribute from their dashboards.</span>
+            </div>`;
+        return;
+    }
+    gridEl.innerHTML = items.map(buildCard).join('');
+}
+
+// ── Build one card ─────────────────────────────────────────────────────────────
+function buildCard(c) {
+    const initials   = (c.author_name || 'F').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const tags       = (c.tags || '').split(',').map(t => t.trim()).filter(Boolean).slice(0, 3);
+    const isBlog     = c.type === 'blog';
+    const icon       = isBlog ? 'article' : 'school';
+    const typeLabel  = isBlog ? 'Blog Post' : 'Course';
+
+    const coverHtml = c.cover_image
+        ? `<img src="${esc(c.cover_image)}" alt="">`
+        : `<span class="material-symbols-outlined card-cover-icon">${icon}</span>`;
+
+    const avatarHtml = c.author_avatar
+        ? `<div class="card-author-avatar"><img src="${esc(c.author_avatar)}"></div>`
+        : `<div class="card-author-avatar">${initials}</div>`;
+
+    const tagHtml = tags.length
+        ? `<div class="tag-strip">${tags.map(t => `<span class="tag-pill">${esc(t)}</span>`).join('')}</div>`
+        : '';
+
+    return `
+    <a class="content-card" href="contribution_view.html?id=${c.contribution_id}">
+        <div class="card-cover">
+            ${coverHtml}
+            <span class="card-type-badge ${c.type}">
+                <span class="material-symbols-outlined">${icon}</span>${typeLabel}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="card-title">${esc(c.title)}</div>
+            ${c.description ? `<div class="card-desc">${esc(c.description)}</div>` : '<div class="card-desc" style="flex:1;"></div>'}
+            ${tagHtml}
+            <div class="card-footer">
+                <div class="card-author">${avatarHtml}${esc(c.author_name || 'Faculty')}</div>
+                <div class="card-meta">
+                    <span class="material-symbols-outlined">visibility</span>${c.view_count || 0}
+                </div>
+                <span class="card-lang-pill">${langLabel(c.language)}</span>
+            </div>
+        </div>
+    </a>`;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function langLabel(l) {
+    return { general:'General', python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' }[l] || l || 'General';
+}
+function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeType = btn.dataset.type;
+        renderAll();
+    });
+});
+
+document.getElementById('langFilter').addEventListener('change', e => {
+    activeLang = e.target.value;
+    renderAll();
+});
+
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        searchQuery = e.target.value.trim();
+        renderAll();
+    }, 260);
+});
+
+load();
+</script>
+</body>
+</html>

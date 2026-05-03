@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Challenge – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/ace.js"></script>
+    <style>
+        /* ── Hero banner ─────────────────────────────────────────────────── */
+        .ch-hero {
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 55%, #06b6d4 100%);
+            border-radius: var(--radius-lg); padding: 1.75rem 2rem;
+            margin-bottom: 1.5rem; position: relative; overflow: hidden;
+        }
+        .ch-hero::before {
+            content: '🔥'; position: absolute;
+            right: 1.5rem; top: 50%; transform: translateY(-50%);
+            font-size: 5rem; opacity: 0.12; line-height: 1;
+        }
+        .ch-hero-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.7); margin-bottom: 0.4rem; }
+        .ch-hero h1   { font-size: 1.45rem; font-weight: 700; color: #fff; margin: 0 0 0.5rem; line-height: 1.3; }
+        .ch-hero-meta { display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap; }
+        .ch-badge {
+            padding: 0.22rem 0.7rem; border-radius: 20px; font-size: 0.72rem;
+            font-weight: 700; background: rgba(255,255,255,0.2); color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* ── Streak bar ──────────────────────────────────────────────────── */
+        .streak-bar {
+            display: flex; align-items: center; gap: 1rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.85rem 1.1rem;
+            margin-bottom: 1.5rem; flex-wrap: wrap;
+        }
+        .streak-num { font-size: 1.6rem; font-weight: 900; color: #f97316; line-height: 1; }
+        .streak-info { flex: 1; }
+        .streak-info strong { font-size: 0.85rem; color: var(--text); display: block; }
+        .streak-info span   { font-size: 0.75rem; color: var(--text-muted); }
+        .streak-dots { display: flex; gap: 0.35rem; }
+        .streak-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-surface); position: relative; }
+        .streak-dot.done { background: #f97316; border-color: #f97316; }
+        .streak-dot.done::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #fff; font-weight: 800; }
+        .streak-dot.today { border-color: var(--primary); animation: pulse 1.5s ease infinite; }
+        @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(124,58,237,0.4); } 50%{ box-shadow: 0 0 0 6px rgba(124,58,237,0); } }
+
+        /* ── Layout ──────────────────────────────────────────────────────── */
+        .ch-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; }
+        @media (max-width: 900px) { .ch-layout { grid-template-columns: 1fr; } }
+
+        /* ── Code editor ─────────────────────────────────────────────────── */
+        .editor-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+        }
+        .editor-toolbar {
+            display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1rem;
+            background: var(--bg-surface); border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .editor-toolbar span { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); flex: 1; }
+        #aceEditor { width: 100%; height: 300px; font-size: 14px; line-height: 1.6; }
+
+        .output-section { border-top: 1px solid var(--border); }
+        .output-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.55rem 1rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-light);
+        }
+        .output-header span { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .output-body {
+            padding: 0.85rem 1rem; min-height: 80px;
+            font-family: 'Courier New', monospace; font-size: 0.85rem;
+            color: #22d3ee; white-space: pre-wrap; line-height: 1.6;
+            max-height: 160px; overflow-y: auto;
+        }
+        .output-body.error { color: #f87171; }
+
+        /* ── Sidebar ─────────────────────────────────────────────────────── */
+        .ch-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+
+        .ch-panel {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.15rem 1.25rem;
+        }
+        .ch-panel-title {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 0.35rem;
+        }
+        .ch-panel-title .material-symbols-outlined { font-size: 0.95rem; }
+
+        /* Task description */
+        .task-text { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+        .task-req { margin-top: 0.75rem; padding-left: 0; list-style: none; }
+        .task-req li { font-size: 0.82rem; color: var(--text-muted); padding: 0.2rem 0; display: flex; align-items: flex-start; gap: 0.4rem; }
+        .task-req li::before { content: '→'; color: var(--primary); flex-shrink: 0; }
+
+        /* XP reward */
+        .xp-reward-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
+            border-radius: var(--radius-sm); padding: 0.65rem 0.9rem; margin-bottom: 0.75rem;
+        }
+        .xp-reward-row .xp-num { font-size: 1.3rem; font-weight: 900; color: #fbbf24; }
+        .xp-reward-row .xp-lbl { font-size: 0.72rem; color: var(--text-muted); }
+
+        /* Hints */
+        .hint-lvl-row { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; }
+        .hint-lvl-btn {
+            flex: 1; font-size: 0.72rem; font-weight: 700; padding: 0.3rem 0;
+            border-radius: var(--radius-sm); border: 1px solid var(--border);
+            background: var(--bg-surface); color: var(--text-muted); cursor: pointer;
+            transition: all 0.15s;
+        }
+        .hint-lvl-btn:hover   { border-color: var(--primary); color: var(--primary); }
+        .hint-lvl-btn.active  { background: rgba(124,58,237,0.15); border-color: var(--primary); color: #a78bfa; }
+        .hint-lvl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .hint-content { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; margin-top: 0.6rem; display: none; }
+        .hint-content.show { display: block; }
+        .hint-spinner { display: none; font-size: 0.78rem; color: var(--text-muted); align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+        .hint-spinner.show { display: flex; }
+        .mini-spin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--bg-surface); border-top-color: var(--primary); animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Submit result */
+        .result-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.4rem;
+            text-align: center; display: none;
+        }
+        .result-card.show { display: block; }
+        .result-emoji { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+        .result-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+        .result-sub   { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem; }
+        .result-xp    { font-size: 1.4rem; font-weight: 900; color: #fbbf24; }
+
+        /* Completed state */
+        .completed-overlay {
+            background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.3);
+            border-radius: var(--radius-lg); padding: 1.5rem; text-align: center;
+            display: none;
+        }
+        .completed-overlay.show { display: block; }
+        .completed-overlay .material-symbols-outlined { font-size: 2.5rem; color: #34d399; display: block; margin-bottom: 0.5rem; }
+        .completed-overlay h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0 0 0.3rem; }
+        .completed-overlay p  { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+
+        /* Skeleton */
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity:0.5; } 50%{ opacity:1; } }
+
+        /* Loading screen */
+        .loading-screen { text-align: center; padding: 3rem 1rem; }
+        .loading-screen .spinner-ring { width: 40px; height: 40px; border-radius: 50%; border: 4px solid var(--bg-surface); border-top-color: var(--primary); animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+
+        /* XP toast */
+        .xp-toast {
+            position: fixed; top: 5rem; right: 1.5rem; z-index: 600;
+            background: linear-gradient(135deg,rgba(251,191,36,0.95),rgba(245,158,11,0.95));
+            color: #1a1000; font-size: 0.9rem; font-weight: 800;
+            padding: 0.6rem 1.2rem; border-radius: 30px; pointer-events: none;
+            opacity: 0; transform: translateY(10px);
+            transition: opacity 0.25s, transform 0.25s;
+        }
+        .xp-toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- Loading state -->
+<div id="loadingScreen" class="loading-screen">
+    <div class="spinner-ring"></div>
+    <p style="color:var(--text-muted);font-size:0.88rem;">Generating today's challenge…</p>
+</div>
+
+<!-- Main content (hidden until loaded) -->
+<div id="mainContent" style="display:none;">
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<div class="ch-hero">
+    <div class="ch-hero-label">📅 Daily Challenge · <span id="heroDate">—</span></div>
+    <h1 id="heroTitle">Loading challenge…</h1>
+    <div class="ch-hero-meta">
+        <span class="ch-badge" id="heroDiff">—</span>
+        <span class="ch-badge" id="heroLang">—</span>
+        <span class="ch-badge" id="heroXP">— XP</span>
+    </div>
+</div>
+
+<!-- ── Streak Bar ──────────────────────────────────────────────────────────── -->
+<div class="streak-bar">
+    <div class="streak-num" id="streakNum">0🔥</div>
+    <div class="streak-info">
+        <strong>Day Streak</strong>
+        <span>Complete today's challenge to keep your streak!</span>
+    </div>
+    <div class="streak-dots" id="streakDots"></div>
+</div>
+
+<!-- ── Completed today overlay ────────────────────────────────────────────── -->
+<div class="completed-overlay" id="completedOverlay">
+    <span class="material-symbols-outlined">check_circle</span>
+    <h3>Challenge Completed!</h3>
+    <p>You've already completed today's challenge. Come back tomorrow for a new one.</p>
+</div>
+
+<!-- ── Main layout ────────────────────────────────────────────────────────── -->
+<div class="ch-layout" id="challengeLayout">
+
+    <!-- LEFT: Code editor -->
+    <div>
+        <div class="editor-card">
+            <div class="editor-toolbar">
+                <span id="editorLangLabel">Python</span>
+                <button class="btn btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.75rem;" onclick="resetCode()">
+                    <span class="material-symbols-outlined" style="font-size:0.9rem;">restart_alt</span> Reset
+                </button>
+                <button class="btn btn-primary" style="font-size:0.75rem;padding:0.35rem 0.75rem;" id="runBtn" onclick="runCode()">
+                    <span class="material-symbols-outlined" style="font-size:0.9rem;">play_arrow</span> Run
+                </button>
+            </div>
+            <div id="aceEditor"></div>
+            <div class="output-section">
+                <div class="output-header">
+                    <span>Output</span>
+                    <button style="background:none;border:none;cursor:pointer;font-size:0.72rem;color:var(--text-muted);" onclick="clearOutput()">Clear</button>
+                </div>
+                <div class="output-body" id="outputBody">// Run your code to see output…</div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div style="display:flex;gap:0.65rem;margin-top:0.85rem;" id="submitRow">
+            <button class="btn btn-primary" style="flex:1;justify-content:center;font-size:0.88rem;" onclick="submitChallenge()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>
+                Submit Solution
+            </button>
+            <a href="playground.html" class="btn btn-secondary" style="font-size:0.82rem;">
+                <span class="material-symbols-outlined" style="font-size:0.95rem;">open_in_new</span>
+                Full Playground
+            </a>
+        </div>
+
+        <!-- Result card -->
+        <div class="result-card" id="resultCard">
+            <span class="result-emoji" id="resultEmoji">🎉</span>
+            <div class="result-title" id="resultTitle">—</div>
+            <div class="result-sub"   id="resultSub">—</div>
+            <div class="result-xp"    id="resultXP">+0 XP</div>
+            <div style="margin-top:1rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+                <a href="dashboard.html" class="btn btn-secondary" style="font-size:0.82rem;">Dashboard</a>
+                <a href="leaderboard.html" class="btn btn-primary" style="font-size:0.82rem;">Leaderboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Sidebar panels -->
+    <div class="ch-sidebar">
+
+        <!-- Task description -->
+        <div class="ch-panel">
+            <div class="ch-panel-title">
+                <span class="material-symbols-outlined">assignment</span>
+                Task
+            </div>
+            <div class="task-text" id="taskDesc">Loading…</div>
+            <ul class="task-req" id="taskReqs"></ul>
+        </div>
+
+        <!-- XP + stats -->
+        <div class="ch-panel">
+            <div class="ch-panel-title">
+                <span class="material-symbols-outlined">bolt</span>
+                Reward
+            </div>
+            <div class="xp-reward-row">
+                <div>
+                    <div class="xp-num" id="xpRewardNum">50</div>
+                    <div class="xp-lbl">XP on completion</div>
+                </div>
+                <span style="font-size:2rem;">⭐</span>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size:0.95rem;vertical-align:middle;color:#f97316;">local_fire_department</span>
+                Completing daily challenges builds your streak and earns bonus XP.
+            </div>
+        </div>
+
+        <!-- AI Hints -->
+        <div class="ch-panel">
+            <div class="ch-panel-title">
+                <span class="material-symbols-outlined">auto_awesome</span>
+                AI Hints
+            </div>
+            <div class="hint-lvl-row">
+                <button class="hint-lvl-btn" id="hBtn1" onclick="getHint(1)">Hint 1</button>
+                <button class="hint-lvl-btn" id="hBtn2" onclick="getHint(2)" disabled>Hint 2</button>
+                <button class="hint-lvl-btn" id="hBtn3" onclick="getHint(3)" disabled>Hint 3</button>
+            </div>
+            <div class="hint-spinner" id="hintSpinner"><div class="mini-spin"></div>Thinking…</div>
+            <div class="hint-content" id="hintContent"></div>
+        </div>
+
+        <!-- Example input/output -->
+        <div class="ch-panel" id="examplePanel" style="display:none;">
+            <div class="ch-panel-title">
+                <span class="material-symbols-outlined">data_object</span>
+                Example
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.25rem;">Input</div>
+            <div style="background:var(--bg-surface);border-radius:6px;padding:0.5rem 0.75rem;font-family:monospace;font-size:0.82rem;color:#22d3ee;margin-bottom:0.6rem;" id="exInput">—</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.25rem;">Expected Output</div>
+            <div style="background:var(--bg-surface);border-radius:6px;padding:0.5rem 0.75rem;font-family:monospace;font-size:0.82rem;color:#34d399;" id="exOutput">—</div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /mainContent -->
+
+<!-- XP toast -->
+<div class="xp-toast" id="xpToast">+50 XP</div>
+
+<script>window.SIDEBAR_PAGE = 'dashboard';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!me.id) { location.href = 'login.html'; }
+
+let editor;
+let challenge = null;
+let hintLevel = 0;
+let submitted = false;
+const todayKey = 'ch_completed_' + new Date().toISOString().slice(0,10);
+
+// ─── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    // Date display
+    document.getElementById('heroDate').textContent =
+        new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+    // Streak dots (7 days)
+    renderStreakDots(me.streak || 0);
+    document.getElementById('streakNum').textContent = (me.streak || 0) + '🔥';
+
+    // Init Ace Editor
+    editor = ace.edit('aceEditor');
+    editor.setTheme('ace/theme/tomorrow_night');
+    editor.setOptions({ fontSize: '14px', showPrintMargin: false, tabSize: 4, useSoftTabs: true });
+
+    await loadChallenge();
+});
+
+// ─── Load challenge ────────────────────────────────────────────────────────────
+async function loadChallenge() {
+    try {
+        const res  = await fetch(`${API}/daily-challenge`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        challenge  = data.challenge || data;
+        renderChallenge(challenge);
+    } catch {
+        // Fallback challenge
+        challenge = {
+            title:       'Sum of Two Numbers',
+            description: 'Write a function that takes two integers and returns their sum.',
+            language:    me.selected_language || me.language || 'python',
+            difficulty:  'beginner',
+            xp_reward:   50,
+            starter_code:'def add(a, b):\n    # Your code here\n    pass\n\nprint(add(3, 5))',
+            requirements: ['Function must accept two parameters', 'Return the sum', 'Handle negative numbers'],
+            example_input:  '3, 5',
+            example_output: '8',
+        };
+        renderChallenge(challenge);
+    }
+}
+
+function renderChallenge(ch) {
+    const lang = ch.language || 'python';
+    document.getElementById('heroTitle').textContent   = ch.title || 'Daily Challenge';
+    document.getElementById('heroDiff').textContent   = ch.difficulty || 'beginner';
+    document.getElementById('heroLang').textContent   = lang;
+    document.getElementById('heroXP').textContent     = `${ch.xp_reward || 50} XP`;
+    document.getElementById('xpRewardNum').textContent = ch.xp_reward || 50;
+    document.getElementById('taskDesc').textContent   = ch.description || '';
+    document.getElementById('editorLangLabel').textContent = lang.charAt(0).toUpperCase() + lang.slice(1);
+
+    // Requirements
+    const reqs = ch.requirements || [];
+    document.getElementById('taskReqs').innerHTML = reqs.map(r => `<li>${esc(r)}</li>`).join('');
+
+    // Example
+    if (ch.example_input || ch.example_output) {
+        document.getElementById('examplePanel').style.display = 'block';
+        document.getElementById('exInput').textContent  = ch.example_input  || '—';
+        document.getElementById('exOutput').textContent = ch.example_output || '—';
+    }
+
+    // Set editor language mode
+    const modeMap = { python:'python', javascript:'javascript', java:'java', cpp:'c_cpp' };
+    editor.session.setMode(`ace/mode/${modeMap[lang] || 'python'}`);
+    editor.setValue(ch.starter_code || getDefaultStarter(lang), -1);
+
+    // Already completed today?
+    if (localStorage.getItem(todayKey)) {
+        showCompleted();
+    }
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display  = 'block';
+}
+
+function getDefaultStarter(lang) {
+    const starters = {
+        python:     '# Write your solution here\ndef solution():\n    pass\n',
+        javascript: '// Write your solution here\nfunction solution() {\n    \n}\n',
+        java:       'public class Solution {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}\n',
+        cpp:        '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your solution here\n    return 0;\n}\n',
+    };
+    return starters[lang] || starters.python;
+}
+
+// ─── Run code ─────────────────────────────────────────────────────────────────
+async function runCode() {
+    const code = editor.getValue();
+    const lang = challenge?.language || 'python';
+    const btn  = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:0.9rem;animation:spin 0.7s linear infinite;">refresh</span> Running…';
+
+    const out = document.getElementById('outputBody');
+    out.className = 'output-body';
+    out.textContent = '⏳ Running…';
+
+    try {
+        const res  = await fetch(`${API}/execute`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ code, language: lang })
+        });
+        const data = await res.json();
+        if (data.error || data.stderr) {
+            out.className = 'output-body error';
+            out.textContent = data.stderr || data.error || 'Runtime error';
+        } else {
+            out.className = 'output-body';
+            out.textContent = data.output || data.stdout || '(no output)';
+        }
+    } catch {
+        out.className = 'output-body error';
+        out.textContent = 'Could not connect to execution server.';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:0.9rem;">play_arrow</span> Run';
+}
+
+function resetCode() {
+    if (challenge) editor.setValue(challenge.starter_code || getDefaultStarter(challenge.language), -1);
+    document.getElementById('outputBody').textContent = '// Run your code to see output…';
+    document.getElementById('outputBody').className = 'output-body';
+}
+
+function clearOutput() {
+    document.getElementById('outputBody').textContent = '';
+    document.getElementById('outputBody').className = 'output-body';
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+async function submitChallenge() {
+    if (submitted || localStorage.getItem(todayKey)) return;
+
+    const code = editor.getValue().trim();
+    if (!code || code.length < 10) {
+        alert('Write some code before submitting!');
+        return;
+    }
+
+    submitted = true;
+    document.getElementById('submitRow').style.display = 'none';
+
+    const xp = challenge?.xp_reward || 50;
+
+    // Award XP via track-session
+    try {
+        await fetch(`${API}/ai/track-session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ xpEarned: xp, language: challenge?.language || 'python', results: [] })
+        });
+    } catch {}
+
+    // Mark completed
+    localStorage.setItem(todayKey, '1');
+
+    // Show result
+    const result = document.getElementById('resultCard');
+    document.getElementById('resultEmoji').textContent = '🎉';
+    document.getElementById('resultTitle').textContent = 'Challenge Submitted!';
+    document.getElementById('resultSub').textContent   = 'Great work! Your solution has been recorded.';
+    document.getElementById('resultXP').textContent    = `+${xp} XP earned`;
+    result.classList.add('show');
+
+    showXpToast(`+${xp} XP`);
+}
+
+function showCompleted() {
+    document.getElementById('completedOverlay').classList.add('show');
+    document.getElementById('challengeLayout').style.opacity = '0.5';
+    document.getElementById('challengeLayout').style.pointerEvents = 'none';
+}
+
+// ─── AI Hints ─────────────────────────────────────────────────────────────────
+let currentHintLevel = 0;
+
+async function getHint(level) {
+    if (level <= currentHintLevel) return;
+    currentHintLevel = level;
+
+    document.getElementById('hintSpinner').className = 'hint-spinner show';
+    document.getElementById('hintContent').className = 'hint-content';
+    ['hBtn1','hBtn2','hBtn3'].forEach(id => {
+        document.getElementById(id).disabled = true;
+        document.getElementById(id).classList.remove('active');
+    });
+    document.getElementById(`hBtn${level}`).classList.add('active');
+
+    try {
+        const res  = await fetch(`${API}/ai/hint`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+                questionText:  challenge?.description || 'daily coding challenge',
+                topic:         challenge?.topic || 'programming',
+                language:      challenge?.language || 'python',
+                level:         challenge?.difficulty || 'beginner',
+                hintLevel:     level,
+                studentAnswer: editor.getValue().slice(0, 200)
+            })
+        });
+        const data = await res.json();
+        document.getElementById('hintSpinner').className = 'hint-spinner';
+        document.getElementById('hintContent').className = 'hint-content show';
+        document.getElementById('hintContent').innerHTML = `<strong>Level ${level} Hint:</strong> ${esc(data.hint || 'Think about the problem step by step.')}`;
+    } catch {
+        document.getElementById('hintSpinner').className = 'hint-spinner';
+        document.getElementById('hintContent').className = 'hint-content show';
+        document.getElementById('hintContent').textContent = 'Hint unavailable right now.';
+    }
+
+    // Re-enable buttons
+    document.getElementById('hBtn1').disabled = false;
+    if (level >= 1) document.getElementById('hBtn2').disabled = false;
+    if (level >= 2) document.getElementById('hBtn3').disabled = false;
+}
+
+// ─── Streak dots ──────────────────────────────────────────────────────────────
+function renderStreakDots(streak) {
+    const container = document.getElementById('streakDots');
+    container.innerHTML = Array.from({ length: 7 }, (_, i) => {
+        const done  = i < streak;
+        const today = i === Math.min(streak, 6);
+        return `<div class="streak-dot${done ? ' done' : today ? ' today' : ''}"></div>`;
+    }).join('');
+}
+
+// ─── XP Toast ─────────────────────────────────────────────────────────────────
+let xpHide;
+function showXpToast(msg) {
+    const el = document.getElementById('xpToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(xpHide);
+    xpHide = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

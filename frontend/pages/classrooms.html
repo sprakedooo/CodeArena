@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.75rem; gap: 1rem; flex-wrap: wrap;
+        }
+        .page-header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0; }
+        .page-header p  { font-size: 0.85rem; color: var(--text-secondary); margin: 0.2rem 0 0; }
+
+        .section-title {
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.4px;
+            color: var(--text-muted); margin: 1.6rem 0 0.8rem;
+        }
+
+        /* ── Enroll card ─────────────────────────────────────────────────── */
+        .enroll-card {
+            background: linear-gradient(135deg, #1e1045 0%, #12203a 100%);
+            border: 1px solid rgba(124,58,237,0.25);
+            border-radius: var(--radius-lg); padding: 1.5rem 1.75rem;
+            display: flex; align-items: center; gap: 1.5rem;
+            margin-bottom: 1.75rem; flex-wrap: wrap;
+            position: relative; overflow: hidden;
+        }
+        .enroll-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at top right, rgba(124,58,237,0.2), transparent 65%);
+            pointer-events: none;
+        }
+        .enroll-card-icon {
+            width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0;
+            background: rgba(124,58,237,0.25);
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(124,58,237,0.3);
+        }
+        .enroll-card-icon .material-symbols-outlined { font-size: 1.75rem; color: #a78bfa; }
+        .enroll-card-text { flex: 1; min-width: 180px; position: relative; }
+        .enroll-card-text h3 { font-size: 1rem; font-weight: 700; color: #fff; margin: 0 0 0.2rem; }
+        .enroll-card-text p  { font-size: 0.8rem; color: rgba(255,255,255,0.55); margin: 0; }
+        .enroll-input-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; position: relative; }
+        .enroll-key-input {
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--radius-sm); padding: 0.65rem 1rem;
+            font-size: 1rem; font-weight: 700; letter-spacing: 2.5px;
+            color: #fff; font-family: 'Courier New', monospace;
+            text-transform: uppercase; width: 170px; outline: none;
+            transition: border-color 0.15s;
+        }
+        .enroll-key-input::placeholder { letter-spacing: 1px; font-weight: 400; color: rgba(255,255,255,0.3); }
+        .enroll-key-input:focus { border-color: #a78bfa; }
+
+        /* ── Course grid (Moodle card layout) ───────────────────────────── */
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.1rem;
+        }
+        .course-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .course-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+            border-color: rgba(124,58,237,0.4);
+        }
+
+        /* Coloured top banner — like Moodle */
+        .course-banner {
+            height: 110px;
+            display: flex; align-items: flex-end;
+            padding: 0.85rem 1.1rem;
+            position: relative; overflow: hidden;
+            flex-shrink: 0;
+        }
+        .course-banner::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.45));
+        }
+        .course-banner-pattern {
+            position: absolute; inset: 0;
+            opacity: 0.12;
+            background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                              radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                              radial-gradient(circle at 60% 80%, rgba(255,255,255,0.8) 2px, transparent 2px);
+            background-size: 60px 60px;
+        }
+        .course-banner-code {
+            font-size: 1.1rem; font-weight: 800; color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            position: relative; z-index: 1; letter-spacing: 0.5px;
+        }
+        .course-banner-lang {
+            position: absolute; top: 0.7rem; right: 0.75rem; z-index: 1;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.7px; padding: 0.22rem 0.6rem;
+            border-radius: 20px; background: rgba(0,0,0,0.35);
+            color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Card body */
+        .course-body {
+            padding: 1rem 1.1rem 1.1rem;
+            display: flex; flex-direction: column; gap: 0.6rem; flex: 1;
+        }
+        .course-title {
+            font-size: 0.88rem; font-weight: 700; color: var(--text);
+            line-height: 1.35; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .course-desc {
+            font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .course-meta {
+            display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.1rem;
+        }
+        .course-meta-row {
+            display: flex; align-items: center; gap: 0.35rem;
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+        .course-meta-row .material-symbols-outlined { font-size: 0.95rem; }
+        .course-divider {
+            height: 1px; background: var(--border); margin: 0.25rem 0;
+        }
+        .course-enter-btn {
+            display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+            padding: 0.65rem; border-radius: var(--radius-sm); font-size: 0.82rem;
+            font-weight: 700; background: var(--primary); color: #fff;
+            border: none; cursor: pointer; text-decoration: none;
+            transition: background 0.15s, transform 0.15s;
+            margin-top: auto; letter-spacing: 0.2px;
+        }
+        .course-enter-btn:hover { background: #6d28d9; transform: translateY(-1px); }
+        .course-enter-btn .material-symbols-outlined { font-size: 1rem; }
+
+        /* Empty state */
+        .empty-state {
+            grid-column: 1/-1; text-align: center; padding: 3.5rem 1rem;
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+        .empty-state .material-symbols-outlined { font-size: 3rem; display: block; margin-bottom: 0.75rem; opacity: 0.35; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.75rem 1.1rem;
+            font-size: 0.83rem; color: var(--text); z-index: 2000;
+            display: none; align-items: center; gap: 0.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show { display: flex; }
+        .toast.success { border-color: var(--success); }
+        .toast.error   { border-color: var(--danger);  }
+
+        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity: 0.5; } 50%{ opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+    <div>
+        <h1>Course Overview</h1>
+        <p>Your enrolled courses. Use an enrollment key to join a new course.</p>
+    </div>
+</div>
+
+<!-- ── Enroll in a Course ─────────────────────────────────────────────────── -->
+<div class="enroll-card">
+    <div class="enroll-card-icon">
+        <span class="material-symbols-outlined">vpn_key</span>
+    </div>
+    <div class="enroll-card-text">
+        <h3>Enroll in a Course</h3>
+        <p>Enter the enrollment key your instructor provided</p>
+    </div>
+    <div class="enroll-input-row">
+        <input type="text" id="enrollKey" class="enroll-key-input" placeholder="XXXX-XXXX" maxlength="9" autocomplete="off" spellcheck="false">
+        <button class="btn btn-primary" onclick="joinClassroom()" id="joinBtn">
+            <span class="material-symbols-outlined" style="font-size:1rem;">login</span>
+            Enroll
+        </button>
+    </div>
+</div>
+
+<!-- ── My Courses ─────────────────────────────────────────────────────────── -->
+<p class="section-title">My Courses</p>
+<div class="course-grid" id="classroomGrid">
+    <div class="course-card" style="min-height:220px;">
+        <div style="height:110px;background:var(--bg-surface);"></div>
+        <div class="course-body"><div class="skeleton-line" style="width:65%"></div><div class="skeleton-line" style="width:40%"></div></div>
+    </div>
+    <div class="course-card" style="min-height:220px;">
+        <div style="height:110px;background:var(--bg-surface);"></div>
+        <div class="course-body"><div class="skeleton-line" style="width:55%"></div><div class="skeleton-line" style="width:35%"></div></div>
+    </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toastIcon">info</span>
+    <span id="toastMsg">—</span>
+</div>
+
+<script>window.SIDEBAR_PAGE = 'classrooms';</script>
+<script src="../js/sidebar.js"></script>
+<script>
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!user.id) { location.href = 'login.html'; }
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadClassrooms();
+
+    // Auto-format enrollment key  XXXX-XXXX
+    const keyInput = document.getElementById('enrollKey');
+    keyInput.addEventListener('input', () => {
+        let v = keyInput.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+        if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4,8);
+        keyInput.value = v;
+    });
+    keyInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') joinClassroom();
+    });
+});
+
+async function loadClassrooms() {
+    try {
+        const res  = await fetch(`${API}/classrooms/enrolled`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        renderGrid(data.classrooms || data || []);
+    } catch {
+        renderGrid([]);
+    }
+}
+
+// Banner colours per language (Moodle-style)
+const BANNER = {
+    python:     { from: '#1a3a5c', to: '#2e6da4' },
+    javascript: { from: '#3b2f00', to: '#7a6200' },
+    java:       { from: '#3a1500', to: '#7a3000' },
+    cpp:        { from: '#132840', to: '#2a5080' },
+    default:    { from: '#1e1045', to: '#4c1d95' },
+};
+
+function renderGrid(classrooms) {
+    const grid = document.getElementById('classroomGrid');
+    if (!classrooms.length) {
+        grid.innerHTML = `<div class="empty-state">
+            <span class="material-symbols-outlined">school</span>
+            <strong style="color:var(--text);display:block;margin-bottom:0.4rem;">No courses yet</strong>
+            Enter an enrollment key above to join your first course.
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = classrooms.map(c => {
+        const lang    = (c.language || c.subject || 'python').toLowerCase();
+        const bKey    = BANNER[lang] ? lang : 'default';
+        const { from, to } = BANNER[bKey];
+        const count   = c.student_count || c.studentCount || 0;
+        const lessons = c.lesson_count  || c.lessonCount  || 0;
+        const faculty = c.facultyName   || c.faculty_name || 'Instructor';
+        const desc    = c.description   || c.subject      || '';
+        const id      = c.classroom_id  || c.id;
+
+        return `
+        <div class="course-card">
+            <div class="course-banner" style="background:linear-gradient(135deg,${from},${to});">
+                <div class="course-banner-pattern"></div>
+                <span class="course-banner-lang">${lang}</span>
+                <span class="course-banner-code">${esc(c.name)}</span>
+            </div>
+            <div class="course-body">
+                ${desc ? `<div class="course-desc">${esc(desc)}</div>` : ''}
+                <div class="course-divider"></div>
+                <div class="course-meta">
+                    <div class="course-meta-row">
+                        <span class="material-symbols-outlined">person</span>
+                        ${esc(faculty)}
+                    </div>
+                    <div class="course-meta-row">
+                        <span class="material-symbols-outlined">group</span>
+                        ${count} student${count !== 1 ? 's' : ''}
+                        ${lessons ? `&nbsp;·&nbsp;<span class="material-symbols-outlined">menu_book</span>${lessons} lesson${lessons !== 1 ? 's' : ''}` : ''}
+                    </div>
+                </div>
+                <a href="classroom_room.html?id=${id}" class="course-enter-btn">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Open Course
+                </a>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function joinClassroom() {
+    const key = document.getElementById('enrollKey').value.trim();
+    if (key.replace('-','').length < 8) {
+        showToast('Please enter a valid 8-character enrollment key', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('joinBtn');
+    btn.disabled = true;
+    btn.textContent = 'Joining…';
+
+    try {
+        const res  = await fetch(`${API}/classrooms/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ enrollmentKey: key })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to join');
+        document.getElementById('enrollKey').value = '';
+        showToast(`Enrolled in "${data.classroom?.name || 'course'}" successfully!`, 'success');
+        loadClassrooms();
+    } catch (err) {
+        showToast(err.message || 'Could not join classroom', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">meeting_room</span> Join`;
+    }
+}
+
+function showToast(msg, type = 'info') {
+    const t  = document.getElementById('toast');
+    const ic = document.getElementById('toastIcon');
+    document.getElementById('toastMsg').textContent = msg;
+    ic.textContent = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

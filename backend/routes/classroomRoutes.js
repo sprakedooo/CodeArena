@@ -83,6 +83,20 @@ function isEnrolled(classroomId, studentId) {
     return mockEnrollments.some(e => e.classroomId === classroomId && e.studentId === studentId && e.status === 'active');
 }
 
+// DB-aware enrollment check — returns true if enrolled (checks DB first, falls back to mock)
+async function checkEnrolled(classroomId, studentId) {
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query(
+                `SELECT 1 FROM classroom_enrollments WHERE classroom_id = ? AND student_id = ? AND status = 'active'`,
+                [classroomId, studentId]
+            );
+            return rows.length > 0;
+        } catch { /* fall through to mock */ }
+    }
+    return isEnrolled(classroomId, studentId);
+}
+
 function classroomBelongsTo(classroomId, facultyId) {
     return mockClassrooms.some(c => c.id === classroomId && c.facultyId === facultyId);
 }
@@ -293,7 +307,8 @@ router.delete('/:id', async (req, res) => {
 // POST /api/classrooms/join — Enroll with key
 router.post('/join', async (req, res) => {
     cacheUser(req); // always cache the student's identity
-    const { enrollmentKey } = req.body;
+    console.log('[JOIN] body:', req.body, '| user:', req.user?.id);
+    const enrollmentKey = (req.body.enrollmentKey || req.body.enrollment_key || '').toString().trim().toUpperCase();
     const studentId = req.user.id;
     if (!enrollmentKey) return res.status(400).json({ success: false, message: 'Enrollment key is required' });
 
@@ -301,7 +316,7 @@ router.post('/join', async (req, res) => {
         try {
             const classrooms = await db.query(
                 'SELECT * FROM classrooms WHERE enrollment_key = ? AND is_active = TRUE',
-                [enrollmentKey.toUpperCase()]
+                [enrollmentKey]
             );
             if (!classrooms.length) return res.status(404).json({ success: false, message: 'Invalid or expired enrollment key' });
             const classroom = classrooms[0];
@@ -324,7 +339,7 @@ router.post('/join', async (req, res) => {
         }
     }
 
-    const classroom = mockClassrooms.find(c => c.enrollmentKey === enrollmentKey.toUpperCase() && c.isActive);
+    const classroom = mockClassrooms.find(c => c.enrollmentKey === enrollmentKey && c.isActive);
     if (!classroom) return res.status(404).json({ success: false, message: 'Invalid or expired enrollment key' });
 
     const existing = mockEnrollments.find(e => e.classroomId === classroom.id && e.studentId === studentId);
@@ -369,7 +384,7 @@ router.get('/:id/students', async (req, res) => {
                  JOIN users u ON u.user_id = e.student_id
                  LEFT JOIN progress p ON p.user_id = u.user_id
                  WHERE e.classroom_id = ? AND e.status = 'active'
-                 ORDER BY u.total_points DESC`,
+                 ORDER BY u.total_xp DESC`,
                 [classroomId]
             );
             return res.json({ success: true, students: rows, source: 'database' });
@@ -446,16 +461,19 @@ router.post('/:id/lessons', async (req, res) => {
 // GET /api/classrooms/:id/lessons
 router.get('/:id/lessons', async (req, res) => {
     const classroomId = parseInt(req.params.id);
-    const userId = req.user.id;
-    const isFaculty = req.user.role === 'faculty';
-
-    // Students must be enrolled
-    if (!isFaculty && !isEnrolled(classroomId, userId)) {
-        return res.status(403).json({ success: false, message: 'You are not enrolled in this classroom' });
-    }
+    const userId      = req.user.id;
+    const isFaculty   = req.user.role === 'faculty';
 
     if (dbService.isDbAvailable()) {
         try {
+            // Check enrollment via DB (not mock cache)
+            if (!isFaculty) {
+                const enrollment = await db.query(
+                    `SELECT 1 FROM classroom_enrollments WHERE classroom_id = ? AND student_id = ? AND status = 'active'`,
+                    [classroomId, userId]
+                );
+                if (!enrollment.length) return res.status(403).json({ success: false, message: 'You are not enrolled in this classroom' });
+            }
             const rows = await db.query(
                 'SELECT * FROM classroom_lessons WHERE classroom_id = ? ORDER BY order_index ASC, created_at ASC',
                 [classroomId]
@@ -464,6 +482,10 @@ router.get('/:id/lessons', async (req, res) => {
         } catch (err) { console.error(err); }
     }
 
+    // Mock fallback — check in-memory enrollment
+    if (!isFaculty && !isEnrolled(classroomId, userId)) {
+        return res.status(403).json({ success: false, message: 'You are not enrolled in this classroom' });
+    }
     const lessons = mockClLessons.filter(l => l.classroomId === classroomId).sort((a, b) => a.orderIndex - b.orderIndex);
     res.json({ success: true, lessons, source: 'mock' });
 });
@@ -540,7 +562,7 @@ router.post('/:id/questions', async (req, res) => {
 router.get('/:id/questions', async (req, res) => {
     const classroomId = parseInt(req.params.id);
     const isFaculty = req.user.role === 'faculty';
-    if (!isFaculty && !isEnrolled(classroomId, req.user.id)) return res.status(403).json({ success: false, message: 'Not enrolled' });
+    if (!isFaculty && !(await checkEnrolled(classroomId, req.user.id))) return res.status(403).json({ success: false, message: 'Not enrolled' });
 
     if (dbService.isDbAvailable()) {
         try {
@@ -620,27 +642,38 @@ router.post('/:id/questions/generate', async (req, res) => {
 // GAME SESSIONS
 // ═════════════════════════════════════════════════════════════════════════════
 
-// POST /api/classrooms/:id/sessions — Create session
+// POST /api/classrooms/:id/sessions — Create (and optionally activate) session
 router.post('/:id/sessions', async (req, res) => {
     if (!requireFacultyRole(req, res)) return;
     const classroomId = parseInt(req.params.id);
-    const { title, gameMode, questionIds } = req.body;
+    const title       = req.body.title;
+    const gameMode    = req.body.gameMode    || req.body.game_mode    || 'mcq';
+    const questionIds = req.body.questionIds || req.body.question_ids || [];
+    const status      = req.body.status;
     if (!title) return res.status(400).json({ success: false, message: 'Session title is required' });
+
+    const initialStatus = ['active','pending','closed'].includes(status) ? status : 'pending';
 
     if (dbService.isDbAvailable()) {
         try {
             await ensureUserInDb(req.user);
             const result = await db.query(
-                'INSERT INTO classroom_sessions (classroom_id, faculty_id, title, game_mode, question_ids) VALUES (?, ?, ?, ?, ?)',
-                [classroomId, req.user.id, title, gameMode || 'mcq', JSON.stringify(questionIds || [])]
+                'INSERT INTO classroom_sessions (classroom_id, faculty_id, title, game_mode, question_ids, status) VALUES (?, ?, ?, ?, ?, ?)',
+                [classroomId, req.user.id, title, gameMode || 'mcq', JSON.stringify(questionIds || []), initialStatus]
             );
-            return res.status(201).json({ success: true, sessionId: result.insertId, source: 'database' });
+            const sessionId = result.insertId;
+            return res.status(201).json({
+                success: true,
+                session: { session_id: sessionId, classroom_id: classroomId, title, game_mode: gameMode || 'mcq', status: initialStatus },
+                sessionId,
+                source: 'database'
+            });
         } catch (err) { console.error(err); }
     }
 
-    const session = { id: _nextId.se++, classroomId, facultyId: req.user.id, title, gameMode: gameMode || 'mcq', questionIds: questionIds || [], status: 'pending', createdAt: new Date().toISOString() };
+    const session = { id: _nextId.se++, session_id: _nextId.se - 1, classroomId, facultyId: req.user.id, title, gameMode: gameMode || 'mcq', questionIds: questionIds || [], status: initialStatus, createdAt: new Date().toISOString() };
     mockClSessions.push(session);
-    res.status(201).json({ success: true, session, source: 'mock' });
+    res.status(201).json({ success: true, session, sessionId: session.id, source: 'mock' });
 });
 
 // GET /api/classrooms/:id/sessions — List sessions
@@ -658,7 +691,7 @@ router.get('/:id/sessions', async (req, res) => {
     res.json({ success: true, sessions, source: 'mock' });
 });
 
-// GET /api/classrooms/:id/sessions/active — Active session for students
+// GET /api/classrooms/:id/sessions/active — Active session for students (includes questions)
 router.get('/:id/sessions/active', async (req, res) => {
     const classroomId = parseInt(req.params.id);
 
@@ -668,12 +701,59 @@ router.get('/:id/sessions/active', async (req, res) => {
                 'SELECT * FROM classroom_sessions WHERE classroom_id = ? AND status = "active" LIMIT 1',
                 [classroomId]
             );
-            return res.json({ success: true, session: rows[0] || null, source: 'database' });
-        } catch (err) { console.error(err); }
+            if (!rows.length) return res.json({ success: true, session: null, questions: [], source: 'database' });
+
+            const session = rows[0];
+
+            // mysql2 auto-parses JSON columns — handle both already-parsed arrays and raw strings
+            let qIds = session.question_ids;
+            if (typeof qIds === 'string') { try { qIds = JSON.parse(qIds); } catch { qIds = []; } }
+            if (!Array.isArray(qIds)) qIds = [];
+
+            let questions = [];
+            if (qIds.length) {
+                // Fetch only the selected questions
+                const placeholders = qIds.map(() => '?').join(',');
+                questions = await db.query(
+                    `SELECT * FROM classroom_questions WHERE question_id IN (${placeholders})`,
+                    qIds
+                );
+                // Preserve the faculty-chosen order
+                const orderMap = {};
+                qIds.forEach((id, i) => { orderMap[id] = i; });
+                questions.sort((a, b) => (orderMap[a.question_id] ?? 99) - (orderMap[b.question_id] ?? 99));
+            } else {
+                // No specific IDs chosen — use all questions for this classroom
+                questions = await db.query(
+                    'SELECT * FROM classroom_questions WHERE classroom_id = ? ORDER BY question_id',
+                    [classroomId]
+                );
+            }
+
+            // Normalise options: mysql2 auto-parses JSON columns, but guard against strings/nulls
+            questions = questions.map(q => {
+                let options = q.options;
+                if (typeof options === 'string') { try { options = JSON.parse(options); } catch { options = []; } }
+                if (!Array.isArray(options)) options = [];
+                return { ...q, options, question_id: q.question_id };
+            });
+
+            return res.json({ success: true, session, questions, source: 'database' });
+        } catch (err) { console.error('DB active session error:', err); }
     }
 
+    // ── Mock fallback ─────────────────────────────────────────────────────────
     const session = mockClSessions.find(s => s.classroomId === classroomId && s.status === 'active') || null;
-    res.json({ success: true, session, source: 'mock' });
+    if (!session) return res.json({ success: true, session: null, questions: [], source: 'mock' });
+
+    let questions = [];
+    const qIds = session.questionIds || [];
+    if (qIds.length) {
+        questions = mockClQuestions.filter(q => qIds.includes(q.id));
+    } else {
+        questions = mockClQuestions.filter(q => q.classroomId === classroomId);
+    }
+    res.json({ success: true, session, questions, source: 'mock' });
 });
 
 // PATCH /api/classrooms/:id/sessions/:sid — Start or close session
@@ -787,24 +867,35 @@ router.get('/:id/leaderboard', async (req, res) => {
 
     if (dbService.isDbAvailable()) {
         try {
-            const params = sessionId ? [sessionId] : [];
-            const whereSession = sessionId ? 'WHERE ca.session_id = ?' : '';
-            const rows = await db.query(
-                `SELECT u.user_id AS id, u.full_name AS fullName,
-                        SUM(ca.points_earned) AS totalPoints,
-                        COUNT(ca.answer_id) AS answered,
-                        SUM(ca.is_correct) AS correct
-                 FROM classroom_answers ca
-                 JOIN classroom_sessions cs ON cs.session_id = ca.session_id
-                 JOIN users u ON u.user_id = ca.student_id
-                 ${whereSession}
-                 AND cs.classroom_id = ?
-                 GROUP BY ca.student_id
-                 ORDER BY totalPoints DESC`,
-                [...params, classroomId]
-            );
+            let sql, params;
+            if (sessionId) {
+                sql = `SELECT u.user_id AS id, u.full_name AS fullName,
+                              SUM(ca.points_earned) AS totalPoints,
+                              COUNT(ca.answer_id) AS answered,
+                              SUM(ca.is_correct) AS correct
+                       FROM classroom_answers ca
+                       JOIN classroom_sessions cs ON cs.session_id = ca.session_id
+                       JOIN users u ON u.user_id = ca.student_id
+                       WHERE ca.session_id = ? AND cs.classroom_id = ?
+                       GROUP BY ca.student_id
+                       ORDER BY totalPoints DESC`;
+                params = [sessionId, classroomId];
+            } else {
+                sql = `SELECT u.user_id AS id, u.full_name AS fullName,
+                              SUM(ca.points_earned) AS totalPoints,
+                              COUNT(ca.answer_id) AS answered,
+                              SUM(ca.is_correct) AS correct
+                       FROM classroom_answers ca
+                       JOIN classroom_sessions cs ON cs.session_id = ca.session_id
+                       JOIN users u ON u.user_id = ca.student_id
+                       WHERE cs.classroom_id = ?
+                       GROUP BY ca.student_id
+                       ORDER BY totalPoints DESC`;
+                params = [classroomId];
+            }
+            const rows = await db.query(sql, params);
             return res.json({ success: true, leaderboard: rows, source: 'database' });
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error('Leaderboard error:', err); }
     }
 
     // Mock leaderboard from in-memory answers
