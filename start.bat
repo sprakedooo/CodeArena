@@ -4,6 +4,11 @@ echo    CODEARENA - Starting All Servers
 echo ================================================================
 echo.
 
+:: Kill any existing Node.js processes on ports 3000/3001
+echo Stopping any existing server processes...
+for /f "tokens=5" %%a in ('netstat -ano 2^>nul ^| findstr ":3000 " ^| findstr LISTENING') do taskkill /PID %%a /F >nul 2>&1
+for /f "tokens=5" %%a in ('netstat -ano 2^>nul ^| findstr ":3001 " ^| findstr LISTENING') do taskkill /PID %%a /F >nul 2>&1
+
 :: Install backend dependencies if needed
 if not exist "backend\node_modules" (
     echo Installing backend dependencies...

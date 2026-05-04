@@ -339,7 +339,7 @@ app.get('/', (req, res) => {
 // SECTION 6: START THE SERVER
 // ─────────────────────────────────────────────────────────────────────────────
 
-app.listen(PORT, '0.0.0.0', async () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
     console.log('╔════════════════════════════════════════════════════════════╗');
     console.log('║   CODEARENA - AI-POWERED ADAPTIVE LEARNING SYSTEM         ║');
     console.log('╠════════════════════════════════════════════════════════════╣');
@@ -361,4 +361,16 @@ app.listen(PORT, '0.0.0.0', async () => {
     console.log('║             Points & Badges | AI Hints | ML Predictions    ║');
     console.log('║             Decision Tree Model | Progress Tracking        ║');
     console.log('╚════════════════════════════════════════════════════════════╝');
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌  Port ${PORT} is already in use.`);
+        console.error(`   Another backend process may still be running.`);
+        console.error(`   Fix: open Task Manager → find "node.exe" → End Task`);
+        console.error(`   Or run:  taskkill /IM node.exe /F\n`);
+    } else {
+        console.error('Server error:', err);
+    }
+    process.exit(1);
 });
