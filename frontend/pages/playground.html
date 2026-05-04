@@ -9,7 +9,7 @@
         /* Widescreen container override */
         .container {
             max-width: 100%;
-            padding: 5vh 18%;
+            padding: 1.25rem 1.5rem;
         }
 
         /* Top Bar */
@@ -422,7 +422,7 @@
 
         @media (min-width: 901px) {
             #editor {
-                min-height: 400px;
+                min-height: 520px;
             }
         }
     </style>
@@ -532,8 +532,6 @@
 
         const user = JSON.parse(localStorage.getItem('user') || 'null');
         if (!user) window.location.href = 'login.html';
-
-        document.getElementById('navXP').textContent = (user.totalPoints || 0) + ' XP';
 
         function getAuthHeaders() {
             const headers = { 'Content-Type': 'application/json' };
