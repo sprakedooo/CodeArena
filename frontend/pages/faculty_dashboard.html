@@ -6,9 +6,15 @@
     <title>Faculty Dashboard – CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        .welcome-banner { margin-bottom: 1.75rem; }
-        .welcome-banner h1 { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
-        .welcome-banner p { color: var(--text-secondary); font-size: 0.88rem; }
+        .welcome-banner {
+            margin-bottom: 1.75rem;
+            background: linear-gradient(135deg, #1e1040 0%, #2d1b69 45%, #1a0d3d 100%);
+            border: 1px solid rgba(124, 58, 237, 0.35);
+            border-radius: 16px;
+            padding: 1.6rem 2rem;
+        }
+        .welcome-banner h1 { font-size: 1.55rem; font-weight: 700; color: #fff; margin-bottom: 0.3rem; }
+        .welcome-banner p { color: rgba(255,255,255,0.65); font-size: 0.88rem; }
 
         .section-title {
             font-size: 0.72rem; font-weight: 700;
@@ -333,7 +339,9 @@ if (user.role !== 'faculty') { location.href = 'dashboard.html'; }
 
 document.addEventListener('DOMContentLoaded', () => {
     const firstName = (user.fullName || user.name || 'Professor').split(' ')[0];
-    document.getElementById('welcomeMsg').textContent = `Welcome back, ${firstName}! 🎓`;
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('welcomeMsg').textContent = `${greet}, ${firstName}! 🎓`;
 
     loadClassrooms();
     loadInsights(false);

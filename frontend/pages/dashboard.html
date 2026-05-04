@@ -7,12 +7,18 @@
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         /* ── Welcome ─────────────────────────────────────────────────────── */
-        .welcome-banner { margin-bottom: 1.75rem; }
+        .welcome-banner {
+            margin-bottom: 1.75rem;
+            background: linear-gradient(135deg, #1e1040 0%, #2d1b69 45%, #1a0d3d 100%);
+            border: 1px solid rgba(124, 58, 237, 0.35);
+            border-radius: 16px;
+            padding: 1.6rem 2rem;
+        }
         .welcome-banner h1 {
             font-size: 1.55rem; font-weight: 700;
-            color: var(--text); margin-bottom: 0.3rem;
+            color: #fff; margin-bottom: 0.3rem;
         }
-        .welcome-banner p { color: var(--text-secondary); font-size: 0.88rem; }
+        .welcome-banner p { color: rgba(255,255,255,0.65); font-size: 0.88rem; }
 
         /* ── Section labels ─────────────────────────────────────────────── */
         .section-title {
@@ -316,10 +322,6 @@
         <div class="quick-card-icon qc-red"><span class="material-symbols-outlined" style="font-size:1.4rem;">sports_esports</span></div>
         <span class="quick-card-label">Play</span>
     </a>
-    <a href="leaderboard.html" class="quick-card">
-        <div class="quick-card-icon qc-gold"><span class="material-symbols-outlined" style="font-size:1.4rem;">emoji_events</span></div>
-        <span class="quick-card-label">Leaderboard</span>
-    </a>
 </div>
 
 <!-- ── Continue Learning + AI Recommends ──────────────────────────────────── -->
@@ -476,7 +478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) + ' · AI-powered';
 
     // ── Load in parallel
-    const [progressData] = await Promise.allSettled([
+    await Promise.allSettled([
         loadProgress(user.id, token),
     ]);
 
@@ -486,49 +488,88 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── Progress summary ──────────────────────────────────────────────────────────
 async function loadProgress(userId, token) {
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // Tier 1: full paths/progress endpoint (requires DB + learning_paths table)
     try {
-        const res = await fetch(`${API}/paths/progress/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error('no data');
+        const res = await fetch(`${API}/paths/progress/me`, { headers });
+        if (!res.ok) throw new Error('paths api unavailable');
         const data = await res.json();
 
-        // Stat strip
         document.getElementById('statXP').textContent      = (data.user?.total_xp || 0).toLocaleString();
         document.getElementById('statStreak').textContent  = (data.user?.streak    || 0) + ' 🔥';
         document.getElementById('statLessons').textContent = data.completedLessons || 0;
-
         const activePaths = (data.paths || []).filter(p => p.completed_count > 0).length;
         document.getElementById('statPaths').textContent = activePaths;
 
-        // Welcome subtitle
         const total = data.completedLessons || 0;
         document.getElementById('welcomeSub').textContent =
             total > 0
                 ? `You've completed ${total} lesson${total !== 1 ? 's' : ''} and earned ${(data.user?.total_xp || 0).toLocaleString()} XP. Keep going!`
                 : `Start your first lesson to begin earning XP and tracking your progress.`;
 
-        // Continue learning — find the first path with incomplete lessons
-        buildContinueCard(data.paths || [], data.user?.language);
-
-        // Path progress list
+        await buildContinueCard(data.paths || [], data.user?.language, token);
         buildPathList(data.paths || []);
-
-        // Weaknesses
         buildWeaknessList(data.weaknesses || []);
+        return;
+    } catch { /* fall through to tier 2 */ }
+
+    // Tier 2: fallback to basic progress + rewards endpoints (have mock data)
+    try {
+        const [progRes, rewardRes] = await Promise.all([
+            fetch(`${API}/progress/${userId}`, { headers }),
+            fetch(`${API}/rewards/${userId}`,  { headers }),
+        ]);
+
+        const prog   = progRes.ok   ? await progRes.json()   : {};
+        const reward = rewardRes.ok ? await rewardRes.json() : {};
+
+        const xp      = prog.total_xp   || reward.points || 0;
+        const streak  = prog.streak      || 0;
+        const lessons = prog.completed_lessons || 0;
+        const level   = prog.level       || 'beginner';
+
+        document.getElementById('statXP').textContent      = Number(xp).toLocaleString();
+        document.getElementById('statStreak').textContent  = streak + ' 🔥';
+        document.getElementById('statLessons').textContent = lessons;
+        document.getElementById('statPaths').textContent   = level !== 'beginner' ? '2' : '1';
+
+        document.getElementById('welcomeSub').textContent =
+            lessons > 0
+                ? `You've completed ${lessons} lesson${lessons !== 1 ? 's' : ''} and earned ${Number(xp).toLocaleString()} XP. Keep going!`
+                : `Start your first lesson to begin earning XP and tracking your progress.`;
+
+        // Build a synthetic path from progress data
+        const syntheticPath = [{
+            path_id: null,
+            title: `${capitalize(prog.language || 'Python')} Fundamentals`,
+            language: prog.language || 'python',
+            difficulty: level,
+            completed_count: lessons,
+            lesson_count: level === 'beginner' ? 6 : level === 'intermediate' ? 12 : 18,
+            progress_pct: Math.min(Math.round((lessons / 6) * 100), 100),
+            xp_earned: xp,
+            xp_reward: 20,
+            estimated_minutes: 10,
+            icon: 'code',
+        }];
+
+        await buildContinueCard(syntheticPath, prog.language, token);
+        buildPathList(syntheticPath);
+        buildWeaknessList([]);
 
     } catch (err) {
-        // Fallback: show defaults
+        console.error('loadProgress fallback failed:', err);
         ['statXP','statStreak','statLessons','statPaths'].forEach(id => {
-            document.getElementById(id).textContent = '0';
+            document.getElementById(id).textContent = '—';
         });
-        buildContinueCard([], null);
+        await buildContinueCard([], null, token);
         buildPathList([]);
         buildWeaknessList([]);
     }
 }
 
-function buildContinueCard(paths, language) {
+async function buildContinueCard(paths, language, token) {
     // Find path to continue: first one with progress < 100, prefer language match
     const sorted = [...paths].sort((a, b) => {
         const aMatch = language && a.language === language ? -1 : 0;
@@ -565,8 +606,7 @@ function buildContinueCard(paths, language) {
     btn.href = `learn.html?path=${path.path_id}`;
 
     // Try to find the exact next uncompleted lesson and deep-link to it
-    try {
-        const token = localStorage.getItem('token');
+    if (path.path_id) try {
         const res = await fetch(`${API}/paths/${path.path_id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });

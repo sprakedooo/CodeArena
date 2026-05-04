@@ -1,0 +1,9 @@
+# Ignore all compiler binaries (too large for git)
+# Re-download using setup_compilers.bat
+python/
+java/
+cpp/
+*.zip
+*.tar.gz
+*.exe
+!.gitignore
