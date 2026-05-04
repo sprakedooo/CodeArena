@@ -315,8 +315,8 @@ CREATE TABLE assignment_test_cases (
     test_case_id    INT AUTO_INCREMENT PRIMARY KEY,
     assignment_id   INT NOT NULL,
     label           VARCHAR(100) DEFAULT 'Test',
-    input           TEXT         DEFAULT '',
-    expected_output TEXT         DEFAULT '',
+    input           TEXT,
+    expected_output TEXT,
     is_hidden       BOOLEAN      DEFAULT FALSE,
     order_index     INT          DEFAULT 0,
     FOREIGN KEY (assignment_id) REFERENCES coding_assignments(assignment_id) ON DELETE CASCADE
