@@ -526,10 +526,14 @@ async function loadProgress(userId, token) {
         const prog   = progRes.ok   ? await progRes.json()   : {};
         const reward = rewardRes.ok ? await rewardRes.json() : {};
 
-        const xp      = prog.total_xp   || reward.points || 0;
-        const streak  = prog.streak      || 0;
-        const lessons = prog.completed_lessons || 0;
-        const level   = prog.level       || 'beginner';
+        // progress route: { overall:{ totalQuestions, totalCorrect }, byLanguage:{} }
+        // rewards route:  { rewards:{ totalPoints, currentLevel, ... } }
+        const rw      = reward.rewards || {};
+        const xp      = rw.totalPoints  || 0;
+        const level   = rw.currentLevel || 'beginner';
+        const streak  = prog.streak     || 0;   // streak lives on user record
+        // Use totalCorrect as a proxy for "answers given" until lesson_progress exists
+        const lessons = prog.overall?.totalCorrect || prog.completed_lessons || 0;
 
         document.getElementById('statStreak').textContent  = streak + ' 🔥';
         document.getElementById('statLessons').textContent = lessons;
