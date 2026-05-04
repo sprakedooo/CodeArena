@@ -56,6 +56,7 @@ CREATE TABLE users (
     current_path_id INT DEFAULT NULL,
     total_xp        INT DEFAULT 0,
     streak          INT DEFAULT 0,
+    google_id       VARCHAR(255) DEFAULT NULL,
     last_activity_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
