@@ -262,6 +262,18 @@
     <h1 id="welcomeMsg">Welcome back! 👋</h1>
     <p id="welcomeSub">Ready to level up your programming skills today?</p>
 </div>
+<script>
+// Set greeting immediately (synchronous, no flash)
+(function(){
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    const name = u.fullName || u.full_name || u.name || '';
+    const first = name.split(' ')[0] || 'there';
+    const h = new Date().getHours();
+    const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    const el = document.getElementById('welcomeMsg');
+    if (el) el.textContent = greet + ', ' + first + '! 👋';
+})();
+</script>
 
 <!-- ── Stat Strip ──────────────────────────────────────────────────────────── -->
 <div class="stat-strip">
@@ -340,7 +352,7 @@
         </div>
         <a id="continueLessonBtn" href="learn.html" class="btn btn-primary" style="width:100%;justify-content:center;font-size:0.82rem;">
             <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
-            Continue Lesson
+            Continue
         </a>
     </div>
 
@@ -458,10 +470,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
     if (!user.id) { location.href = 'login.html'; return; }
 
-    // ── Greeting
+    // ── Greeting (already set synchronously above, but refresh here too)
     const hour      = new Date().getHours();
     const greet     = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-    const firstName = (user.fullName || user.name || 'Student').split(' ')[0];
+    const firstName = (user.fullName || user.full_name || user.name || 'Student').split(' ')[0];
     document.getElementById('welcomeMsg').textContent = `${greet}, ${firstName}! 👋`;
 
     // ── Date for challenge
@@ -559,12 +571,70 @@ async function loadProgress(userId, token) {
 }
 
 async function buildContinueCard(paths, language, token) {
-    // Find path to continue: first one with progress < 100, prefer language match
+    const btn = document.getElementById('continueLessonBtn');
+
+    // ── Priority 1: last visited lesson or blog/course (from localStorage) ──────
+    try {
+        const lv = JSON.parse(localStorage.getItem('lastVisited') || 'null');
+        // Consider "recent" if visited in the last 30 days
+        if (lv && lv.title && lv.url && (Date.now() - lv.visitedAt) < 30 * 24 * 60 * 60 * 1000) {
+            const typeIcon = lv.type === 'blog'   ? 'article'  :
+                             lv.type === 'course' ? 'school'   : 'play_circle';
+            const typeLabel = lv.type === 'blog'   ? 'Blog Post' :
+                              lv.type === 'course' ? 'Course'    : 'Lesson';
+            const langLabel = lv.language ? capitalize(lv.language) : null;
+            const timeSince = formatTimeSince(lv.visitedAt);
+
+            document.getElementById('continuePathName').textContent =
+                lv.type === 'lesson' ? 'Pick up where you left off' :
+                lv.type === 'blog'   ? 'Recently read'              : 'Continue course';
+
+            document.getElementById('continueLessonBlock').innerHTML = `
+                <div class="continue-lesson-title" style="display:flex;align-items:flex-start;gap:0.5rem;">
+                    <span class="material-symbols-outlined ms-icon" style="color:var(--primary);font-size:1.1rem;margin-top:2px;">${typeIcon}</span>
+                    <span>${esc(lv.title)}</span>
+                </div>
+                <div class="continue-lesson-meta">
+                    <span style="background:rgba(124,58,237,0.12);color:#a78bfa;padding:0.15rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:700;">${typeLabel}</span>
+                    ${langLabel ? `<span><span class="material-symbols-outlined ms-icon">code</span>${langLabel}</span>` : ''}
+                    ${lv.mins ? `<span><span class="material-symbols-outlined ms-icon">schedule</span>${lv.mins} min</span>` : ''}
+                    <span style="margin-left:auto;opacity:0.6;">${timeSince}</span>
+                </div>`;
+
+            // Update progress bar if it's a lesson with path data
+            if (lv.type === 'lesson' && lv.pathId) {
+                try {
+                    const pr = await fetch(`${API}/paths/${lv.pathId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (pr.ok) {
+                        const pd = await pr.json();
+                        const lessons = pd.lessons || [];
+                        const done  = lessons.filter(l => l.progress_status === 'completed').length;
+                        const total = lessons.length;
+                        const pct   = total ? Math.round(done / total * 100) : 0;
+                        document.getElementById('continuePathName').textContent = esc(pd.path?.title || 'Pick up where you left off');
+                        document.getElementById('continueProgressFill').style.width = pct + '%';
+                        document.getElementById('continueProgressPct').textContent  = pct;
+                    }
+                } catch { /* non-fatal */ }
+            } else {
+                document.getElementById('continueProgressFill').style.width = '0%';
+                document.getElementById('continueProgressPct').textContent  = '—';
+            }
+
+            btn.href = lv.url;
+            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">${typeIcon}</span>
+                Continue ${typeLabel}`;
+            return;
+        }
+    } catch { /* fall through to path-based logic */ }
+
+    // ── Priority 2: path progress data ──────────────────────────────────────────
     const sorted = [...paths].sort((a, b) => {
         const aMatch = language && a.language === language ? -1 : 0;
         const bMatch = language && b.language === language ? -1 : 0;
         if (aMatch !== bMatch) return aMatch - bMatch;
-        // prefer in-progress over not started
         const aStarted = a.completed_count > 0 ? -1 : 0;
         const bStarted = b.completed_count > 0 ? -1 : 0;
         return aStarted - bStarted;
@@ -582,16 +652,8 @@ async function buildContinueCard(paths, language, token) {
     document.getElementById('continueProgressFill').style.width = path.progress_pct + '%';
     document.getElementById('continueProgressPct').textContent  = path.progress_pct;
 
-    const next = path.completed_count + 1;
-    const total = path.lesson_count || '?';
-    document.getElementById('continueLessonBlock').innerHTML = `
-        <div class="continue-lesson-title">Lesson ${next} of ${total}</div>
-        <div class="continue-lesson-meta">
-            <span><span class="material-symbols-outlined ms-icon">schedule</span>${path.estimated_minutes || 10} min</span>
-        </div>`;
-
-    const btn = document.getElementById('continueLessonBtn');
     btn.href = `learn.html?path=${path.path_id}`;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span> Continue Lesson`;
 
     // Try to find the exact next uncompleted lesson and deep-link to it
     if (path.path_id) try {
@@ -608,9 +670,28 @@ async function buildContinueCard(paths, language, token) {
                     <div class="continue-lesson-meta">
                         <span><span class="material-symbols-outlined ms-icon">schedule</span>${nextLesson.estimated_minutes || 5} min</span>
                     </div>`;
+            } else {
+                document.getElementById('continueLessonBlock').innerHTML = `
+                    <div class="continue-lesson-title">Lesson ${(path.completed_count||0) + 1} of ${path.lesson_count || '?'}</div>
+                    <div class="continue-lesson-meta">
+                        <span><span class="material-symbols-outlined ms-icon">schedule</span>${path.estimated_minutes || 10} min</span>
+                    </div>`;
             }
         }
     } catch { /* keep fallback href */ }
+}
+
+function formatTimeSince(ts) {
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)   return 'Just now';
+    if (mins < 60)  return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24)   return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    if (days < 7)   return `${days} days ago`;
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function buildPathList(paths) {

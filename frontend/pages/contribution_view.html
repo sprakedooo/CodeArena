@@ -371,6 +371,19 @@ async function load() {
 // ── Header render ─────────────────────────────────────────────────────────────
 function render(c) {
     document.title = `${c.title} – CodeArena`;
+
+    // Track last visited for dashboard "Continue Learning"
+    try {
+        localStorage.setItem('lastVisited', JSON.stringify({
+            type:      c.type === 'blog' ? 'blog' : 'course',
+            id:        c.contribution_id || id,
+            title:     c.title,
+            author:    c.author_name || '',
+            language:  c.language || '',
+            url:       `contribution_view.html?id=${c.contribution_id || id}`,
+            visitedAt: Date.now()
+        }));
+    } catch (_) {}
     const authorInitials = (c.author_name || 'F').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     const tags = (c.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
 
