@@ -362,6 +362,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         renderLesson(token);
 
+        // Track last visited for dashboard "Continue Learning"
+        try {
+            localStorage.setItem('lastVisited', JSON.stringify({
+                type:      'lesson',
+                id:        lessonData.lesson_id,
+                title:     lessonData.title,
+                pathId:    lessonData.path_id,
+                language:  lessonData.language || '',
+                mins:      lessonData.estimated_minutes || 5,
+                url:       `lesson_view.html?id=${lessonData.lesson_id}`,
+                visitedAt: Date.now()
+            }));
+        } catch (_) {}
+
         // Mark as in_progress (non-blocking)
         fetch(`${API}/paths/lesson/${lessonId}/start`, {
             method: 'POST',
