@@ -17,7 +17,7 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = 8080;
+const PORT = 3001;
 
 // Serve static files from frontend directory
 app.use('/css',    express.static(path.join(__dirname, 'css')));
