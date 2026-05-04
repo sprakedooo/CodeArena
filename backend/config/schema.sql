@@ -18,6 +18,11 @@ DROP TABLE IF EXISTS submissions;
 DROP TABLE IF EXISTS lesson_progress;
 DROP TABLE IF EXISTS path_lessons;
 DROP TABLE IF EXISTS learning_paths;
+DROP TABLE IF EXISTS assignment_submissions;
+DROP TABLE IF EXISTS assignment_test_cases;
+DROP TABLE IF EXISTS coding_assignments;
+DROP TABLE IF EXISTS announcement_comments;
+DROP TABLE IF EXISTS classroom_announcements;
 DROP TABLE IF EXISTS announcements;
 DROP TABLE IF EXISTS classroom_answers;
 DROP TABLE IF EXISTS classroom_sessions;
@@ -146,6 +151,7 @@ CREATE TABLE classrooms (
     subject        VARCHAR(100),
     language       VARCHAR(50) DEFAULT 'python',
     enrollment_key VARCHAR(20) UNIQUE NOT NULL,
+    banner_image   TEXT DEFAULT NULL,
     is_active      BOOLEAN DEFAULT TRUE,
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (faculty_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -255,30 +261,85 @@ CREATE TABLE submissions (
 );
 
 -- ============================================================================
--- ANNOUNCEMENTS
+-- CLASSROOM ANNOUNCEMENTS  (Stream tab — faculty posts)
 -- ============================================================================
-CREATE TABLE announcements (
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    classroom_id INT NOT NULL,
-    author_id    INT NOT NULL,
-    title        VARCHAR(255),
-    message      TEXT NOT NULL,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE classroom_announcements (
+    announcement_id INT AUTO_INCREMENT PRIMARY KEY,
+    classroom_id    INT NOT NULL,
+    faculty_id      INT NOT NULL,
+    body            TEXT NOT NULL,
+    link_url        VARCHAR(500) DEFAULT '',
+    link_label      VARCHAR(200) DEFAULT '',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (classroom_id) REFERENCES classrooms(classroom_id) ON DELETE CASCADE,
-    FOREIGN KEY (author_id)    REFERENCES users(user_id)           ON DELETE CASCADE
+    FOREIGN KEY (faculty_id)   REFERENCES users(user_id)           ON DELETE CASCADE
 );
 
 -- ============================================================================
 -- ANNOUNCEMENT COMMENTS
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS announcement_comments (
+CREATE TABLE announcement_comments (
     comment_id       INT AUTO_INCREMENT PRIMARY KEY,
     announcement_id  INT NOT NULL,
     user_id          INT NOT NULL,
     body             TEXT NOT NULL,
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (announcement_id) REFERENCES announcements(id)          ON DELETE CASCADE,
-    FOREIGN KEY (user_id)         REFERENCES users(user_id)              ON DELETE CASCADE
+    FOREIGN KEY (announcement_id) REFERENCES classroom_announcements(announcement_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id)         REFERENCES users(user_id)                           ON DELETE CASCADE
+);
+
+-- ============================================================================
+-- CODING ASSIGNMENTS
+-- ============================================================================
+CREATE TABLE coding_assignments (
+    assignment_id  INT AUTO_INCREMENT PRIMARY KEY,
+    classroom_id   INT NOT NULL,
+    faculty_id     INT NOT NULL,
+    title          VARCHAR(255) NOT NULL,
+    description    TEXT,
+    language       VARCHAR(50)  DEFAULT 'python',
+    starter_code   LONGTEXT,
+    max_points     INT          DEFAULT 100,
+    scoring_mode   ENUM('per_test','all_or_nothing') DEFAULT 'per_test',
+    deadline       TIMESTAMP    NULL,
+    status         ENUM('draft','published') DEFAULT 'published',
+    created_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (classroom_id) REFERENCES classrooms(classroom_id) ON DELETE CASCADE,
+    FOREIGN KEY (faculty_id)   REFERENCES users(user_id)           ON DELETE CASCADE
+);
+
+-- ============================================================================
+-- ASSIGNMENT TEST CASES
+-- ============================================================================
+CREATE TABLE assignment_test_cases (
+    test_case_id    INT AUTO_INCREMENT PRIMARY KEY,
+    assignment_id   INT NOT NULL,
+    label           VARCHAR(100) DEFAULT 'Test',
+    input           TEXT         DEFAULT '',
+    expected_output TEXT         DEFAULT '',
+    is_hidden       BOOLEAN      DEFAULT FALSE,
+    order_index     INT          DEFAULT 0,
+    FOREIGN KEY (assignment_id) REFERENCES coding_assignments(assignment_id) ON DELETE CASCADE
+);
+
+-- ============================================================================
+-- ASSIGNMENT SUBMISSIONS
+-- ============================================================================
+CREATE TABLE assignment_submissions (
+    submission_id      INT AUTO_INCREMENT PRIMARY KEY,
+    assignment_id      INT NOT NULL,
+    student_id         INT NOT NULL,
+    code               LONGTEXT NOT NULL,
+    language           VARCHAR(50) NOT NULL,
+    test_results       JSON,
+    passed_tests       INT DEFAULT 0,
+    total_tests        INT DEFAULT 0,
+    score              INT DEFAULT 0,
+    execution_time_ms  INT DEFAULT 0,
+    submitted_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_assign_student (assignment_id, student_id),
+    FOREIGN KEY (assignment_id) REFERENCES coding_assignments(assignment_id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id)    REFERENCES users(user_id)                    ON DELETE CASCADE
 );
 
 -- ============================================================================
@@ -400,7 +461,12 @@ CREATE INDEX idx_progress_user        ON progress(user_id);
 CREATE INDEX idx_classrooms_faculty   ON classrooms(faculty_id);
 CREATE INDEX idx_enrollments_classroom ON classroom_enrollments(classroom_id);
 CREATE INDEX idx_enrollments_student  ON classroom_enrollments(student_id);
-CREATE INDEX idx_announcements_room   ON announcements(classroom_id);
+CREATE INDEX idx_announcements_room       ON classroom_announcements(classroom_id);
+CREATE INDEX idx_ann_comments_ann         ON announcement_comments(announcement_id);
+CREATE INDEX idx_coding_assignments_room  ON coding_assignments(classroom_id);
+CREATE INDEX idx_assignment_tc_assign     ON assignment_test_cases(assignment_id);
+CREATE INDEX idx_assignment_sub_assign    ON assignment_submissions(assignment_id);
+CREATE INDEX idx_assignment_sub_student   ON assignment_submissions(student_id);
 
 -- ============================================================================
 -- SEED DATA
