@@ -23,7 +23,7 @@
         }
 
         /* Stat strip */
-        .stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
+        .stat-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
         .stat-chip {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 1rem 1.15rem;
@@ -225,15 +225,6 @@
             <div class="stat-chip-lbl">Sessions Run</div>
         </div>
     </div>
-    <div class="stat-chip">
-        <div class="stat-chip-icon chip-gold">
-            <span class="material-symbols-outlined">workspace_premium</span>
-        </div>
-        <div>
-            <div class="stat-chip-val" id="statAvgScore">—</div>
-            <div class="stat-chip-lbl">Avg Accuracy</div>
-        </div>
-    </div>
 </div>
 
 <!-- ── Quick Actions ───────────────────────────────────────────────────────── -->
@@ -371,7 +362,6 @@ function updateStats(classrooms) {
     document.getElementById('statStudents').textContent   = total;
     const sessions = classrooms.reduce((s, c) => s + (c.session_count || 0), 0);
     document.getElementById('statSessions').textContent   = sessions || '—';
-    document.getElementById('statAvgScore').textContent   = '—';
 }
 
 function renderClassrooms(classrooms) {

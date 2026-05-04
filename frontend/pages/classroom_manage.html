@@ -40,37 +40,73 @@
            CLASSROOM HERO HEADER
         ══════════════════════════════════════════ */
         .classroom-hero {
-            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 28px 32px;
             margin-bottom: 28px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #1e1040 0%, #2d1b69 50%, #0e4f6e 100%);
+            background-size: cover;
+            background-position: center;
+            min-height: 180px;
             display: flex;
-            align-items: center;
-            gap: 24px;
+            align-items: flex-end;
         }
-        .classroom-hero-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        .classroom-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%);
+            pointer-events: none;
+        }
+        .classroom-hero-top {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 2;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 1.8rem;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 22px 24px 0;
+            gap: 4px;
         }
-        .classroom-hero-body { flex: 1; min-width: 0; }
         .classroom-hero-name {
             font-family: 'Press Start 2P', monospace;
             font-size: 1rem;
-            color: var(--text);
-            margin: 0 0 6px;
+            color: #fff;
+            margin: 0;
             line-height: 1.4;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.6);
         }
+        .banner-edit-btn {
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .banner-edit-btn:hover { background: rgba(124,58,237,0.7); }
+        .banner-edit-btn .material-symbols-outlined { font-size: 1.05rem; }
+        #bannerInput { display: none; }
+        .classroom-hero-inner {
+            position: relative;
+            z-index: 1;
+            padding: 52px 32px 28px;
+            display: flex;
+            align-items: flex-end;
+            gap: 24px;
+            width: 100%;
+        }
+        .classroom-hero-body { flex: 1; min-width: 0; }
         .classroom-hero-desc {
             font-size: 0.875rem;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.75);
             margin: 0;
             white-space: nowrap;
             overflow: hidden;
@@ -87,21 +123,22 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 10px;
             padding: 10px 16px;
+            backdrop-filter: blur(6px);
         }
         .key-badge-label {
             font-size: 0.68rem;
-            color: var(--text-muted);
+            color: rgba(255,255,255,0.55);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .key-badge-val {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.75rem;
-            color: var(--secondary);
+            color: #67e8f9;
             letter-spacing: 2px;
         }
         .copy-btn {
@@ -109,33 +146,34 @@
             border: none;
             cursor: pointer;
             font-size: 1.1rem;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.6);
             transition: color 0.15s;
             padding: 0;
             line-height: 1;
         }
-        .copy-btn:hover { color: var(--primary); }
+        .copy-btn:hover { color: #fff; }
         .hero-stats {
             display: flex;
             gap: 12px;
         }
         .hero-stat {
             text-align: center;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 8px;
             padding: 8px 14px;
             min-width: 70px;
+            backdrop-filter: blur(6px);
         }
         .hero-stat-val {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.9rem;
-            color: var(--primary);
+            color: #fff;
             display: block;
         }
         .hero-stat-label {
             font-size: 0.65rem;
-            color: var(--text-muted);
+            color: rgba(255,255,255,0.55);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-top: 3px;
@@ -665,11 +703,17 @@
     </nav>
 
     <!-- ── Classroom Hero Header ── -->
-    <div class="classroom-hero">
-        <div class="classroom-hero-icon">🏫</div>
-        <div class="classroom-hero-body">
+    <div class="classroom-hero" id="classroomHero">
+        <div class="classroom-hero-top">
             <h1 class="classroom-hero-name" id="classroomName">Loading…</h1>
             <p class="classroom-hero-desc" id="classroomDesc">—</p>
+        </div>
+        <input type="file" id="bannerInput" accept="image/*" onchange="handleBannerUpload(event)">
+        <div class="classroom-hero-inner">
+        <div class="classroom-hero-body">
+            <button class="banner-edit-btn" onclick="document.getElementById('bannerInput').click()" title="Change banner">
+                <span class="material-symbols-outlined">edit</span>
+            </button>
         </div>
         <div class="classroom-hero-right">
             <div class="key-badge">
@@ -695,6 +739,7 @@
                     <span class="hero-stat-label">Sessions</span>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
@@ -1005,6 +1050,25 @@
         document.getElementById('tab-' + tabId).classList.add('active');
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         if (btn) btn.classList.add('active');
+    }
+
+    // ── Banner ───────────────────────────────────────────────────────────────
+    function loadBanner() {
+        const saved = localStorage.getItem(`classroom_banner_${classroomId}`);
+        if (saved) document.getElementById('classroomHero').style.backgroundImage = `url(${saved})`;
+    }
+
+    function handleBannerUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const dataUrl = ev.target.result;
+            document.getElementById('classroomHero').style.backgroundImage = `url(${dataUrl})`;
+            localStorage.setItem(`classroom_banner_${classroomId}`, dataUrl);
+            showToast('Banner updated!');
+        };
+        reader.readAsDataURL(file);
     }
 
     // ── Classroom info ───────────────────────────────────────────────────────
@@ -1528,6 +1592,7 @@
     function logout() { if (!confirm('Logout?')) return; localStorage.removeItem('user'); localStorage.removeItem('token'); localStorage.removeItem('isLoggedIn'); window.location.href='index.html'; }
 
     // ── Init ──────────────────────────────────────────────────────────────────
+    loadBanner();
     loadClassroom();
     loadStudents();
     loadLessons();

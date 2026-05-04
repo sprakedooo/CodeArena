@@ -95,14 +95,41 @@
         }
 
         /* ── Classroom grid (same cards as dashboard) ──────────────────── */
-        .classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
+        .classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.85rem; }
         .cl-card {
             background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 1.3rem 1.4rem;
-            display: flex; flex-direction: column; gap: 0.9rem;
+            border-radius: var(--radius-lg); padding: 1rem 1.1rem;
+            display: flex; flex-direction: column; gap: 0.7rem;
             transition: all 0.18s;
             position: relative;
             overflow: hidden;
+        }
+
+        /* ── Recently opened ────────────────────────────────────────────── */
+        .recent-section { margin-bottom: 1.5rem; }
+        .recent-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 0.65rem;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .recent-label .material-symbols-outlined { font-size: 0.95rem; }
+        .recent-row { display: flex; gap: 0.65rem; overflow-x: auto; padding-bottom: 4px; }
+        .recent-row::-webkit-scrollbar { height: 4px; }
+        .recent-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .recent-chip {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 0.45rem 0.9rem;
+            font-size: 0.78rem; font-weight: 600; color: var(--text);
+            text-decoration: none; white-space: nowrap;
+            flex-shrink: 0; transition: all 0.15s;
+            overflow: hidden; position: relative;
+        }
+        .recent-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .recent-chip-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            opacity: 0.15;
         }
         .cl-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0;
@@ -284,6 +311,15 @@
     </div>
 </div>
 
+<!-- ── Recently Opened ────────────────────────────────────────────────────── -->
+<div class="recent-section" id="recentSection" style="display:none">
+    <div class="recent-label">
+        <span class="material-symbols-outlined">history</span>
+        Recently Opened
+    </div>
+    <div class="recent-row" id="recentRow"></div>
+</div>
+
 <!-- ── Filter bar ─────────────────────────────────────────────────────────── -->
 <div class="filter-bar">
     <div class="filter-search">
@@ -320,6 +356,18 @@
         <div class="form-group">
             <label>Description (optional)</label>
             <input type="text" id="clDesc" placeholder="Short description…" maxlength="200">
+        </div>
+        <div class="form-group">
+            <label>Banner Image (optional)</label>
+            <div id="bannerPreviewWrap" style="position:relative;border-radius:8px;overflow:hidden;margin-bottom:0.5rem;display:none;">
+                <div id="bannerPreviewImg" style="height:70px;background-size:cover;background-position:center;border-radius:8px;"></div>
+                <button type="button" onclick="clearModalBanner()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);border:none;border-radius:6px;color:#fff;cursor:pointer;padding:2px 7px;font-size:0.75rem;">✕</button>
+            </div>
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;background:var(--bg-surface);border:1px dashed var(--border);border-radius:8px;padding:0.6rem 0.85rem;font-size:0.8rem;color:var(--text-muted);font-weight:400;">
+                <span class="material-symbols-outlined" style="font-size:1.05rem;">add_photo_alternate</span>
+                Click to upload banner image
+                <input type="file" id="clBanner" accept="image/*" style="display:none;" onchange="previewModalBanner(this)">
+            </label>
         </div>
         <div class="modal-actions">
             <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
@@ -367,6 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     Languages.fillSelect(document.getElementById('clLanguage'));
 
+    renderRecentlyOpened();
     loadClassrooms();
 
     // Search input
@@ -483,10 +532,14 @@ function renderClassrooms(classrooms) {
         const count = c.student_count  || c.studentCount  || 0;
         const id    = c.classroom_id   || c.id;
         const desc  = c.description    || '';
+        const savedBanner = localStorage.getItem(`classroom_banner_${id}`);
+        const cardBg = savedBanner
+            ? `url(${savedBanner}) center/cover no-repeat`
+            : `linear-gradient(135deg,${from},${to})`;
         return `
         <div class="cl-card" style="padding:0;overflow:hidden;">
-            <div style="height:100px;background:linear-gradient(135deg,${from},${to});position:relative;display:flex;align-items:flex-end;padding:0.8rem 1rem;flex-shrink:0;">
-                <div style="position:absolute;inset:0;opacity:0.1;background-image:radial-gradient(circle at 20% 50%,rgba(255,255,255,0.8) 2px,transparent 2px),radial-gradient(circle at 80% 20%,rgba(255,255,255,0.8) 2px,transparent 2px);background-size:55px 55px;"></div>
+            <div style="height:80px;background:${cardBg};position:relative;display:flex;align-items:flex-end;padding:0.65rem 1rem;flex-shrink:0;">
+                <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.55));"></div>
                 <span style="position:absolute;top:0.6rem;right:0.75rem;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:0.2rem 0.55rem;border-radius:20px;background:rgba(0,0,0,0.3);color:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.15);">${lang}</span>
                 <span style="font-size:1.05rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.5);position:relative;z-index:1;">${esc(c.name)}</span>
             </div>
@@ -512,7 +565,7 @@ function renderClassrooms(classrooms) {
                     </div>
                 </div>
                 <div class="cl-card-actions">
-                    <a href="classroom_manage.html?id=${id}" class="btn btn-primary" style="flex:1;">
+                    <a href="classroom_manage.html?id=${id}" class="btn btn-primary" style="flex:1;" onclick="trackRecent(${id},'${esc(c.name)}')">
                         <span class="material-symbols-outlined" style="font-size:0.95rem;">edit</span>
                         Manage
                     </a>
@@ -548,12 +601,33 @@ function formatDate(dateStr) {
 }
 
 // ─── Create classroom modal ───────────────────────────────────────────────────
+let _modalBannerDataUrl = null;
+
+function previewModalBanner(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        _modalBannerDataUrl = e.target.result;
+        document.getElementById('bannerPreviewImg').style.backgroundImage = `url(${_modalBannerDataUrl})`;
+        document.getElementById('bannerPreviewWrap').style.display = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearModalBanner() {
+    _modalBannerDataUrl = null;
+    document.getElementById('bannerPreviewWrap').style.display = 'none';
+    document.getElementById('clBanner').value = '';
+}
+
 function openCreateModal()  {
     document.getElementById('createModal').classList.add('open');
     setTimeout(() => document.getElementById('clName').focus(), 100);
 }
 function closeCreateModal() {
     document.getElementById('createModal').classList.remove('open');
+    clearModalBanner();
 }
 
 async function createClassroom() {
@@ -570,10 +644,16 @@ async function createClassroom() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Failed');
+
+        const newId = data.classroom?.id || data.classroom?.classroom_id;
+        if (_modalBannerDataUrl && newId) {
+            localStorage.setItem(`classroom_banner_${newId}`, _modalBannerDataUrl);
+        }
+
         closeCreateModal();
         document.getElementById('clName').value = '';
         document.getElementById('clDesc').value = '';
-        const key = data.classroom?.enrollment_key || '';
+        const key = data.classroom?.enrollment_key || data.classroom?.enrollmentKey || '';
         showToast(`Classroom "${name}" created!${key ? ' Key: ' + key : ''}`, 'success');
         loadClassrooms();
     } catch (err) {
@@ -593,6 +673,42 @@ function showToast(msg, type = 'info') {
 
 function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Recently Opened ──────────────────────────────────────────────────────────
+const RECENT_KEY = 'recently_opened_classrooms';
+const RECENT_MAX = 6;
+
+function trackRecent(id, name) {
+    const banner = localStorage.getItem(`classroom_banner_${id}`) || null;
+    let list = getRecentList();
+    list = list.filter(r => r.id !== id);
+    list.unshift({ id, name, banner });
+    if (list.length > RECENT_MAX) list = list.slice(0, RECENT_MAX);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+}
+
+function getRecentList() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function renderRecentlyOpened() {
+    const list = getRecentList();
+    const section = document.getElementById('recentSection');
+    const row = document.getElementById('recentRow');
+    if (!list.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    row.innerHTML = list.map(r => {
+        const bgStyle = r.banner
+            ? `style="background-image:url(${r.banner})"`
+            : '';
+        return `<a href="classroom_manage.html?id=${r.id}" class="recent-chip" onclick="trackRecent(${r.id},'${esc(r.name)}')">
+            ${r.banner ? `<span class="recent-chip-bg" ${bgStyle}></span>` : ''}
+            <span class="material-symbols-outlined" style="font-size:1rem;flex-shrink:0;position:relative;">school</span>
+            <span style="position:relative;">${esc(r.name)}</span>
+        </a>`;
+    }).join('');
 }
 </script>
 </body>

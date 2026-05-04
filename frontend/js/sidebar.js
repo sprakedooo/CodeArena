@@ -221,6 +221,7 @@
         });
 
         document.getElementById('topbarLogoutBtn').addEventListener('click', () => {
+            if (!confirm('Are you sure you want to log out?')) return;
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             localStorage.removeItem('isLoggedIn');
