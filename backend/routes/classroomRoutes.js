@@ -143,22 +143,23 @@ async function ensureUserInDb(user) {
 // POST /api/classrooms — Create classroom
 router.post('/', async (req, res) => {
     if (!requireFacultyRole(req, res)) return;
-    const { name, description, subject } = req.body;
+    const { name, description, subject, language } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Classroom name is required' });
 
     const facultyId = req.user.id;
+    const lang = (language || 'python').toLowerCase();
     const key = generateKey();
 
     if (dbService.isDbAvailable()) {
         try {
             await ensureUserInDb(req.user);   // ← guarantee FK row exists
             const result = await db.query(
-                'INSERT INTO classrooms (faculty_id, name, description, subject, enrollment_key) VALUES (?, ?, ?, ?, ?)',
-                [facultyId, name, description || null, subject || null, key]
+                'INSERT INTO classrooms (faculty_id, name, description, subject, language, enrollment_key) VALUES (?, ?, ?, ?, ?, ?)',
+                [facultyId, name, description || null, subject || null, lang, key]
             );
             return res.status(201).json({
                 success: true,
-                classroom: { id: result.insertId, name, description, subject, enrollmentKey: key, isActive: true },
+                classroom: { id: result.insertId, name, description, subject, language: lang, enrollmentKey: key, isActive: true },
                 source: 'database'
             });
         } catch (err) {
@@ -173,6 +174,7 @@ router.post('/', async (req, res) => {
         name,
         description: description || null,
         subject: subject || null,
+        language: lang,
         enrollmentKey: key,
         isActive: true,
         createdAt: new Date().toISOString()

@@ -21,13 +21,15 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.3.1",
+    "ejs": "^5.0.2",
     "express": "^4.18.2",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.6.0",
-    "nodemailer": "^8.0.6",
-    "openai": "^6.34.0",
+    "nodemailer": "^8.0.7",
+    "openai": "^6.35.0",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0"
   }
 }
