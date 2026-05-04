@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -246,15 +246,7 @@
 <!-- ══════════ STUDENT TABS ══════════════════════════════════════════════════ -->
 
 <div id="tab-progress" class="tab-panel">
-    <div class="xp-bar-card">
-        <div class="xp-bar-top">
-            <span style="font-size:0.85rem;font-weight:600;color:var(--text);">XP Progress</span>
-            <span class="xp-level-tag" id="xpLevelTag">LVL 1</span>
-        </div>
-        <div class="xp-bar"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div>
-        <div class="xp-bar-lbl" id="xpBarLbl">0 / 500 XP to next level</div>
-    </div>
-    <p class="section-title">Learning Paths</p>
+<p class="section-title">Learning Paths</p>
     <div id="pathProgress">
         <div class="skeleton-line" style="width:100%;"></div>
         <div class="skeleton-line" style="width:80%;"></div>
@@ -485,10 +477,6 @@ function populateHero(user) {
     } else {
         stats.innerHTML = `
             <div class="pstat">
-                <div class="pstat-val gold" id="psXP">${(user.totalXp || user.total_xp || user.xp || 0).toLocaleString()}</div>
-                <div class="pstat-lbl">Total XP</div>
-            </div>
-            <div class="pstat">
                 <div class="pstat-val fire" id="psStreak">${(user.streak || 0)}🔥</div>
                 <div class="pstat-lbl">Streak</div>
             </div>
@@ -542,17 +530,10 @@ async function loadProgress() {
         const data = await res.json();
         const u    = data.user || {};
 
-        document.getElementById('psXP').textContent      = (u.total_xp || 0).toLocaleString();
         document.getElementById('psStreak').textContent  = (u.streak || 0) + '🔥';
         document.getElementById('psLessons').textContent = data.completedLessons || 0;
 
-        const xp    = u.total_xp || 0;
-        const level = Math.floor(xp / 500) + 1;
-        const inLvl = xp % 500;
-        document.getElementById('xpLevelTag').textContent = `LVL ${level}`;
-        document.getElementById('xpBarFill').style.width  = (inLvl / 500 * 100) + '%';
-        document.getElementById('xpBarLbl').textContent   = `${inLvl} / 500 XP to Level ${level + 1}`;
-
+        
         buildPathProgress(data.paths || []);
         buildWeaknesses(data.weaknesses || []);
     } catch {
@@ -772,3 +753,5 @@ function esc(s) {
 </script>
 </body>
 </html>
+
+

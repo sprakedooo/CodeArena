@@ -3,404 +3,928 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom Room – CodeArena</title>
+    <title>Classroom – CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        /* ── Room header ─────────────────────────────────────────────────────── */
-        .room-header {
-            display: flex; align-items: flex-start; justify-content: space-between;
-            gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
-        }
-        .room-title { font-size: 1.3rem; font-weight: 700; color: var(--text); margin: 0 0 0.2rem; }
-        .room-meta  { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-        .room-badge {
-            font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.6rem; border-radius: 20px;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .badge-lang { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
-        .badge-teacher { background: rgba(6,182,212,0.1); color: #22d3ee; border: 1px solid rgba(6,182,212,0.25); }
-        .badge-students { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+        /* ══ PAGE SHELL ══════════════════════════════════════════════════ */
+        .room-page { max-width: 1100px; margin: 0 auto; padding: 28px 24px 80px; }
 
-        /* ── Tabs ───────────────────────────────────────────────────────────── */
-        .tab-nav { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+        /* ══ BREADCRUMB ══════════════════════════════════════════════════ */
+        .breadcrumb { display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--text-muted); margin-bottom:18px; }
+        .breadcrumb a { color:var(--text-secondary); text-decoration:none; transition:color .15s; }
+        .breadcrumb a:hover { color:var(--primary); }
+        .breadcrumb-sep { color:var(--border); }
+
+        /* ══ HERO ════════════════════════════════════════════════════════ */
+        .classroom-hero {
+            border:1px solid var(--border); border-radius:16px; margin-bottom:0;
+            overflow:hidden; position:relative;
+            background:linear-gradient(135deg,#1e1040 0%,#2d1b69 50%,#0e4f6e 100%);
+            background-size:cover; background-position:center;
+            min-height:180px; display:flex; align-items:flex-end;
+        }
+        .classroom-hero::before {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.7) 100%);
+            pointer-events:none;
+        }
+        .classroom-hero-inner {
+            position:relative; z-index:1; padding:52px 28px 20px;
+            display:flex; align-items:flex-end; gap:24px; width:100%;
+        }
+        .classroom-hero-body { flex:1; min-width:0; }
+        .classroom-hero-name {
+            font-family:'Press Start 2P',monospace; font-size:1rem; color:#fff;
+            margin:0 0 4px; line-height:1.4; text-shadow:0 1px 6px rgba(0,0,0,.6);
+        }
+        .classroom-hero-desc { font-size:.875rem; color:rgba(255,255,255,.75); margin:0; }
+        .classroom-hero-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; flex-shrink:0; }
+        .hero-stats { display:flex; gap:10px; }
+        .hero-stat {
+            text-align:center; background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.15);
+            border-radius:8px; padding:7px 12px; min-width:64px; backdrop-filter:blur(6px);
+        }
+        .hero-stat-val { font-family:'Press Start 2P',monospace; font-size:.8rem; color:#fff; display:block; }
+        .hero-stat-label { font-size:.6rem; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:.5px; margin-top:3px; display:block; }
+        .teacher-badge {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.15);
+            border-radius:10px; padding:7px 14px; backdrop-filter:blur(6px);
+        }
+        .teacher-badge-avatar {
+            width:26px; height:26px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.6rem; font-weight:700; color:#fff; font-family:'Inter',sans-serif;
+        }
+        .teacher-badge-name { font-size:.75rem; color:rgba(255,255,255,.85); }
+        .teacher-badge-role { font-size:.62rem; color:rgba(255,255,255,.5); }
+
+        /* ══ TAB BAR ═════════════════════════════════════════════════════ */
+        .tab-bar {
+            display:flex; gap:0; border-bottom:2px solid var(--border);
+            margin-bottom:28px; margin-top:0;
+        }
         .tab-btn {
-            padding: 0.6rem 1.1rem; border: none; background: none; cursor: pointer;
-            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
-            border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s;
-            display: flex; align-items: center; gap: 0.35rem;
+            background:none; border:none; border-bottom:2px solid transparent;
+            margin-bottom:-2px; color:var(--text-muted); cursor:pointer;
+            font-family:'Inter',sans-serif; font-size:.88rem; font-weight:500;
+            padding:14px 20px; display:flex; align-items:center; gap:7px;
+            transition:color .15s,border-color .15s; white-space:nowrap;
         }
-        .tab-btn .material-symbols-outlined { font-size: 1rem; }
-        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .tab-btn:hover:not(.active) { color: var(--text); }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+        .tab-btn .material-symbols-outlined { font-size:1.05rem; }
+        .tab-btn:hover { color:var(--text); }
+        .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+        .tab-panel { display:none; }
+        .tab-panel.active { display:block; }
 
-        /* ── Lessons tab ────────────────────────────────────────────────────── */
-        .lesson-list { display: flex; flex-direction: column; gap: 0.6rem; }
+        /* ══ STREAM ══════════════════════════════════════════════════════ */
+        .stream-layout { display:grid; grid-template-columns:260px 1fr; gap:20px; }
+        @media(max-width:720px) { .stream-layout { grid-template-columns:1fr; } }
+
+        .stream-info-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:14px 16px; margin-bottom:14px;
+        }
+        .stream-info-card-header {
+            font-size:.7rem; font-weight:700; color:var(--text-muted);
+            text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px;
+        }
+        .stream-info-row { display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--text-secondary); padding:6px 0; border-bottom:1px solid var(--border); }
+        .stream-info-row:last-child { border-bottom:none; }
+        .stream-info-row .material-symbols-outlined { font-size:.95rem; color:var(--text-muted); }
+        .stream-info-val { font-weight:600; color:var(--text); margin-left:auto; }
+
+        .stream-progress-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:14px 16px;
+        }
+        .stream-progress-card-header {
+            font-size:.7rem; font-weight:700; color:var(--text-muted);
+            text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px;
+        }
+        .progress-bar-row { margin-bottom:12px; }
+        .progress-bar-label { display:flex; justify-content:space-between; font-size:.78rem; color:var(--text-secondary); margin-bottom:5px; }
+        .progress-bar-track { height:6px; background:var(--bg-surface); border-radius:20px; overflow:hidden; }
+        .progress-bar-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,var(--primary),var(--secondary)); transition:width .5s ease; }
+
+        .announcement-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:18px 20px; margin-bottom:14px; transition:border-color .15s;
+        }
+        .announcement-card:hover { border-color:rgba(124,58,237,.3); }
+        .ann-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+        .ann-avatar {
+            width:38px; height:38px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.75rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Inter',sans-serif;
+        }
+        .ann-meta { flex:1; min-width:0; }
+        .ann-author { font-size:.88rem; font-weight:600; color:var(--text); }
+        .ann-time { font-size:.75rem; color:var(--text-muted); margin-top:1px; }
+        .ann-body { font-size:.875rem; color:var(--text); line-height:1.65; white-space:pre-wrap; }
+        .ann-link {
+            display:inline-flex; align-items:center; gap:6px; margin-top:10px;
+            background:var(--bg-surface); border:1px solid var(--border); border-radius:8px;
+            padding:8px 14px; text-decoration:none; color:var(--primary); font-size:.82rem; font-weight:500;
+            transition:border-color .15s; word-break:break-all;
+        }
+        .ann-link:hover { border-color:var(--primary); }
+        .ann-link .material-symbols-outlined { font-size:.95rem; flex-shrink:0; }
+
+        /* ── Comments ── */
+        .ann-comments { margin-top:14px; border-top:1px solid var(--border); padding-top:12px; }
+        .ann-comments-toggle {
+            background:none; border:none; cursor:pointer;
+            font-size:.78rem; color:var(--text-muted); padding:0;
+            display:flex; align-items:center; gap:5px; font-family:'Inter',sans-serif;
+            transition:color .15s;
+        }
+        .ann-comments-toggle:hover { color:var(--primary); }
+        .ann-comments-toggle .material-symbols-outlined { font-size:.95rem; }
+        .ann-comments-list { margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+        .ann-comment {
+            display:flex; gap:9px; align-items:flex-start;
+        }
+        .ann-comment-avatar {
+            width:28px; height:28px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg,#374151,#4b5563);
+            display:flex; align-items:center; justify-content:center;
+            font-size:.6rem; font-weight:700; color:#fff; font-family:'Inter',sans-serif;
+        }
+        .ann-comment-avatar.faculty { background:linear-gradient(135deg,var(--primary),var(--secondary)); }
+        .ann-comment-bubble {
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:10px; padding:8px 12px; flex:1; min-width:0;
+        }
+        .ann-comment-header { display:flex; align-items:center; gap:7px; margin-bottom:3px; }
+        .ann-comment-author { font-size:.78rem; font-weight:600; color:var(--text); }
+        .ann-comment-time   { font-size:.7rem; color:var(--text-muted); }
+        .ann-comment-role   { font-size:.62rem; font-weight:700; background:rgba(124,58,237,.12); color:#a78bfa; border-radius:20px; padding:1px 7px; }
+        .ann-comment-body   { font-size:.82rem; color:var(--text-secondary); line-height:1.5; }
+        .ann-compose {
+            display:flex; gap:9px; align-items:flex-end; margin-top:10px;
+        }
+        .ann-compose-input {
+            flex:1; background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:8px; padding:8px 12px; color:var(--text);
+            font-size:.83rem; font-family:'Inter',sans-serif;
+            resize:none; outline:none; min-height:36px; max-height:120px;
+            line-height:1.45; transition:border-color .15s;
+        }
+        .ann-compose-input:focus { border-color:var(--primary); }
+        .ann-compose-input::placeholder { color:var(--text-muted); }
+        .ann-compose-send {
+            background:var(--primary); border:none; border-radius:8px;
+            width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:background .15s; flex-shrink:0;
+        }
+        .ann-compose-send:hover { background:#6d28d9; }
+        .ann-compose-send .material-symbols-outlined { font-size:1rem; color:#fff; }
+        .ann-compose-send:disabled { background:var(--bg-surface); cursor:default; }
+        .ann-compose-send:disabled .material-symbols-outlined { color:var(--text-muted); }
+
+        .stream-empty { text-align:center; padding:48px 16px; color:var(--text-muted); }
+        .stream-empty .material-symbols-outlined { font-size:2.5rem; display:block; margin-bottom:10px; opacity:.3; }
+        .stream-empty p { font-size:.85rem; margin:0; }
+
+        /* ══ CLASSWORK ═══════════════════════════════════════════════════ */
+        .classwork-section { margin-bottom:32px; }
+        .classwork-section-header {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 0 14px; border-bottom:2px solid var(--primary); margin-bottom:18px;
+        }
+        .classwork-section-title {
+            display:flex; align-items:center; gap:10px;
+            font-size:1rem; font-weight:700; color:var(--text); margin:0;
+        }
+        .classwork-section-title .material-symbols-outlined { font-size:1.15rem; color:var(--primary); }
+        .cw-count { font-size:.7rem; font-weight:700; background:rgba(124,58,237,.15); color:#a78bfa; border-radius:20px; padding:2px 9px; }
+
+        .lesson-list { display:flex; flex-direction:column; gap:10px; }
         .lesson-row {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1rem 1.15rem;
-            display: flex; align-items: center; gap: 1rem;
-            cursor: pointer; transition: all 0.15s; text-decoration: none; color: inherit;
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:14px 18px; display:flex; align-items:center; gap:14px;
+            transition:border-color .15s;
         }
-        .lesson-row:hover { border-color: var(--primary); background: var(--bg-card-hover); }
-        .lesson-row.expanded { border-color: var(--primary); }
-        .lesson-num {
-            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-            background: var(--bg-surface); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+        .lesson-row:hover { border-color:rgba(124,58,237,.3); }
+        .lesson-row.done { border-color:rgba(16,185,129,.25); background:rgba(16,185,129,.03); }
+        .lesson-row-icon {
+            width:38px; height:38px; border-radius:8px;
+            background:rgba(6,182,212,.1); border:1px solid rgba(6,182,212,.2);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
         }
-        .lesson-info { flex: 1; min-width: 0; }
-        .lesson-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-        .lesson-sub   { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
-        .lesson-content {
-            display: none; padding: 1rem 1.15rem; margin-top: 0.25rem;
-            background: var(--bg-surface); border-radius: var(--radius-sm);
-            font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;
+        .lesson-row.done .lesson-row-icon { background:rgba(16,185,129,.12); border-color:rgba(16,185,129,.25); }
+        .lesson-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--secondary); }
+        .lesson-row.done .lesson-row-icon .material-symbols-outlined { color:var(--success); }
+        .lesson-row-body { flex:1; min-width:0; }
+        .lesson-row-title { font-size:.9rem; font-weight:600; color:var(--text); }
+        .lesson-row-meta { font-size:.75rem; color:var(--text-muted); margin-top:2px; }
+        .lesson-row-actions { display:flex; gap:6px; flex-shrink:0; align-items:center; }
+        .done-badge {
+            display:inline-flex; align-items:center; gap:4px;
+            font-size:.7rem; font-weight:700; color:var(--success);
+            background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.2);
+            border-radius:20px; padding:3px 10px;
         }
-        .lesson-content.open { display: block; }
 
-        /* ── Play tab ───────────────────────────────────────────────────────── */
+        .challenge-list { display:flex; flex-direction:column; gap:10px; }
+        .challenge-row {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:14px 18px; display:flex; align-items:center; gap:14px;
+            transition:border-color .15s;
+        }
+        .challenge-row:hover { border-color:rgba(124,58,237,.3); }
+        .challenge-row-icon {
+            width:38px; height:38px; border-radius:8px;
+            background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.2);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .challenge-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--primary); }
+        .challenge-row-body { flex:1; min-width:0; }
+        .challenge-row-text { font-size:.88rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:500px; }
+        .challenge-row-meta { display:flex; align-items:center; gap:10px; margin-top:4px; flex-wrap:wrap; }
+        .challenge-row-actions { display:flex; gap:6px; flex-shrink:0; }
+        .level-pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+        .level-pill.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
+        .level-pill.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
+        .level-pill.advanced     { background:rgba(239,68,68,.12);   color:var(--danger);   border:1px solid rgba(239,68,68,.22); }
+        .type-chip { display:inline-flex; align-items:center; gap:4px; font-size:.7rem; color:var(--text-secondary); background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 7px; }
+
+        /* ══ PLAY ════════════════════════════════════════════════════════ */
         .session-idle {
-            text-align: center; padding: 3rem 1.5rem;
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+            text-align:center; padding:3.5rem 1.5rem;
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
         }
-        .session-idle .material-symbols-outlined { font-size: 3rem; color: var(--primary); display: block; margin-bottom: 0.75rem; }
-        .session-idle h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0 0 0.4rem; }
-        .session-idle p  { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1.25rem; }
+        .session-idle .material-symbols-outlined { font-size:3rem; color:var(--primary); display:block; margin-bottom:.75rem; }
+        .session-idle h3 { font-size:1rem; font-weight:700; color:var(--text); margin:0 0 .4rem; }
+        .session-idle p  { font-size:.82rem; color:var(--text-muted); margin:0 0 1.25rem; }
 
-        /* HUD */
+        .live-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.25);
+            border-radius:20px; padding:5px 12px; font-size:.75rem; font-weight:700; color:var(--success);
+            margin-bottom:1rem;
+        }
+        .live-dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:livepulse 1.4s ease infinite; }
+        @keyframes livepulse { 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
+
         .game-hud {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 0.65rem; margin-bottom: 1.25rem;
+            display:grid; grid-template-columns:repeat(4,1fr);
+            gap:.65rem; margin-bottom:1.25rem;
         }
         .hud-chip {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); padding: 0.7rem 0.85rem; text-align: center;
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:10px; padding:.75rem .9rem; text-align:center;
         }
-        .hud-val { font-size: 1.1rem; font-weight: 800; color: var(--text); }
-        .hud-lbl { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 0.1rem; }
-        .hud-timer .hud-val { color: #f87171; }
-        .hud-score .hud-val { color: #fbbf24; }
-        .hud-streak .hud-val { color: #f97316; }
+        .hud-val { font-size:1.15rem; font-weight:800; color:var(--text); }
+        .hud-lbl { font-size:.62rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-top:.15rem; }
+        .hud-timer .hud-val { color:#f87171; }
+        .hud-score .hud-val { color:#fbbf24; }
+        .hud-streak .hud-val { color:#f97316; }
 
-        /* Question card */
         .q-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem;
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:14px; padding:1.5rem; margin-bottom:1rem;
         }
-        .q-meta { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
-        .q-text { font-size: 1rem; font-weight: 600; color: var(--text); line-height: 1.6; margin-bottom: 1.1rem; }
-        .q-options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .q-meta { font-size:.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.75rem; }
+        .q-text { font-size:1rem; font-weight:600; color:var(--text); line-height:1.6; margin-bottom:1.1rem; }
+        .q-options { display:flex; flex-direction:column; gap:.5rem; }
         .q-option {
-            background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); padding: 0.75rem 1rem;
-            cursor: pointer; transition: all 0.15s; font-size: 0.88rem; color: var(--text);
-            text-align: left;
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:8px; padding:.75rem 1rem;
+            cursor:pointer; transition:all .15s; font-size:.88rem; color:var(--text); text-align:left;
         }
-        .q-option:hover:not(:disabled) { border-color: var(--primary); background: rgba(124,58,237,0.08); }
-        .q-option.correct  { border-color: var(--success); background: rgba(16,185,129,0.12); color: #34d399; }
-        .q-option.wrong    { border-color: var(--danger);  background: rgba(239,68,68,0.12);  color: #f87171; }
-        .q-option:disabled { cursor: default; }
-
+        .q-option:hover:not(:disabled) { border-color:var(--primary); background:rgba(124,58,237,.08); }
+        .q-option.correct  { border-color:var(--success); background:rgba(16,185,129,.12); color:#34d399; }
+        .q-option.wrong    { border-color:var(--danger);  background:rgba(239,68,68,.12);  color:#f87171; }
+        .q-option:disabled { cursor:default; }
         .q-feedback {
-            display: none; padding: 0.85rem 1rem; border-radius: var(--radius-sm);
-            font-size: 0.85rem; margin-top: 0.75rem; line-height: 1.5;
+            display:none; padding:.85rem 1rem; border-radius:8px;
+            font-size:.85rem; margin-top:.75rem; line-height:1.5;
         }
-        .q-feedback.correct { display: block; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
-        .q-feedback.wrong   { display: block; background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
+        .q-feedback.correct { display:block; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); color:#34d399; }
+        .q-feedback.wrong   { display:block; background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#f87171; }
 
-        /* Waiting / end screens */
         .wait-screen, .end-screen {
-            text-align: center; padding: 2.5rem 1.5rem;
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+            text-align:center; padding:2.5rem 1.5rem;
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
         }
-        .wait-screen .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--bg-surface); border-top-color: var(--primary); animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .wait-screen .spinner { width:36px; height:36px; border-radius:50%; border:3px solid var(--bg-surface); border-top-color:var(--primary); animation:spin .8s linear infinite; margin:0 auto 1rem; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .end-score { font-size:2.5rem; font-weight:900; color:#fbbf24; margin:.5rem 0; }
+        .end-stats { display:flex; justify-content:center; gap:2rem; margin:1rem 0 1.5rem; }
+        .end-stat-val { font-size:1.1rem; font-weight:700; color:var(--text); display:block; }
+        .end-stat-lbl { font-size:.7rem; color:var(--text-muted); text-transform:uppercase; }
 
-        .end-score { font-size: 2.5rem; font-weight: 900; color: #fbbf24; margin: 0.5rem 0; }
-        .end-stats { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0 1.5rem; }
-        .end-stat  { text-align: center; }
-        .end-stat-val { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-        .end-stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+        /* ══ PROGRESS ════════════════════════════════════════════════════ */
+        .progress-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:28px; }
+        .progress-stat-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:18px 20px; text-align:center;
+        }
+        .progress-stat-icon { font-size:1.5rem; display:block; margin-bottom:.4rem; }
+        .progress-stat-val { font-family:'Press Start 2P',monospace; font-size:1rem; color:var(--text); display:block; margin-bottom:.3rem; }
+        .progress-stat-lbl { font-size:.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; }
 
-        /* ── Leaderboard tab ────────────────────────────────────────────────── */
         .lb-table {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); overflow: hidden;
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:14px; overflow:hidden;
         }
         .lb-row {
-            display: grid; grid-template-columns: 48px 1fr auto;
-            align-items: center; gap: 0.75rem; padding: 0.85rem 1.1rem;
-            border-bottom: 1px solid var(--border-light); transition: background 0.15s;
+            display:grid; grid-template-columns:48px 1fr auto;
+            align-items:center; gap:.75rem; padding:.85rem 1.1rem;
+            border-bottom:1px solid var(--border); transition:background .15s;
         }
-        .lb-row:last-child { border-bottom: none; }
-        .lb-row:hover { background: var(--bg-card-hover); }
-        .lb-row.me { background: rgba(124,58,237,0.08); border-left: 3px solid var(--primary); }
-        .lb-rank { font-size: 1rem; text-align: center; }
-        .lb-name { font-size: 0.88rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 0.4rem; }
-        .lb-you  { font-size: 0.62rem; background: rgba(124,58,237,0.15); color: #a78bfa; padding: 0.1rem 0.35rem; border-radius: 20px; font-weight: 700; }
-        .lb-score { font-size: 0.88rem; font-weight: 700; color: #fbbf24; }
+        .lb-row:last-child { border-bottom:none; }
+        .lb-row:hover { background:var(--bg-card-hover); }
+        .lb-row.me { background:rgba(124,58,237,.08); border-left:3px solid var(--primary); }
+        .lb-rank { font-size:1rem; text-align:center; }
+        .lb-name { font-size:.88rem; font-weight:600; color:var(--text); display:flex; align-items:center; gap:.4rem; }
+        .lb-you  { font-size:.62rem; background:rgba(124,58,237,.15); color:#a78bfa; padding:.1rem .35rem; border-radius:20px; font-weight:700; }
+        .lb-score { font-size:.88rem; font-weight:700; color:#fbbf24; }
 
-        /* ── AI Feedback tab ────────────────────────────────────────────────── */
-        .feedback-panel {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 1.4rem 1.5rem;
+        .ai-feedback-panel {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:14px;
+            padding:1.5rem; margin-top:24px;
         }
-        .feedback-section { margin-bottom: 1.25rem; }
-        .feedback-section h4 { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 0.5rem; }
-        .feedback-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; }
-        .feedback-pill {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            font-size: 0.72rem; padding: 0.22rem 0.6rem; border-radius: 20px; margin: 0.2rem;
-            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171;
+        .ai-feedback-header {
+            display:flex; align-items:center; gap:10px; margin-bottom:16px;
+            padding-bottom:14px; border-bottom:1px solid var(--border);
+        }
+        .ai-feedback-icon {
+            width:36px; height:36px; border-radius:10px;
+            background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(6,182,212,.15));
+            border:1px solid rgba(124,58,237,.25);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .ai-feedback-icon .material-symbols-outlined { font-size:1.1rem; color:#a78bfa; }
+        .ai-feedback-title { font-size:.9rem; font-weight:700; color:var(--text); }
+        .ai-feedback-subtitle { font-size:.75rem; color:var(--text-muted); }
+        .ai-feedback-body { font-size:.875rem; color:var(--text-secondary); line-height:1.7; }
+        .ai-feedback-loading { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:.85rem; padding:.5rem 0; }
+        .ai-feedback-loading .mini-spin { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--primary); animation:spin .7s linear infinite; flex-shrink:0; }
+
+        /* ══ SHARED UTILITIES ════════════════════════════════════════════ */
+        .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); font-size:.85rem; }
+        .empty-state .material-symbols-outlined { font-size:2.5rem; display:block; margin-bottom:.75rem; opacity:.35; }
+        .skeleton-line { height:14px; background:var(--bg-surface); border-radius:4px; animation:shimmer 1.4s infinite; margin-bottom:.5rem; }
+        @keyframes shimmer { 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+
+        .toast {
+            position:fixed; bottom:1.5rem; right:1.5rem;
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:.75rem 1.1rem;
+            font-size:.83rem; color:var(--text); z-index:2000;
+            display:none; align-items:center; gap:.5rem;
+            box-shadow:var(--shadow-lg);
+        }
+        .toast.show { display:flex; }
+        .toast.success { border-color:var(--success); }
+        .toast.error   { border-color:var(--danger); }
+
+        .section-title {
+            font-size:.75rem; font-weight:700; color:var(--text-muted);
+            text-transform:uppercase; letter-spacing:1px; margin:0 0 14px;
         }
 
-        /* ── Faculty actions ────────────────────────────────────────────────── */
-        .faculty-bar {
-            display: flex; gap: 0.6rem; padding: 0.9rem 1rem;
-            background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.2);
-            border-radius: var(--radius); margin-bottom: 1.25rem; flex-wrap: wrap;
-            align-items: center;
+        @media(max-width:640px) {
+            .game-hud { grid-template-columns:repeat(2,1fr); }
+            .hero-stats { flex-wrap:wrap; }
+            .classroom-hero-inner { flex-direction:column; align-items:flex-start; gap:14px; }
+            .classroom-hero-right { align-items:flex-start; }
         }
-        .faculty-bar .session-status {
-            font-size: 0.78rem; color: var(--text-muted); flex: 1;
-        }
-        .status-dot {
-            display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-            background: var(--text-muted); margin-right: 5px;
-        }
-        .status-dot.live { background: #34d399; animation: pulse 1.4s ease infinite; }
-        @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
-
-        /* Empty / skeleton */
-        .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.85rem; }
-        .empty-state .material-symbols-outlined { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.35; }
-        .skeleton-line { height: 14px; background: var(--bg-surface); border-radius: 4px; animation: shimmer 1.4s infinite; margin-bottom: 0.5rem; }
-        @keyframes shimmer { 0%,100%{ opacity: 0.5; } 50%{ opacity: 1; } }
-
-        @media (max-width: 640px) { .game-hud { grid-template-columns: repeat(2,1fr); } }
     </style>
 </head>
 <body>
 
-<!-- ── Room Header ────────────────────────────────────────────────────────── -->
-<div class="room-header">
-    <div>
-        <h1 class="room-title" id="roomTitle">Loading…</h1>
-        <div class="room-meta" id="roomMeta">
-            <div class="skeleton-line" style="width:80px;height:20px;border-radius:20px;"></div>
-        </div>
-    </div>
-    <a href="classrooms.html" class="btn btn-secondary" style="font-size:0.8rem;">
-        <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span>
-        Back
-    </a>
-</div>
+<main class="room-page">
 
-<!-- ── Tabs ──────────────────────────────────────────────────────────────── -->
-<div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('lessons', this)">
-        <span class="material-symbols-outlined">menu_book</span> Lessons
-    </button>
-    <button class="tab-btn" onclick="switchTab('play', this)">
-        <span class="material-symbols-outlined">sports_esports</span> Play
-    </button>
-    <button class="tab-btn" onclick="switchTab('leaderboard', this)">
-        <span class="material-symbols-outlined">emoji_events</span> Leaderboard
-    </button>
-    <button class="tab-btn" id="feedbackTabBtn" onclick="switchTab('feedback', this)">
-        <span class="material-symbols-outlined">psychology</span> AI Feedback
-    </button>
-</div>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="classrooms.html">My Classrooms</a>
+        <span class="breadcrumb-sep">›</span>
+        <span id="breadcrumbName">Loading…</span>
+    </nav>
 
-<!-- ══════════════════════ LESSONS TAB ══════════════════════════════════════ -->
-<div id="tab-lessons" class="tab-panel active">
-    <div class="lesson-list" id="lessonList">
-        <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
-        <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
-        <div class="skeleton-line" style="height:60px;border-radius:12px;"></div>
-    </div>
-</div>
-
-<!-- ══════════════════════ PLAY TAB ═════════════════════════════════════════ -->
-<div id="tab-play" class="tab-panel">
-    <!-- Faculty controls -->
-    <div class="faculty-bar" id="facultyBar" style="display:none;">
-        <div class="session-status" id="sessionStatus">
-            <span class="status-dot" id="statusDot"></span>
-            <span id="statusText">No active session</span>
-        </div>
-        <button class="btn btn-primary" id="startSessionBtn" style="font-size:0.78rem;" onclick="startSession()">
-            <span class="material-symbols-outlined" style="font-size:0.95rem;">play_circle</span>
-            Start Game Session
-        </button>
-        <button class="btn btn-secondary" id="closeSessionBtn" style="font-size:0.78rem;display:none;" onclick="closeSession()">
-            <span class="material-symbols-outlined" style="font-size:0.95rem;">stop_circle</span>
-            End Session
-        </button>
-    </div>
-
-    <!-- Idle screen (student waiting) -->
-    <div class="session-idle" id="playIdle">
-        <span class="material-symbols-outlined">sports_esports</span>
-        <h3>Waiting for a Session</h3>
-        <p>Your instructor will start a game session soon. Stay tuned!</p>
-        <button class="btn btn-secondary" onclick="checkForSession()" style="font-size:0.82rem;">
-            <span class="material-symbols-outlined" style="font-size:0.95rem;">refresh</span>
-            Check Now
-        </button>
-    </div>
-
-    <!-- Waiting for next question -->
-    <div class="wait-screen" id="playWait" style="display:none;">
-        <div class="spinner"></div>
-        <p style="font-size:0.88rem;color:var(--text-muted);">Waiting for next question…</p>
-    </div>
-
-    <!-- Active question -->
-    <div id="playActive" style="display:none;">
-        <div class="game-hud">
-            <div class="hud-chip hud-score">
-                <div class="hud-val" id="hudScore">0</div>
-                <div class="hud-lbl">Score</div>
+    <!-- Hero -->
+    <div class="classroom-hero" id="classroomHero">
+        <div class="classroom-hero-inner">
+            <div class="classroom-hero-body">
+                <p class="classroom-hero-name" id="heroName">Loading…</p>
+                <p class="classroom-hero-desc" id="heroDesc"></p>
             </div>
-            <div class="hud-chip hud-streak">
-                <div class="hud-val" id="hudStreak">0🔥</div>
-                <div class="hud-lbl">Streak</div>
-            </div>
-            <div class="hud-chip hud-timer">
-                <div class="hud-val" id="hudTimer">30</div>
-                <div class="hud-lbl">Seconds</div>
-            </div>
-            <div class="hud-chip">
-                <div class="hud-val" id="hudQ">1/—</div>
-                <div class="hud-lbl">Question</div>
+            <div class="classroom-hero-right">
+                <div class="teacher-badge" id="teacherBadge" style="display:none;">
+                    <div class="teacher-badge-avatar" id="teacherInitials">?</div>
+                    <div>
+                        <div class="teacher-badge-name" id="teacherName">Instructor</div>
+                        <div class="teacher-badge-role">Teacher</div>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><span class="hero-stat-val" id="heroLessons">0</span><span class="hero-stat-label">Lessons</span></div>
+                    <div class="hero-stat"><span class="hero-stat-val" id="heroChallenges">0</span><span class="hero-stat-label">Challenges</span></div>
+                    <div class="hero-stat"><span class="hero-stat-val" id="heroSessions">0</span><span class="hero-stat-label">Sessions</span></div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="q-card" id="qCard">
-            <div class="q-meta" id="qMeta">Question</div>
-            <div class="q-text" id="qText">—</div>
-            <div class="q-options" id="qOptions"></div>
-            <div class="q-feedback" id="qFeedback"></div>
-        </div>
-
-        <button id="nextQBtn" class="btn btn-primary" style="display:none;width:100%;justify-content:center;" onclick="nextQuestion()">
-            Next Question →
+    <!-- Tab bar -->
+    <div class="tab-bar" style="margin-top:0; border-radius:0 0 0 0;">
+        <button class="tab-btn active" onclick="switchTab('stream',this)">
+            <span class="material-symbols-outlined">campaign</span>Stream
+        </button>
+        <button class="tab-btn" onclick="switchTab('classwork',this)">
+            <span class="material-symbols-outlined">assignment</span>Classwork
+        </button>
+        <button class="tab-btn" onclick="switchTab('play',this)">
+            <span class="material-symbols-outlined">sports_esports</span>Play
+        </button>
+        <button class="tab-btn" onclick="switchTab('progress',this)">
+            <span class="material-symbols-outlined">bar_chart</span>Progress
         </button>
     </div>
 
-    <!-- End screen -->
-    <div class="end-screen" id="playEnd" style="display:none;">
-        <span class="material-symbols-outlined" style="font-size:2.5rem;color:#fbbf24;">emoji_events</span>
-        <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">Session Complete!</div>
-        <div class="end-score" id="endScore">0</div>
-        <div style="font-size:0.82rem;color:var(--text-muted);">points earned</div>
-        <div class="end-stats">
-            <div class="end-stat"><div class="end-stat-val" id="endCorrect">0</div><div class="end-stat-lbl">Correct</div></div>
-            <div class="end-stat"><div class="end-stat-val" id="endTotal">0</div><div class="end-stat-lbl">Total Qs</div></div>
-            <div class="end-stat"><div class="end-stat-val" id="endXP">+0</div><div class="end-stat-lbl">XP Earned</div></div>
+    <!-- ══════════════ STREAM TAB ══════════════════════════════════════════ -->
+    <div id="tab-stream" class="tab-panel active">
+        <div class="stream-layout">
+            <!-- Sidebar -->
+            <aside>
+                <div class="stream-info-card" style="margin-bottom:14px;">
+                    <div class="stream-info-card-header">Classroom Info</div>
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">person</span>
+                        Instructor
+                        <span class="stream-info-val" id="sideTeacher">—</span>
+                    </div>
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">code</span>
+                        Language
+                        <span class="stream-info-val" id="sideLang">—</span>
+                    </div>
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">group</span>
+                        Students
+                        <span class="stream-info-val" id="sideStudents">—</span>
+                    </div>
+                </div>
+
+                <div class="stream-progress-card">
+                    <div class="stream-progress-card-header">My Progress</div>
+                    <div class="progress-bar-row">
+                        <div class="progress-bar-label">
+                            <span>Lessons</span>
+                            <span id="lessonProgressTxt">0 / 0</span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="lessonProgressBar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-row">
+                        <div class="progress-bar-label">
+                            <span>Accuracy</span>
+                            <span id="accuracyTxt">0%</span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="accuracyBar" style="width:0%;background:linear-gradient(90deg,var(--success),#34d399)"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Announcements feed -->
+            <div>
+                <div id="annFeed">
+                    <div class="skeleton-line" style="height:80px;border-radius:12px;margin-bottom:12px;"></div>
+                    <div class="skeleton-line" style="height:80px;border-radius:12px;"></div>
+                </div>
+            </div>
         </div>
-        <button class="btn btn-primary" onclick="switchTab('leaderboard', document.querySelector('[onclick*=leaderboard]'))" style="font-size:0.85rem;">
-            <span class="material-symbols-outlined" style="font-size:1rem;">emoji_events</span>
-            View Leaderboard
+    </div>
+
+    <!-- ══════════════ CLASSWORK TAB ══════════════════════════════════════ -->
+    <div id="tab-classwork" class="tab-panel">
+        <!-- Lessons section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h3 class="classwork-section-title">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    Lessons
+                    <span class="cw-count" id="lessonCount">0</span>
+                </h3>
+            </div>
+            <div class="lesson-list" id="lessonList">
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+            </div>
+        </div>
+
+        <!-- Challenges section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h3 class="classwork-section-title">
+                    <span class="material-symbols-outlined">quiz</span>
+                    Challenges
+                    <span class="cw-count" id="challengeCount">0</span>
+                </h3>
+            </div>
+            <div class="challenge-list" id="challengeList">
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PLAY TAB ══════════════════════════════════════════ -->
+    <div id="tab-play" class="tab-panel">
+        <!-- Idle: no active session -->
+        <div class="session-idle" id="playIdle">
+            <span class="material-symbols-outlined">sports_esports</span>
+            <h3>No Active Session</h3>
+            <p>Your instructor will start a live game session soon. Check back here!</p>
+            <button class="btn btn-secondary" onclick="checkForSession()" style="font-size:.82rem;">
+                <span class="material-symbols-outlined" style="font-size:.95rem;">refresh</span>
+                Check Now
+            </button>
+        </div>
+
+        <!-- Session found: waiting for questions -->
+        <div class="wait-screen" id="playWait" style="display:none;">
+            <div class="live-badge"><div class="live-dot"></div>Session Live</div>
+            <div class="spinner"></div>
+            <p style="font-size:.88rem;color:var(--text-muted);">Session in progress — waiting for questions…</p>
+        </div>
+
+        <!-- Active question -->
+        <div id="playActive" style="display:none;">
+            <div class="game-hud">
+                <div class="hud-chip hud-score"><div class="hud-val" id="hudScore">0</div><div class="hud-lbl">Score</div></div>
+                <div class="hud-chip hud-streak"><div class="hud-val" id="hudStreak">0🔥</div><div class="hud-lbl">Streak</div></div>
+                <div class="hud-chip hud-timer"><div class="hud-val" id="hudTimer">30</div><div class="hud-lbl">Seconds</div></div>
+                <div class="hud-chip"><div class="hud-val" id="hudQ">1/—</div><div class="hud-lbl">Question</div></div>
+            </div>
+            <div class="q-card" id="qCard">
+                <div class="q-meta" id="qMeta">Question</div>
+                <div class="q-text" id="qText">—</div>
+                <div class="q-options" id="qOptions"></div>
+                <div class="q-feedback" id="qFeedback"></div>
+            </div>
+            <button id="nextQBtn" class="btn btn-primary" style="display:none;width:100%;justify-content:center;" onclick="nextQuestion()">
+                Next Question →
+            </button>
+        </div>
+
+        <!-- End screen -->
+        <div class="end-screen" id="playEnd" style="display:none;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;color:#fbbf24;">emoji_events</span>
+            <div style="font-size:.85rem;color:var(--text-muted);margin-top:.5rem;">Session Complete!</div>
+            <div class="end-score" id="endScore">0</div>
+            <div style="font-size:.82rem;color:var(--text-muted);">points earned</div>
+            <div class="end-stats">
+                <div><div class="end-stat-val" id="endCorrect">0</div><div class="end-stat-lbl">Correct</div></div>
+                <div><div class="end-stat-val" id="endTotal">0</div><div class="end-stat-lbl">Total</div></div>
+                <div><div class="end-stat-val" id="endAcc">0%</div><div class="end-stat-lbl">Accuracy</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="switchTab('progress', document.querySelectorAll('.tab-btn')[3])" style="font-size:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">bar_chart</span>
+                View My Progress
+            </button>
+        </div>
+    </div>
+
+    <!-- ══════════════ PROGRESS TAB ══════════════════════════════════════ -->
+    <div id="tab-progress" class="tab-panel">
+        <!-- My stats -->
+        <p class="section-title">My Stats</p>
+        <div class="progress-grid">
+            <div class="progress-stat-card">
+                <span class="progress-stat-icon">🎯</span>
+                <span class="progress-stat-val" id="statAccuracy">0%</span>
+                <span class="progress-stat-lbl">Accuracy</span>
+            </div>
+            <div class="progress-stat-card">
+                <span class="progress-stat-icon">❓</span>
+                <span class="progress-stat-val" id="statAnswered">0</span>
+                <span class="progress-stat-lbl">Questions</span>
+            </div>
+            <div class="progress-stat-card">
+                <span class="progress-stat-icon">🔥</span>
+                <span class="progress-stat-val" id="statStreak">0</span>
+                <span class="progress-stat-lbl">Best Streak</span>
+            </div>
+            <div class="progress-stat-card">
+                <span class="progress-stat-icon">📚</span>
+                <span class="progress-stat-val" id="statLessons">0</span>
+                <span class="progress-stat-lbl">Lessons Done</span>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <p class="section-title">Leaderboard</p>
+        <div class="lb-table" id="lbTable">
+            <div style="padding:2rem;text-align:center;">
+                <div class="skeleton-line" style="width:100%;height:20px;"></div>
+                <div class="skeleton-line" style="width:100%;height:20px;"></div>
+            </div>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:.75rem;font-size:.8rem;" onclick="loadLeaderboard()">
+            <span class="material-symbols-outlined" style="font-size:.95rem;">refresh</span>
+            Refresh
         </button>
-    </div>
-</div>
 
-<!-- ══════════════════════ LEADERBOARD TAB ══════════════════════════════════ -->
-<div id="tab-leaderboard" class="tab-panel">
-    <div class="lb-table" id="lbTable">
-        <div style="padding:2rem;text-align:center;">
-            <div class="skeleton-line" style="width:100%;height:20px;"></div>
-            <div class="skeleton-line" style="width:100%;height:20px;"></div>
+        <!-- AI Feedback -->
+        <div class="ai-feedback-panel" id="aiFeedbackPanel">
+            <div class="ai-feedback-header">
+                <div class="ai-feedback-icon">
+                    <span class="material-symbols-outlined">psychology</span>
+                </div>
+                <div>
+                    <div class="ai-feedback-title">AI Performance Insight</div>
+                    <div class="ai-feedback-subtitle">Personalised assessment based on your activity</div>
+                </div>
+                <button class="btn btn-secondary" style="margin-left:auto;font-size:.75rem;" onclick="loadAIFeedback()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">refresh</span>
+                    Refresh
+                </button>
+            </div>
+            <div class="ai-feedback-body" id="aiFeedbackBody">
+                <div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.85rem;">
+                    Complete some activities to get personalised AI feedback.
+                </div>
+            </div>
         </div>
     </div>
-    <button class="btn btn-secondary" style="margin-top:0.75rem;font-size:0.8rem;" onclick="loadLeaderboard()">
-        <span class="material-symbols-outlined" style="font-size:0.95rem;">refresh</span>
-        Refresh
-    </button>
-</div>
 
-<!-- ══════════════════════ AI FEEDBACK TAB ══════════════════════════════════ -->
-<div id="tab-feedback" class="tab-panel">
-    <div class="feedback-panel" id="feedbackPanel">
-        <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">
-            Complete a game session to see your AI-powered feedback here.
-        </div>
-    </div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toastIcon">info</span>
+    <span id="toastMsg">—</span>
 </div>
 
 <script>window.SIDEBAR_PAGE = 'classrooms';</script>
 <script src="../js/sidebar.js"></script>
 <script>
-const API    = 'http://localhost:3000/api';
-const token  = localStorage.getItem('token');
-const me     = JSON.parse(localStorage.getItem('user') || '{}');
+const API   = 'http://localhost:3000/api';
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
 
 if (!me.id) { location.href = 'login.html'; }
 
 const params      = new URLSearchParams(location.search);
 const classroomId = params.get('id');
-const isFaculty   = me.role === 'faculty' || params.get('role') === 'faculty';
-
-let sessionId     = null;
-let questions     = [];
-let qIndex        = 0;
-let score         = 0;
-let streak        = 0;
-let correct       = 0;
-let timer         = null;
-let timerSec      = 30;
-let answered      = false;
-
 if (!classroomId) { location.href = 'classrooms.html'; }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-    // Hide AI feedback tab for faculty
-    if (isFaculty) {
-        document.getElementById('feedbackTabBtn').style.display = 'none';
-        document.getElementById('facultyBar').style.display = 'flex';
-    }
+function getAuthHeaders() {
+    return { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+}
 
+// ── Game state ─────────────────────────────────────────────────────────────────
+let sessionId  = null;
+let questions  = [];
+let qIndex     = 0;
+let score      = 0;
+let streak     = 0;
+let bestStreak = 0;
+let correct    = 0;
+let timerInt   = null;
+let timerSec   = 30;
+let answered   = false;
+
+// Completed lessons stored in localStorage per classroom
+const DONE_KEY = 'doneLesson_' + classroomId;
+function getDoneLessons() {
+    try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch { return []; }
+}
+function markLessonDone(id) {
+    const done = getDoneLessons();
+    if (!done.includes(id)) { done.push(id); localStorage.setItem(DONE_KEY, JSON.stringify(done)); }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
     await loadClassroomInfo();
-    loadLessons();
+    loadAnnouncements();
+    loadClasswork();
     checkForSession();
     loadLeaderboard();
+    loadMyProgress();
 });
 
+// ── Classroom info ─────────────────────────────────────────────────────────────
 async function loadClassroomInfo() {
     try {
-        const res  = await fetch(`${API}/classrooms/${classroomId}`, { headers: { Authorization: `Bearer ${token}` } });
+        const res  = await fetch(API + '/classrooms/' + classroomId, { headers: getAuthHeaders() });
         const data = await res.json();
         const cl   = data.classroom || data;
 
-        document.title = `${cl.name || 'Classroom'} – CodeArena`;
-        document.getElementById('roomTitle').textContent = cl.name || 'Classroom';
-
-        const lang    = (cl.language || 'python').toLowerCase();
+        const name    = cl.name    || 'Classroom';
+        const desc    = cl.description || cl.subject || '';
+        const lang    = (cl.language || 'python');
         const faculty = cl.faculty_name || cl.facultyName || 'Instructor';
         const count   = cl.student_count || cl.studentCount || 0;
+        const lessons = cl.lesson_count  || cl.lessonCount  || 0;
+        const challs  = cl.challenge_count || cl.challengeCount || 0;
+        const sessions= cl.session_count || cl.sessionCount || 0;
 
-        document.getElementById('roomMeta').innerHTML = `
-            <span class="room-badge badge-lang">${lang}</span>
-            <span class="room-badge badge-teacher">👤 ${esc(faculty)}</span>
-            <span class="room-badge badge-students">👥 ${count} students</span>`;
+        document.title = name + ' – CodeArena';
+        document.getElementById('breadcrumbName').textContent = name;
+        document.getElementById('heroName').textContent       = name;
+        document.getElementById('heroDesc').textContent       = desc;
+        document.getElementById('heroLessons').textContent    = lessons;
+        document.getElementById('heroChallenges').textContent = challs;
+        document.getElementById('heroSessions').textContent   = sessions;
+
+        // Teacher badge
+        const initials = faculty.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('teacherInitials').textContent = initials;
+        document.getElementById('teacherName').textContent     = faculty;
+        document.getElementById('teacherBadge').style.display  = 'flex';
+
+        // Sidebar
+        document.getElementById('sideTeacher').textContent  = faculty;
+        document.getElementById('sideLang').textContent     = lang;
+        document.getElementById('sideStudents').textContent = count;
+
+        // Banner image
+        if (cl.banner_image) {
+            document.getElementById('classroomHero').style.backgroundImage = 'url("' + cl.banner_image + '")';
+        }
     } catch {
-        document.getElementById('roomTitle').textContent = 'Classroom';
-        document.getElementById('roomMeta').textContent  = '';
+        document.getElementById('breadcrumbName').textContent = 'Classroom';
+        document.getElementById('heroName').textContent       = 'Classroom';
     }
 }
 
-// ─── Lessons ──────────────────────────────────────────────────────────────────
+// ── Announcements ──────────────────────────────────────────────────────────────
+async function loadAnnouncements() {
+    try {
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/announcements', { headers: getAuthHeaders() });
+        const data = await res.json();
+        renderAnnouncements(data.announcements || data || []);
+    } catch {
+        renderAnnouncements([]);
+    }
+}
+
+function renderAnnouncements(anns) {
+    const feed = document.getElementById('annFeed');
+    if (!anns.length) {
+        feed.innerHTML = '<div class="stream-empty"><span class="material-symbols-outlined">campaign</span><p>No announcements yet. Check back later!</p></div>';
+        return;
+    }
+    feed.innerHTML = anns.map(a => {
+        const author = a.author_name || a.authorName || 'Instructor';
+        const init   = author.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const time   = relativeTime(a.created_at || a.createdAt);
+        const body   = esc(a.body || a.content || '');
+        const link   = a.link_url || a.linkUrl || '';
+        const linkTxt= a.link_title || a.linkTitle || link;
+        const aid    = a.announcement_id || a.id;
+        return '<div class="announcement-card" id="ann-' + aid + '">' +
+            '<div class="ann-header">' +
+                '<div class="ann-avatar">' + init + '</div>' +
+                '<div class="ann-meta"><div class="ann-author">' + esc(author) + '</div><div class="ann-time">' + time + '</div></div>' +
+            '</div>' +
+            '<div class="ann-body">' + body + '</div>' +
+            (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener" class="ann-link"><span class="material-symbols-outlined">link</span>' + esc(linkTxt) + '</a>' : '') +
+            '<div class="ann-comments">' +
+                '<button class="ann-comments-toggle" onclick="toggleComments(' + aid + ', this)">' +
+                    '<span class="material-symbols-outlined">chat_bubble_outline</span>' +
+                    '<span class="ann-comment-count-lbl" id="ann-ccount-' + aid + '">View comments</span>' +
+                '</button>' +
+                '<div class="ann-comments-list" id="ann-clist-' + aid + '" style="display:none;"></div>' +
+                '<div class="ann-compose" id="ann-compose-' + aid + '" style="display:none;">' +
+                    '<div class="ann-comment-avatar" style="width:28px;height:28px;font-size:.6rem;">' + esc(meInitials()) + '</div>' +
+                    '<textarea class="ann-compose-input" id="ann-input-' + aid + '" placeholder="Add a comment…" rows="1" onkeydown="composeKeydown(event,' + aid + ')"></textarea>' +
+                    '<button class="ann-compose-send" onclick="postComment(' + aid + ')" id="ann-send-' + aid + '" title="Post">' +
+                        '<span class="material-symbols-outlined">send</span>' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── Comments ───────────────────────────────────────────────────────────────────
+const _commentsCache = {};
+
+function meInitials() {
+    const name = me.fullName || me.full_name || me.name || me.email || 'Me';
+    return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+
+async function toggleComments(aid, btn) {
+    const list    = document.getElementById('ann-clist-' + aid);
+    const compose = document.getElementById('ann-compose-' + aid);
+    const open    = list.style.display === 'none';
+    list.style.display    = open ? 'flex' : 'none';
+    compose.style.display = open ? 'flex' : 'none';
+    if (!open) return;
+
+    if (_commentsCache[aid]) {
+        renderComments(aid, _commentsCache[aid]);
+        return;
+    }
+    list.innerHTML = '<div style="font-size:.78rem;color:var(--text-muted);padding:4px 0;">Loading…</div>';
+    try {
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/announcements/' + aid + '/comments', { headers: getAuthHeaders() });
+        const data = await res.json();
+        const comments = data.comments || [];
+        _commentsCache[aid] = comments;
+        renderComments(aid, comments);
+    } catch {
+        list.innerHTML = '<div style="font-size:.78rem;color:var(--danger);">Could not load comments.</div>';
+    }
+}
+
+function renderComments(aid, comments) {
+    const list  = document.getElementById('ann-clist-' + aid);
+    const label = document.getElementById('ann-ccount-' + aid);
+    const n     = comments.length;
+    label.textContent = n ? n + ' comment' + (n !== 1 ? 's' : '') : 'Add a comment';
+
+    if (!n) {
+        list.innerHTML = '<div style="font-size:.78rem;color:var(--text-muted);padding:2px 0;">No comments yet. Be the first!</div>';
+        return;
+    }
+    list.innerHTML = comments.map(c => {
+        const author = esc(c.author_name || c.authorName || 'Student');
+        const init   = (c.author_name || 'S').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const role   = (c.author_role || c.role || 'student').toLowerCase();
+        const isFac  = role === 'faculty' || role === 'instructor';
+        const time   = relativeTime(c.created_at || c.createdAt);
+        return '<div class="ann-comment">' +
+            '<div class="ann-comment-avatar' + (isFac ? ' faculty' : '') + '">' + init + '</div>' +
+            '<div class="ann-comment-bubble">' +
+                '<div class="ann-comment-header">' +
+                    '<span class="ann-comment-author">' + author + '</span>' +
+                    (isFac ? '<span class="ann-comment-role">Instructor</span>' : '') +
+                    '<span class="ann-comment-time">' + time + '</span>' +
+                '</div>' +
+                '<div class="ann-comment-body">' + esc(c.body || '') + '</div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function composeKeydown(e, aid) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); postComment(aid); }
+}
+
+async function postComment(aid) {
+    const input = document.getElementById('ann-input-' + aid);
+    const send  = document.getElementById('ann-send-' + aid);
+    const body  = input.value.trim();
+    if (!body) return;
+
+    send.disabled = true;
+    input.disabled = true;
+    try {
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/announcements/' + aid + '/comments', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ body })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+
+        // Optimistic: add to cache and re-render
+        const newComment = {
+            comment_id: data.comment_id,
+            announcement_id: aid,
+            user_id: me.id,
+            author_name: me.fullName || me.full_name || me.name || 'You',
+            author_role: me.role || 'student',
+            body,
+            created_at: new Date().toISOString()
+        };
+        if (!_commentsCache[aid]) _commentsCache[aid] = [];
+        _commentsCache[aid].push(newComment);
+        renderComments(aid, _commentsCache[aid]);
+        input.value = '';
+    } catch {
+        showToast('Could not post comment. Try again.', 'error');
+    } finally {
+        send.disabled  = false;
+        input.disabled = false;
+        input.focus();
+    }
+}
+
+// ── Classwork ──────────────────────────────────────────────────────────────────
+async function loadClasswork() {
+    await Promise.all([loadLessons(), loadChallenges()]);
+}
+
 async function loadLessons() {
     try {
-        const res  = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: { Authorization: `Bearer ${token}` } });
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/lessons', { headers: getAuthHeaders() });
         const data = await res.json();
         renderLessons(data.lessons || data || []);
     } catch {
@@ -410,59 +934,105 @@ async function loadLessons() {
 
 function renderLessons(lessons) {
     const list = document.getElementById('lessonList');
+    document.getElementById('lessonCount').textContent = lessons.length;
+
     if (!lessons.length) {
-        list.innerHTML = `<div class="empty-state">
-            <span class="material-symbols-outlined">menu_book</span>
-            No lessons yet. ${isFaculty ? 'Add lessons via Manage Classroom.' : 'Ask your instructor to add lessons.'}</div>`;
+        list.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">menu_book</span>No lessons assigned yet.</div>';
+        updateProgressSidebar(0, 0);
         return;
     }
 
-    list.innerHTML = lessons.map((l, i) => `
-    <div>
-        <div class="lesson-row" onclick="toggleLesson(${i})">
-            <div class="lesson-num">${i + 1}</div>
-            <div class="lesson-info">
-                <div class="lesson-title">${esc(l.title)}</div>
-                ${l.content_preview ? `<div class="lesson-sub">${esc(l.content_preview.slice(0,80))}…</div>` : ''}
-            </div>
-            <span class="material-symbols-outlined" id="lessonChev${i}" style="color:var(--text-muted);font-size:1.1rem;">expand_more</span>
-        </div>
-        <div class="lesson-content" id="lessonContent${i}">
-            <div style="white-space:pre-wrap;">${esc(l.content || 'No content yet.')}</div>
-        </div>
-    </div>`).join('');
+    const done = getDoneLessons();
+    const doneCount = lessons.filter(l => done.includes(l.lesson_id || l.id)).length;
+    updateProgressSidebar(doneCount, lessons.length);
+
+    list.innerHTML = lessons.map((l, i) => {
+        const lid   = l.lesson_id || l.id || i;
+        const isDone= done.includes(lid);
+        const title = esc(l.title || 'Lesson ' + (i + 1));
+        const meta  = [l.language || '', l.topic || ''].filter(Boolean).join(' · ');
+        return '<div class="lesson-row' + (isDone ? ' done' : '') + '" id="lrow-' + lid + '">' +
+            '<div class="lesson-row-icon"><span class="material-symbols-outlined">' + (isDone ? 'check_circle' : 'menu_book') + '</span></div>' +
+            '<div class="lesson-row-body">' +
+                '<div class="lesson-row-title">' + title + '</div>' +
+                (meta ? '<div class="lesson-row-meta">' + esc(meta) + '</div>' : '') +
+            '</div>' +
+            '<div class="lesson-row-actions">' +
+                (isDone ? '<span class="done-badge"><span class="material-symbols-outlined" style="font-size:.85rem;">check</span>Done</span>' :
+                    '<button class="btn btn-secondary" style="font-size:.75rem;" onclick="markDone(' + lid + ')"><span class="material-symbols-outlined" style="font-size:.9rem;">check</span>Mark Done</button>') +
+                '<a href="lesson_view.html?id=' + lid + '" class="btn btn-primary" style="font-size:.75rem;"><span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>Open</a>' +
+            '</div>' +
+        '</div>';
+    }).join('');
 }
 
-function toggleLesson(i) {
-    const content = document.getElementById(`lessonContent${i}`);
-    const chev    = document.getElementById(`lessonChev${i}`);
-    const open    = content.classList.toggle('open');
-    chev.textContent = open ? 'expand_less' : 'expand_more';
+function markDone(lid) {
+    markLessonDone(lid);
+    loadLessons();
+    showToast('Lesson marked as done!', 'success');
 }
 
-// ─── Session / Play ───────────────────────────────────────────────────────────
+function updateProgressSidebar(done, total) {
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('lessonProgressTxt').textContent  = done + ' / ' + total;
+    document.getElementById('lessonProgressBar').style.width  = pct + '%';
+    document.getElementById('statLessons').textContent        = done;
+}
+
+async function loadChallenges() {
+    try {
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/questions', { headers: getAuthHeaders() });
+        const data = await res.json();
+        renderChallenges(data.questions || data || []);
+    } catch {
+        renderChallenges([]);
+    }
+}
+
+function renderChallenges(qs) {
+    const list = document.getElementById('challengeList');
+    document.getElementById('challengeCount').textContent = qs.length;
+
+    if (!qs.length) {
+        list.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">quiz</span>No challenges assigned yet.</div>';
+        return;
+    }
+
+    list.innerHTML = qs.map((q, i) => {
+        const level = (q.difficulty || q.level || 'beginner').toLowerCase();
+        const type  = q.question_type || q.type || 'multiple_choice';
+        const txt   = esc(q.question_text || q.text || 'Question ' + (i + 1));
+        return '<div class="challenge-row">' +
+            '<div class="challenge-row-icon"><span class="material-symbols-outlined">quiz</span></div>' +
+            '<div class="challenge-row-body">' +
+                '<div class="challenge-row-text">' + txt + '</div>' +
+                '<div class="challenge-row-meta">' +
+                    '<span class="level-pill ' + level + '">' + level + '</span>' +
+                    '<span class="type-chip"><span class="material-symbols-outlined" style="font-size:.8rem;">edit_note</span>' + esc(type.replace(/_/g,' ')) + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="challenge-row-actions">' +
+                '<button class="btn btn-primary" style="font-size:.75rem;" onclick="switchTab(\'play\',document.querySelectorAll(\'.tab-btn\')[2])">' +
+                    '<span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Play' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── Play / Game session ────────────────────────────────────────────────────────
 async function checkForSession() {
     try {
-        const res  = await fetch(`${API}/classrooms/${classroomId}/sessions/active`, { headers: { Authorization: `Bearer ${token}` } });
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/sessions/active', { headers: getAuthHeaders() });
         if (!res.ok) { showIdle(); return; }
         const data = await res.json();
         const sess = data.session || data;
         if (!sess || !sess.session_id) { showIdle(); return; }
         sessionId = sess.session_id;
-        await loadQuestions();
-    } catch {
-        showIdle();
-    }
-}
-
-async function loadQuestions() {
-    try {
-        const res  = await fetch(`${API}/classrooms/${classroomId}/sessions/active`, { headers: { Authorization: `Bearer ${token}` } });
-        const data = await res.json();
-        const qs   = data.questions || data.session?.questions || [];
+        const qs  = data.questions || sess.questions || [];
         if (!qs.length) { showWaiting(); return; }
         questions = qs;
-        qIndex = 0; score = 0; streak = 0; correct = 0;
+        qIndex = 0; score = 0; streak = 0; bestStreak = 0; correct = 0;
         showQuestion();
     } catch {
         showIdle();
@@ -474,14 +1044,7 @@ function showIdle() {
     document.getElementById('playWait').style.display   = 'none';
     document.getElementById('playActive').style.display = 'none';
     document.getElementById('playEnd').style.display    = 'none';
-    if (isFaculty) {
-        document.getElementById('statusDot').className  = 'status-dot';
-        document.getElementById('statusText').textContent = 'No active session';
-        document.getElementById('startSessionBtn').style.display = 'inline-flex';
-        document.getElementById('closeSessionBtn').style.display = 'none';
-    }
 }
-
 function showWaiting() {
     document.getElementById('playIdle').style.display   = 'none';
     document.getElementById('playWait').style.display   = 'block';
@@ -497,64 +1060,66 @@ function showQuestion() {
     document.getElementById('playEnd').style.display    = 'none';
 
     const q = questions[qIndex];
-    document.getElementById('qMeta').textContent    = `Question ${qIndex + 1} of ${questions.length} · ${q.difficulty || 'medium'}`;
-    document.getElementById('qText').textContent    = q.question_text || q.text || '—';
-    document.getElementById('hudQ').textContent     = `${qIndex + 1}/${questions.length}`;
-    document.getElementById('qFeedback').className  = 'q-feedback';
+    document.getElementById('qMeta').textContent   = 'Question ' + (qIndex + 1) + ' of ' + questions.length + ' · ' + (q.difficulty || 'medium');
+    document.getElementById('qText').textContent   = q.question_text || q.text || '—';
+    document.getElementById('hudQ').textContent    = (qIndex + 1) + '/' + questions.length;
+    document.getElementById('qFeedback').className = 'q-feedback';
     document.getElementById('nextQBtn').style.display = 'none';
     answered = false;
 
-    const opts = q.options || tryParseOptions(q);
-    document.getElementById('qOptions').innerHTML = opts.map((o, i) => `
-        <button class="q-option" onclick="selectOption(this, ${JSON.stringify(String(o))}, ${JSON.stringify(String(q.correct_answer || q.correctAnswer || opts[0]))}, ${q.question_id || q.id || 0})">
-            <span style="font-weight:700;margin-right:0.5rem;">${String.fromCharCode(65+i)}.</span>${esc(String(o))}
-        </button>`).join('');
+    const opts = parseOptions(q);
+    const correctAns = String(q.correct_answer || q.correctAnswer || opts[0]);
+    document.getElementById('qOptions').innerHTML = opts.map((o, i) =>
+        '<button class="q-option" onclick="selectOption(this,\'' + escQ(String(o)) + '\',\'' + escQ(correctAns) + '\',' + (q.question_id || q.id || 0) + ')">' +
+            '<span style="font-weight:700;margin-right:.5rem;">' + String.fromCharCode(65 + i) + '.</span>' + esc(String(o)) +
+        '</button>'
+    ).join('');
 
     startTimer();
 }
 
-function tryParseOptions(q) {
+function parseOptions(q) {
     try {
+        if (Array.isArray(q.options)) return q.options;
         if (q.options_json) return JSON.parse(q.options_json);
         if (Array.isArray(q.choices)) return q.choices;
     } catch {}
-    return ['Option A', 'Option B', 'Option C', 'Option D'];
+    return ['Option A','Option B','Option C','Option D'];
 }
 
 function startTimer() {
-    clearInterval(timer);
+    clearInterval(timerInt);
     timerSec = 30;
     document.getElementById('hudTimer').textContent = timerSec;
-    timer = setInterval(() => {
+    timerInt = setInterval(() => {
         timerSec--;
         document.getElementById('hudTimer').textContent = timerSec;
-        if (timerSec <= 0) { clearInterval(timer); if (!answered) autoWrong(); }
+        if (timerSec <= 0) { clearInterval(timerInt); if (!answered) autoWrong(); }
     }, 1000);
 }
 
 function autoWrong() {
-    answered = true;
-    streak = 0;
+    answered = true; streak = 0;
     document.getElementById('hudStreak').textContent = '0🔥';
     document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
     const fb = document.getElementById('qFeedback');
-    fb.className  = 'q-feedback wrong';
+    fb.className   = 'q-feedback wrong';
     fb.textContent = '⏱ Time\'s up!';
     document.getElementById('nextQBtn').style.display = 'block';
 }
 
-async function selectOption(btn, selected, correct, questionId) {
+async function selectOption(btn, selected, correctAns, questionId) {
     if (answered) return;
     answered = true;
-    clearInterval(timer);
+    clearInterval(timerInt);
 
-    const isCorrect = String(selected).trim() === String(correct).trim();
+    const isCorrect = selected.trim() === correctAns.trim();
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
     document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
 
     if (isCorrect) {
-        score += 10; correct++;
-        streak++;
+        score += 10; correct++; streak++;
+        if (streak > bestStreak) bestStreak = streak;
         document.getElementById('hudScore').textContent  = score;
         document.getElementById('hudStreak').textContent = streak + '🔥';
     } else {
@@ -563,15 +1128,14 @@ async function selectOption(btn, selected, correct, questionId) {
     }
 
     const fb = document.getElementById('qFeedback');
-    fb.className  = `q-feedback ${isCorrect ? 'correct' : 'wrong'}`;
-    fb.textContent = isCorrect ? '✓ Correct! Well done.' : `✗ Incorrect. Correct: ${correct}`;
+    fb.className   = 'q-feedback ' + (isCorrect ? 'correct' : 'wrong');
+    fb.textContent = isCorrect ? '✓ Correct! Well done.' : '✗ Incorrect. Correct answer: ' + correctAns;
 
-    // Submit answer to backend
     if (sessionId && questionId) {
         try {
-            await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/answer`, {
+            await fetch(API + '/classrooms/' + classroomId + '/sessions/' + sessionId + '/answer', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ questionId, selectedAnswer: selected, isCorrect })
             });
         } catch {}
@@ -580,67 +1144,53 @@ async function selectOption(btn, selected, correct, questionId) {
     document.getElementById('nextQBtn').style.display = 'block';
 }
 
-function nextQuestion() {
-    qIndex++;
-    showQuestion();
-}
+function nextQuestion() { qIndex++; showQuestion(); }
 
 function showEnd() {
-    clearInterval(timer);
+    clearInterval(timerInt);
     document.getElementById('playIdle').style.display   = 'none';
     document.getElementById('playWait').style.display   = 'none';
     document.getElementById('playActive').style.display = 'none';
     document.getElementById('playEnd').style.display    = 'block';
 
+    const acc = questions.length ? Math.round((correct / questions.length) * 100) : 0;
     document.getElementById('endScore').textContent   = score;
     document.getElementById('endCorrect').textContent = correct;
     document.getElementById('endTotal').textContent   = questions.length;
-    const xp = score * 2;
-    document.getElementById('endXP').textContent = '+' + xp;
+    document.getElementById('endAcc').textContent     = acc + '%';
+
+    // Update accuracy sidebar
+    document.getElementById('accuracyTxt').textContent      = acc + '%';
+    document.getElementById('accuracyBar').style.width      = acc + '%';
+    document.getElementById('statAccuracy').textContent     = acc + '%';
+    document.getElementById('statAnswered').textContent     = questions.length;
+    document.getElementById('statStreak').textContent       = bestStreak;
+
     loadLeaderboard();
 }
 
-// ─── Faculty session management ───────────────────────────────────────────────
-async function startSession() {
+// ── Progress ───────────────────────────────────────────────────────────────────
+async function loadMyProgress() {
     try {
-        const res  = await fetch(`${API}/classrooms/${classroomId}/sessions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ title: 'Live Quiz' })
-        });
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/feedback', { headers: getAuthHeaders() });
         const data = await res.json();
-        sessionId  = (data.session || data)?.session_id || (data.session || data)?.id;
-        document.getElementById('statusDot').className     = 'status-dot live';
-        document.getElementById('statusText').textContent  = 'Session active — students can now play';
-        document.getElementById('startSessionBtn').style.display = 'none';
-        document.getElementById('closeSessionBtn').style.display = 'inline-flex';
-        document.getElementById('playIdle').style.display  = 'none';
-        document.getElementById('playWait').style.display  = 'block';
-    } catch (err) {
-        alert('Failed to start session: ' + err.message);
-    }
+        const s    = data.student || data;
+        if (!s) return;
+
+        const acc = Math.round(s.accuracy || s.accuracy_percent || 0);
+        const qs  = s.questionsAnswered || s.questions_answered || 0;
+
+        document.getElementById('statAccuracy').textContent = acc + '%';
+        document.getElementById('statAnswered').textContent = qs;
+        document.getElementById('accuracyTxt').textContent  = acc + '%';
+        document.getElementById('accuracyBar').style.width  = acc + '%';
+    } catch {}
 }
 
-async function closeSession() {
-    if (!sessionId) return;
-    try {
-        await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ status: 'closed' })
-        });
-        sessionId = null;
-        showIdle();
-        loadLeaderboard();
-    } catch (err) {
-        alert('Failed to close session: ' + err.message);
-    }
-}
-
-// ─── Leaderboard ──────────────────────────────────────────────────────────────
+// ── Leaderboard ────────────────────────────────────────────────────────────────
 async function loadLeaderboard() {
     try {
-        const res  = await fetch(`${API}/classrooms/${classroomId}/leaderboard`, { headers: { Authorization: `Bearer ${token}` } });
+        const res  = await fetch(API + '/classrooms/' + classroomId + '/leaderboard', { headers: getAuthHeaders() });
         const data = await res.json();
         renderLeaderboard(data.leaderboard || data || []);
     } catch {
@@ -651,38 +1201,90 @@ async function loadLeaderboard() {
 function renderLeaderboard(entries) {
     const table = document.getElementById('lbTable');
     if (!entries.length) {
-        table.innerHTML = `<div class="empty-state">
-            <span class="material-symbols-outlined">emoji_events</span>
-            No scores yet. Play a session to appear here!</div>`;
+        table.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">emoji_events</span>No scores yet. Play a session first!</div>';
         return;
     }
-
     const medals = ['🥇','🥈','🥉'];
-    table.innerHTML = entries.slice(0,20).map((e, i) => {
-        const name  = e.full_name || e.fullName || e.name || 'Player';
+    table.innerHTML = entries.slice(0, 20).map((e, i) => {
+        const name  = esc(e.full_name || e.fullName || e.name || 'Player');
         const pts   = e.score || e.total_score || 0;
         const isMe  = (e.user_id || e.id) === me.id;
-        return `<div class="lb-row${isMe ? ' me' : ''}">
-            <div class="lb-rank">${medals[i] || `#${i+1}`}</div>
-            <div class="lb-name">${esc(name)}${isMe ? '<span class="lb-you">you</span>' : ''}</div>
-            <div class="lb-score">${pts} pts</div>
-        </div>`;
+        return '<div class="lb-row' + (isMe ? ' me' : '') + '">' +
+            '<div class="lb-rank">' + (medals[i] || '#' + (i + 1)) + '</div>' +
+            '<div class="lb-name">' + name + (isMe ? '<span class="lb-you">you</span>' : '') + '</div>' +
+            '<div class="lb-score">' + pts + ' pts</div>' +
+        '</div>';
     }).join('');
 }
 
-// ─── Tab switching ────────────────────────────────────────────────────────────
+// ── AI Feedback ────────────────────────────────────────────────────────────────
+let _aiFeedbackCache = null;
+async function loadAIFeedback() {
+    if (_aiFeedbackCache) { document.getElementById('aiFeedbackBody').innerHTML = _aiFeedbackCache; return; }
+    const body = document.getElementById('aiFeedbackBody');
+    body.innerHTML = '<div class="ai-feedback-loading"><div class="mini-spin"></div>Generating your personalised feedback…</div>';
+
+    try {
+        const acc     = document.getElementById('statAccuracy').textContent || '0%';
+        const qs      = document.getElementById('statAnswered').textContent || '0';
+        const lessons = document.getElementById('statLessons').textContent  || '0';
+        const streak  = document.getElementById('statStreak').textContent   || '0';
+
+        const prompt = 'I am a student in a programming classroom. Here is my current performance:\n' +
+            '- Accuracy: ' + acc + '\n' +
+            '- Questions answered: ' + qs + '\n' +
+            '- Lessons completed: ' + lessons + '\n' +
+            '- Best streak: ' + streak + '\n\n' +
+            'Give me a brief (3-4 sentences) personalised assessment: what I\'m doing well, where I need improvement, and one specific actionable tip. Be encouraging but honest.';
+
+        const res  = await fetch(API + '/ai/ask', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ message: prompt, conversationHistory: [] })
+        });
+        const data = await res.json();
+        const text = data.response || data.message || 'No feedback available.';
+        const html = '<p>' + esc(text).replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
+        body.innerHTML = html;
+        _aiFeedbackCache = html;
+    } catch {
+        body.innerHTML = '<p style="color:var(--text-muted);">Could not load AI feedback. Try again later.</p>';
+    }
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`tab-${name}`).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
     if (btn) btn.classList.add('active');
 
-    if (name === 'leaderboard') loadLeaderboard();
-    if (name === 'play') checkForSession();
+    if (name === 'progress') { loadLeaderboard(); loadAIFeedback(); }
+    if (name === 'play')     { checkForSession(); }
+    if (name === 'classwork') { loadClasswork(); }
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────────
 function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escQ(s) {
+    return s.replace(/\\/g,'\\\\').replace(/'/g,'\\\'');
+}
+function relativeTime(ts) {
+    if (!ts) return '';
+    const diff = (Date.now() - new Date(ts).getTime()) / 1000;
+    if (diff < 60)    return 'just now';
+    if (diff < 3600)  return Math.floor(diff / 60)   + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600)  + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent  = msg;
+    document.getElementById('toastIcon').textContent = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+    t.className = 'toast show ' + (type || '');
+    setTimeout(() => t.classList.remove('show'), 3000);
 }
 </script>
 </body>

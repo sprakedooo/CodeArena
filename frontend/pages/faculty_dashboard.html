@@ -21,6 +21,57 @@
             text-transform: uppercase; letter-spacing: 1.4px;
             color: var(--text-muted); margin: 1.6rem 0 0.8rem;
         }
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 1.6rem 0 0.8rem;
+        }
+        .section-header .section-title { margin: 0; }
+        .see-all-link {
+            font-size: 0.75rem; font-weight: 600; color: var(--primary);
+            text-decoration: none; display: flex; align-items: center; gap: 0.2rem;
+            transition: opacity 0.15s;
+        }
+        .see-all-link:hover { opacity: 0.75; }
+        .see-all-link .material-symbols-outlined { font-size: 0.9rem; }
+
+        /* Contribution cards */
+        .contrib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 0.5rem; }
+        .contrib-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+            display: flex; flex-direction: column; transition: border-color 0.15s, transform 0.15s;
+        }
+        .contrib-card:hover { border-color: rgba(124,58,237,0.4); transform: translateY(-2px); }
+        .contrib-card-cover {
+            height: 110px; background: linear-gradient(135deg, #1e1045, #12203a);
+            position: relative; overflow: hidden; flex-shrink: 0;
+        }
+        .contrib-card-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .contrib-card-cover-placeholder {
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        .contrib-card-cover-placeholder .material-symbols-outlined { font-size: 2.2rem; opacity: 0.2; color: var(--primary); }
+        .type-badge {
+            position: absolute; top: 0.6rem; left: 0.6rem;
+            font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px;
+            text-transform: uppercase; padding: 0.18rem 0.5rem; border-radius: 20px;
+        }
+        .type-badge.blog   { background: rgba(6,182,212,0.2);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); }
+        .type-badge.course { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+        .status-badge {
+            position: absolute; top: 0.6rem; right: 0.6rem;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+            padding: 0.18rem 0.48rem; border-radius: 20px;
+        }
+        .status-badge.published { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+        .status-badge.draft     { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+        .contrib-card-body { padding: 0.85rem 1rem; flex: 1; display: flex; flex-direction: column; }
+        .contrib-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin: 0 0 0.3rem; line-height: 1.3; }
+        .contrib-card-desc  { font-size: 0.75rem; color: var(--text-muted); margin: 0 0 0.65rem; line-height: 1.45; flex: 1;
+                               display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .contrib-card-meta  { display: flex; align-items: center; gap: 0.6rem; font-size: 0.68rem; color: var(--text-muted); flex-wrap: wrap; }
+        .contrib-card-meta span { display: flex; align-items: center; gap: 0.2rem; }
+        .contrib-card-meta .material-symbols-outlined { font-size: 0.78rem; }
 
         /* Stat strip */
         .stat-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
@@ -54,41 +105,53 @@
         .quick-sub   { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
 
         /* Classroom grid */
-        .classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.85rem; }
         .cl-card {
             background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 1.3rem 1.4rem;
-            display: flex; flex-direction: column; gap: 0.9rem;
-            transition: all 0.18s;
+            border-radius: var(--radius-lg); padding: 0; overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: all 0.18s; position: relative;
         }
-        .cl-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--glow-primary); }
-        .cl-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
-        .cl-card-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .cl-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: var(--primary); opacity: 0; transition: opacity 0.18s;
+        }
+        .cl-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(124,58,237,0.18); }
+        .cl-card:hover::before { opacity: 1; }
+        .cl-card-banner {
+            height: 110px; position: relative; display: flex;
+            align-items: flex-end; padding: 0.65rem 1rem; flex-shrink: 0;
+            background-size: cover; background-position: center;
+        }
+        .cl-card-banner::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.55));
+        }
+        .cl-card-banner-name {
+            font-size: 1rem; font-weight: 800; color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5); position: relative; z-index: 1;
+        }
         .cl-lang-badge {
-            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
-            padding: 0.22rem 0.55rem; border-radius: 20px; flex-shrink: 0;
-            background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3);
+            position: absolute; top: 0.6rem; right: 0.75rem; z-index: 1;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
+            padding: 0.2rem 0.55rem; border-radius: 20px;
+            background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.15);
         }
-        .cl-lang-badge.js  { background: rgba(251,191,36,0.12); color: #fbbf24; border-color: rgba(251,191,36,0.3); }
-        .cl-lang-badge.java{ background: rgba(239,68,68,0.12);  color: #f87171; border-color: rgba(239,68,68,0.3);  }
-        .cl-lang-badge.cpp { background: rgba(6,182,212,0.12);  color: #22d3ee; border-color: rgba(6,182,212,0.3);  }
-
-        .cl-card-meta { display: flex; align-items: center; gap: 1rem; }
+        .cl-card-body { padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.65rem; flex: 1; }
+        .cl-card-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; }
+        .cl-card-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .cl-meta-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.77rem; color: var(--text-muted); }
         .cl-meta-item .material-symbols-outlined { font-size: 0.95rem; }
-
-        .cl-key-chip {
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
-            padding: 0.28rem 0.65rem; border-radius: 6px;
-            background: var(--bg-surface); border: 1px dashed var(--border);
-            color: var(--text-muted); font-family: 'Courier New', monospace;
-            cursor: pointer; transition: all 0.15s;
-        }
-        .cl-key-chip:hover { border-color: var(--primary); color: var(--primary); }
-        .cl-key-chip.copied { border-color: var(--success); color: var(--success); }
-
-        .cl-card-actions { display: flex; gap: 0.5rem; }
-        .cl-card-actions .btn { flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; }
+        .cl-key-block { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 0.6rem 0.75rem; }
+        .cl-key-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem; }
+        .cl-key-row { display: flex; align-items: center; justify-content: space-between; }
+        .cl-key-val { font-family: 'Courier New', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 1.5px; color: var(--text); }
+        .cl-key-copy { background: transparent; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; padding: 0.2rem; border-radius: 4px; transition: color 0.15s; }
+        .cl-key-copy:hover { color: var(--primary); }
+        .cl-key-copy.copied { color: var(--success, #10b981); }
+        .cl-key-copy .material-symbols-outlined { font-size: 1rem; }
+        .cl-card-actions { display: flex; gap: 0.5rem; margin-top: auto; }
+        .cl-card-actions .btn { flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.55rem; }
 
         /* AI Insights panel */
         .insights-panel {
@@ -238,10 +301,10 @@
         </div>
     </button>
     <a href="admin.html" class="quick-card">
-        <div class="quick-icon chip-cyan"><span class="material-symbols-outlined">edit_note</span></div>
+        <div class="quick-icon chip-cyan"><span class="material-symbols-outlined">add_box</span></div>
         <div>
-            <div class="quick-label">Manage Content</div>
-            <div class="quick-sub">Lessons &amp; questions</div>
+            <div class="quick-label">Contribute</div>
+            <div class="quick-sub">Add lessons &amp; questions</div>
         </div>
     </a>
     <a href="profile.html" class="quick-card">
@@ -253,12 +316,26 @@
     </a>
 </div>
 
-<!-- ── Classrooms ─────────────────────────────────────────────────────────── -->
-<p class="section-title" id="classrooms" style="scroll-margin-top: 80px;">My Classrooms</p>
+<!-- ── Recently Opened Classrooms ─────────────────────────────────────────── -->
+<div class="section-header" id="classrooms" style="scroll-margin-top: 80px;">
+    <p class="section-title">Recently Opened Classrooms</p>
+    <a href="classrooms_faculty.html" class="see-all-link">See All <span class="material-symbols-outlined">chevron_right</span></a>
+</div>
 <div id="classroomGrid" class="classroom-grid">
     <!-- skeleton -->
     <div class="cl-card"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:40%"></div></div>
     <div class="cl-card"><div class="skeleton-line" style="width:55%"></div><div class="skeleton-line" style="width:35%"></div></div>
+</div>
+
+<!-- ── Recent Contributions ────────────────────────────────────────────────── -->
+<div class="section-header">
+    <p class="section-title">Recent Contributions</p>
+    <a href="contribute.html" class="see-all-link">See All <span class="material-symbols-outlined">chevron_right</span></a>
+</div>
+<div id="contribGrid" class="contrib-grid">
+    <div class="contrib-card" style="min-height:180px;"><div class="skeleton-line" style="height:110px;margin:0;border-radius:0;"></div><div style="padding:0.85rem 1rem;"><div class="skeleton-line" style="width:65%"></div><div class="skeleton-line" style="width:45%"></div></div></div>
+    <div class="contrib-card" style="min-height:180px;"><div class="skeleton-line" style="height:110px;margin:0;border-radius:0;"></div><div style="padding:0.85rem 1rem;"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:40%"></div></div></div>
+    <div class="contrib-card" style="min-height:180px;"><div class="skeleton-line" style="height:110px;margin:0;border-radius:0;"></div><div style="padding:0.85rem 1rem;"><div class="skeleton-line" style="width:55%"></div><div class="skeleton-line" style="width:50%"></div></div></div>
 </div>
 
 <!-- ── AI Teaching Insights ───────────────────────────────────────────────── -->
@@ -335,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('welcomeMsg').textContent = `${greet}, ${firstName}! 🎓`;
 
     loadClassrooms();
+    loadRecentContribs();
     loadInsights(false);
 });
 
@@ -360,7 +438,7 @@ function updateStats(classrooms) {
     document.getElementById('statClassrooms').textContent = classrooms.length;
     const total = classrooms.reduce((s, c) => s + (c.student_count || c.studentCount || 0), 0);
     document.getElementById('statStudents').textContent   = total;
-    const sessions = classrooms.reduce((s, c) => s + (c.session_count || 0), 0);
+    const sessions = classrooms.reduce((s, c) => s + (c.session_count || c.sessionCount || 0), 0);
     document.getElementById('statSessions').textContent   = sessions || '—';
 }
 
@@ -374,47 +452,113 @@ function renderClassrooms(classrooms) {
         return;
     }
 
-    grid.innerHTML = classrooms.map(c => {
-        const lang = (c.language || 'python').toLowerCase();
-        const key  = c.enrollment_key || c.enrollmentKey || '????-????';
-        const count = c.student_count || c.studentCount || 0;
-        const langClass = lang === 'javascript' ? 'js' : lang === 'java' ? 'java' : lang === 'cpp' ? 'cpp' : '';
+    const BANNER = {
+        python:     { from: '#1a3a5c', to: '#2e6da4' },
+        javascript: { from: '#3b2f00', to: '#7a6200' },
+        java:       { from: '#3a1500', to: '#7a3000' },
+        cpp:        { from: '#132840', to: '#2a5080' },
+        default:    { from: '#1e1045', to: '#4c1d95' },
+    };
+
+    grid.innerHTML = classrooms.slice(0, 3).map(c => {
+        const lang  = (c.language || 'python').toLowerCase();
+        const key   = c.enrollment_key || c.enrollmentKey || '????-????';
+        const count = c.student_count  || c.studentCount  || 0;
+        const id    = c.classroom_id   || c.id;
+        const desc  = c.description    || '';
+        const { from, to } = BANNER[lang] || BANNER.default;
+        const savedBanner = localStorage.getItem(`classroom_banner_${id}`);
+        const bannerBg = savedBanner
+            ? `url(${savedBanner}) center/cover no-repeat`
+            : `linear-gradient(135deg,${from},${to})`;
         return `
         <div class="cl-card">
-            <div class="cl-card-header">
-                <div class="cl-card-name">${esc(c.name)}</div>
-                <span class="cl-lang-badge ${langClass}">${lang}</span>
+            <div class="cl-card-banner" style="background:${bannerBg};">
+                <span class="cl-lang-badge">${lang}</span>
+                <span class="cl-card-banner-name">${esc(c.name)}</span>
             </div>
-            <div class="cl-card-meta">
-                <span class="cl-meta-item">
-                    <span class="material-symbols-outlined">group</span>
-                    ${count} student${count !== 1 ? 's' : ''}
-                </span>
-                ${c.description ? `<span class="cl-meta-item">${esc(c.description).slice(0,40)}…</span>` : ''}
-            </div>
-            <div>
-                <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.5px;">Enrollment Key</div>
-                <span class="cl-key-chip" onclick="copyKey(this,'${key}')" title="Click to copy">${key}</span>
-            </div>
-            <div class="cl-card-actions">
-                <a href="classroom_manage.html?id=${c.classroom_id || c.id}" class="btn btn-secondary">
-                    <span class="material-symbols-outlined" style="font-size:0.95rem;">edit</span>
-                    Manage
-                </a>
-                <a href="classroom_room.html?id=${c.classroom_id || c.id}&role=faculty" class="btn btn-primary">
-                    <span class="material-symbols-outlined" style="font-size:0.95rem;">meeting_room</span>
-                    Enter
-                </a>
+            <div class="cl-card-body">
+                ${desc ? `<div class="cl-card-desc">${esc(desc)}</div>` : ''}
+                <div class="cl-card-meta">
+                    <span class="cl-meta-item">
+                        <span class="material-symbols-outlined">group</span>
+                        ${count} student${count !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <div class="cl-key-block">
+                    <div class="cl-key-label">Enrollment Key</div>
+                    <div class="cl-key-row">
+                        <span class="cl-key-val">${key}</span>
+                        <button class="cl-key-copy" onclick="copyKey(this,'${key}')" title="Copy key">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="cl-card-actions">
+                    <a href="classroom_manage.html?id=${id}" class="btn btn-primary" style="flex:1;">
+                        <span class="material-symbols-outlined" style="font-size:0.95rem;">edit</span>
+                        Manage
+                    </a>
+                </div>
             </div>
         </div>`;
     }).join('');
 }
 
-function copyKey(el, key) {
+// ─── Recent Contributions ─────────────────────────────────────────────────────
+async function loadRecentContribs() {
+    try {
+        const res  = await fetch(`${API}/contributions/mine`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        renderRecentContribs((data.contributions || []).slice(0, 3));
+    } catch {
+        renderRecentContribs([]);
+    }
+}
+
+function renderRecentContribs(list) {
+    const grid = document.getElementById('contribGrid');
+    if (!list.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.85rem;">
+            <span class="material-symbols-outlined" style="display:block;font-size:2rem;opacity:0.3;margin-bottom:0.5rem;">edit_note</span>
+            No contributions yet. <a href="contribute.html" style="color:var(--primary);">Create one</a>
+        </div>`;
+        return;
+    }
+    grid.innerHTML = list.map(c => `
+        <div class="contrib-card">
+            <div class="contrib-card-cover">
+                ${c.cover_image ? `<img src="${esc(c.cover_image)}" alt="">` : `<div class="contrib-card-cover-placeholder"><span class="material-symbols-outlined">${c.type === 'blog' ? 'article' : 'school'}</span></div>`}
+                <span class="type-badge ${c.type}">${c.type === 'blog' ? 'Blog Post' : 'Course'}</span>
+                <span class="status-badge ${c.status}">${c.status}</span>
+            </div>
+            <div class="contrib-card-body">
+                <div class="contrib-card-title">${esc(c.title)}</div>
+                <div class="contrib-card-desc">${esc(c.description || 'No description provided.')}</div>
+                <div class="contrib-card-meta">
+                    <span><span class="material-symbols-outlined">visibility</span>${c.view_count || 0} views</span>
+                    <span><span class="material-symbols-outlined">calendar_today</span>${fmtDate(c.created_at)}</span>
+                </div>
+            </div>
+        </div>`).join('');
+}
+
+function fmtDate(d) {
+    if (!d) return '—';
+    const date = new Date(d);
+    if (isNaN(date)) return '—';
+    const diff = Math.floor((Date.now() - date) / 86400000);
+    if (diff < 1) return 'Today';
+    if (diff < 7) return `${diff}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function copyKey(btn, key) {
     navigator.clipboard.writeText(key).then(() => {
-        el.textContent = 'Copied!';
-        el.classList.add('copied');
-        setTimeout(() => { el.textContent = key; el.classList.remove('copied'); }, 1800);
+        btn.classList.add('copied');
+        const ic = btn.querySelector('.material-symbols-outlined');
+        ic.textContent = 'check';
+        setTimeout(() => { btn.classList.remove('copied'); ic.textContent = 'content_copy'; }, 1500);
     });
 }
 

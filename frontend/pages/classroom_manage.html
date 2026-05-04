@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,702 +7,458 @@
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        /* ══════════════════════════════════════════
-           PAGE SHELL
-        ══════════════════════════════════════════ */
-        .manage-page {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 32px 28px 64px;
-            min-height: calc(100vh - 64px);
-        }
+        /* ══ PAGE SHELL ══════════════════════════════════════════════════ */
+        .manage-page { max-width: 1100px; margin: 0 auto; padding: 28px 24px 80px; }
 
-        /* ══════════════════════════════════════════
-           BREADCRUMB
-        ══════════════════════════════════════════ */
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-        .breadcrumb a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.15s;
-        }
-        .breadcrumb a:hover { color: var(--primary); }
-        .breadcrumb-sep { color: var(--border); }
+        /* ══ BREADCRUMB ══════════════════════════════════════════════════ */
+        .breadcrumb { display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--text-muted); margin-bottom:18px; }
+        .breadcrumb a { color:var(--text-secondary); text-decoration:none; transition:color .15s; }
+        .breadcrumb a:hover { color:var(--primary); }
+        .breadcrumb-sep { color:var(--border); }
 
-        /* ══════════════════════════════════════════
-           CLASSROOM HERO HEADER
-        ══════════════════════════════════════════ */
+        /* ══ HERO ════════════════════════════════════════════════════════ */
         .classroom-hero {
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            margin-bottom: 28px;
-            overflow: hidden;
-            position: relative;
-            background: linear-gradient(135deg, #1e1040 0%, #2d1b69 50%, #0e4f6e 100%);
-            background-size: cover;
-            background-position: center;
-            min-height: 180px;
-            display: flex;
-            align-items: flex-end;
+            border:1px solid var(--border); border-radius:16px; margin-bottom:0;
+            overflow:hidden; position:relative;
+            background:linear-gradient(135deg,#1e1040 0%,#2d1b69 50%,#0e4f6e 100%);
+            background-size:cover; background-position:center;
+            min-height:180px; display:flex; align-items:flex-end;
         }
         .classroom-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%);
-            pointer-events: none;
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.7) 100%);
+            pointer-events:none;
         }
         .classroom-hero-top {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 22px 24px 0;
-            gap: 4px;
+            position:absolute; top:0; left:0; right:0; z-index:2;
+            display:flex; flex-direction:column; align-items:flex-start;
+            padding:22px 24px 0; gap:4px;
         }
         .classroom-hero-name {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1rem;
-            color: #fff;
-            margin: 0;
-            line-height: 1.4;
-            text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+            font-family:'Press Start 2P',monospace; font-size:1rem; color:#fff;
+            margin:0; line-height:1.4; text-shadow:0 1px 6px rgba(0,0,0,.6);
         }
-        .banner-edit-btn {
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px;
-            height: 34px;
-            transition: background 0.2s;
-            flex-shrink: 0;
+        .classroom-hero-desc { font-size:.875rem; color:rgba(255,255,255,.75); margin:0; }
+        .hero-settings-wrap { position:relative; }
+        .hero-settings-btn {
+            background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.2);
+            border-radius:8px; color:#fff; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            width:34px; height:34px; transition:background .2s; flex-shrink:0;
         }
-        .banner-edit-btn:hover { background: rgba(124,58,237,0.7); }
-        .banner-edit-btn .material-symbols-outlined { font-size: 1.05rem; }
-        #bannerInput { display: none; }
-        .classroom-hero-inner {
-            position: relative;
-            z-index: 1;
-            padding: 52px 32px 28px;
-            display: flex;
-            align-items: flex-end;
-            gap: 24px;
-            width: 100%;
+        .hero-settings-btn:hover { background:rgba(0,0,0,.65); }
+        .hero-settings-btn .material-symbols-outlined { font-size:1.15rem; }
+        .hero-settings-menu {
+            position:absolute; top:calc(100% + 6px); left:0; z-index:200;
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:6px; min-width:170px; box-shadow:0 8px 24px rgba(0,0,0,.25);
+            display:none;
         }
-        .classroom-hero-body { flex: 1; min-width: 0; }
-        .classroom-hero-desc {
-            font-size: 0.875rem;
-            color: rgba(255,255,255,0.75);
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .hero-settings-menu.open { display:block; }
+        .hero-settings-item {
+            display:flex; align-items:center; gap:9px; width:100%;
+            background:none; border:none; border-radius:7px; padding:9px 12px;
+            font-size:.82rem; font-weight:500; cursor:pointer; color:var(--text);
+            font-family:'Inter',sans-serif; transition:background .12s; white-space:nowrap;
         }
-        .classroom-hero-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-            flex-shrink: 0;
+        .hero-settings-item:hover { background:var(--bg-surface); }
+        .hero-settings-item.danger { color:var(--danger); }
+        .hero-settings-item.danger:hover { background:rgba(239,68,68,.08); }
+        .hero-settings-item .material-symbols-outlined { font-size:1rem; }
+        .hero-settings-sep { height:1px; background:var(--border); margin:4px 0; }
+        /* ── Delete confirmation modal ── */
+        .delete-modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:1000;
+            display:flex; align-items:center; justify-content:center;
+            opacity:0; pointer-events:none; transition:opacity .2s;
         }
-        .key-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 10px;
-            padding: 10px 16px;
-            backdrop-filter: blur(6px);
+        .delete-modal-overlay.open { opacity:1; pointer-events:all; }
+        .delete-modal {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+            padding:28px 28px 24px; width:100%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,.4);
+            transform:translateY(12px); transition:transform .2s;
         }
-        .key-badge-label {
-            font-size: 0.68rem;
-            color: rgba(255,255,255,0.55);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .delete-modal-overlay.open .delete-modal { transform:translateY(0); }
+        .delete-modal-icon {
+            width:52px; height:52px; border-radius:50%; background:rgba(239,68,68,.12);
+            border:1px solid rgba(239,68,68,.25); display:flex; align-items:center;
+            justify-content:center; margin:0 auto 16px;
         }
-        .key-badge-val {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.75rem;
-            color: #67e8f9;
-            letter-spacing: 2px;
+        .delete-modal-icon .material-symbols-outlined { font-size:1.6rem; color:var(--danger); }
+        .delete-modal h3 { font-size:1rem; font-weight:700; color:var(--text); text-align:center; margin:0 0 6px; }
+        .delete-modal p { font-size:.82rem; color:var(--text-muted); text-align:center; margin:0 0 20px; line-height:1.5; }
+        .delete-modal-classroom-name {
+            font-family:'Press Start 2P',monospace; font-size:.7rem; color:var(--danger);
+            background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2);
+            border-radius:6px; padding:6px 10px; text-align:center; margin-bottom:18px;
         }
-        .copy-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.6);
-            transition: color 0.15s;
-            padding: 0;
-            line-height: 1;
-        }
-        .copy-btn:hover { color: #fff; }
-        .hero-stats {
-            display: flex;
-            gap: 12px;
-        }
-        .hero-stat {
-            text-align: center;
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 8px;
-            padding: 8px 14px;
-            min-width: 70px;
-            backdrop-filter: blur(6px);
-        }
-        .hero-stat-val {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.9rem;
-            color: #fff;
-            display: block;
-        }
-        .hero-stat-label {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.55);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 3px;
-            display: block;
-        }
+        .delete-modal-footer { display:flex; gap:10px; margin-top:20px; }
+        .delete-modal-footer .btn { flex:1; justify-content:center; }
 
-        /* ══════════════════════════════════════════
-           TAB NAVIGATION
-        ══════════════════════════════════════════ */
-        .tab-nav {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 28px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 6px;
+        .banner-edit-btn {
+            background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.2);
+            border-radius:8px; color:#fff; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            width:34px; height:34px; transition:background .2s; flex-shrink:0;
+        }
+        .banner-edit-btn:hover { background:rgba(124,58,237,.7); }
+        .banner-edit-btn .material-symbols-outlined { font-size:1.05rem; }
+        #bannerInput { display:none; }
+        .classroom-hero-inner {
+            position:relative; z-index:1; padding:52px 28px 20px;
+            display:flex; align-items:flex-end; gap:24px; width:100%;
+        }
+        .classroom-hero-body { flex:1; min-width:0; }
+        .classroom-hero-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; flex-shrink:0; }
+        .key-badge {
+            display:inline-flex; align-items:center; gap:10px;
+            background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.15);
+            border-radius:10px; padding:8px 14px; backdrop-filter:blur(6px);
+        }
+        .key-badge-label { font-size:.65rem; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:.5px; }
+        .key-badge-val { font-family:'Press Start 2P',monospace; font-size:.72rem; color:#67e8f9; letter-spacing:2px; }
+        .copy-btn { background:none; border:none; cursor:pointer; font-size:1.1rem; color:rgba(255,255,255,.6); transition:color .15s; padding:0; line-height:1; }
+        .copy-btn:hover { color:#fff; }
+        .hero-stats { display:flex; gap:10px; }
+        .hero-stat {
+            text-align:center; background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.15);
+            border-radius:8px; padding:7px 12px; min-width:64px; backdrop-filter:blur(6px);
+        }
+        .hero-stat-val { font-family:'Press Start 2P',monospace; font-size:.8rem; color:#fff; display:block; }
+        .hero-stat-label { font-size:.6rem; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:.5px; margin-top:3px; display:block; }
+
+        /* ══ TAB BAR ═════════════════════════════════════════════════════ */
+        .tab-bar {
+            display:flex; gap:0; border-bottom:2px solid var(--border);
+            margin-bottom:28px; margin-top:0;
         }
         .tab-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 500;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            transition: color 0.15s, background 0.15s;
-            white-space: nowrap;
+            background:none; border:none; border-bottom:2px solid transparent;
+            margin-bottom:-2px; color:var(--text-muted); cursor:pointer;
+            font-family:'Inter',sans-serif; font-size:.88rem; font-weight:500;
+            padding:14px 20px; display:flex; align-items:center; gap:7px;
+            transition:color .15s,border-color .15s; white-space:nowrap;
         }
-        .tab-btn .material-symbols-outlined { font-size: 1rem; }
-        .tab-btn:hover { color: var(--text); background: var(--bg-card); }
-        .tab-btn.active {
-            color: var(--primary);
-            background: var(--bg-card);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            font-weight: 600;
-        }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+        .tab-btn .material-symbols-outlined { font-size:1.05rem; }
+        .tab-btn:hover { color:var(--text); }
+        .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+        .tab-panel { display:none; }
+        .tab-panel.active { display:block; }
 
-        /* ══════════════════════════════════════════
-           SECTION HEADER
-        ══════════════════════════════════════════ */
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            gap: 12px;
-        }
-        .section-header-left { display: flex; align-items: center; gap: 10px; }
-        .section-header h2 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text);
-            margin: 0;
-        }
-        .count-badge {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            padding: 2px 10px;
-        }
+        /* ══ STREAM ══════════════════════════════════════════════════════ */
+        .stream-layout { display:grid; grid-template-columns:260px 1fr; gap:20px; }
+        @media(max-width:720px) { .stream-layout { grid-template-columns:1fr; } }
 
-        /* ══════════════════════════════════════════
-           STUDENTS TABLE
-        ══════════════════════════════════════════ */
-        .table-wrap {
-            overflow-x: auto;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+        .stream-sidebar {}
+        .stream-key-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            overflow:hidden; margin-bottom:14px;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-        thead th {
-            background: var(--bg-surface);
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            padding: 14px 18px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
+        .stream-key-card-header {
+            background:linear-gradient(135deg,var(--primary),#0e4f6e);
+            padding:14px 16px; display:flex; align-items:center; gap:8px;
         }
-        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
-        tbody tr:last-child { border-bottom: none; }
-        tbody tr:hover { background: var(--bg-card-hover); }
-        tbody td { padding: 14px 18px; color: var(--text); vertical-align: middle; }
+        .stream-key-card-header .material-symbols-outlined { color:#fff; font-size:1.1rem; }
+        .stream-key-card-header span:last-child { font-size:.72rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; }
+        .stream-key-card-body { padding:14px 16px; }
+        .stream-key-val { font-family:'Press Start 2P',monospace; font-size:.85rem; color:var(--primary); letter-spacing:2px; display:block; margin-bottom:10px; }
+        .stream-key-copy { width:100%; justify-content:center; font-size:.75rem; }
 
-        .avatar-cell { display: flex; align-items: center; gap: 12px; }
-        .avatar-circle {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
-            font-family: 'Inter', sans-serif;
+        .stream-info-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:14px 16px;
         }
-        .student-name { font-weight: 600; color: var(--text); }
-        .student-email { font-size: 0.78rem; color: var(--text-muted); margin-top: 1px; }
+        .stream-info-row { display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--text-secondary); padding:6px 0; border-bottom:1px solid var(--border); }
+        .stream-info-row:last-child { border-bottom:none; }
+        .stream-info-row .material-symbols-outlined { font-size:.95rem; color:var(--text-muted); }
+        .stream-info-val { font-weight:600; color:var(--text); margin-left:auto; }
 
-        .status-active {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(16,185,129,.12);
-            color: var(--success);
-            border: 1px solid rgba(16,185,129,.25);
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 3px 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+        .stream-main {}
+        .composer {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:16px; margin-bottom:20px;
         }
-        .status-active::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--success);
-            border-radius: 50%;
-            display: inline-block;
+        .composer-trigger {
+            display:flex; align-items:center; gap:12px; cursor:pointer;
         }
+        .composer-avatar {
+            width:38px; height:38px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.75rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Inter',sans-serif;
+        }
+        .composer-placeholder {
+            flex:1; background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:8px; padding:10px 14px; font-size:.85rem; color:var(--text-muted);
+            cursor:pointer; transition:border-color .15s;
+        }
+        .composer-placeholder:hover { border-color:var(--primary); }
+        .composer-form { display:none; }
+        .composer-form.open { display:block; }
+        .composer-textarea {
+            width:100%; box-sizing:border-box; background:var(--bg-surface);
+            border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+            color:var(--text); font-size:.88rem; font-family:'Inter',sans-serif;
+            resize:vertical; min-height:90px; outline:none; margin-bottom:10px; line-height:1.55;
+        }
+        .composer-textarea:focus { border-color:var(--primary); }
+        .composer-link-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+        .composer-link-input {
+            background:var(--bg-surface); border:1px solid var(--border); border-radius:6px;
+            padding:8px 12px; color:var(--text); font-size:.82rem; font-family:'Inter',sans-serif; outline:none; width:100%; box-sizing:border-box;
+        }
+        .composer-link-input:focus { border-color:var(--primary); }
+        .composer-link-input::placeholder { color:var(--text-muted); }
+        .composer-actions { display:flex; justify-content:flex-end; gap:8px; }
 
-        /* ══════════════════════════════════════════
-           LESSON CARDS
-        ══════════════════════════════════════════ */
-        .lesson-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
+        .announcement-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:18px 20px; margin-bottom:14px; transition:border-color .15s;
         }
-        .lesson-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: border-color 0.15s, box-shadow 0.15s;
+        .announcement-card:hover { border-color:rgba(124,58,237,.3); }
+        .ann-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+        .ann-avatar {
+            width:38px; height:38px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.75rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Inter',sans-serif;
         }
-        .lesson-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 4px 16px rgba(124,58,237,.08);
+        .ann-meta { flex:1; min-width:0; }
+        .ann-author { font-size:.88rem; font-weight:600; color:var(--text); }
+        .ann-time { font-size:.75rem; color:var(--text-muted); margin-top:1px; }
+        .ann-delete-btn {
+            background:none; border:none; cursor:pointer; color:var(--text-muted);
+            padding:4px; border-radius:6px; display:flex; transition:color .15s;
         }
-        .lesson-card-header { display: flex; align-items: center; justify-content: space-between; }
-        .lesson-card-lang {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            background: rgba(6,182,212,.12);
-            color: var(--secondary);
-            border: 1px solid rgba(6,182,212,.2);
+        .ann-delete-btn:hover { color:var(--danger); }
+        .ann-body { font-size:.875rem; color:var(--text); line-height:1.65; white-space:pre-wrap; }
+        .ann-link {
+            display:inline-flex; align-items:center; gap:6px; margin-top:10px;
+            background:var(--bg-surface); border:1px solid var(--border); border-radius:8px;
+            padding:8px 14px; text-decoration:none; color:var(--primary); font-size:.82rem; font-weight:500;
+            transition:border-color .15s; word-break:break-all;
         }
-        .lesson-card-title {
-            font-size: 0.925rem;
-            font-weight: 700;
-            color: var(--text);
-            line-height: 1.35;
-        }
-        .lesson-card-preview {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.55;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            flex: 1;
-        }
-        .lesson-card-actions { display: flex; gap: 8px; margin-top: auto; }
+        .ann-link:hover { border-color:var(--primary); }
+        .ann-link .material-symbols-outlined { font-size:.95rem; flex-shrink:0; }
 
-        /* ══════════════════════════════════════════
-           CHALLENGE TABLE EXTRAS
-        ══════════════════════════════════════════ */
-        .level-pill {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .level-pill.beginner     { background: rgba(16,185,129,.12); color: var(--success);  border: 1px solid rgba(16,185,129,.22); }
-        .level-pill.intermediate { background: rgba(245,158,11,.12);  color: var(--warning);  border: 1px solid rgba(245,158,11,.22); }
-        .level-pill.advanced     { background: rgba(239,68,68,.12);   color: var(--danger);   border: 1px solid rgba(239,68,68,.22); }
+        .stream-empty { text-align:center; padding:48px 16px; color:var(--text-muted); }
+        .stream-empty .material-symbols-outlined { font-size:2.5rem; display:block; margin-bottom:10px; opacity:.3; }
+        .stream-empty p { font-size:.85rem; margin:0; }
 
-        .type-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 2px 8px;
+        /* ══ CLASSWORK ═══════════════════════════════════════════════════ */
+        .classwork-section { margin-bottom:32px; }
+        .classwork-section-header {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 0 14px; border-bottom:2px solid var(--primary); margin-bottom:18px;
         }
-        .pts-badge {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-            color: var(--xp-gold);
+        .classwork-section-title {
+            display:flex; align-items:center; gap:10px;
+            font-size:1rem; font-weight:700; color:var(--text); margin:0;
         }
+        .classwork-section-title .material-symbols-outlined { font-size:1.15rem; color:var(--primary); }
+        .cw-count { font-size:.7rem; font-weight:700; background:rgba(124,58,237,.15); color:#a78bfa; border-radius:20px; padding:2px 9px; }
 
-        /* ══════════════════════════════════════════
-           SESSION CARDS
-        ══════════════════════════════════════════ */
-        .sessions-list { display: flex; flex-direction: column; gap: 16px; }
-        .session-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
+        /* Lesson list */
+        .lesson-list { display:flex; flex-direction:column; gap:10px; }
+        .lesson-row {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:14px 18px; display:flex; align-items:center; gap:14px;
+            transition:border-color .15s;
         }
-        .session-card-main {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px 24px;
+        .lesson-row:hover { border-color:rgba(124,58,237,.3); }
+        .lesson-row-icon {
+            width:38px; height:38px; border-radius:8px;
+            background:rgba(6,182,212,.1); border:1px solid rgba(6,182,212,.2);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
         }
-        .session-card.live {
-            border-color: rgba(16,185,129,.35);
-            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16,185,129,.03) 100%);
-        }
-        .session-info { flex: 1; min-width: 0; }
-        .session-title {
-            font-size: 0.975rem;
-            font-weight: 700;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .live-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(16,185,129,.15);
-            color: var(--success);
-            border: 1px solid rgba(16,185,129,.3);
-            border-radius: 20px;
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            padding: 2px 9px;
-        }
-        .live-dot {
-            width: 6px; height: 6px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: livePulse 1.2s ease-in-out infinite;
-        }
-        .session-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
-        .status-pill {
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            flex-shrink: 0;
-        }
-        .status-pill.pending  { background: rgba(245,158,11,.12); color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
-        .status-pill.active   { background: rgba(16,185,129,.12); color: var(--success); border: 1px solid rgba(16,185,129,.25); }
-        .status-pill.closed   { background: var(--bg-surface);    color: var(--text-muted); border: 1px solid var(--border); }
-        .session-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .lesson-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--secondary); }
+        .lesson-row-body { flex:1; min-width:0; }
+        .lesson-row-title { font-size:.9rem; font-weight:600; color:var(--text); }
+        .lesson-row-meta { font-size:.75rem; color:var(--text-muted); margin-top:2px; }
+        .lesson-row-actions { display:flex; gap:6px; flex-shrink:0; }
 
-        /* ══════════════════════════════════════════
-           LIVE MONITOR PANEL
-        ══════════════════════════════════════════ */
-        .monitor-panel {
-            background: rgba(16,185,129,.04);
-            border-top: 1px solid rgba(16,185,129,.2);
-            padding: 20px 24px;
+        /* Challenge list */
+        .challenge-list { display:flex; flex-direction:column; gap:10px; }
+        .challenge-row {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:14px 18px; display:flex; align-items:center; gap:14px;
+            transition:border-color .15s;
         }
-        .monitor-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
+        .challenge-row:hover { border-color:rgba(124,58,237,.3); }
+        .challenge-row-icon {
+            width:38px; height:38px; border-radius:8px;
+            background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.2);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
         }
-        .monitor-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--success);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .monitor-refresh { font-size: 0.72rem; color: var(--text-muted); }
-        .monitor-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .monitor-row:last-child { border-bottom: none; }
-        .monitor-name {
-            width: 160px;
-            flex-shrink: 0;
-            font-size: 0.83rem;
-            font-weight: 600;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .monitor-bar-wrap {
-            flex: 1;
-            background: var(--bg-card);
-            border-radius: 20px;
-            height: 8px;
-            overflow: hidden;
-        }
-        .monitor-bar-fill {
-            height: 100%;
-            border-radius: 20px;
-            background: var(--success);
-            transition: width 0.5s ease;
-        }
-        .monitor-stats {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            min-width: 110px;
-            text-align: right;
-        }
-        .monitor-pts {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.62rem;
-            color: var(--xp-gold);
-            min-width: 60px;
-            text-align: right;
-        }
+        .challenge-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--primary); }
+        .challenge-row-body { flex:1; min-width:0; }
+        .challenge-row-text { font-size:.88rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:500px; }
+        .challenge-row-meta { display:flex; align-items:center; gap:10px; margin-top:4px; flex-wrap:wrap; }
+        .challenge-row-actions { display:flex; gap:6px; flex-shrink:0; }
+        .level-pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+        .level-pill.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
+        .level-pill.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
+        .level-pill.advanced     { background:rgba(239,68,68,.12);   color:var(--danger);   border:1px solid rgba(239,68,68,.22); }
+        .type-chip { display:inline-flex; align-items:center; gap:4px; font-size:.7rem; color:var(--text-secondary); background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 7px; }
+        .pts-badge { font-family:'Press Start 2P',monospace; font-size:.6rem; color:var(--xp-gold); }
 
-        /* ══════════════════════════════════════════
-           ASSIGNMENT CARDS
-        ══════════════════════════════════════════ */
-        .assignments-list { display: flex; flex-direction: column; gap: 14px; }
-        .assignment-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 24px;
-            display: flex;
-            align-items: flex-start;
-            gap: 18px;
+        /* Assignment list */
+        .assignment-list { display:flex; flex-direction:column; gap:10px; }
+        .assignment-row {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:14px 18px; display:flex; align-items:center; gap:14px;
+            transition:border-color .15s;
         }
-        .assignment-icon {
-            width: 44px; height: 44px;
-            border-radius: 10px;
-            background: rgba(124,58,237,.12);
-            border: 1px solid rgba(124,58,237,.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: var(--primary);
+        .assignment-row:hover { border-color:rgba(124,58,237,.3); }
+        .assignment-row-icon {
+            width:38px; height:38px; border-radius:8px;
+            background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.2);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
         }
-        .assignment-icon .material-symbols-outlined { font-size: 1.3rem; }
-        .assignment-body { flex: 1; min-width: 0; }
-        .assignment-meta-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-        .lang-chip {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            padding: 2px 9px;
-            border-radius: 6px;
-        }
-        .assignment-title {
-            font-size: 0.975rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-        .assignment-sub { font-size: 0.8rem; color: var(--text-secondary); }
-        .assignment-desc {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            line-height: 1.5;
-        }
-        .assignment-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-            align-items: flex-start;
-        }
+        .assignment-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--xp-gold); }
+        .assignment-row-body { flex:1; min-width:0; }
+        .assignment-row-title { font-size:.9rem; font-weight:600; color:var(--text); }
+        .assignment-row-meta { display:flex; align-items:center; gap:10px; margin-top:3px; flex-wrap:wrap; }
+        .assignment-row-actions { display:flex; gap:6px; flex-shrink:0; }
+        .lang-chip { font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:20px; text-transform:uppercase; }
 
-        /* ══════════════════════════════════════════
-           EMPTY / LOADING
-        ══════════════════════════════════════════ */
-        .empty-state {
-            text-align: center;
-            padding: 56px 24px;
-            color: var(--text-muted);
+        /* ══ PEOPLE ══════════════════════════════════════════════════════ */
+        .people-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .people-header h2 { font-size:.95rem; font-weight:700; color:var(--text); margin:0; display:flex; align-items:center; gap:8px; }
+        .people-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+        .people-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:18px 20px; transition:border-color .15s;
         }
-        .empty-state-icon { font-size: 2.5rem; margin-bottom: 14px; opacity: 0.45; }
-        .empty-state-title { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-        .empty-state-sub { font-size: 0.8rem; }
-        .loading-text {
-            text-align: center;
-            padding: 32px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
+        .people-card:hover { border-color:rgba(124,58,237,.3); }
+        .people-card-top { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+        .people-avatar {
+            width:44px; height:44px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.8rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Inter',sans-serif;
         }
+        .people-info { flex:1; min-width:0; }
+        .people-name { font-size:.9rem; font-weight:600; color:var(--text); }
+        .people-email { font-size:.75rem; color:var(--text-muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .people-remove-btn {
+            background:none; border:none; cursor:pointer; color:var(--text-muted);
+            padding:4px; border-radius:6px; display:flex; flex-shrink:0; transition:color .15s;
+        }
+        .people-remove-btn:hover { color:var(--danger); }
+        .people-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+        .people-stat {
+            background:var(--bg-surface); border:1px solid var(--border); border-radius:8px;
+            padding:8px 10px; text-align:center;
+        }
+        .people-stat-val { font-size:.88rem; font-weight:700; color:var(--text); display:block; }
+        .people-stat-label { font-size:.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; margin-top:1px; display:block; }
+        .xp-bar-wrap { margin-top:6px; }
+        .xp-bar-label { display:flex; justify-content:space-between; font-size:.72rem; color:var(--text-muted); margin-bottom:4px; }
+        .xp-bar-track { height:5px; background:var(--bg-surface); border-radius:3px; overflow:hidden; }
+        .xp-bar-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--secondary)); border-radius:3px; transition:width .4s; }
+        .level-badge-sm { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-top:8px; }
+        .level-badge-sm.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
+        .level-badge-sm.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
+        .level-badge-sm.advanced     { background:rgba(239,68,68,.12);   color:var(--danger);   border:1px solid rgba(239,68,68,.22); }
+        .ai-insight-btn {
+            display:flex; align-items:center; gap:6px; margin-top:12px; width:100%;
+            background:rgba(124,58,237,.07); border:1px dashed rgba(124,58,237,.3);
+            color:var(--primary); border-radius:8px; padding:7px 12px; font-size:.75rem;
+            font-weight:600; cursor:pointer; transition:background .15s,border-color .15s;
+        }
+        .ai-insight-btn:hover { background:rgba(124,58,237,.14); border-color:rgba(124,58,237,.5); }
+        .ai-insight-btn .ai-btn-icon { font-size:.9rem; }
+        .ai-insight-panel {
+            margin-top:10px; background:linear-gradient(135deg,rgba(124,58,237,.06),rgba(6,182,212,.04));
+            border:1px solid rgba(124,58,237,.2); border-radius:10px; padding:12px 14px;
+            font-size:.78rem; line-height:1.55; color:var(--text-secondary); display:none;
+            animation:fadeIn .2s ease;
+        }
+        .ai-insight-panel.visible { display:block; }
+        .ai-insight-header {
+            display:flex; align-items:center; gap:6px; margin-bottom:8px;
+            font-size:.7rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:.5px;
+        }
+        .ai-insight-loading { color:var(--text-muted); font-style:italic; }
 
-        /* ══════════════════════════════════════════
-           MODAL
-        ══════════════════════════════════════════ */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 500;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 32px;
-            width: 100%;
-            max-width: 520px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(18px) scale(.98);
-            transition: transform 0.2s;
-        }
-        .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
-        .modal-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            color: var(--text);
-            margin: 0 0 24px;
-        }
-        .modal-field { margin-bottom: 16px; }
-        .modal-field label {
-            display: block;
-            font-size: 0.74rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-        .err-msg { color: var(--danger); font-size: 0.8rem; margin-top: -8px; margin-bottom: 4px; display: none; }
+        /* ══ SESSIONS ════════════════════════════════════════════════════ */
+        .sessions-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .sessions-header h2 { font-size:.95rem; font-weight:700; color:var(--text); margin:0; display:flex; align-items:center; gap:8px; }
+        .sessions-list { display:flex; flex-direction:column; gap:14px; }
+        .session-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        .session-card-main { display:flex; align-items:center; gap:16px; padding:18px 20px; }
+        .session-card.live { border-color:rgba(16,185,129,.35); background:linear-gradient(135deg,var(--bg-card) 0%,rgba(16,185,129,.03) 100%); }
+        .session-info { flex:1; min-width:0; }
+        .session-title { font-size:.95rem; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .live-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(16,185,129,.15); color:var(--success); border:1px solid rgba(16,185,129,.3); border-radius:20px; font-size:.6rem; font-weight:700; letter-spacing:1px; padding:2px 9px; }
+        .live-dot { width:6px; height:6px; background:var(--success); border-radius:50%; animation:livePulse 1.2s ease-in-out infinite; }
+        @keyframes livePulse { 0%,100%{opacity:1}50%{opacity:.35} }
+        .session-meta { font-size:.8rem; color:var(--text-secondary); margin-top:4px; }
+        .status-pill { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:4px 12px; border-radius:20px; flex-shrink:0; }
+        .status-pill.pending  { background:rgba(245,158,11,.12); color:var(--warning); border:1px solid rgba(245,158,11,.25); }
+        .status-pill.active   { background:rgba(16,185,129,.12); color:var(--success); border:1px solid rgba(16,185,129,.25); }
+        .status-pill.closed   { background:var(--bg-surface); color:var(--text-muted); border:1px solid var(--border); }
+        .session-actions { display:flex; gap:8px; flex-shrink:0; }
+        .monitor-panel { background:rgba(16,185,129,.04); border-top:1px solid rgba(16,185,129,.2); padding:18px 20px; }
+        .monitor-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+        .monitor-title { font-size:.82rem; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; }
+        .monitor-refresh { font-size:.72rem; color:var(--text-muted); }
+        .monitor-row { display:grid; grid-template-columns:160px 1fr 120px 70px; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+        .monitor-row:last-child { border-bottom:none; }
+        .monitor-name { font-size:.8rem; font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .monitor-bar-wrap { height:6px; background:var(--bg-surface); border-radius:3px; overflow:hidden; }
+        .monitor-bar-fill { height:100%; border-radius:3px; transition:width .3s; }
+        .monitor-stats { font-size:.75rem; color:var(--text-secondary); text-align:right; }
+        .monitor-pts { font-family:'Press Start 2P',monospace; font-size:.62rem; color:var(--xp-gold); text-align:right; }
 
-        @keyframes livePulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: .4; transform: scale(.7); }
-        }
+        /* ══ SHARED EMPTIES ══════════════════════════════════════════════ */
+        .empty-state { text-align:center; padding:36px 16px; color:var(--text-muted); }
+        .empty-state-icon { font-size:2rem; display:block; margin-bottom:8px; opacity:.5; }
+        .empty-state-title { font-size:.88rem; font-weight:600; color:var(--text-secondary); margin-bottom:4px; }
+        .empty-state-sub { font-size:.78rem; }
+        .loading-text { color:var(--text-muted); font-size:.82rem; padding:20px; text-align:center; }
 
-        /* ══════════════════════════════════════════
-           TEST CASE ROWS
-        ══════════════════════════════════════════ */
-        .tc-row { background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:10px; }
-        .tc-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-        .tc-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-        .tc-row-fields textarea { resize:vertical; font-family:monospace; font-size:0.82rem; min-height:80px; }
+        /* ══ MODALS ══════════════════════════════════════════════════════ */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:flex-start; justify-content:center; z-index:3000; padding:2rem 1rem; overflow-y:auto; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; width:100%; max-width:660px; box-shadow:0 24px 64px rgba(0,0,0,.6); animation:modal-in .2s ease; }
+        @keyframes modal-in { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        .modal-title { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:20px; }
+        .modal-field { margin-bottom:14px; }
+        .modal-field label { display:block; font-size:.72rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+        .form-input { width:100%; box-sizing:border-box; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:9px 13px; color:var(--text); font-size:.875rem; outline:none; font-family:'Inter',sans-serif; }
+        .form-input:focus { border-color:var(--primary); }
+        .err-msg { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); border-radius:8px; padding:10px 14px; font-size:.8rem; color:var(--danger); margin-bottom:14px; display:none; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:20px; padding:16px 0 0; border-top:1px solid var(--border); }
 
-        /* ══════════════════════════════════════════
-           RESPONSIVE
-        ══════════════════════════════════════════ */
-        @media (max-width: 960px) {
-            .manage-page { padding: 20px 16px 48px; }
-            .classroom-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
-            .classroom-hero-right { align-items: flex-start; }
-            .hero-stats { flex-wrap: wrap; }
-            .tab-btn span.material-symbols-outlined { display: none; }
-        }
-        @media (max-width: 640px) {
-            .tab-nav { gap: 2px; padding: 4px; }
-            .tab-btn { font-size: 0.75rem; padding: 9px 8px; }
-            .lesson-cards { grid-template-columns: 1fr; }
-        }
+        /* assignment modal extras */
+        .assignments-list { display:flex; flex-direction:column; gap:12px; }
+        .assignment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; display:flex; align-items:flex-start; gap:16px; }
+        .assignment-icon { width:40px; height:40px; border-radius:10px; background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .assignment-icon .material-symbols-outlined { font-size:1.2rem; color:var(--primary); }
+        .assignment-body { flex:1; min-width:0; }
+        .assignment-meta-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+        .assignment-title { font-size:.92rem; font-weight:700; color:var(--text); margin-bottom:3px; }
+        .assignment-sub { font-size:.78rem; color:var(--text-muted); }
+        .assignment-desc { font-size:.8rem; color:var(--text-secondary); margin-top:5px; line-height:1.5; }
+        .assignment-actions { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+        .tc-row { background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
+        .tc-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+        .tc-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     </style>
 </head>
 <body>
-
 <main class="manage-page">
 
-    <!-- ── Breadcrumb ── -->
+    <!-- Breadcrumb -->
     <nav class="breadcrumb">
         <a href="classrooms_faculty.html">My Classrooms</a>
         <span class="breadcrumb-sep">›</span>
-        <span id="breadcrumbName">Manage Classroom</span>
+        <span id="breadcrumbName">Classroom</span>
     </nav>
 
-    <!-- ── Classroom Hero Header ── -->
+    <!-- Hero -->
     <div class="classroom-hero" id="classroomHero">
         <div class="classroom-hero-top">
             <h1 class="classroom-hero-name" id="classroomName">Loading…</h1>
@@ -710,138 +466,212 @@
         </div>
         <input type="file" id="bannerInput" accept="image/*" onchange="handleBannerUpload(event)">
         <div class="classroom-hero-inner">
-        <div class="classroom-hero-body">
-            <button class="banner-edit-btn" onclick="document.getElementById('bannerInput').click()" title="Change banner">
-                <span class="material-symbols-outlined">edit</span>
-            </button>
-        </div>
-        <div class="classroom-hero-right">
-            <div class="key-badge">
-                <span class="key-badge-label">Enrollment Key</span>
-                <span class="key-badge-val" id="enrollmentKey">—</span>
-                <button class="copy-btn" title="Copy key" onclick="copyKey()">⎘</button>
-            </div>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span class="hero-stat-val" id="statStudents">—</span>
-                    <span class="hero-stat-label">Students</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-val" id="statLessons">—</span>
-                    <span class="hero-stat-label">Lessons</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-val" id="statChallenges">—</span>
-                    <span class="hero-stat-label">Challenges</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-val" id="statSessions">—</span>
-                    <span class="hero-stat-label">Sessions</span>
+            <div class="classroom-hero-body">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="banner-edit-btn" onclick="document.getElementById('bannerInput').click()" title="Change banner">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <div class="hero-settings-wrap">
+                        <button class="hero-settings-btn" onclick="toggleSettingsMenu(event)" title="Settings">
+                            <span class="material-symbols-outlined">more_vert</span>
+                        </button>
+                        <div class="hero-settings-menu" id="heroSettingsMenu">
+                            <button class="hero-settings-item" onclick="openEditClassroom();closeSettingsMenu()">
+                                <span class="material-symbols-outlined">edit</span>Edit Classroom
+                            </button>
+                            <div class="hero-settings-sep"></div>
+                            <button class="hero-settings-item danger" onclick="openDeleteClassroom();closeSettingsMenu()">
+                                <span class="material-symbols-outlined">delete_forever</span>Delete Classroom
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+            <div class="classroom-hero-right">
+                <div class="key-badge">
+                    <span class="key-badge-label">Key</span>
+                    <span class="key-badge-val" id="enrollmentKey">—</span>
+                    <button class="copy-btn" title="Copy" onclick="copyKey()">⎘</button>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><span class="hero-stat-val" id="statStudents">—</span><span class="hero-stat-label">Students</span></div>
+                    <div class="hero-stat"><span class="hero-stat-val" id="statLessons">—</span><span class="hero-stat-label">Lessons</span></div>
+                    <div class="hero-stat"><span class="hero-stat-val" id="statChallenges">—</span><span class="hero-stat-label">Challenges</span></div>
+                    <div class="hero-stat"><span class="hero-stat-val" id="statSessions">—</span><span class="hero-stat-label">Sessions</span></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ── Tab Navigation ── -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('students', this)">
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('stream',this)">
+            <span class="material-symbols-outlined">campaign</span>Stream
+        </button>
+        <button class="tab-btn" onclick="switchTab('classwork',this)">
+            <span class="material-symbols-outlined">assignment</span>Classwork
+        </button>
+        <button class="tab-btn" onclick="switchTab('people',this)">
             <span class="material-symbols-outlined">group</span>Students
         </button>
-        <button class="tab-btn" onclick="switchTab('lessons', this)">
-            <span class="material-symbols-outlined">menu_book</span>Lessons
-        </button>
-        <button class="tab-btn" onclick="switchTab('challenges', this)">
-            <span class="material-symbols-outlined">quiz</span>Challenges
-        </button>
-        <button class="tab-btn" onclick="switchTab('sessions', this)">
+        <button class="tab-btn" onclick="switchTab('sessions',this)">
             <span class="material-symbols-outlined">sports_esports</span>Sessions
         </button>
-        <button class="tab-btn" onclick="switchTab('assignments', this)">
-            <span class="material-symbols-outlined">assignment</span>Assignments
-        </button>
     </div>
 
-    <!-- ── TAB: STUDENTS ── -->
-    <div class="tab-panel active" id="tab-students">
-        <div class="section-header">
-            <div class="section-header-left">
-                <h2>Enrolled Students</h2>
-                <span class="count-badge" id="studentsCount">0</span>
+    <!-- ── STREAM ─────────────────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-stream">
+        <div class="stream-layout">
+            <!-- Sidebar -->
+            <div class="stream-sidebar">
+                <div class="stream-key-card">
+                    <div class="stream-key-card-header">
+                        <span class="material-symbols-outlined">key</span>
+                        <span>Enrollment Key</span>
+                    </div>
+                    <div class="stream-key-card-body">
+                        <span class="stream-key-val" id="sidebarKey">—</span>
+                        <button class="btn btn-outline stream-key-copy" onclick="copyKey()">
+                            <span class="material-symbols-outlined" style="font-size:.9rem;">content_copy</span>
+                            Copy Key
+                        </button>
+                    </div>
+                </div>
+                <div class="stream-info-card">
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">group</span>
+                        Students
+                        <span class="stream-info-val" id="sidebarStudents">—</span>
+                    </div>
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">menu_book</span>
+                        Lessons
+                        <span class="stream-info-val" id="sidebarLessons">—</span>
+                    </div>
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">quiz</span>
+                        Challenges
+                        <span class="stream-info-val" id="sidebarChallenges">—</span>
+                    </div>
+                    <div class="stream-info-row">
+                        <span class="material-symbols-outlined">terminal</span>
+                        Assignments
+                        <span class="stream-info-val" id="sidebarAssignments">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main feed -->
+            <div class="stream-main">
+                <!-- Announcement composer -->
+                <div class="composer" id="composer">
+                    <div class="composer-trigger" id="composerTrigger" onclick="openComposer()">
+                        <div class="composer-avatar" id="composerAvatar">?</div>
+                        <div class="composer-placeholder">Announce something to your class…</div>
+                    </div>
+                    <div class="composer-form" id="composerForm">
+                        <textarea class="composer-textarea" id="annBody" placeholder="Share an announcement, resource, or reminder with your class…"></textarea>
+                        <div class="composer-link-row">
+                            <input class="composer-link-input" id="annLinkUrl" placeholder="Link URL (optional)" type="url">
+                            <input class="composer-link-input" id="annLinkLabel" placeholder="Link label (optional)">
+                        </div>
+                        <div class="composer-actions">
+                            <button class="btn btn-outline" style="font-size:.8rem;" onclick="closeComposer()">Cancel</button>
+                            <button class="btn btn-primary" style="font-size:.8rem;" id="postBtn" onclick="postAnnouncement()">
+                                <span class="material-symbols-outlined" style="font-size:.95rem;">send</span>Post
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed -->
+                <div id="announcementFeed">
+                    <div class="loading-text">Loading announcements…</div>
+                </div>
             </div>
         </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Enrolled</th>
-                        <th>Status</th>
-                        <th style="width:80px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="studentsBody">
-                    <tr><td colspan="4" class="loading-text">Loading students…</td></tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 
-    <!-- ── TAB: LESSONS ── -->
-    <div class="tab-panel" id="tab-lessons">
-        <div class="section-header">
-            <div class="section-header-left">
-                <h2>Classroom Lessons</h2>
-                <span class="count-badge" id="lessonsCount">0</span>
+    <!-- ── CLASSWORK ──────────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-classwork">
+
+        <!-- Lessons section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h2 class="classwork-section-title">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    Lessons
+                    <span class="cw-count" id="lessonsCount">0</span>
+                </h2>
+                <button class="btn btn-primary" style="font-size:.8rem;" onclick="openModal('lesson')">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Add Lesson
+                </button>
             </div>
-            <button class="btn btn-primary" onclick="openModal('lesson')">
-                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>Add Lesson
-            </button>
-        </div>
-        <div class="lesson-cards" id="lessonsGrid">
-            <div class="loading-text" style="grid-column:1/-1;">Loading lessons…</div>
-        </div>
-    </div>
-
-    <!-- ── TAB: CHALLENGES ── -->
-    <div class="tab-panel" id="tab-challenges">
-        <div class="section-header">
-            <div class="section-header-left">
-                <h2>Challenges / Questions</h2>
-                <span class="count-badge" id="challengesCount">0</span>
+            <div class="lesson-list" id="lessonsGrid">
+                <div class="loading-text">Loading lessons…</div>
             </div>
-            <button class="btn btn-primary" onclick="openModal('question')">
-                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>Add Challenge
-            </button>
         </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Question</th>
-                        <th>Type</th>
-                        <th>Difficulty</th>
-                        <th>Points</th>
-                        <th>Topic</th>
-                        <th style="width:100px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="questionsBody">
-                    <tr><td colspan="6" class="loading-text">Loading challenges…</td></tr>
-                </tbody>
-            </table>
+
+        <!-- Challenges section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h2 class="classwork-section-title">
+                    <span class="material-symbols-outlined">quiz</span>
+                    Challenges
+                    <span class="cw-count" id="challengesCount">0</span>
+                </h2>
+                <button class="btn btn-primary" style="font-size:.8rem;" onclick="openModal('question')">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Add Challenge
+                </button>
+            </div>
+            <div class="challenge-list" id="challengesList">
+                <div class="loading-text">Loading challenges…</div>
+            </div>
+        </div>
+
+        <!-- Assignments section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h2 class="classwork-section-title">
+                    <span class="material-symbols-outlined">terminal</span>
+                    Coding Assignments
+                    <span class="cw-count" id="assignmentsCount">0</span>
+                </h2>
+                <button class="btn btn-primary" style="font-size:.8rem;" onclick="openAssignmentModal()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>New Assignment
+                </button>
+            </div>
+            <div class="assignment-list" id="assignmentsList">
+                <div class="loading-text">Loading assignments…</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── PEOPLE ─────────────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-people">
+        <div class="people-header">
+            <h2>
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:var(--primary);">group</span>
+                Enrolled Students
+                <span class="cw-count" id="studentsCount">0</span>
+            </h2>
+        </div>
+        <div class="people-grid" id="peopleGrid">
+            <div class="loading-text" style="grid-column:1/-1;">Loading students…</div>
         </div>
     </div>
 
-    <!-- ── TAB: SESSIONS ── -->
+    <!-- ── SESSIONS ───────────────────────────────────────────────────── -->
     <div class="tab-panel" id="tab-sessions">
-        <div class="section-header">
-            <div class="section-header-left">
-                <h2>Game Sessions</h2>
-                <span class="count-badge" id="sessionsCount">0</span>
-            </div>
-            <button class="btn btn-primary" onclick="openModal('session')">
-                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>Create Session
+        <div class="sessions-header">
+            <h2>
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:var(--primary);">sports_esports</span>
+                Game Sessions
+                <span class="cw-count" id="sessionsCount">0</span>
+            </h2>
+            <button class="btn btn-primary" style="font-size:.8rem;" onclick="openModal('session')">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Create Session
             </button>
         </div>
         <div class="sessions-list" id="sessionsContainer">
@@ -849,45 +679,52 @@
         </div>
     </div>
 
-    <!-- ── TAB: ASSIGNMENTS ── -->
-    <div class="tab-panel" id="tab-assignments">
-        <div class="section-header">
-            <div class="section-header-left">
-                <h2>Coding Assignments</h2>
-                <span class="count-badge" id="assignmentsCount">0</span>
-            </div>
-            <button class="btn btn-primary" onclick="openAssignmentModal()">
-                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">add</span>New Assignment
-            </button>
-        </div>
-        <div class="assignments-list" id="assignmentsContainer">
-            <div class="loading-text">Loading assignments…</div>
-        </div>
-    </div>
-
 </main>
 
-<!-- ── Lesson Modal ── -->
+<!-- ══ DELETE CLASSROOM MODAL ════════════════════════════════════════════ -->
+<div class="delete-modal-overlay" id="deleteClassroomModal">
+    <div class="delete-modal" onclick="event.stopPropagation()">
+        <div class="delete-modal-icon">
+            <span class="material-symbols-outlined">delete_forever</span>
+        </div>
+        <h3>Delete Classroom</h3>
+        <p>This will permanently remove the classroom and all its content. This action cannot be undone.</p>
+        <div class="delete-modal-classroom-name" id="deleteModalName">—</div>
+        <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Confirm your password</label>
+            <input type="password" class="form-input" id="deletePasswordInput" placeholder="Enter your password…" autocomplete="current-password">
+            <div id="deletePasswordError" style="font-size:.75rem;color:var(--danger);margin-top:6px;display:none;"></div>
+        </div>
+        <div class="delete-modal-footer">
+            <button class="btn btn-outline" onclick="closeDeleteClassroom()">Cancel</button>
+            <button class="btn" id="deleteClassroomBtn" style="background:var(--danger);border-color:var(--danger);" onclick="confirmDeleteClassroom()">
+                <span class="material-symbols-outlined" style="font-size:.95rem;">delete_forever</span>Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ LESSON MODAL ══════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="lessonModal" onclick="handleOverlayClick(event,'lessonModal')">
-    <div class="modal-box" style="max-width:680px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div class="modal-box" style="padding:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <div class="modal-title" style="margin:0;" id="lessonModalTitle">Add Lesson</div>
-            <button class="btn btn-outline" onclick="toggleLessonAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
+            <button class="btn btn-outline" onclick="toggleLessonAIPanel()" style="font-size:.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:.95rem;">auto_awesome</span>Generate with AI</button>
         </div>
         <input type="hidden" id="lessonEditId">
         <div id="lessonAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
-            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Lesson Generator</div>
+            <div style="font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:.35rem;"><span class="material-symbols-outlined" style="font-size:.9rem;">auto_awesome</span>AI Lesson Generator</div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="lessonAITopic" placeholder="e.g. For Loops" style="font-size:0.82rem;"></div>
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="lessonAILang" style="font-size:0.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="lessonAIDiff" style="font-size:0.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="lessonAITopic" placeholder="e.g. For Loops" style="font-size:.82rem;"></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="lessonAILang" style="font-size:.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="lessonAIDiff" style="font-size:.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
             </div>
-            <button class="btn btn-primary" id="lessonAIGenBtn" onclick="generateAILesson()" style="font-size:0.8rem;">⚡ Generate Lesson</button>
-            <span id="lessonAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
+            <button class="btn btn-primary" id="lessonAIGenBtn" onclick="generateAILesson()" style="font-size:.8rem;">⚡ Generate Lesson</button>
+            <span id="lessonAIStatus" style="font-size:.78rem;color:var(--text-muted);margin-left:12px;"></span>
         </div>
         <div class="modal-field"><label>Title *</label><input type="text" class="form-input" id="lessonTitle" placeholder="Lesson title"></div>
         <div class="modal-field"><label>Language</label><select class="form-input" id="lessonLang"><option value="">All / General</option><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
-        <div class="modal-field"><label>Content *</label><textarea class="form-input" id="lessonContent" rows="7" placeholder="Lesson content…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea></div>
+        <div class="modal-field"><label>Content *</label><textarea class="form-input" id="lessonContent" rows="7" placeholder="Lesson content…" style="resize:vertical;font-family:monospace;font-size:.82rem;"></textarea></div>
         <div class="err-msg" id="lessonErr"></div>
         <div class="modal-actions">
             <button class="btn btn-outline" onclick="closeModal('lessonModal')">Cancel</button>
@@ -896,27 +733,27 @@
     </div>
 </div>
 
-<!-- ── Question Modal ── -->
+<!-- ══ CHALLENGE MODAL ═══════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="questionModal" onclick="handleOverlayClick(event,'questionModal')">
-    <div class="modal-box">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div class="modal-box" style="padding:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <div class="modal-title" id="questionModalTitle" style="margin:0;">Add Challenge</div>
-            <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
+            <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:.95rem;">auto_awesome</span>Generate with AI</button>
         </div>
         <div id="aiGenPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
-            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Question Generator</div>
+            <div style="font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:.35rem;"><span class="material-symbols-outlined" style="font-size:.9rem;">auto_awesome</span>AI Question Generator</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="aiTopic" placeholder="e.g. For Loops…" style="font-size:0.82rem;"></div>
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="aiLanguage" style="font-size:0.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="aiTopic" placeholder="e.g. For Loops…" style="font-size:.82rem;"></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="aiLanguage" style="font-size:.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="aiDifficulty" style="font-size:0.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Type</label><select class="form-input" id="aiType" style="font-size:0.82rem;"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="aiDifficulty" style="font-size:.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Type</label><select class="form-input" id="aiType" style="font-size:.82rem;"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option></select></div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
-                <button class="btn btn-primary" id="aiGenerateBtn" onclick="generateQuestion()" style="font-size:0.78rem;">✨ Generate</button>
-                <button class="btn btn-outline" onclick="closeAIGenPanel()" style="font-size:0.78rem;">Cancel</button>
-                <span id="aiGenStatus" style="font-size:0.75rem;color:var(--text-muted);margin-left:4px;"></span>
+                <button class="btn btn-primary" id="aiGenerateBtn" onclick="generateQuestion()" style="font-size:.78rem;">✨ Generate</button>
+                <button class="btn btn-outline" onclick="closeAIGenPanel()" style="font-size:.78rem;">Cancel</button>
+                <span id="aiGenStatus" style="font-size:.75rem;color:var(--text-muted);margin-left:4px;"></span>
             </div>
         </div>
         <input type="hidden" id="questionEditId">
@@ -945,9 +782,9 @@
     </div>
 </div>
 
-<!-- ── Session Modal ── -->
+<!-- ══ SESSION MODAL ═════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="sessionModal" onclick="handleOverlayClick(event,'sessionModal')">
-    <div class="modal-box">
+    <div class="modal-box" style="padding:28px;">
         <div class="modal-title">Create Session</div>
         <div class="modal-field"><label>Session Title *</label><input type="text" class="form-input" id="sessionTitle" placeholder="e.g. Week 3 Quiz"></div>
         <div class="modal-field"><label>Game Mode</label><select class="form-input" id="sessionMode"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option><option value="ordering">Code Ordering</option></select></div>
@@ -960,22 +797,22 @@
     </div>
 </div>
 
-<!-- ── Assignment Modal ── -->
+<!-- ══ ASSIGNMENT MODAL ══════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal-box" style="max-width:760px;width:95vw;max-height:90vh;overflow-y:auto;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div class="modal-box" style="max-width:760px;width:95vw;max-height:90vh;overflow-y:auto;padding:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <div class="modal-title" id="assignModalTitle" style="margin:0;">New Coding Assignment</div>
-            <button class="btn btn-outline" onclick="toggleAssignAIPanel()" style="font-size:0.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span> Generate with AI</button>
+            <button class="btn btn-outline" onclick="toggleAssignAIPanel()" style="font-size:.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:.95rem;">auto_awesome</span>Generate with AI</button>
         </div>
         <div id="assignAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
-            <div style="font-size:0.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:0.35rem;"><span class="material-symbols-outlined" style="font-size:0.9rem;">auto_awesome</span> AI Assignment Generator</div>
+            <div style="font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:.35rem;"><span class="material-symbols-outlined" style="font-size:.9rem;">auto_awesome</span>AI Assignment Generator</div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="assignAITopic" placeholder="e.g. Fibonacci…" style="font-size:0.82rem;"></div>
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="assignAILang" style="font-size:0.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
-                <div><label style="font-size:0.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="assignAIDiff" style="font-size:0.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="assignAITopic" placeholder="e.g. Fibonacci…" style="font-size:.82rem;"></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="assignAILang" style="font-size:.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="assignAIDiff" style="font-size:.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
             </div>
-            <button class="btn btn-primary" id="assignAIGenBtn" onclick="generateAIAssignment()" style="font-size:0.8rem;">⚡ Generate Assignment</button>
-            <span id="assignAIStatus" style="font-size:0.78rem;color:var(--text-muted);margin-left:12px;"></span>
+            <button class="btn btn-primary" id="assignAIGenBtn" onclick="generateAIAssignment()" style="font-size:.8rem;">⚡ Generate Assignment</button>
+            <span id="assignAIStatus" style="font-size:.78rem;color:var(--text-muted);margin-left:12px;"></span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="modal-field" style="grid-column:1/-1;"><label>Title *</label><input type="text" class="form-input" id="assignTitle" placeholder="e.g. Two Sum Problem"></div>
@@ -984,12 +821,12 @@
             <div class="modal-field"><label>Max Points</label><input type="number" class="form-input" id="assignMaxPoints" value="100" min="1"></div>
             <div class="modal-field"><label>Scoring Mode</label><select class="form-input" id="assignScoringMode"><option value="per_test">Per test case (partial credit)</option><option value="all_or_nothing">All or nothing</option></select></div>
             <div class="modal-field"><label>Deadline (optional)</label><input type="date" class="form-input" id="assignDeadline"></div>
-            <div class="modal-field" style="grid-column:1/-1;"><label>Starter Code (optional)</label><textarea class="form-input" id="assignStarterCode" rows="4" placeholder="# Starter code…" style="resize:vertical;font-family:monospace;font-size:0.82rem;"></textarea></div>
+            <div class="modal-field" style="grid-column:1/-1;"><label>Starter Code (optional)</label><textarea class="form-input" id="assignStarterCode" rows="4" placeholder="# Starter code…" style="resize:vertical;font-family:monospace;font-size:.82rem;"></textarea></div>
         </div>
-        <div style="margin-top:20px;">
+        <div style="margin-top:18px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                <label style="font-weight:600;font-size:0.85rem;">Test Cases *</label>
-                <button class="btn btn-outline" style="font-size:0.75rem;" onclick="addTestCaseRow()">+ Add Test Case</button>
+                <label style="font-weight:600;font-size:.85rem;">Test Cases *</label>
+                <button class="btn btn-outline" style="font-size:.75rem;" onclick="addTestCaseRow()">+ Add Test Case</button>
             </div>
             <div id="testCasesBody"></div>
         </div>
@@ -1001,9 +838,9 @@
     </div>
 </div>
 
-<!-- ── Submissions Modal ── -->
+<!-- ══ SUBMISSIONS MODAL ═════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="submissionsModal" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal-box" style="max-width:800px;width:95vw;max-height:90vh;overflow-y:auto;">
+    <div class="modal-box" style="max-width:800px;width:95vw;max-height:90vh;overflow-y:auto;padding:28px;">
         <div class="modal-title">Student Submissions</div>
         <div id="submissionsBody"><div class="loading-text">Loading…</div></div>
         <div class="modal-actions"><button class="btn btn-outline" onclick="document.getElementById('submissionsModal').classList.remove('open')">Close</button></div>
@@ -1011,56 +848,57 @@
 </div>
 
 <script>
-    const API = 'http://localhost:3000/api';
+    const API   = 'http://localhost:3000/api';
     const params = new URLSearchParams(window.location.search);
     const classroomId = params.get('id');
-
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const user  = JSON.parse(localStorage.getItem('user') || 'null');
     const token = localStorage.getItem('token');
-    if (!user || !token) { window.location.href = 'login.html'; }
-    if (user && user.role !== 'faculty') { window.location.href = 'dashboard.html'; }
-    if (!classroomId) { window.location.href = 'classrooms_faculty.html'; }
+    if (!user || !token)           { window.location.href = 'login.html'; }
+    if (user?.role !== 'faculty')  { window.location.href = 'dashboard.html'; }
+    if (!classroomId)              { window.location.href = 'classrooms_faculty.html'; }
 
-    function getAuthHeaders() {
-        return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
-    }
-    function escHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+    function getAuthHeaders() { return { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` }; }
+    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function relativeTime(iso) {
         if (!iso) return '—';
         const diff = Date.now() - new Date(iso).getTime();
-        const m = Math.floor(diff / 60000);
+        const m = Math.floor(diff/60000);
         if (m < 1) return 'Just now';
         if (m < 60) return `${m}m ago`;
-        const h = Math.floor(m / 60);
+        const h = Math.floor(m/60);
         if (h < 24) return `${h}h ago`;
-        return `${Math.floor(h/24)}d ago`;
+        const d = Math.floor(h/24);
+        if (d < 30) return `${d}d ago`;
+        return new Date(iso).toLocaleDateString([], {month:'short',day:'numeric'});
     }
     function initials(name) {
         if (!name) return '?';
-        const parts = name.trim().split(/\s+/);
-        return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+        const p = name.trim().split(/\s+/);
+        return p.length === 1 ? p[0][0].toUpperCase() : (p[0][0]+p[p.length-1][0]).toUpperCase();
+    }
+    function showToast(msg, type='success') {
+        const colors = {success:'var(--success)',danger:'var(--danger)',error:'var(--danger)'};
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = `position:fixed;bottom:28px;right:28px;background:${colors[type]||colors.success};color:#fff;padding:12px 20px;border-radius:10px;font-size:.83rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);`;
+        document.body.appendChild(t); setTimeout(()=>t.remove(),2400);
     }
 
-    // ── Tab switching ────────────────────────────────────────────────────────
+    // ── Tab switching ─────────────────────────────────────────────────────────
     function switchTab(tabId, btn) {
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById('tab-'+tabId).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
         if (btn) btn.classList.add('active');
     }
 
-    // ── Banner ───────────────────────────────────────────────────────────────
+    // ── Banner ────────────────────────────────────────────────────────────────
     function loadBanner() {
         const saved = localStorage.getItem(`classroom_banner_${classroomId}`);
         if (saved) document.getElementById('classroomHero').style.backgroundImage = `url(${saved})`;
     }
-
     function handleBannerUpload(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = ev => {
             const dataUrl = ev.target.result;
@@ -1071,74 +909,268 @@
         reader.readAsDataURL(file);
     }
 
-    // ── Classroom info ───────────────────────────────────────────────────────
-    let classroomData = null;
-    let classroomQuestions = [];
+    // ── Classroom info ────────────────────────────────────────────────────────
+    let classroomData = null, classroomQuestions = [];
 
     async function loadClassroom() {
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}`, { headers: getAuthHeaders() });
+            const res  = await fetch(`${API}/classrooms/${classroomId}`, {headers:getAuthHeaders()});
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
             classroomData = data.classroom;
             const name = classroomData.name;
+            const key  = classroomData.enrollmentKey || classroomData.enrollment_key || '—';
             document.getElementById('classroomName').textContent = name;
             document.getElementById('breadcrumbName').textContent = name;
-            document.getElementById('classroomDesc').textContent = classroomData.description || classroomData.subject || 'No description';
-            document.getElementById('enrollmentKey').textContent = classroomData.enrollmentKey || classroomData.enrollment_key || '—';
+            document.getElementById('classroomDesc').textContent = classroomData.description || classroomData.subject || '';
+            document.getElementById('enrollmentKey').textContent = key;
+            document.getElementById('sidebarKey').textContent = key;
             document.title = `${name} — CodeArena`;
-        } catch (err) {
+            // Set composer avatar
+            const av = initials(user?.fullName || user?.name || 'F');
+            document.getElementById('composerAvatar').textContent = av;
+        } catch(err) {
             document.getElementById('classroomName').textContent = 'Classroom not found';
         }
     }
 
     function copyKey() {
         const key = document.getElementById('enrollmentKey').textContent;
-        navigator.clipboard.writeText(key).then(() => showToast('Enrollment key copied!'));
+        navigator.clipboard.writeText(key).then(()=>showToast('Enrollment key copied!'));
     }
 
-    function showToast(msg, type = 'success') {
-        const colors = { success: 'var(--success)', danger: 'var(--danger)' };
-        const t = document.createElement('div');
-        t.textContent = msg;
-        t.style.cssText = `position:fixed;bottom:28px;right:28px;background:${colors[type]||colors.success};color:#fff;padding:12px 20px;border-radius:10px;font-size:0.83rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.25);`;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2400);
+    // ── Settings dropdown / edit ──────────────────────────────────────────────
+    function openEditClassroom() {
+        document.getElementById('classroomHero').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('bannerInput').click();
     }
 
-    // ── Students ─────────────────────────────────────────────────────────────
-    async function loadStudents() {
+    // ── Settings dropdown ─────────────────────────────────────────────────────
+    function toggleSettingsMenu(e) {
+        e.stopPropagation();
+        document.getElementById('heroSettingsMenu').classList.toggle('open');
+    }
+    function closeSettingsMenu() {
+        document.getElementById('heroSettingsMenu').classList.remove('open');
+    }
+    document.addEventListener('click', () => closeSettingsMenu());
+
+    // ── Delete classroom ──────────────────────────────────────────────────────
+    function openDeleteClassroom() {
+        const name = document.getElementById('classroomName').textContent || 'this classroom';
+        document.getElementById('deleteModalName').textContent = name;
+        document.getElementById('deletePasswordInput').value = '';
+        document.getElementById('deletePasswordError').style.display = 'none';
+        document.getElementById('deleteClassroomBtn').disabled = false;
+        document.getElementById('deleteClassroomModal').classList.add('open');
+        setTimeout(() => document.getElementById('deletePasswordInput').focus(), 150);
+    }
+    function closeDeleteClassroom() {
+        document.getElementById('deleteClassroomModal').classList.remove('open');
+    }
+    async function confirmDeleteClassroom() {
+        const password = document.getElementById('deletePasswordInput').value.trim();
+        const errEl    = document.getElementById('deletePasswordError');
+        const btn      = document.getElementById('deleteClassroomBtn');
+        errEl.style.display = 'none';
+        if (!password) {
+            errEl.textContent = 'Please enter your password.';
+            errEl.style.display = 'block';
+            return;
+        }
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.95rem;animation:spin 1s linear infinite">progress_activity</span>Deleting…';
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/students`, { headers: getAuthHeaders() });
+            const res  = await fetch(`${API}/classrooms/${classroomId}`, {
+                method: 'DELETE',
+                headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
             const data = await res.json();
-            const students = data.success ? (data.students || []) : [];
-            document.getElementById('studentsCount').textContent = students.length;
-            document.getElementById('statStudents').textContent = students.length;
-            const tbody = document.getElementById('studentsBody');
-            if (!students.length) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-title">No students yet</div><div class="empty-state-sub">Share the enrollment key to get started</div></div></td></tr>`;
+            if (!res.ok || !data.success) {
+                errEl.textContent = data.message || 'Failed to delete classroom.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.95rem;">delete_forever</span>Delete';
                 return;
             }
-            tbody.innerHTML = students.map(s => {
-                const name = s.fullName || s.full_name || 'Unknown';
-                return `<tr>
-                    <td><div class="avatar-cell"><div class="avatar-circle">${initials(name)}</div><div><div class="student-name">${escHtml(name)}</div><div class="student-email">${escHtml(s.email || '—')}</div></div></div></td>
-                    <td style="color:var(--text-secondary);font-size:0.82rem;">${relativeTime(s.enrolledAt || s.enrolled_at)}</td>
-                    <td><span class="status-active">${s.status || 'active'}</span></td>
-                    <td><button class="btn btn-outline" style="font-size:0.72rem;padding:4px 12px;color:var(--danger);border-color:var(--danger);" onclick="removeStudent(${s.id || s.student_id}, '${escHtml(name)}')">Remove</button></td>
-                </tr>`;
+            showToast('Classroom deleted.', 'success');
+            setTimeout(() => { window.location.href = 'classrooms_faculty.html'; }, 900);
+        } catch {
+            errEl.textContent = 'Network error. Please try again.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.95rem;">delete_forever</span>Delete';
+        }
+    }
+    // Close delete modal on overlay click
+    document.getElementById('deleteClassroomModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteClassroom();
+    });
+
+    // ── Announcements ─────────────────────────────────────────────────────────
+    function openComposer() {
+        document.getElementById('composerTrigger').style.display = 'none';
+        document.getElementById('composerForm').classList.add('open');
+        document.getElementById('annBody').focus();
+    }
+    function closeComposer() {
+        document.getElementById('composerTrigger').style.display = 'flex';
+        document.getElementById('composerForm').classList.remove('open');
+        document.getElementById('annBody').value = '';
+        document.getElementById('annLinkUrl').value = '';
+        document.getElementById('annLinkLabel').value = '';
+    }
+
+    async function postAnnouncement() {
+        const body = document.getElementById('annBody').value.trim();
+        const link_url   = document.getElementById('annLinkUrl').value.trim();
+        const link_label = document.getElementById('annLinkLabel').value.trim();
+        if (!body) { showToast('Write something first','error'); return; }
+        const btn = document.getElementById('postBtn');
+        btn.disabled = true; btn.textContent = 'Posting…';
+        try {
+            const res = await fetch(`${API}/classrooms/${classroomId}/announcements`, {
+                method:'POST', headers:getAuthHeaders(),
+                body: JSON.stringify({body,link_url,link_label})
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed');
+            closeComposer();
+            loadAnnouncements();
+        } catch(err) { showToast(err.message,'error'); }
+        finally { btn.disabled=false; btn.innerHTML='<span class="material-symbols-outlined" style="font-size:.95rem;">send</span>Post'; }
+    }
+
+    async function loadAnnouncements() {
+        const feed = document.getElementById('announcementFeed');
+        try {
+            const res  = await fetch(`${API}/classrooms/${classroomId}/announcements`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            const list = data.announcements || [];
+            if (!list.length) {
+                feed.innerHTML = `<div class="stream-empty"><span class="material-symbols-outlined">campaign</span><p>No announcements yet. Share something with your class!</p></div>`;
+                return;
+            }
+            feed.innerHTML = list.map(a => {
+                const author = a.author_name || user?.fullName || 'Faculty';
+                const linkHtml = a.link_url ? `<a href="${escHtml(a.link_url)}" class="ann-link" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span>${escHtml(a.link_label||a.link_url)}</a>` : '';
+                return `<div class="announcement-card">
+                    <div class="ann-header">
+                        <div class="ann-avatar">${initials(author)}</div>
+                        <div class="ann-meta">
+                            <div class="ann-author">${escHtml(author)}</div>
+                            <div class="ann-time">${relativeTime(a.created_at)}</div>
+                        </div>
+                        <button class="ann-delete-btn" onclick="deleteAnnouncement(${a.announcement_id})" title="Delete"><span class="material-symbols-outlined" style="font-size:1rem;">delete</span></button>
+                    </div>
+                    <div class="ann-body">${escHtml(a.body)}</div>
+                    ${linkHtml}
+                </div>`;
             }).join('');
-        } catch (err) {
-            document.getElementById('studentsBody').innerHTML = `<tr><td colspan="4" class="loading-text" style="color:var(--danger);">Failed to load students.</td></tr>`;
+        } catch(err) {
+            feed.innerHTML = `<div class="stream-empty"><span class="material-symbols-outlined">error</span><p>Failed to load announcements.</p></div>`;
+        }
+    }
+
+    async function deleteAnnouncement(id) {
+        if (!confirm('Delete this announcement?')) return;
+        try {
+            await fetch(`${API}/classrooms/${classroomId}/announcements/${id}`, {method:'DELETE',headers:getAuthHeaders()});
+            loadAnnouncements();
+        } catch { showToast('Failed to delete','error'); }
+    }
+
+    // ── Students / People ─────────────────────────────────────────────────────
+    async function loadStudents() {
+        try {
+            const res  = await fetch(`${API}/classrooms/${classroomId}/students`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            const students = data.success ? (data.students||[]) : [];
+            const count = students.length;
+            document.getElementById('studentsCount').textContent = count;
+            document.getElementById('statStudents').textContent  = count;
+            document.getElementById('sidebarStudents').textContent = count;
+            renderPeople(students);
+        } catch(err) {
+            document.getElementById('peopleGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load students.</div>`;
+        }
+    }
+
+    function renderPeople(students) {
+        const grid = document.getElementById('peopleGrid');
+        if (!students.length) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="empty-state-icon">👥</span><div class="empty-state-title">No students yet</div><div class="empty-state-sub">Share the enrollment key to get started</div></div>`;
+            return;
+        }
+        const levelOrder = {beginner:0,intermediate:1,advanced:2};
+        grid.innerHTML = students.map(s => {
+            const name  = s.fullName || s.full_name || 'Student';
+            const level = (s.currentLevel || s.current_level || 'beginner').toLowerCase();
+            const acc   = Math.round(s.accuracy || s.accuracy_percent || 0);
+            const qs    = s.questionsAnswered || s.questions_answered || 0;
+            return `<div class="people-card">
+                <div class="people-card-top">
+                    <div class="people-avatar">${initials(name)}</div>
+                    <div class="people-info">
+                        <div class="people-name">${escHtml(name)}</div>
+                        <div class="people-email">${escHtml(s.email||'—')}</div>
+                    </div>
+                    <button class="people-remove-btn" onclick="removeStudent(${s.id||s.student_id||s.user_id},'${escHtml(name)}')" title="Remove student">
+                        <span class="material-symbols-outlined" style="font-size:1.05rem;">person_remove</span>
+                    </button>
+                </div>
+                <div class="people-stats">
+                    <div class="people-stat"><span class="people-stat-val">${acc}%</span><span class="people-stat-label">Accuracy</span></div>
+                    <div class="people-stat"><span class="people-stat-val">${qs}</span><span class="people-stat-label">Answered</span></div>
+                    <div class="people-stat"><span class="people-stat-val">${relativeTime(s.enrolledAt||s.enrolled_at)}</span><span class="people-stat-label">Joined</span></div>
+                </div>
+                <span class="level-badge-sm ${level}">${level}</span>
+                <button class="ai-insight-btn" onclick="getStudentAIInsight('${s.id||s.student_id||s.user_id}','${escHtml(name)}',${acc},${qs},'${level}')">
+                    <span class="ai-btn-icon">✦</span> AI Insight
+                </button>
+                <div class="ai-insight-panel" id="ai-insight-${s.id||s.student_id||s.user_id}"></div>
+            </div>`;
+        }).join('');
+    }
+
+    const _insightCache = {};
+    async function getStudentAIInsight(studentId, name, acc, qs, level) {
+        const panel = document.getElementById(`ai-insight-${studentId}`);
+        if (!panel) return;
+        if (panel.classList.contains('visible')) {
+            panel.classList.remove('visible');
+            return;
+        }
+        panel.classList.add('visible');
+        if (_insightCache[studentId]) {
+            panel.innerHTML = _insightCache[studentId];
+            return;
+        }
+        panel.innerHTML = `<div class="ai-insight-loading">Analyzing student performance…</div>`;
+        const prompt = `You are an AI teaching advisor. Give a brief 2-3 sentence assessment of this student's current status and one actionable recommendation. Student: ${name}. Stats: ${acc}% accuracy, ${qs} questions answered, level: ${level}. Be specific and encouraging.`;
+        try {
+            const res = await fetch(`${API}/ai/ask`, {
+                method: 'POST',
+                headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: prompt })
+            });
+            const data = await res.json();
+            const text = data.reply || data.error || 'Unable to generate insight.';
+            const html = `<div class="ai-insight-header"><span>✦</span> AI Insight</div>${escHtml(text)}`;
+            panel.innerHTML = html;
+            _insightCache[studentId] = html;
+        } catch {
+            panel.innerHTML = `<div class="ai-insight-loading">Failed to load AI insight.</div>`;
         }
     }
 
     async function removeStudent(studentId, name) {
         if (!confirm(`Remove ${name} from this classroom?`)) return;
         try {
-            await fetch(`${API}/classrooms/${classroomId}/students/${studentId}`, { method: 'DELETE', headers: getAuthHeaders() });
+            await fetch(`${API}/classrooms/${classroomId}/students/${studentId}`, {method:'DELETE',headers:getAuthHeaders()});
             loadStudents();
-        } catch (err) { alert('Failed to remove student.'); }
+        } catch { alert('Failed to remove student.'); }
     }
 
     // ── Lessons ───────────────────────────────────────────────────────────────
@@ -1146,51 +1178,184 @@
 
     async function loadLessons() {
         try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/lessons`, { headers: getAuthHeaders() });
+            const res  = await fetch(`${API}/classrooms/${classroomId}/lessons`, {headers:getAuthHeaders()});
             const data = await res.json();
-            lessonsList = data.success ? (data.lessons || []) : [];
+            lessonsList = data.success ? (data.lessons||[]) : [];
             document.getElementById('lessonsCount').textContent = lessonsList.length;
-            document.getElementById('statLessons').textContent = lessonsList.length;
+            document.getElementById('statLessons').textContent  = lessonsList.length;
+            document.getElementById('sidebarLessons').textContent = lessonsList.length;
             renderLessons();
-        } catch (err) {
-            document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load lessons.</div>`;
-        }
+        } catch { document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state">Failed to load lessons.</div>`; }
     }
 
     function renderLessons() {
-        const grid = document.getElementById('lessonsGrid');
+        const el = document.getElementById('lessonsGrid');
         if (!lessonsList.length) {
-            grid.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state"><div class="empty-state-icon">📖</div><div class="empty-state-title">No lessons yet</div><div class="empty-state-sub">Add your first lesson to this classroom</div></div></div>`;
+            el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">📖</span><div class="empty-state-title">No lessons yet</div><div class="empty-state-sub">Add lessons for students to study</div></div>`;
             return;
         }
-        grid.innerHTML = lessonsList.map(l => `
-            <div class="lesson-card">
-                <div class="lesson-card-header"><span class="lesson-card-lang">${l.language || 'General'}</span></div>
-                <div class="lesson-card-title">${escHtml(l.title)}</div>
-                <div class="lesson-card-preview">${escHtml(l.content || '').replace(/<[^>]+>/g, '').substring(0, 120)}…</div>
-                <div class="lesson-card-actions">
-                    <button class="btn btn-outline" style="flex:1;font-size:0.78rem;" onclick="editLesson(${l.lesson_id || l.id})">✏ Edit</button>
-                    <button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="deleteLesson(${l.lesson_id || l.id})">Delete</button>
+        el.innerHTML = lessonsList.map(l => {
+            const id = l.lesson_id || l.id;
+            const preview = (l.content||'').replace(/<[^>]+>/g,'').substring(0,100);
+            return `<div class="lesson-row">
+                <div class="lesson-row-icon"><span class="material-symbols-outlined">menu_book</span></div>
+                <div class="lesson-row-body">
+                    <div class="lesson-row-title">${escHtml(l.title)}</div>
+                    <div class="lesson-row-meta">${l.language||'General'}${preview ? ' · '+escHtml(preview)+'…' : ''}</div>
                 </div>
-            </div>`).join('');
+                <div class="lesson-row-actions">
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 12px;" onclick="editLesson(${id})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 10px;color:var(--danger);border-color:var(--danger);" onclick="deleteLesson(${id})"><span class="material-symbols-outlined" style="font-size:.9rem;">delete</span></button>
+                </div>
+            </div>`;
+        }).join('');
     }
 
+    // ── Challenges ────────────────────────────────────────────────────────────
+    async function loadQuestions() {
+        try {
+            const res  = await fetch(`${API}/classrooms/${classroomId}/questions`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            classroomQuestions = data.success ? (data.questions||[]) : [];
+            document.getElementById('challengesCount').textContent = classroomQuestions.length;
+            document.getElementById('statChallenges').textContent  = classroomQuestions.length;
+            document.getElementById('sidebarChallenges').textContent = classroomQuestions.length;
+            renderChallenges();
+        } catch { document.getElementById('challengesList').innerHTML = `<div class="empty-state">Failed to load challenges.</div>`; }
+    }
+
+    function renderChallenges() {
+        const el = document.getElementById('challengesList');
+        if (!classroomQuestions.length) {
+            el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">❓</span><div class="empty-state-title">No challenges yet</div><div class="empty-state-sub">Add questions to use in game sessions</div></div>`;
+            return;
+        }
+        const typeLabel = {mcq:'MCQ',fill_blank:'Fill Blank',output_pred:'Output',ordering:'Ordering'};
+        el.innerHTML = classroomQuestions.map(q => {
+            const id = q.question_id||q.id;
+            const text = (q.question_text||q.questionText||'').substring(0,90);
+            return `<div class="challenge-row">
+                <div class="challenge-row-icon"><span class="material-symbols-outlined">quiz</span></div>
+                <div class="challenge-row-body">
+                    <div class="challenge-row-text">${escHtml(text)}${text.length>=90?'…':''}</div>
+                    <div class="challenge-row-meta">
+                        <span class="level-pill ${q.difficulty||'beginner'}">${q.difficulty||'beginner'}</span>
+                        <span class="type-chip">${typeLabel[q.type]||q.type||'MCQ'}</span>
+                        <span class="pts-badge">${q.points||10} pts</span>
+                        ${q.topic?`<span style="font-size:.72rem;color:var(--text-muted);">${escHtml(q.topic)}</span>`:''}
+                    </div>
+                </div>
+                <div class="challenge-row-actions">
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 12px;" onclick="editQuestion(${id})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 10px;color:var(--danger);border-color:var(--danger);" onclick="deleteQuestion(${id})"><span class="material-symbols-outlined" style="font-size:.9rem;">delete</span></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Assignments ───────────────────────────────────────────────────────────
+    let assignmentsList = [];
+
+    async function loadAssignments() {
+        try {
+            const res  = await fetch(`${API}/assignments?classroomId=${classroomId}`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            assignmentsList = data.success ? (data.assignments||[]) : [];
+            document.getElementById('assignmentsCount').textContent = assignmentsList.length;
+            document.getElementById('sidebarAssignments').textContent = assignmentsList.length;
+            renderAssignments();
+        } catch { document.getElementById('assignmentsList').innerHTML = `<div class="empty-state">Failed to load assignments.</div>`; }
+    }
+
+    function renderAssignments() {
+        const el = document.getElementById('assignmentsList');
+        if (!assignmentsList.length) {
+            el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">📋</span><div class="empty-state-title">No assignments yet</div><div class="empty-state-sub">Create coding assignments with automated test-case grading</div></div>`;
+            return;
+        }
+        const langColors = {python:'#3b82f6',javascript:'#f59e0b',java:'#ef4444',cpp:'#8b5cf6'};
+        el.innerHTML = assignmentsList.map(a => {
+            const aid = a.assignment_id||a.id;
+            const lang = a.language||'python';
+            const lc   = langColors[lang]||'#6b7280';
+            const deadline = a.deadline ? new Date(a.deadline).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'}) : 'No deadline';
+            const subs = a.submission_count||0;
+            return `<div class="assignment-row">
+                <div class="assignment-row-icon"><span class="material-symbols-outlined">terminal</span></div>
+                <div class="assignment-row-body">
+                    <div class="assignment-row-title">${escHtml(a.title)}</div>
+                    <div class="assignment-row-meta">
+                        <span class="lang-chip" style="background:${lc}18;color:${lc};border:1px solid ${lc}30;">${lang}</span>
+                        <span style="font-size:.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;"><span class="material-symbols-outlined" style="font-size:.82rem;">calendar_today</span>${deadline}</span>
+                        <span style="font-size:.72rem;font-weight:700;color:var(--xp-gold);">${a.max_points||100} pts</span>
+                        <span style="font-size:.72rem;color:var(--text-muted);">${subs} submission${subs!==1?'s':''}</span>
+                    </div>
+                </div>
+                <div class="assignment-row-actions">
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 12px;display:inline-flex;align-items:center;gap:4px;" onclick="viewSubmissions(${aid})"><span class="material-symbols-outlined" style="font-size:.85rem;">bar_chart</span>Results</button>
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 12px;" onclick="editAssignment(${aid})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 10px;color:var(--danger);border-color:var(--danger);" onclick="deleteAssignment(${aid})"><span class="material-symbols-outlined" style="font-size:.9rem;">delete</span></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Sessions ──────────────────────────────────────────────────────────────
+    let sessionsList = [];
+
+    async function loadSessions() {
+        try {
+            const res  = await fetch(`${API}/classrooms/${classroomId}/sessions`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            sessionsList = data.success ? (data.sessions||[]) : [];
+            document.getElementById('sessionsCount').textContent = sessionsList.length;
+            document.getElementById('statSessions').textContent  = sessionsList.length;
+            renderSessions();
+        } catch { document.getElementById('sessionsContainer').innerHTML = `<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`; }
+    }
+
+    function renderSessions() {
+        const container = document.getElementById('sessionsContainer');
+        if (!sessionsList.length) {
+            container.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🎮</span><div class="empty-state-title">No sessions yet</div><div class="empty-state-sub">Create a session and students can join with the classroom key</div></div>`;
+            return;
+        }
+        container.innerHTML = sessionsList.map(s => {
+            const sid = s.session_id||s.id;
+            const isLive = s.status==='active';
+            return `<div class="session-card ${isLive?'live':''}">
+                <div class="session-card-main">
+                    <div class="session-info">
+                        <div class="session-title">${isLive?`<span class="live-badge"><span class="live-dot"></span>LIVE</span>`:''} ${escHtml(s.title)}</div>
+                        <div class="session-meta">Mode: ${s.game_mode||'—'} · Created ${relativeTime(s.created_at||s.createdAt)}${isLive?`<span id="answerCount-${sid}" style="color:var(--success);margin-left:8px;">· Loading…</span>`:''}</div>
+                    </div>
+                    <span class="status-pill ${s.status}">${s.status}</span>
+                    <div class="session-actions">
+                        ${s.status==='pending'?`<button class="btn btn-primary" style="font-size:.78rem;" onclick="setSessionStatus(${sid},'active')">▶ Launch</button>`:''}
+                        ${isLive?`<button class="btn btn-outline" style="font-size:.78rem;color:var(--danger);border-color:var(--danger);" onclick="setSessionStatus(${sid},'closed')">■ End</button>`:''}
+                    </div>
+                </div>
+                ${isLive?`<div class="monitor-panel" id="monitor-${sid}"><div class="monitor-header"><span class="monitor-title"><span class="material-symbols-outlined" style="font-size:.95rem;color:var(--success);">sensors</span>Live Student Monitor</span><span class="monitor-refresh" id="monitorRefresh-${sid}">Refreshing…</span></div><div id="monitorRows-${sid}"><div class="loading-text" style="padding:8px 0;">Waiting for students…</div></div></div>`:''}
+            </div>`;
+        }).join('');
+    }
+
+    // ── Modals ────────────────────────────────────────────────────────────────
     function openModal(type) {
         if (type === 'lesson') {
             document.getElementById('lessonModalTitle').textContent = 'Add Lesson';
             document.getElementById('lessonEditId').value = '';
-            document.getElementById('lessonTitle').value = '';
+            ['lessonTitle','lessonContent'].forEach(id=>document.getElementById(id).value='');
             document.getElementById('lessonLang').value = '';
-            document.getElementById('lessonContent').value = '';
             document.getElementById('lessonErr').style.display = 'none';
             document.getElementById('lessonModal').classList.add('open');
-            setTimeout(() => document.getElementById('lessonTitle').focus(), 80);
+            setTimeout(()=>document.getElementById('lessonTitle').focus(),80);
         } else if (type === 'question') {
             document.getElementById('questionModalTitle').textContent = 'Add Challenge';
             document.getElementById('questionEditId').value = '';
             document.getElementById('questionText').value = '';
             document.getElementById('questionType').value = 'mcq';
-            ['optA','optB','optC','optD','correctAnswer','questionHint','questionTopic'].forEach(id => document.getElementById(id).value = '');
+            ['optA','optB','optC','optD','correctAnswer','questionHint','questionTopic'].forEach(id=>document.getElementById(id).value='');
             document.getElementById('questionDiff').value = 'beginner';
             document.getElementById('questionPoints').value = '10';
             document.getElementById('questionErr').style.display = 'none';
@@ -1204,316 +1369,203 @@
             document.getElementById('sessionModal').classList.add('open');
         }
     }
-
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    function handleOverlayClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+    function closeModal(id)              { document.getElementById(id).classList.remove('open'); }
+    function handleOverlayClick(e, id)  { if (e.target===document.getElementById(id)) closeModal(id); }
 
     async function saveLesson() {
-        const id = document.getElementById('lessonEditId').value;
-        const title = document.getElementById('lessonTitle').value.trim();
-        const language = document.getElementById('lessonLang').value;
+        const id      = document.getElementById('lessonEditId').value;
+        const title   = document.getElementById('lessonTitle').value.trim();
+        const language= document.getElementById('lessonLang').value;
         const content = document.getElementById('lessonContent').value.trim();
-        const errEl = document.getElementById('lessonErr');
-        if (!title || !content) { errEl.textContent = 'Title and content are required.'; errEl.style.display = 'block'; return; }
+        const errEl   = document.getElementById('lessonErr');
+        if (!title||!content) { errEl.textContent='Title and content are required.'; errEl.style.display='block'; return; }
         const btn = document.getElementById('lessonSaveBtn');
-        btn.disabled = true; btn.textContent = 'Saving…'; errEl.style.display = 'none';
+        btn.disabled=true; btn.textContent='Saving…'; errEl.style.display='none';
         try {
-            const url = id ? `${API}/classrooms/${classroomId}/lessons/${id}` : `${API}/classrooms/${classroomId}/lessons`;
-            const res = await fetch(url, { method: id ? 'PUT' : 'POST', headers: getAuthHeaders(), body: JSON.stringify({ title, language, content }) });
-            const data = await res.json();
+            const url = id?`${API}/classrooms/${classroomId}/lessons/${id}`:`${API}/classrooms/${classroomId}/lessons`;
+            const res = await fetch(url,{method:id?'PUT':'POST',headers:getAuthHeaders(),body:JSON.stringify({title,language,content})});
+            const data= await res.json();
             if (!data.success) throw new Error(data.message);
             closeModal('lessonModal'); loadLessons();
-        } catch (err) { errEl.textContent = err.message || 'Failed to save lesson.'; errEl.style.display = 'block'; }
-        finally { btn.disabled = false; btn.textContent = 'Save Lesson'; }
+        } catch(err) { errEl.textContent=err.message||'Failed to save lesson.'; errEl.style.display='block'; }
+        finally { btn.disabled=false; btn.textContent='Save Lesson'; }
     }
 
     function editLesson(id) {
-        const lesson = lessonsList.find(l => (l.lesson_id || l.id) === id);
-        if (!lesson) return;
-        document.getElementById('lessonModalTitle').textContent = 'Edit Lesson';
-        document.getElementById('lessonEditId').value = id;
-        document.getElementById('lessonTitle').value = lesson.title || '';
-        document.getElementById('lessonLang').value = lesson.language || '';
-        document.getElementById('lessonContent').value = lesson.content || '';
-        document.getElementById('lessonErr').style.display = 'none';
+        const l = lessonsList.find(x=>(x.lesson_id||x.id)===id); if (!l) return;
+        document.getElementById('lessonModalTitle').textContent='Edit Lesson';
+        document.getElementById('lessonEditId').value=id;
+        document.getElementById('lessonTitle').value=l.title||'';
+        document.getElementById('lessonLang').value=l.language||'';
+        document.getElementById('lessonContent').value=l.content||'';
+        document.getElementById('lessonErr').style.display='none';
         document.getElementById('lessonModal').classList.add('open');
     }
 
     async function deleteLesson(id) {
         if (!confirm('Delete this lesson?')) return;
-        try { await fetch(`${API}/classrooms/${classroomId}/lessons/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); loadLessons(); }
-        catch (err) { alert('Failed to delete lesson.'); }
-    }
-
-    // ── Questions ─────────────────────────────────────────────────────────────
-    async function loadQuestions() {
-        try {
-            const res = await fetch(`${API}/classrooms/${classroomId}/questions`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            classroomQuestions = data.success ? (data.questions || []) : [];
-            document.getElementById('challengesCount').textContent = classroomQuestions.length;
-            document.getElementById('statChallenges').textContent = classroomQuestions.length;
-            renderQuestions();
-        } catch (err) {
-            document.getElementById('questionsBody').innerHTML = `<tr><td colspan="6" class="loading-text" style="color:var(--danger);">Failed to load challenges.</td></tr>`;
-        }
-    }
-
-    function renderQuestions() {
-        const tbody = document.getElementById('questionsBody');
-        if (!classroomQuestions.length) {
-            tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">❓</div><div class="empty-state-title">No challenges yet</div><div class="empty-state-sub">Add questions to use in game sessions</div></div></td></tr>`;
-            return;
-        }
-        const typeLabel = { mcq:'MCQ', fill_blank:'Fill Blank', output_pred:'Output', ordering:'Ordering' };
-        tbody.innerHTML = classroomQuestions.map(q => `
-            <tr>
-                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(q.question_text||q.questionText||'')}">${escHtml((q.question_text||q.questionText||'').substring(0,70))}…</td>
-                <td><span class="type-chip">${typeLabel[q.type]||q.type||'MCQ'}</span></td>
-                <td><span class="level-pill ${q.difficulty||'beginner'}">${q.difficulty||'beginner'}</span></td>
-                <td><span class="pts-badge">${q.points||10} pts</span></td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${escHtml(q.topic||'—')}</td>
-                <td><div style="display:flex;gap:6px;justify-content:flex-end;">
-                    <button class="btn btn-outline" style="font-size:0.72rem;padding:4px 12px;" onclick="editQuestion(${q.question_id||q.id})">Edit</button>
-                    <button class="btn btn-outline" style="font-size:0.72rem;padding:4px 12px;color:var(--danger);border-color:var(--danger);" onclick="deleteQuestion(${q.question_id||q.id})">Del</button>
-                </div></td>
-            </tr>`).join('');
+        try { await fetch(`${API}/classrooms/${classroomId}/lessons/${id}`,{method:'DELETE',headers:getAuthHeaders()}); loadLessons(); }
+        catch { alert('Failed to delete lesson.'); }
     }
 
     function toggleMCQOptions() {
-        document.getElementById('mcqOptionsGroup').style.display = document.getElementById('questionType').value === 'mcq' ? 'block' : 'none';
+        document.getElementById('mcqOptionsGroup').style.display = document.getElementById('questionType').value==='mcq'?'block':'none';
     }
-
-    function openAIGenPanel() { document.getElementById('aiGenPanel').style.display='block'; document.getElementById('aiGenBtn').style.display='none'; document.getElementById('questionErr').style.display='none'; document.getElementById('aiTopic').focus(); }
+    function openAIGenPanel()  { document.getElementById('aiGenPanel').style.display='block'; document.getElementById('aiGenBtn').style.display='none'; document.getElementById('questionErr').style.display='none'; document.getElementById('aiTopic').focus(); }
     function closeAIGenPanel() { document.getElementById('aiGenPanel').style.display='none'; document.getElementById('aiGenBtn').style.display='flex'; document.getElementById('aiGenStatus').textContent=''; }
 
     async function generateQuestion() {
-        const topic=document.getElementById('aiTopic').value.trim(), language=document.getElementById('aiLanguage').value, difficulty=document.getElementById('aiDifficulty').value, type=document.getElementById('aiType').value;
-        const statusEl=document.getElementById('aiGenStatus'), genBtn=document.getElementById('aiGenerateBtn');
+        const topic=document.getElementById('aiTopic').value.trim(),language=document.getElementById('aiLanguage').value,difficulty=document.getElementById('aiDifficulty').value,type=document.getElementById('aiType').value;
+        const statusEl=document.getElementById('aiGenStatus'),genBtn=document.getElementById('aiGenerateBtn');
         if (!topic) { statusEl.textContent='Enter a topic first.'; statusEl.style.color='var(--danger)'; return; }
         genBtn.disabled=true; statusEl.style.color='var(--text-muted)'; statusEl.textContent='Generating…';
         try {
             const res=await fetch(`${API}/classrooms/${classroomId}/questions/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty,type})});
             const data=await res.json(); if (!data.success) throw new Error(data.message);
             const q=data.question;
-            document.getElementById('questionText').value=q.question_text||''; document.getElementById('questionType').value=q.type||type;
-            document.getElementById('correctAnswer').value=q.correct_answer||''; document.getElementById('questionHint').value=q.hint||'';
-            document.getElementById('questionDiff').value=q.difficulty||difficulty; document.getElementById('questionPoints').value=q.type==='advanced'?30:q.type==='intermediate'?20:10;
-            document.getElementById('questionTopic').value=q.topic||topic; toggleMCQOptions();
-            if (q.type==='mcq'&&Array.isArray(q.options)) { const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/i,'')); ['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||''); }
-            document.getElementById('questionErr').style.display='none';
-            statusEl.style.color='var(--success)'; statusEl.textContent='✔ Done!'; setTimeout(closeAIGenPanel,1200);
-        } catch(err) { statusEl.style.color='var(--danger)'; statusEl.textContent=err.message||'Failed.'; }
+            document.getElementById('questionText').value=q.question_text||'';document.getElementById('questionType').value=q.type||type;
+            document.getElementById('correctAnswer').value=q.correct_answer||'';document.getElementById('questionHint').value=q.hint||'';
+            document.getElementById('questionDiff').value=q.difficulty||difficulty;document.getElementById('questionPoints').value=10;
+            document.getElementById('questionTopic').value=q.topic||topic;toggleMCQOptions();
+            if (q.type==='mcq'&&Array.isArray(q.options)){const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/i,''));['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||'');}
+            statusEl.style.color='var(--success)';statusEl.textContent='✔ Done!';setTimeout(closeAIGenPanel,1200);
+        } catch(err) { statusEl.style.color='var(--danger)';statusEl.textContent=err.message||'Failed.'; }
         finally { genBtn.disabled=false; }
     }
 
     async function saveQuestion() {
-        const id=document.getElementById('questionEditId').value, question_text=document.getElementById('questionText').value.trim(), type=document.getElementById('questionType').value;
-        const correct_answer=document.getElementById('correctAnswer').value.trim(), hint=document.getElementById('questionHint').value.trim();
-        const difficulty=document.getElementById('questionDiff').value, points=parseInt(document.getElementById('questionPoints').value)||10, topic=document.getElementById('questionTopic').value.trim();
+        const id=document.getElementById('questionEditId').value,question_text=document.getElementById('questionText').value.trim(),type=document.getElementById('questionType').value;
+        const correct_answer=document.getElementById('correctAnswer').value.trim(),hint=document.getElementById('questionHint').value.trim();
+        const difficulty=document.getElementById('questionDiff').value,points=parseInt(document.getElementById('questionPoints').value)||10,topic=document.getElementById('questionTopic').value.trim();
         const errEl=document.getElementById('questionErr');
-        if (!question_text||!correct_answer) { errEl.textContent='Question and correct answer are required.'; errEl.style.display='block'; return; }
+        if (!question_text||!correct_answer){errEl.textContent='Question and correct answer are required.';errEl.style.display='block';return;}
         let options=null;
-        if (type==='mcq') { const [a,b,c,d]=['optA','optB','optC','optD'].map(x=>document.getElementById(x).value.trim()); options=[a&&`A) ${a}`,b&&`B) ${b}`,c&&`C) ${c}`,d&&`D) ${d}`].filter(Boolean); }
-        const btn=document.getElementById('questionSaveBtn'); btn.disabled=true; btn.textContent='Saving…'; errEl.style.display='none';
+        if (type==='mcq'){const[a,b,c,d]=['optA','optB','optC','optD'].map(x=>document.getElementById(x).value.trim());options=[a&&`A) ${a}`,b&&`B) ${b}`,c&&`C) ${c}`,d&&`D) ${d}`].filter(Boolean);}
+        const btn=document.getElementById('questionSaveBtn');btn.disabled=true;btn.textContent='Saving…';errEl.style.display='none';
         try {
             const url=id?`${API}/classrooms/${classroomId}/questions/${id}`:`${API}/classrooms/${classroomId}/questions`;
             const res=await fetch(url,{method:id?'PUT':'POST',headers:getAuthHeaders(),body:JSON.stringify({question_text,type,options,correct_answer,hint,difficulty,points,topic})});
-            const data=await res.json(); if (!data.success) throw new Error(data.message);
-            closeModal('questionModal'); loadQuestions();
-        } catch(err) { errEl.textContent=err.message||'Failed to save challenge.'; errEl.style.display='block'; }
-        finally { btn.disabled=false; btn.textContent='Save Challenge'; }
+            const data=await res.json();if (!data.success) throw new Error(data.message);
+            closeModal('questionModal');loadQuestions();
+        } catch(err){errEl.textContent=err.message||'Failed to save challenge.';errEl.style.display='block';}
+        finally{btn.disabled=false;btn.textContent='Save Challenge';}
     }
 
     function editQuestion(id) {
-        const q=classroomQuestions.find(x=>(x.question_id||x.id)===id); if (!q) return;
-        document.getElementById('questionModalTitle').textContent='Edit Challenge'; document.getElementById('questionEditId').value=id;
-        document.getElementById('questionText').value=q.question_text||q.questionText||''; document.getElementById('questionType').value=q.type||'mcq';
-        document.getElementById('correctAnswer').value=q.correct_answer||q.correctAnswer||''; document.getElementById('questionHint').value=q.hint||'';
-        document.getElementById('questionDiff').value=q.difficulty||'beginner'; document.getElementById('questionPoints').value=q.points||10; document.getElementById('questionTopic').value=q.topic||'';
+        const q=classroomQuestions.find(x=>(x.question_id||x.id)===id);if (!q) return;
+        document.getElementById('questionModalTitle').textContent='Edit Challenge';document.getElementById('questionEditId').value=id;
+        document.getElementById('questionText').value=q.question_text||q.questionText||'';document.getElementById('questionType').value=q.type||'mcq';
+        document.getElementById('correctAnswer').value=q.correct_answer||q.correctAnswer||'';document.getElementById('questionHint').value=q.hint||'';
+        document.getElementById('questionDiff').value=q.difficulty||'beginner';document.getElementById('questionPoints').value=q.points||10;document.getElementById('questionTopic').value=q.topic||'';
         toggleMCQOptions();
-        if (q.type==='mcq'&&Array.isArray(q.options)) { const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/,'')); ['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||''); }
-        document.getElementById('questionErr').style.display='none'; document.getElementById('questionModal').classList.add('open');
+        if (q.type==='mcq'&&Array.isArray(q.options)){const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/,''));['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||'');}
+        document.getElementById('questionErr').style.display='none';document.getElementById('questionModal').classList.add('open');
     }
 
     async function deleteQuestion(id) {
         if (!confirm('Delete this challenge?')) return;
         try { await fetch(`${API}/classrooms/${classroomId}/questions/${id}`,{method:'DELETE',headers:getAuthHeaders()}); loadQuestions(); }
-        catch(err) { alert('Failed to delete challenge.'); }
-    }
-
-    // ── Sessions ──────────────────────────────────────────────────────────────
-    let sessionsList = [];
-
-    async function loadSessions() {
-        try {
-            const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{headers:getAuthHeaders()});
-            const data=await res.json(); sessionsList=data.success?(data.sessions||[]):[];
-            document.getElementById('sessionsCount').textContent=sessionsList.length;
-            document.getElementById('statSessions').textContent=sessionsList.length;
-            renderSessions();
-        } catch(err) { document.getElementById('sessionsContainer').innerHTML=`<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`; }
-    }
-
-    function renderSessions() {
-        const container=document.getElementById('sessionsContainer');
-        if (!sessionsList.length) { container.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🎮</div><div class="empty-state-title">No sessions yet</div><div class="empty-state-sub">Create a session and students can join with the classroom key</div></div>`; return; }
-        container.innerHTML=sessionsList.map(s => {
-            const sid=s.session_id||s.id, isLive=s.status==='active';
-            return `<div class="session-card ${isLive?'live':''}">
-                <div class="session-card-main">
-                    <div class="session-info">
-                        <div class="session-title">${isLive?`<span class="live-badge"><span class="live-dot"></span>LIVE</span>`:''} ${escHtml(s.title)}</div>
-                        <div class="session-meta">Mode: ${s.game_mode||'—'} · Created ${relativeTime(s.created_at||s.createdAt)}${isLive?`<span id="answerCount-${sid}" style="color:var(--success);margin-left:8px;">· Loading…</span>`:''}</div>
-                    </div>
-                    <span class="status-pill ${s.status}">${s.status}</span>
-                    <div class="session-actions">
-                        ${s.status==='pending'?`<button class="btn btn-primary" style="font-size:0.78rem;" onclick="setSessionStatus(${sid},'active')">▶ Launch</button>`:''}
-                        ${isLive?`<button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="setSessionStatus(${sid},'closed')">■ End</button>`:''}
-                    </div>
-                </div>
-                ${isLive?`<div class="monitor-panel" id="monitor-${sid}"><div class="monitor-header"><span class="monitor-title">📡 Live Student Monitor</span><span class="monitor-refresh" id="monitorRefresh-${sid}">Refreshing…</span></div><div id="monitorRows-${sid}"><div class="loading-text" style="padding:8px 0;">Waiting for students…</div></div></div>`:''}
-            </div>`;
-        }).join('');
+        catch { alert('Failed to delete challenge.'); }
     }
 
     function renderSessionQuestionPicker() {
         const picker=document.getElementById('sessionQuestionPicker');
-        if (!classroomQuestions.length) { picker.innerHTML=`<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0;">No challenges yet. Add some in the Challenges tab first.</div>`; return; }
-        picker.innerHTML=classroomQuestions.map(q=>`<label style="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:0.83rem;color:var(--text);border-bottom:1px solid var(--border);"><input type="checkbox" value="${q.question_id||q.id}" style="accent-color:var(--primary);width:15px;height:15px;"><span>${escHtml((q.question_text||q.questionText||'').substring(0,70))}…</span></label>`).join('');
+        if (!classroomQuestions.length){picker.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:8px 0;">No challenges yet. Add some in the Classwork tab first.</div>`;return;}
+        picker.innerHTML=classroomQuestions.map(q=>`<label style="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:.83rem;color:var(--text);border-bottom:1px solid var(--border);"><input type="checkbox" value="${q.question_id||q.id}" style="accent-color:var(--primary);width:15px;height:15px;"><span>${escHtml((q.question_text||q.questionText||'').substring(0,70))}…</span></label>`).join('');
     }
 
     async function createSession() {
-        const title=document.getElementById('sessionTitle').value.trim(), game_mode=document.getElementById('sessionMode').value;
+        const title=document.getElementById('sessionTitle').value.trim(),game_mode=document.getElementById('sessionMode').value;
         const checked=[...document.querySelectorAll('#sessionQuestionPicker input[type=checkbox]:checked')].map(c=>parseInt(c.value));
         const errEl=document.getElementById('sessionErr');
-        if (!title) { errEl.textContent='Session title is required.'; errEl.style.display='block'; return; }
-        if (!checked.length) { errEl.textContent='Select at least one challenge.'; errEl.style.display='block'; return; }
-        const btn=document.getElementById('sessionSaveBtn'); btn.disabled=true; btn.textContent='Creating…'; errEl.style.display='none';
+        if (!title){errEl.textContent='Session title is required.';errEl.style.display='block';return;}
+        if (!checked.length){errEl.textContent='Select at least one challenge.';errEl.style.display='block';return;}
+        const btn=document.getElementById('sessionSaveBtn');btn.disabled=true;btn.textContent='Creating…';errEl.style.display='none';
         try {
             const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({title,game_mode,question_ids:checked})});
-            const data=await res.json(); if (!data.success) throw new Error(data.message);
-            closeModal('sessionModal'); loadSessions();
-        } catch(err) { errEl.textContent=err.message||'Failed.'; errEl.style.display='block'; }
-        finally { btn.disabled=false; btn.textContent='Create Session'; }
+            const data=await res.json();if (!data.success) throw new Error(data.message);
+            closeModal('sessionModal');loadSessions();
+        } catch(err){errEl.textContent=err.message||'Failed.';errEl.style.display='block';}
+        finally{btn.disabled=false;btn.textContent='Create Session';}
     }
 
     async function setSessionStatus(id,status) {
         try { await fetch(`${API}/classrooms/${classroomId}/sessions/${id}`,{method:'PATCH',headers:getAuthHeaders(),body:JSON.stringify({status})}); await loadSessions(); if (status==='active') startLivePolling(); if (status==='closed') stopLivePolling(); }
-        catch(err) { alert('Failed to update session.'); }
+        catch { alert('Failed to update session.'); }
     }
 
     let livePoll=null;
-    function startLivePolling() { if (livePoll) return; livePoll=setInterval(pollLiveSessions,5000); pollLiveSessions(); }
-    function stopLivePolling() { clearInterval(livePoll); livePoll=null; }
+    function startLivePolling(){if (livePoll) return;livePoll=setInterval(pollLiveSessions,5000);pollLiveSessions();}
+    function stopLivePolling(){clearInterval(livePoll);livePoll=null;}
 
     async function pollLiveSessions() {
         try {
             const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{headers:getAuthHeaders()});
-            const data=await res.json(); const fresh=data.success?(data.sessions||[]):[];
-            sessionsList=fresh; const active=fresh.filter(s=>s.status==='active');
-            for (const s of active) { const sid=s.session_id||s.id; fetchAnswerCount(sid); fetchMonitor(sid); }
+            const data=await res.json();const fresh=data.success?(data.sessions||[]):[];
+            sessionsList=fresh;const active=fresh.filter(s=>s.status==='active');
+            for (const s of active){const sid=s.session_id||s.id;fetchAnswerCount(sid);fetchMonitor(sid);}
             if (!active.length) stopLivePolling();
-        } catch(_) {}
+        } catch(_){}
     }
 
     async function fetchAnswerCount(sessionId) {
         try {
             const res=await fetch(`${API}/classrooms/${classroomId}/analytics`,{headers:getAuthHeaders()});
-            const data=await res.json(); const el=document.getElementById(`answerCount-${sessionId}`);
-            if (el&&data.success) { const count=data.analytics?.totalAnswers||0; el.textContent=`· ${count} response${count!==1?'s':''} so far`; }
-        } catch(_) {}
+            const data=await res.json();const el=document.getElementById(`answerCount-${sessionId}`);
+            if (el&&data.success){const count=data.analytics?.totalAnswers||0;el.textContent=`· ${count} response${count!==1?'s':''} so far`;}
+        } catch(_){}
     }
 
     async function fetchMonitor(sessionId) {
         try {
             const res=await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/monitor`,{headers:getAuthHeaders()});
-            const data=await res.json(); const rowsEl=document.getElementById(`monitorRows-${sessionId}`); const refreshEl=document.getElementById(`monitorRefresh-${sessionId}`);
+            const data=await res.json();const rowsEl=document.getElementById(`monitorRows-${sessionId}`);const refreshEl=document.getElementById(`monitorRefresh-${sessionId}`);
             if (!rowsEl) return;
             if (refreshEl) refreshEl.textContent=`Last updated ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
-            if (!data.success) { rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:0.8rem;padding:6px 0;">Monitor unavailable.</div>`; return; }
-            const {monitor=[],totalQuestions=0}=data;
-            if (!monitor.length) { rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0;">No students joined yet.</div>`; return; }
+            if (!data.success){rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:6px 0;">Monitor unavailable.</div>`;return;}
+            const{monitor=[],totalQuestions=0}=data;
+            if (!monitor.length){rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:8px 0;">No students joined yet.</div>`;return;}
             const sorted=[...monitor].sort((a,b)=>(b.points||0)-(a.points||0));
             rowsEl.innerHTML=sorted.map(m=>{
                 const answered=m.answered||0,total=totalQuestions||1,pct=Math.min(100,Math.round((answered/total)*100));
-                const barColor=m.correct/Math.max(answered,1)>=0.7?'var(--success)':m.correct/Math.max(answered,1)>=0.4?'var(--warning)':'var(--danger)';
+                const barColor=m.correct/Math.max(answered,1)>=.7?'var(--success)':m.correct/Math.max(answered,1)>=.4?'var(--warning)':'var(--danger)';
                 return `<div class="monitor-row"><div class="monitor-name" title="${escHtml(m.fullName||m.full_name||'Student')}">${escHtml(m.fullName||m.full_name||'Student')}</div><div class="monitor-bar-wrap"><div class="monitor-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><div class="monitor-stats">${answered}/${total} · ${m.correct||0} correct</div><div class="monitor-pts">${m.points||0} pts</div></div>`;
             }).join('');
-        } catch(_) {}
+        } catch(_){}
     }
 
-    // ── Assignments ───────────────────────────────────────────────────────────
-    let assignmentsList=[];
-
-    async function loadAssignments() {
-        try {
-            const res=await fetch(`${API}/assignments?classroomId=${classroomId}`,{headers:getAuthHeaders()});
-            const data=await res.json(); assignmentsList=data.success?(data.assignments||[]):[];
-            document.getElementById('assignmentsCount').textContent=assignmentsList.length;
-            renderAssignments();
-        } catch(err) { document.getElementById('assignmentsContainer').innerHTML=`<div class="empty-state">Failed to load assignments.</div>`; }
-    }
-
-    function renderAssignments() {
-        const container=document.getElementById('assignmentsContainer');
-        if (!assignmentsList.length) { container.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No assignments yet</div><div class="empty-state-sub">Create a coding assignment with automated test-case grading</div></div>`; return; }
-        const langColors={python:'#3b82f6',javascript:'#f59e0b',java:'#ef4444',cpp:'#8b5cf6'};
-        container.innerHTML=assignmentsList.map(a=>{
-            const aid=a.assignment_id||a.id, lang=a.language||'python', lc=langColors[lang]||'#6b7280';
-            const deadline=a.deadline?new Date(a.deadline).toLocaleDateString():'No deadline', subCount=a.submission_count||0;
-            return `<div class="assignment-card">
-                <div class="assignment-icon"><span class="material-symbols-outlined">terminal</span></div>
-                <div class="assignment-body">
-                    <div class="assignment-meta-row">
-                        <span class="lang-chip" style="background:${lc}18;color:${lc};border:1px solid ${lc}30;">${lang}</span>
-                        <span style="font-size:0.72rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;"><span class="material-symbols-outlined" style="font-size:0.85rem;">calendar_today</span>${deadline}</span>
-                        <span style="font-size:0.72rem;color:var(--xp-gold);font-weight:700;">${a.max_points||a.maxPoints||100} pts</span>
-                    </div>
-                    <div class="assignment-title">${escHtml(a.title)}</div>
-                    <div class="assignment-sub">${a.total_tests||0} test cases · ${subCount} submission${subCount!==1?'s':''}</div>
-                    ${a.description?`<div class="assignment-desc">${escHtml(a.description.substring(0,140))}${a.description.length>140?'…':''}</div>`:''}
-                </div>
-                <div class="assignment-actions">
-                    <button class="btn btn-outline" style="font-size:0.78rem;display:inline-flex;align-items:center;gap:5px;" onclick="viewSubmissions(${aid})"><span class="material-symbols-outlined" style="font-size:0.9rem;">bar_chart</span>Submissions</button>
-                    <button class="btn btn-outline" style="font-size:0.78rem;" onclick="editAssignment(${aid})">Edit</button>
-                    <button class="btn btn-outline" style="font-size:0.78rem;color:var(--danger);border-color:var(--danger);" onclick="deleteAssignment(${aid})">Delete</button>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    async function deleteAssignment(id) {
-        if (!confirm('Delete this assignment? All student submissions will be lost.')) return;
-        try { await fetch(`${API}/assignments/${id}`,{method:'DELETE',headers:getAuthHeaders()}); showToast('Assignment deleted'); loadAssignments(); }
-        catch { alert('Failed to delete assignment.'); }
-    }
-
-    let editingAssignmentId=null, testCaseCount=0;
+    // ── Assignments (modals) ──────────────────────────────────────────────────
+    let editingAssignmentId=null,testCaseCount=0;
 
     function openAssignmentModal(assignmentData=null) {
         editingAssignmentId=assignmentData?(assignmentData.assignment_id||assignmentData.id):null;
         document.getElementById('assignModalTitle').textContent=assignmentData?'Edit Assignment':'New Coding Assignment';
-        document.getElementById('assignTitle').value=assignmentData?.title||''; document.getElementById('assignDesc').value=assignmentData?.description||'';
-        document.getElementById('assignLang').value=assignmentData?.language||'python'; document.getElementById('assignMaxPoints').value=assignmentData?.max_points||assignmentData?.maxPoints||100;
+        document.getElementById('assignTitle').value=assignmentData?.title||'';document.getElementById('assignDesc').value=assignmentData?.description||'';
+        document.getElementById('assignLang').value=assignmentData?.language||'python';document.getElementById('assignMaxPoints').value=assignmentData?.max_points||assignmentData?.maxPoints||100;
         document.getElementById('assignScoringMode').value=assignmentData?.scoring_mode||assignmentData?.scoringMode||'per_test';
         document.getElementById('assignDeadline').value=assignmentData?.deadline?assignmentData.deadline.split('T')[0]:'';
         document.getElementById('assignStarterCode').value=assignmentData?.starter_code||assignmentData?.starterCode||'';
         document.getElementById('assignErr').style.display='none';
-        testCaseCount=0; document.getElementById('testCasesBody').innerHTML='';
+        testCaseCount=0;document.getElementById('testCasesBody').innerHTML='';
         if (assignmentData?.testCases) assignmentData.testCases.forEach(tc=>addTestCaseRow(tc)); else addTestCaseRow();
         document.getElementById('assignModal').classList.add('open');
     }
 
     async function editAssignment(id) {
-        try { const res=await fetch(`${API}/assignments/${id}`,{headers:getAuthHeaders()}); const data=await res.json(); if (data.success) openAssignmentModal({...data.assignment,testCases:data.testCases}); }
+        try { const res=await fetch(`${API}/assignments/${id}`,{headers:getAuthHeaders()});const data=await res.json();if (data.success) openAssignmentModal({...data.assignment,testCases:data.testCases}); }
         catch { alert('Failed to load assignment.'); }
     }
 
+    async function deleteAssignment(id) {
+        if (!confirm('Delete this assignment? All submissions will be lost.')) return;
+        try { await fetch(`${API}/assignments/${id}`,{method:'DELETE',headers:getAuthHeaders()});showToast('Assignment deleted');loadAssignments(); }
+        catch { alert('Failed to delete assignment.'); }
+    }
+
     function addTestCaseRow(tc=null) {
-        testCaseCount++; const n=testCaseCount; const row=document.createElement('div');
-        row.className='tc-row'; row.id=`tc-row-${n}`;
-        row.innerHTML=`<div class="tc-row-header"><span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">Test ${n}</span><div style="display:flex;align-items:center;gap:12px;"><label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="tc-hidden-${n}" ${tc?.is_hidden||tc?.isHidden?'checked':''} style="accent-color:var(--primary);">Hidden</label><button onclick="removeTestCase(${n})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;line-height:1;">×</button></div></div><div class="tc-row-fields"><div><label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Input (stdin)</label><textarea class="form-input tc-input" id="tc-input-${n}" rows="3" placeholder="e.g. 5\n3">${escHtml(tc?.input||'')}</textarea></div><div><label style="font-size:0.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Expected Output</label><textarea class="form-input tc-output" id="tc-output-${n}" rows="3" placeholder="e.g. 8">${escHtml(tc?.expected_output||tc?.expectedOutput||'')}</textarea></div></div>`;
+        testCaseCount++;const n=testCaseCount;const row=document.createElement('div');
+        row.className='tc-row';row.id=`tc-row-${n}`;
+        row.innerHTML=`<div class="tc-row-header"><span style="font-size:.75rem;font-weight:600;color:var(--text-secondary);">Test ${n}</span><div style="display:flex;align-items:center;gap:12px;"><label style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="tc-hidden-${n}" ${tc?.is_hidden||tc?.isHidden?'checked':''} style="accent-color:var(--primary);">Hidden</label><button onclick="removeTestCase(${n})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;line-height:1;">×</button></div></div><div class="tc-row-fields"><div><label style="font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Input (stdin)</label><textarea class="form-input tc-input" id="tc-input-${n}" rows="3" placeholder="e.g. 5\n3">${escHtml(tc?.input||'')}</textarea></div><div><label style="font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:4px;">Expected Output</label><textarea class="form-input tc-output" id="tc-output-${n}" rows="3" placeholder="e.g. 8">${escHtml(tc?.expected_output||tc?.expectedOutput||'')}</textarea></div></div>`;
         document.getElementById('testCasesBody').appendChild(row);
     }
 
@@ -1521,61 +1573,61 @@
 
     function collectTestCases() {
         const tcs=[];
-        document.querySelectorAll('.tc-row').forEach(row=>{ const n=row.id.replace('tc-row-',''); const input=document.getElementById(`tc-input-${n}`)?.value||'',expectedOutput=document.getElementById(`tc-output-${n}`)?.value||''; if (input||expectedOutput) tcs.push({input,expectedOutput,isHidden:document.getElementById(`tc-hidden-${n}`)?.checked||false}); });
+        document.querySelectorAll('.tc-row').forEach(row=>{const n=row.id.replace('tc-row-','');const input=document.getElementById(`tc-input-${n}`)?.value||'',expectedOutput=document.getElementById(`tc-output-${n}`)?.value||'';if (input||expectedOutput) tcs.push({input,expectedOutput,isHidden:document.getElementById(`tc-hidden-${n}`)?.checked||false});});
         return tcs;
     }
 
     async function saveAssignment() {
-        const title=document.getElementById('assignTitle').value.trim(), description=document.getElementById('assignDesc').value.trim(), language=document.getElementById('assignLang').value;
-        const maxPoints=parseInt(document.getElementById('assignMaxPoints').value)||100, scoringMode=document.getElementById('assignScoringMode').value;
-        const deadline=document.getElementById('assignDeadline').value||null, starterCode=document.getElementById('assignStarterCode').value, testCases=collectTestCases();
+        const title=document.getElementById('assignTitle').value.trim(),description=document.getElementById('assignDesc').value.trim(),language=document.getElementById('assignLang').value;
+        const maxPoints=parseInt(document.getElementById('assignMaxPoints').value)||100,scoringMode=document.getElementById('assignScoringMode').value;
+        const deadline=document.getElementById('assignDeadline').value||null,starterCode=document.getElementById('assignStarterCode').value,testCases=collectTestCases();
         const errEl=document.getElementById('assignErr');
-        if (!title) { errEl.textContent='Title is required.'; errEl.style.display='block'; return; }
-        if (!testCases.length) { errEl.textContent='Add at least one test case.'; errEl.style.display='block'; return; }
-        const btn=document.getElementById('assignSaveBtn'); btn.disabled=true; btn.textContent='Saving…'; errEl.style.display='none';
+        if (!title){errEl.textContent='Title is required.';errEl.style.display='block';return;}
+        if (!testCases.length){errEl.textContent='Add at least one test case.';errEl.style.display='block';return;}
+        const btn=document.getElementById('assignSaveBtn');btn.disabled=true;btn.textContent='Saving…';errEl.style.display='none';
         try {
             const url=editingAssignmentId?`${API}/assignments/${editingAssignmentId}`:`${API}/assignments`;
             const res=await fetch(url,{method:editingAssignmentId?'PUT':'POST',headers:getAuthHeaders(),body:JSON.stringify({classroomId,title,description,language,maxPoints,scoringMode,deadline,starterCode,testCases,status:'published'})});
-            const data=await res.json(); if (!data.success) throw new Error(data.message);
-            document.getElementById('assignModal').classList.remove('open'); showToast(editingAssignmentId?'Assignment updated!':'Assignment created!'); loadAssignments();
-        } catch(err) { errEl.textContent=err.message||'Failed.'; errEl.style.display='block'; }
-        finally { btn.disabled=false; btn.textContent='Save Assignment'; }
+            const data=await res.json();if (!data.success) throw new Error(data.message);
+            document.getElementById('assignModal').classList.remove('open');showToast(editingAssignmentId?'Assignment updated!':'Assignment created!');loadAssignments();
+        } catch(err){errEl.textContent=err.message||'Failed.';errEl.style.display='block';}
+        finally{btn.disabled=false;btn.textContent='Save Assignment';}
     }
 
-    function toggleLessonAIPanel() { const p=document.getElementById('lessonAIPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+    function toggleLessonAIPanel(){const p=document.getElementById('lessonAIPanel');p.style.display=p.style.display==='none'?'block':'none';}
 
     async function generateAILesson() {
-        const topic=document.getElementById('lessonAITopic').value.trim(), language=document.getElementById('lessonAILang').value, difficulty=document.getElementById('lessonAIDiff').value;
-        if (!topic) { alert('Please enter a topic first.'); return; }
-        const btn=document.getElementById('lessonAIGenBtn'), status=document.getElementById('lessonAIStatus');
-        btn.disabled=true; btn.textContent='⏳ Generating…'; status.textContent='Calling AI…';
+        const topic=document.getElementById('lessonAITopic').value.trim(),language=document.getElementById('lessonAILang').value,difficulty=document.getElementById('lessonAIDiff').value;
+        if (!topic){alert('Please enter a topic first.');return;}
+        const btn=document.getElementById('lessonAIGenBtn'),status=document.getElementById('lessonAIStatus');
+        btn.disabled=true;btn.textContent='⏳ Generating…';status.textContent='Calling AI…';
         try {
             const res=await fetch(`${API}/lessons/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty})});
-            const data=await res.json(); if (!data.success) throw new Error(data.message);
-            document.getElementById('lessonTitle').value=data.lesson.title||''; document.getElementById('lessonLang').value=language; document.getElementById('lessonContent').value=data.lesson.content||'';
-            document.getElementById('lessonAIPanel').style.display='none'; status.textContent=''; showToast('✨ Lesson generated! Review and save.');
-        } catch(err) { status.textContent='❌ '+err.message; }
-        finally { btn.disabled=false; btn.textContent='⚡ Generate Lesson'; }
+            const data=await res.json();if (!data.success) throw new Error(data.message);
+            document.getElementById('lessonTitle').value=data.lesson.title||'';document.getElementById('lessonLang').value=language;document.getElementById('lessonContent').value=data.lesson.content||'';
+            document.getElementById('lessonAIPanel').style.display='none';status.textContent='';showToast('✨ Lesson generated! Review and save.');
+        } catch(err){status.textContent='❌ '+err.message;}
+        finally{btn.disabled=false;btn.textContent='⚡ Generate Lesson';}
     }
 
-    function toggleAssignAIPanel() { const p=document.getElementById('assignAIPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+    function toggleAssignAIPanel(){const p=document.getElementById('assignAIPanel');p.style.display=p.style.display==='none'?'block':'none';}
 
     async function generateAIAssignment() {
-        const topic=document.getElementById('assignAITopic').value.trim(), language=document.getElementById('assignAILang').value, difficulty=document.getElementById('assignAIDiff').value;
-        if (!topic) { alert('Please enter a topic first.'); return; }
-        const btn=document.getElementById('assignAIGenBtn'), status=document.getElementById('assignAIStatus');
-        btn.disabled=true; btn.textContent='⏳ Generating…'; status.textContent='Calling AI…';
+        const topic=document.getElementById('assignAITopic').value.trim(),language=document.getElementById('assignAILang').value,difficulty=document.getElementById('assignAIDiff').value;
+        if (!topic){alert('Please enter a topic first.');return;}
+        const btn=document.getElementById('assignAIGenBtn'),status=document.getElementById('assignAIStatus');
+        btn.disabled=true;btn.textContent='⏳ Generating…';status.textContent='Calling AI…';
         try {
             const res=await fetch(`${API}/assignments/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty})});
-            const data=await res.json(); if (!data.success) throw new Error(data.message);
+            const data=await res.json();if (!data.success) throw new Error(data.message);
             const a=data.assignment;
-            document.getElementById('assignTitle').value=a.title||''; document.getElementById('assignDesc').value=a.description||''; document.getElementById('assignLang').value=language; document.getElementById('assignStarterCode').value=a.starterCode||a.starter_code||'';
-            testCaseCount=0; document.getElementById('testCasesBody').innerHTML='';
-            const tcs=a.testCases||a.test_cases||[]; tcs.forEach(tc=>addTestCaseRow({input:tc.input||'',expected_output:tc.expectedOutput||tc.expected_output||'',isHidden:tc.isHidden||tc.is_hidden||false}));
+            document.getElementById('assignTitle').value=a.title||'';document.getElementById('assignDesc').value=a.description||'';document.getElementById('assignLang').value=language;document.getElementById('assignStarterCode').value=a.starterCode||a.starter_code||'';
+            testCaseCount=0;document.getElementById('testCasesBody').innerHTML='';
+            const tcs=a.testCases||a.test_cases||[];tcs.forEach(tc=>addTestCaseRow({input:tc.input||'',expected_output:tc.expectedOutput||tc.expected_output||'',isHidden:tc.isHidden||tc.is_hidden||false}));
             if (!tcs.length) addTestCaseRow();
-            document.getElementById('assignAIPanel').style.display='none'; status.textContent=''; showToast(`✨ Generated with ${tcs.length} test cases!`);
-        } catch(err) { status.textContent='❌ '+err.message; }
-        finally { btn.disabled=false; btn.textContent='⚡ Generate Assignment'; }
+            document.getElementById('assignAIPanel').style.display='none';status.textContent='';showToast(`✨ Generated with ${tcs.length} test cases!`);
+        } catch(err){status.textContent='❌ '+err.message;}
+        finally{btn.disabled=false;btn.textContent='⚡ Generate Assignment';}
     }
 
     async function viewSubmissions(assignmentId) {
@@ -1583,17 +1635,16 @@
         document.getElementById('submissionsBody').innerHTML='<div class="loading-text">Loading submissions…</div>';
         try {
             const res=await fetch(`${API}/assignments/${assignmentId}/submissions`,{headers:getAuthHeaders()});
-            const data=await res.json(); const subs=data.success?(data.submissions||[]):[];
-            if (!subs.length) { document.getElementById('submissionsBody').innerHTML='<div class="empty-state"><div class="empty-state-icon">📬</div><div class="empty-state-title">No submissions yet</div></div>'; return; }
-            document.getElementById('submissionsBody').innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:0.72rem;color:var(--text-muted);text-align:left;border-bottom:2px solid var(--border);"><th style="padding:10px 12px;">Student</th><th style="padding:10px 12px;">Score</th><th style="padding:10px 12px;">Tests Passed</th><th style="padding:10px 12px;">Time</th><th style="padding:10px 12px;">Submitted</th></tr></thead><tbody>${subs.map(s=>{const pct=s.total_tests>0?Math.round((s.passed_tests/s.total_tests)*100):0;const color=pct===100?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';return `<tr style="border-bottom:1px solid var(--border);font-size:0.83rem;"><td style="padding:12px;"><strong>${escHtml(s.studentName||s.full_name||'Student')}</strong><br><span style="color:var(--text-muted);font-size:0.75rem;">${escHtml(s.email||'')}</span></td><td style="padding:12px;font-weight:700;color:${color};">${s.score} pts</td><td style="padding:12px;color:${color};">${s.passed_tests}/${s.total_tests} (${pct}%)</td><td style="padding:12px;color:var(--text-muted);">${s.execution_time_ms||0}ms</td><td style="padding:12px;color:var(--text-muted);">${relativeTime(s.submitted_at)}</td></tr>`;}).join('')}</tbody></table>`;
+            const data=await res.json();const subs=data.success?(data.submissions||[]):[];
+            if (!subs.length){document.getElementById('submissionsBody').innerHTML='<div class="empty-state"><span class="empty-state-icon">📬</span><div class="empty-state-title">No submissions yet</div></div>';return;}
+            document.getElementById('submissionsBody').innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.72rem;color:var(--text-muted);text-align:left;border-bottom:2px solid var(--border);"><th style="padding:10px 12px;">Student</th><th style="padding:10px 12px;">Score</th><th style="padding:10px 12px;">Tests Passed</th><th style="padding:10px 12px;">Time</th><th style="padding:10px 12px;">Submitted</th></tr></thead><tbody>${subs.map(s=>{const pct=s.total_tests>0?Math.round((s.passed_tests/s.total_tests)*100):0;const color=pct===100?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';return `<tr style="border-bottom:1px solid var(--border);font-size:.83rem;"><td style="padding:12px;"><strong>${escHtml(s.studentName||s.full_name||'Student')}</strong><br><span style="color:var(--text-muted);font-size:.75rem;">${escHtml(s.email||'')}</span></td><td style="padding:12px;font-weight:700;color:${color};">${s.score} pts</td><td style="padding:12px;color:${color};">${s.passed_tests}/${s.total_tests} (${pct}%)</td><td style="padding:12px;color:var(--text-muted);">${s.execution_time_ms||0}ms</td><td style="padding:12px;color:var(--text-muted);">${relativeTime(s.submitted_at)}</td></tr>`;}).join('')}</tbody></table>`;
         } catch { document.getElementById('submissionsBody').innerHTML='<div class="empty-state">Failed to load submissions.</div>'; }
     }
-
-    function logout() { if (!confirm('Logout?')) return; localStorage.removeItem('user'); localStorage.removeItem('token'); localStorage.removeItem('isLoggedIn'); window.location.href='index.html'; }
 
     // ── Init ──────────────────────────────────────────────────────────────────
     loadBanner();
     loadClassroom();
+    loadAnnouncements();
     loadStudents();
     loadLessons();
     loadQuestions();
@@ -1605,3 +1656,5 @@
 <script>window.SIDEBAR_ROLE = 'faculty'; window.SIDEBAR_PAGE = 'classrooms';</script>
 </body>
 </html>
+
+

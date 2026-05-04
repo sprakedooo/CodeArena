@@ -46,6 +46,10 @@ async function ensureTable() {
         try {
             await pool.query('ALTER TABLE contributions DROP FOREIGN KEY contributions_ibfk_1');
         } catch { /* FK didn't exist — fine */ }
+        // Widen cover_image to MEDIUMTEXT so base64 images (up to 16MB) fit
+        try {
+            await pool.query('ALTER TABLE contributions MODIFY cover_image MEDIUMTEXT');
+        } catch { /* column already wide enough or table missing — fine */ }
     } catch { /* DB unavailable — mock fallback will handle it */ }
 }
 ensureTable();
@@ -85,7 +89,7 @@ router.get('/mine', authMiddleware, requireFaculty, async (req, res) => {
     try {
         const [rows] = await pool.query(
             `SELECT contribution_id, type, title, description, content, language,
-                    tags, status, view_count, created_at, updated_at
+                    tags, cover_image, status, view_count, created_at, updated_at
              FROM contributions WHERE faculty_id = ? ORDER BY created_at DESC`,
             [req.user.id]
         );
@@ -172,6 +176,29 @@ router.put('/:id', authMiddleware, requireFaculty, async (req, res) => {
         const idx = mockContributions.findIndex(c => c.contribution_id === id);
         if (idx === -1) return res.status(404).json({ error: 'Not found' });
         mockContributions[idx] = { ...mockContributions[idx], title, description, content, language, tags, status };
+        return res.json({ success: true, source: 'mock' });
+    }
+});
+
+// ── PATCH /api/contributions/:id/cover ───────────────────────────────────────
+router.patch('/:id/cover', authMiddleware, requireFaculty, async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { cover_image } = req.body;
+    if (!cover_image) return res.status(400).json({ error: 'cover_image is required' });
+    try {
+        const [rows] = await pool.query(
+            'SELECT faculty_id FROM contributions WHERE contribution_id = ?', [id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Not found' });
+        if (rows[0].faculty_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+        await pool.query(
+            'UPDATE contributions SET cover_image=?, updated_at=NOW() WHERE contribution_id=?',
+            [cover_image, id]
+        );
+        return res.json({ success: true });
+    } catch {
+        const c = mockContributions.find(c => c.contribution_id === id);
+        if (c) c.cover_image = cover_image;
         return res.json({ success: true, source: 'mock' });
     }
 });

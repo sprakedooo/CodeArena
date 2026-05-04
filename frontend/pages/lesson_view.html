@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -249,10 +249,6 @@
             </div>
         </div>
         <div class="lesson-top-bar-actions">
-            <div class="lesson-xp-chip" id="topBarXP">
-                <span class="material-symbols-outlined ms-icon">bolt</span>
-                <span id="topBarXPVal">—</span> XP
-            </div>
         </div>
     </div>
 
@@ -392,7 +388,6 @@ function renderLesson(token) {
     document.getElementById('metaMins').textContent   = `${lesson.estimated_minutes || 5} min read`;
     document.getElementById('metaNum').textContent    = lesson.order_index || '—';
     document.getElementById('metaLang').textContent   = capitalize(lesson.language || 'python');
-    document.getElementById('topBarXPVal').textContent = lesson.xp_reward || 20;
     document.getElementById('lessonTitle').textContent = lesson.title;
 
     // Body
@@ -468,7 +463,6 @@ async function markComplete() {
             setCompletedState();
 
             if (!data.alreadyCompleted) {
-                showXPToast(data.xpAwarded || 20, data.totalXp || 0);
                 // Refresh path progress bar
                 loadPathProgress(lessonData.path_id, token);
             }
@@ -510,15 +504,6 @@ function showError() {
     document.getElementById('errorState').style.display   = '';
 }
 
-// ── XP toast ──────────────────────────────────────────────────────────────────
-function showXPToast(xp, totalXp) {
-    const el = document.createElement('div');
-    el.className = 'xp-toast';
-    el.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.1rem;">bolt</span>
-        +${xp} XP! Total: ${totalXp.toLocaleString()} XP`;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2700);
-}
 
 // ── Content renderer ──────────────────────────────────────────────────────────
 function renderContent(content) {
@@ -563,3 +548,6 @@ function escHtml(s) {
 </script>
 </body>
 </html>
+
+
+

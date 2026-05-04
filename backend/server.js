@@ -75,11 +75,11 @@ const PORT = process.env.PORT || 3000;
 // Enable CORS for frontend communication
 app.use(cors());
 
-// Parse JSON request bodies (built-in Express middleware)
-app.use(express.json());
+// Parse JSON request bodies — 10 MB limit to support base64 image uploads
+app.use(express.json({ limit: '10mb' }));
 
 // Parse URL-encoded form data
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session (required by passport for the OAuth redirect flow)
 app.use(session({
