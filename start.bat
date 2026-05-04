@@ -22,7 +22,7 @@ if not exist "frontend\node_modules" (
 
 echo.
 echo    Backend API:  http://localhost:3000
-echo    Frontend:     http://localhost:8080
+echo    Frontend:     http://localhost:3001
 echo.
 echo    Close either window to stop that server.
 echo ================================================================

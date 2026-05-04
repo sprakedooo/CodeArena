@@ -541,31 +541,31 @@ router.get('/google',
 
 // Google redirects here after user consents
 router.get('/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:8080/pages/login.html?error=oauth_failed' }),
+    passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:3001/pages/login.html?error=oauth_failed' }),
     (req, res) => {
         // req.user is set by passport strategy
-        const user  = req.user;
+        const user = req.user;
         const token = generateToken({
-            id:       user.id,
-            email:    user.email,
-            role:     user.role || 'student',
+            id: user.id,
+            email: user.email,
+            role: user.role || 'student',
             fullName: user.fullName,
         });
 
         // Build safe user payload for frontend
         const userPayload = encodeURIComponent(JSON.stringify({
-            id:               user.id,
-            email:            user.email,
-            fullName:         user.fullName,
-            role:             user.role || 'student',
-            totalPoints:      user.totalPoints || 0,
-            currentLevel:     user.currentLevel || 'beginner',
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            role: user.role || 'student',
+            totalPoints: user.totalPoints || 0,
+            currentLevel: user.currentLevel || 'beginner',
             selectedLanguage: user.selectedLanguage || null,
-            avatar:           user.avatar || null,
+            avatar: user.avatar || null,
         }));
 
         // Redirect to frontend callback page with token + user in URL
-        res.redirect(`http://localhost:8080/pages/oauth-callback.html?token=${token}&user=${userPayload}`);
+        res.redirect(`http://localhost:3001/pages/oauth-callback.html?token=${token}&user=${userPayload}`);
     }
 );
 
