@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -155,10 +155,7 @@
         <div class="rank-num" id="myRankNum">#—</div>
         <div class="rank-sub" id="myRankSub">Your ranking</div>
     </div>
-    <div style="text-align:right;">
-        <div style="font-size:1rem;font-weight:700;color:#fbbf24;" id="myXPDisplay">— XP</div>
-        <div style="font-size:0.72rem;color:var(--text-muted);">Your XP</div>
-    </div>
+
 </div>
 
 <!-- ── Podium ─────────────────────────────────────────────────────────────── -->
@@ -174,7 +171,7 @@
     <div class="lb-header">
         <div>Rank</div>
         <div>Player</div>
-        <div>XP</div>
+        <div>Score</div>
         <div>Badges</div>
     </div>
     <div style="padding:2rem;text-align:center;">
@@ -212,7 +209,7 @@ async function loadLeaderboard(lang) {
         <div class="skeleton-line" style="width:80px;height:160px;border-radius:8px;"></div>
         <div class="skeleton-line" style="width:80px;height:100px;border-radius:8px;"></div>`;
     document.getElementById('lbTable').innerHTML = `<div class="lb-header">
-        <div>Rank</div><div>Player</div><div>XP</div><div>Badges</div></div>
+        <div>Rank</div><div>Player</div><div>Score</div><div>Badges</div></div>
         <div style="padding:2rem;text-align:center;">
             <div class="skeleton-line" style="width:100%;height:20px;"></div>
             <div class="skeleton-line" style="width:100%;height:20px;"></div>
@@ -252,7 +249,6 @@ function renderLeaderboard(players) {
         myRankCard.style.display = 'flex';
         document.getElementById('myRankNum').textContent  = `#${myIdx + 1}`;
         document.getElementById('myRankSub').textContent  = `out of ${players.length} players`;
-        document.getElementById('myXPDisplay').textContent = ((players[myIdx].total_xp || players[myIdx].xp || 0)).toLocaleString() + ' XP';
     } else {
         myRankCard.style.display = 'none';
     }
@@ -286,7 +282,7 @@ function renderPodium(top) {
                 ${initials}
             </div>
             <div class="podium-name">${esc(name.split(' ')[0])}</div>
-            <div class="podium-xp">${xp} XP</div>
+            <div class="podium-xp">${xp}</div>
             <div class="podium-block">${medals[i]}</div>
         </div>`;
     }).join('');
@@ -297,7 +293,7 @@ function renderTable(players) {
     if (!players.length) {
         table.innerHTML = `<div class="empty-state">
             <span class="material-symbols-outlined">emoji_events</span>
-            No rankings yet. Start learning to earn XP!</div>`;
+            No rankings yet. Start learning!</div>`;
         return;
     }
 
@@ -318,13 +314,13 @@ function renderTable(players) {
                 <div class="lb-avatar" style="background:${bg};">${initials}</div>
                 <span class="lb-name">${esc(name)}${isMe ? `<span class="lb-you">you</span>` : ''}</span>
             </div>
-            <div class="lb-xp">${xp} <span style="font-size:0.7rem;color:var(--text-muted);">XP</span></div>
+            <div class="lb-xp">${xp}</div>
             <div class="lb-badge">${badges} 🏅</div>
         </div>`;
     }).join('');
 
     table.innerHTML = `<div class="lb-header">
-        <div>Rank</div><div>Player</div><div>XP</div><div>Badges</div>
+        <div>Rank</div><div>Player</div><div>Score</div><div>Badges</div>
     </div>${rows}`;
 }
 
@@ -334,3 +330,4 @@ function esc(s) {
 </script>
 </body>
 </html>
+

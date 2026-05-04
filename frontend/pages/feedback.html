@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -298,10 +298,6 @@
 
     <!-- Stat strip -->
     <div class="stat-strip fade-in" id="statStrip">
-        <div class="stat-card accent-xp">
-            <div class="stat-val skeleton" id="statXP" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
-            <div class="stat-label">Total XP</div>
-        </div>
         <div class="stat-card accent-green">
             <div class="stat-val skeleton" id="statLessons" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
             <div class="stat-label">Lessons Done</div>
@@ -382,7 +378,6 @@ function fillStats(xp, lessons, streak, weakCount) {
         el.style.marginBottom = '';
         el.textContent = val;
     };
-    set('statXP',         xp.toLocaleString());
     set('statLessons',    lessons);
     set('statStreak',     streak + '🔥');
     set('statWeaknesses', weakCount);
@@ -475,12 +470,6 @@ function buildLocalBullets(data) {
     const weaknesses = data.weaknesses || [];
     const lang = data.user?.selected_language || '';
 
-    if (xp >= 500)
-        bullets.push({ cls: 'positive', icon: 'emoji_events', text: `Outstanding! You've earned ${xp.toLocaleString()} XP — you're in the top tier.` });
-    else if (xp >= 100)
-        bullets.push({ cls: 'positive', icon: 'star', text: `Great progress with ${xp.toLocaleString()} XP. Keep it up!` });
-    else
-        bullets.push({ cls: 'info', icon: 'info', text: `You have ${xp.toLocaleString()} XP. Complete more lessons and quizzes to level up.` });
 
     if (streak >= 7)
         bullets.push({ cls: 'positive', icon: 'local_fire_department', text: `Incredible ${streak}-day streak! Your consistency is paying off.` });
@@ -601,3 +590,6 @@ loadAll();
 <script src="../js/sidebar.js"></script>
 </body>
 </html>
+
+
+

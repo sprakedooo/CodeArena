@@ -269,6 +269,19 @@ CREATE TABLE announcements (
 );
 
 -- ============================================================================
+-- ANNOUNCEMENT COMMENTS
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS announcement_comments (
+    comment_id       INT AUTO_INCREMENT PRIMARY KEY,
+    announcement_id  INT NOT NULL,
+    user_id          INT NOT NULL,
+    body             TEXT NOT NULL,
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (announcement_id) REFERENCES announcements(id)          ON DELETE CASCADE,
+    FOREIGN KEY (user_id)         REFERENCES users(user_id)              ON DELETE CASCADE
+);
+
+-- ============================================================================
 -- QUESTIONS  (quiz / practice questions)
 -- ============================================================================
 CREATE TABLE questions (

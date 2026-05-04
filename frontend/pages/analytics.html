@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -104,11 +104,7 @@
 
 <!-- ── Stat Strip ─────────────────────────────────────────────────────────── -->
 <div class="stat-strip">
-    <div class="stat-chip">
-        <div class="stat-chip-icon chip-gold"><span class="material-symbols-outlined">bolt</span></div>
-        <div><div class="stat-chip-val" id="statXP">—</div><div class="stat-chip-lbl">Total XP</div></div>
-    </div>
-    <div class="stat-chip">
+<div class="stat-chip">
         <div class="stat-chip-icon chip-green"><span class="material-symbols-outlined">check_circle</span></div>
         <div><div class="stat-chip-val" id="statLessons">—</div><div class="stat-chip-lbl">Lessons Done</div></div>
     </div>
@@ -134,7 +130,7 @@
         <div class="chart-wrap"><canvas id="chartTopics"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-card-title"><span class="material-symbols-outlined">emoji_events</span>XP by Language</div>
+        <div class="chart-card-title"><span class="material-symbols-outlined">bar_chart</span>Lessons by Language</div>
         <div class="chart-wrap"><canvas id="chartLangs"></canvas></div>
     </div>
     <div class="chart-card">
@@ -239,7 +235,6 @@ async function loadAnalyticsData() {
 // ─── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats(data) {
     const u = data.user || {};
-    document.getElementById('statXP').textContent      = (u.total_xp || 0).toLocaleString();
     document.getElementById('statLessons').textContent = data.completedLessons || 0;
     document.getElementById('statStreak').textContent  = (u.streak || 0) + '🔥';
     const acc = data.accuracy != null ? data.accuracy + '%' : '—';
@@ -299,7 +294,7 @@ function renderCharts(data) {
         renderEmptyChart('chartTopics', 'No weakness data yet');
     }
 
-    // Chart 3: XP by language (pie)
+    // Chart 3: Lessons by language
     if (langs.length) {
         new Chart(document.getElementById('chartLangs'), {
             type: 'pie',
@@ -437,7 +432,6 @@ async function renderAISummary(data) {
 
     // Build local analysis (no API call needed)
     const bullets = [];
-    if (xp > 0) bullets.push(`You've earned ${xp.toLocaleString()} XP across your learning journey.`);
     if (lessons > 0) bullets.push(`${lessons} lesson${lessons !== 1 ? 's' : ''} completed — great consistency!`);
 
     const activePaths = paths.filter(p => p.completed_count > 0);
@@ -455,7 +449,7 @@ async function renderAISummary(data) {
 
     const incomplete = paths.filter(p => p.progress_pct < 100 && p.progress_pct > 0);
     if (incomplete.length) {
-        bullets.push(`Continue "${incomplete[0].title}" to earn more XP and advance your level.`);
+        bullets.push(`Continue "${incomplete[0].title}" to keep learning and advance your level.`);
     }
 
     if (bullets.length === 0) {
@@ -479,3 +473,6 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 </script>
 </body>
 </html>
+
+
+

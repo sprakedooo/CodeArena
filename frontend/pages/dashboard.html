@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -265,16 +265,7 @@
 
 <!-- ── Stat Strip ──────────────────────────────────────────────────────────── -->
 <div class="stat-strip">
-    <div class="stat-chip">
-        <div class="stat-chip-icon chip-xp">
-            <span class="material-symbols-outlined">bolt</span>
-        </div>
-        <div class="stat-chip-info">
-            <div class="stat-chip-val" id="statXP">—</div>
-            <div class="stat-chip-lbl">Total XP</div>
-        </div>
-    </div>
-    <div class="stat-chip">
+<div class="stat-chip">
         <div class="stat-chip-icon chip-streak">
             <span class="material-symbols-outlined">local_fire_department</span>
         </div>
@@ -496,7 +487,6 @@ async function loadProgress(userId, token) {
         if (!res.ok) throw new Error('paths api unavailable');
         const data = await res.json();
 
-        document.getElementById('statXP').textContent      = (data.user?.total_xp || 0).toLocaleString();
         document.getElementById('statStreak').textContent  = (data.user?.streak    || 0) + ' 🔥';
         document.getElementById('statLessons').textContent = data.completedLessons || 0;
         const activePaths = (data.paths || []).filter(p => p.completed_count > 0).length;
@@ -506,7 +496,7 @@ async function loadProgress(userId, token) {
         document.getElementById('welcomeSub').textContent =
             total > 0
                 ? `You've completed ${total} lesson${total !== 1 ? 's' : ''} and earned ${(data.user?.total_xp || 0).toLocaleString()} XP. Keep going!`
-                : `Start your first lesson to begin earning XP and tracking your progress.`;
+                : `Start your first lesson to begin tracking your progress.`;
 
         await buildContinueCard(data.paths || [], data.user?.language, token);
         buildPathList(data.paths || []);
@@ -529,15 +519,14 @@ async function loadProgress(userId, token) {
         const lessons = prog.completed_lessons || 0;
         const level   = prog.level       || 'beginner';
 
-        document.getElementById('statXP').textContent      = Number(xp).toLocaleString();
         document.getElementById('statStreak').textContent  = streak + ' 🔥';
         document.getElementById('statLessons').textContent = lessons;
         document.getElementById('statPaths').textContent   = level !== 'beginner' ? '2' : '1';
 
         document.getElementById('welcomeSub').textContent =
             lessons > 0
-                ? `You've completed ${lessons} lesson${lessons !== 1 ? 's' : ''} and earned ${Number(xp).toLocaleString()} XP. Keep going!`
-                : `Start your first lesson to begin earning XP and tracking your progress.`;
+                ? `You've completed ${lessons} lesson${lessons !== 1 ? 's' : ''}. Keep going!`
+                : `Start your first lesson to begin tracking your progress.`;
 
         // Build a synthetic path from progress data
         const syntheticPath = [{
@@ -560,7 +549,7 @@ async function loadProgress(userId, token) {
 
     } catch (err) {
         console.error('loadProgress fallback failed:', err);
-        ['statXP','statStreak','statLessons','statPaths'].forEach(id => {
+        ['statStreak','statLessons','statPaths'].forEach(id => {
             document.getElementById(id).textContent = '—';
         });
         await buildContinueCard([], null, token);
@@ -599,7 +588,6 @@ async function buildContinueCard(paths, language, token) {
         <div class="continue-lesson-title">Lesson ${next} of ${total}</div>
         <div class="continue-lesson-meta">
             <span><span class="material-symbols-outlined ms-icon">schedule</span>${path.estimated_minutes || 10} min</span>
-            <span><span class="material-symbols-outlined ms-icon">bolt</span>${path.xp_reward || 20} XP</span>
         </div>`;
 
     const btn = document.getElementById('continueLessonBtn');
@@ -619,7 +607,6 @@ async function buildContinueCard(paths, language, token) {
                     <div class="continue-lesson-title">${esc(nextLesson.title)}</div>
                     <div class="continue-lesson-meta">
                         <span><span class="material-symbols-outlined ms-icon">schedule</span>${nextLesson.estimated_minutes || 5} min</span>
-                        <span><span class="material-symbols-outlined ms-icon">bolt</span>${nextLesson.xp_reward || 20} XP</span>
                     </div>`;
             }
         }
@@ -653,7 +640,7 @@ function buildPathList(paths) {
                 </div>
                 <span class="path-bar-pct" style="color:${color};">${pct}%</span>
             </div>
-            <div class="path-row-meta">${p.completed_count || 0} / ${p.lesson_count || 0} lessons · ${p.xp_earned || 0} XP earned</div>
+            <div class="path-row-meta">${p.completed_count || 0} / ${p.lesson_count || 0} lessons</div>
         </div>`;
     }).join('');
 }
@@ -708,7 +695,7 @@ async function loadAINextTask(userId, token) {
     } catch {
         block.style.display = 'none';
         action.textContent  = 'Continue your current learning path';
-        reason.textContent  = 'Complete your pending lessons to earn XP and advance to the next level.';
+        reason.textContent  = 'Complete your pending lessons to advance to the next level.';
         label.textContent   = 'Lesson';
         [action, reason, badge, btn].forEach(el => el.style.display = '');
     }
@@ -725,7 +712,7 @@ async function loadDailyChallenge(token) {
         const ch   = data.challenge || data;
 
         document.getElementById('challengeTitle').textContent = ch.title || 'Daily Coding Challenge';
-        document.getElementById('challengeDesc').textContent  = ch.description || ch.desc || 'Solve today's challenge for bonus XP!';
+        document.getElementById('challengeDesc').textContent  = ch.description || ch.desc || 'Solve today's challenge!';
 
         const diff  = ch.difficulty || 'beginner';
         const badge = document.getElementById('challengeDifficulty');
@@ -741,7 +728,7 @@ async function loadDailyChallenge(token) {
         localStorage.setItem('dailyChallenge', JSON.stringify(ch));
     } catch {
         document.getElementById('challengeTitle').textContent = 'Daily Coding Challenge';
-        document.getElementById('challengeDesc').textContent  = 'Complete a coding challenge to earn bonus XP!';
+        document.getElementById('challengeDesc').textContent  = 'Complete a coding challenge!';
     }
 }
 
@@ -752,3 +739,7 @@ function esc(s) {
 </script>
 </body>
 </html>
+
+
+
+
