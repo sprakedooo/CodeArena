@@ -90,12 +90,12 @@ app.get('/:page([a-zA-Z0-9_.-]+)', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log('╔════════════════════════════════════════════════════════════╗');
     console.log('║   CODEARENA - FRONTEND SERVER                              ║');
     console.log('╠════════════════════════════════════════════════════════════╣');
-    console.log(`║   Frontend running at: http://localhost:${PORT}                ║`);
-    console.log('║   Open browser to start using CodeArena                    ║');
+    console.log(`║   Local:   http://localhost:${PORT}                           ║`);
+    console.log(`║   Network: http://192.168.1.8:${PORT}                         ║`);
     console.log('╚════════════════════════════════════════════════════════════╝');
 });
 

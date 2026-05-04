@@ -5,15 +5,14 @@
       "name": "frontend",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
-      "cwd": "C:/Users/jubil/ai-cai-system/.claude/worktrees/keen-kowalevski-0dd1e0/frontend",
-      "port": 3001,
-      "autoPort": true
+      "cwd": "frontend",
+      "port": 3001
     },
     {
       "name": "backend",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
-      "cwd": "C:/Users/jubil/ai-cai-system/.claude/worktrees/keen-kowalevski-0dd1e0/backend",
+      "cwd": "backend",
       "port": 3000,
       "autoPort": false
     }

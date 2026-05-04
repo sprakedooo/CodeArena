@@ -21,7 +21,7 @@
  * Backend API base URL
  * Change this if your server runs on a different port
  */
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `http://${window.location.hostname}:3000/api`;
 
 /**
  * Returns headers object with Authorization Bearer token for API requests

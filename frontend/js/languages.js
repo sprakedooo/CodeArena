@@ -24,7 +24,7 @@
 (function () {
     const API = (typeof window.API_BASE === 'string' && window.API_BASE)
         ? window.API_BASE
-        : 'http://localhost:3000/api';
+        : `http://${window.location.hostname}:3000/api`;
 
     const CACHE_KEY = 'codearena_languages_v1';
     const CACHE_TTL = 5 * 60 * 1000; // 5 minutes

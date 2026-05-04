@@ -339,11 +339,12 @@ app.get('/', (req, res) => {
 // SECTION 6: START THE SERVER
 // ─────────────────────────────────────────────────────────────────────────────
 
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
     console.log('╔════════════════════════════════════════════════════════════╗');
     console.log('║   CODEARENA - AI-POWERED ADAPTIVE LEARNING SYSTEM         ║');
     console.log('╠════════════════════════════════════════════════════════════╣');
-    console.log(`║   Server running at: http://localhost:${PORT}                 ║`);
+    console.log(`║   Local:   http://localhost:${PORT}                           ║`);
+    console.log(`║   Network: http://192.168.1.8:${PORT}                         ║`);
     console.log('║   Press Ctrl+C to stop                                     ║');
     console.log('╠════════════════════════════════════════════════════════════╣');
 

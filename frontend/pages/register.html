@@ -162,7 +162,8 @@
                 </div>
 
                 <!-- ── Google OAuth button ── -->
-                <a href="http://localhost:3000/api/auth/google"
+                <a id="google-oauth-btn" href="#"
+                   onclick="this.href=`http://${window.location.hostname}:3000/api/auth/google`"
                    style="display:flex;align-items:center;justify-content:center;gap:10px;
                           width:100%;padding:11px 0;border-radius:8px;
                           border:1px solid var(--border);background:var(--bg-surface);
@@ -189,7 +190,7 @@
     </div>
 
     <script>
-        const API = 'http://localhost:3000/api';
+        const API = `http://${window.location.hostname}:3000/api`;
 
         // Create particles
         const particlesContainer = document.getElementById('particles');

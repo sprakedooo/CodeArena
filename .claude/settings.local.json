@@ -36,7 +36,9 @@
       "Bash(git checkout *)",
       "PowerShell(Stop-Process -Id 6188 -Force)",
       "Bash(findstr \"LISTENING\")",
-      "Bash(findstr \":300\")"
+      "Bash(findstr \":300\")",
+      "Read(//c/Users/jubil/ai-cai-system/**)",
+      "Bash(mysql -u root -pgigatt0702 codearena)"
     ]
   }
 }

@@ -261,7 +261,7 @@
             const token = localStorage.getItem('token');
             (async () => {
                 try {
-                    const res  = await fetch('http://localhost:3000/api/classrooms/mine', {
+                    const res  = await fetch(`http://${window.location.hostname}:3000/api/classrooms/mine`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -341,7 +341,7 @@
 
     // ── 9. Global AI Assistant Widget ────────────────────────────────────────
     function buildAIAssistant() {
-        const API       = 'http://localhost:3000/api';
+        const API       = `http://${window.location.hostname}:3000/api`;
         const _user     = JSON.parse(localStorage.getItem('user') || '{}');
         const _role     = window.SIDEBAR_ROLE || _user.role || 'student';
         const isFaculty = _role === 'faculty';
@@ -862,7 +862,7 @@
             messages.scrollTop = messages.scrollHeight;
 
             try {
-                const res = await fetch('http://localhost:3000/api/ai/ask', {
+                const res = await fetch(`http://${window.location.hostname}:3000/api/ai/ask`, {
                     method:  'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -904,7 +904,7 @@
 
     // ── 10. Notification Panel ────────────────────────────────────────────────
     function buildNotifications() {
-        const API    = 'http://localhost:3000/api';
+        const API    = `http://${window.location.hostname}:3000/api`;
         let panelOpen = false;
         let loaded    = false;
 
