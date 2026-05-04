@@ -119,12 +119,9 @@ let mockUsers = [
  * - Success: Returns new user with initial game stats
  * - Failure: Returns error message
  */
-// Faculty registration code (required to register as faculty)
-const FACULTY_CODE = process.env.FACULTY_CODE || 'FACULTY2024';
-
 router.post('/register', async (req, res) => {
     // Extract registration data from request
-    const { email, password, role, facultyCode } = req.body;
+    const { email, password, role } = req.body;
     const fullName = req.body.fullName ? toTitleCase(req.body.fullName) : '';
 
     // VALIDATION: Check all required fields
@@ -159,17 +156,8 @@ router.post('/register', async (req, res) => {
         });
     }
 
-    // Determine role — faculty requires a valid faculty code
-    let userRole = 'student';
-    if (role === 'faculty') {
-        if (facultyCode !== FACULTY_CODE) {
-            return res.status(403).json({
-                success: false,
-                message: 'Invalid faculty registration code'
-            });
-        }
-        userRole = 'faculty';
-    }
+    // Determine role
+    const userRole = role === 'faculty' ? 'faculty' : 'student';
 
     // Check if email already exists (DB or mock)
     if (dbService.isDbAvailable()) {
