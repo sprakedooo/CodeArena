@@ -367,6 +367,53 @@
         .ai-feedback-loading { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:.85rem; padding:.5rem 0; }
         .ai-feedback-loading .mini-spin { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--primary); animation:spin .7s linear infinite; flex-shrink:0; }
 
+        /* ══ ASSIGNMENTS ════════════════════════════════════════════════ */
+        .assignment-card { display:flex; align-items:flex-start; gap:12px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; transition:border-color .15s; cursor:default; }
+        .assignment-card:hover { border-color:var(--primary); }
+        .assignment-card-icon { width:36px; height:36px; border-radius:8px; background:rgba(124,58,237,.15); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .assignment-card-icon .material-symbols-outlined { color:var(--primary); font-size:1.1rem; }
+        .assignment-card-body { flex:1; min-width:0; }
+        .assignment-card-title { font-size:.9rem; font-weight:600; color:var(--text); margin-bottom:4px; }
+        .assignment-card-meta { font-size:.75rem; color:var(--text-muted); display:flex; gap:10px; flex-wrap:wrap; }
+        .assignment-card-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+        .score-badge { font-size:.72rem; font-weight:700; padding:3px 8px; border-radius:12px; }
+        .score-badge.submitted { background:rgba(16,185,129,.15); color:#10b981; }
+        .score-badge.pending { background:rgba(251,191,36,.15); color:#fbbf24; }
+
+        /* ══ SANDBOX OVERLAY ══════════════════════════════════════════════ */
+        .sandbox-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; display:none; align-items:flex-end; }
+        .sandbox-overlay.open { display:flex; }
+        .sandbox-panel { background:var(--bg-card); width:100%; max-height:90vh; border-radius:20px 20px 0 0; overflow:hidden; display:flex; flex-direction:column; animation:slideUp .25s ease; }
+        @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+        .sandbox-header { display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+        .sandbox-title { font-size:.95rem; font-weight:700; flex:1; min-width:0; color:var(--text); }
+        .sandbox-lang-badge { font-size:.68rem; font-weight:700; text-transform:uppercase; padding:3px 8px; background:rgba(124,58,237,.15); color:var(--primary); border-radius:6px; }
+        .sandbox-body { display:grid; grid-template-columns:1fr 1fr; flex:1; min-height:0; overflow:hidden; }
+        @media(max-width:720px){ .sandbox-body { grid-template-columns:1fr; overflow-y:auto; } }
+        .sandbox-left { padding:16px 20px; overflow-y:auto; border-right:1px solid var(--border); }
+        .sandbox-right { display:flex; flex-direction:column; overflow:hidden; }
+        .sandbox-desc { font-size:.85rem; color:var(--text-secondary); line-height:1.6; margin-bottom:16px; white-space:pre-wrap; }
+        .sandbox-tc-title { font-size:.78rem; font-weight:700; color:var(--text); margin-bottom:8px; }
+        .sandbox-test-case { background:var(--bg-surface); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
+        .sandbox-test-label { font-weight:600; color:var(--text); margin-bottom:6px; font-size:.78rem; }
+        .sandbox-io { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .sandbox-io-block label { font-size:.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:3px; }
+        .sandbox-io-block pre { background:var(--bg); border-radius:6px; padding:6px 8px; font-size:.75rem; color:var(--text-secondary); margin:0; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+        .code-editor-wrap { flex:1; display:flex; flex-direction:column; padding:12px; overflow:hidden; }
+        .code-editor { flex:1; background:#0d1117; color:#e6edf3; font-family:'JetBrains Mono','Fira Code',monospace; font-size:.82rem; line-height:1.5; border:1px solid var(--border); border-radius:8px; padding:12px; resize:none; outline:none; tab-size:4; overflow:auto; min-height:200px; }
+        .code-editor:focus { border-color:var(--primary); }
+        .sandbox-footer { display:flex; align-items:center; gap:8px; padding:10px 12px; border-top:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+        .test-results { padding:10px 12px; overflow-y:auto; max-height:180px; border-top:1px solid var(--border); flex-shrink:0; }
+        .test-result-row { display:flex; align-items:flex-start; gap:8px; padding:5px 8px; border-radius:6px; margin-bottom:4px; font-size:.78rem; }
+        .test-result-row.pass { background:rgba(16,185,129,.1); }
+        .test-result-row.fail { background:rgba(239,68,68,.1); }
+        .test-result-status { font-weight:700; flex-shrink:0; }
+        .test-result-row.pass .test-result-status { color:#10b981; }
+        .test-result-row.fail .test-result-status { color:#ef4444; }
+        .test-result-detail { color:var(--text-secondary); flex:1; min-width:0; word-break:break-word; }
+        .test-result-detail code { background:var(--bg-surface); border-radius:4px; padding:1px 4px; font-size:.75rem; }
+        .sb-score-chip { font-size:.82rem; font-weight:700; color:#10b981; margin-left:auto; }
+
         /* ══ SHARED UTILITIES ════════════════════════════════════════════ */
         .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); font-size:.85rem; }
         .empty-state .material-symbols-outlined { font-size:2.5rem; display:block; margin-bottom:.75rem; opacity:.35; }
@@ -533,6 +580,20 @@
                 </h3>
             </div>
             <div class="challenge-list" id="challengeList">
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+            </div>
+        </div>
+        <!-- Assignments section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h3 class="classwork-section-title">
+                    <span class="material-symbols-outlined">code_blocks</span>
+                    Coding Assignments
+                    <span class="cw-count" id="assignCount">0</span>
+                </h3>
+            </div>
+            <div id="assignList">
                 <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
                 <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
             </div>
@@ -919,7 +980,7 @@ async function postComment(aid) {
 
 // ── Classwork ──────────────────────────────────────────────────────────────────
 async function loadClasswork() {
-    await Promise.all([loadLessons(), loadChallenges()]);
+    await Promise.all([loadLessons(), loadChallenges(), loadAssignments()]);
 }
 
 async function loadLessons() {
@@ -1252,6 +1313,170 @@ async function loadAIFeedback() {
     }
 }
 
+// ── Assignments ────────────────────────────────────────────────────────────────
+async function loadAssignments() {
+    try {
+        const res  = await fetch(API + '/assignments?classroomId=' + classroomId, { headers: getAuthHeaders() });
+        const data = await res.json();
+        renderAssignments(data.assignments || []);
+    } catch {
+        renderAssignments([]);
+    }
+}
+
+function renderAssignments(assignments) {
+    const list = document.getElementById('assignList');
+    document.getElementById('assignCount').textContent = assignments.length;
+    if (!assignments.length) {
+        list.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">code_blocks</span>No coding assignments yet.</div>';
+        return;
+    }
+    list.innerHTML = assignments.map(a => {
+        const aid  = a.assignment_id || a.id;
+        const pts  = a.max_points || 100;
+        const due  = a.deadline ? 'Due ' + new Date(a.deadline).toLocaleDateString() : '';
+        const sub  = a.mySubmission;
+        const badge = sub
+            ? '<span class="score-badge submitted">✓ ' + sub.score + '/' + pts + '</span>'
+            : (due ? '<span class="score-badge pending">' + esc(due) + '</span>' : '');
+        return '<div class="assignment-card">' +
+            '<div class="assignment-card-icon"><span class="material-symbols-outlined">code_blocks</span></div>' +
+            '<div class="assignment-card-body">' +
+                '<div class="assignment-card-title">' + esc(a.title || 'Assignment') + '</div>' +
+                '<div class="assignment-card-meta">' +
+                    '<span>' + esc(a.language || 'python') + '</span>' +
+                    (a.visible_tests ? '<span>' + a.visible_tests + ' sample tests</span>' : '') +
+                    '<span>' + pts + ' pts</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="assignment-card-actions">' +
+                badge +
+                '<button class="btn btn-primary" style="font-size:.75rem;" onclick="openAssignment(' + aid + ')">' +
+                    '<span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>' +
+                    (sub ? 'Resubmit' : 'Open') +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── Assignment Sandbox ─────────────────────────────────────────────────────────
+let _sbAssignId = null;
+let _sbLang = 'python';
+
+async function openAssignment(id) {
+    _sbAssignId = id;
+    document.getElementById('sandboxOverlay').classList.add('open');
+    document.getElementById('sbTitle').textContent = 'Loading…';
+    document.getElementById('sbDesc').textContent  = '';
+    document.getElementById('sbTestCases').innerHTML = '';
+    document.getElementById('sbResults').style.display = 'none';
+    document.getElementById('sbScore').style.display   = 'none';
+    document.getElementById('sbEditor').value = '';
+
+    try {
+        const [aRes, sRes] = await Promise.all([
+            fetch(API + '/assignments/' + id, { headers: getAuthHeaders() }),
+            fetch(API + '/assignments/' + id + '/my-submission', { headers: getAuthHeaders() }),
+        ]);
+        const { assignment: a, testCases = [] } = await aRes.json();
+        const { submission } = await sRes.json();
+
+        _sbLang = a.language || 'python';
+        document.getElementById('sbTitle').textContent = a.title || 'Assignment';
+        document.getElementById('sbLang').textContent  = _sbLang;
+        document.getElementById('sbDesc').textContent  = a.description || '';
+        document.getElementById('sbMeta').textContent  = [a.max_points + ' pts', a.deadline ? 'Due ' + new Date(a.deadline).toLocaleDateString() : ''].filter(Boolean).join(' · ');
+        document.getElementById('sbEditor').value = (submission && submission.code) ? submission.code : (a.starter_code || '');
+
+        document.getElementById('sbTestCases').innerHTML = testCases.length
+            ? testCases.map(tc =>
+                '<div class="sandbox-test-case">' +
+                    '<div class="sandbox-test-label">' + esc(tc.label || 'Test') + '</div>' +
+                    '<div class="sandbox-io">' +
+                        '<div class="sandbox-io-block"><label>Input</label><pre>' + esc(tc.input || '(none)') + '</pre></div>' +
+                        '<div class="sandbox-io-block"><label>Expected</label><pre>' + esc(tc.expected_output || '') + '</pre></div>' +
+                    '</div>' +
+                '</div>'
+            ).join('')
+            : '<div style="font-size:.8rem;color:var(--text-muted);">No sample test cases.</div>';
+
+        if (submission) {
+            document.getElementById('sbScore').textContent = '✓ Last score: ' + submission.score + '/' + (a.max_points || 100);
+            document.getElementById('sbScore').style.display = '';
+        }
+    } catch {
+        document.getElementById('sbTitle').textContent = 'Failed to load';
+    }
+}
+
+function closeSandbox() {
+    document.getElementById('sandboxOverlay').classList.remove('open');
+    _sbAssignId = null;
+}
+function closeSandboxOnBg(e) {
+    if (e.target === document.getElementById('sandboxOverlay')) closeSandbox();
+}
+
+async function runCode() {
+    if (!_sbAssignId) return;
+    const code = document.getElementById('sbEditor').value.trim();
+    if (!code) { showToast('Write some code first!', 'error'); return; }
+    const btn = document.getElementById('sbRunBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.9rem;">hourglass_top</span>Running…';
+    document.getElementById('sbResults').style.display = 'none';
+    try {
+        const res  = await fetch(API + '/assignments/' + _sbAssignId + '/run', {
+            method: 'POST', headers: getAuthHeaders(),
+            body: JSON.stringify({ code, language: _sbLang })
+        });
+        const data = await res.json();
+        renderTestResults(data.results || [], data.passed, data.total, false);
+    } catch { showToast('Run failed — check connection', 'error'); }
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Run';
+}
+
+async function submitCode() {
+    if (!_sbAssignId) return;
+    const code = document.getElementById('sbEditor').value.trim();
+    if (!code) { showToast('Write some code first!', 'error'); return; }
+    const btn = document.getElementById('sbSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.9rem;">hourglass_top</span>Submitting…';
+    try {
+        const res  = await fetch(API + '/assignments/' + _sbAssignId + '/submit', {
+            method: 'POST', headers: getAuthHeaders(),
+            body: JSON.stringify({ code, language: _sbLang })
+        });
+        const data = await res.json();
+        renderTestResults(data.results || [], data.passed, data.total, true);
+        document.getElementById('sbScore').textContent = '✓ Score: ' + data.score + '/' + data.maxPoints;
+        document.getElementById('sbScore').style.display = '';
+        showToast('Submitted! Score: ' + data.score + '/' + data.maxPoints, 'success');
+        loadAssignments();
+    } catch { showToast('Submit failed — check connection', 'error'); }
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.9rem;">send</span>Submit';
+}
+
+function renderTestResults(results, passed, total, isFinal) {
+    const el = document.getElementById('sbResults');
+    if (!results.length) { el.style.display = 'none'; return; }
+    el.style.display = '';
+    el.innerHTML = '<div style="font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px;">' +
+        (isFinal ? 'Final Results' : 'Run Results') + ': ' + passed + '/' + total + ' passed</div>' +
+        results.map(r =>
+            '<div class="test-result-row ' + (r.passed ? 'pass' : 'fail') + '">' +
+                '<span class="test-result-status">' + (r.passed ? '✓' : '✗') + '</span>' +
+                '<span class="test-result-detail">' + esc(r.label || 'Test') +
+                    (!r.passed ? ' — <code>' + esc(r.stderr || r.actual_output || 'wrong answer') + '</code>' : '') +
+                '</span>' +
+            '</div>'
+        ).join('');
+}
+
 // ── Tab switching ──────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1287,5 +1512,44 @@ function showToast(msg, type) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 </script>
+
+<!-- ══ ASSIGNMENT SANDBOX ════════════════════════════════════════════════════ -->
+<div class="sandbox-overlay" id="sandboxOverlay" onclick="closeSandboxOnBg(event)">
+    <div class="sandbox-panel" id="sandboxPanel">
+        <div class="sandbox-header">
+            <div style="flex:1;min-width:0;">
+                <div class="sandbox-title" id="sbTitle">Assignment</div>
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;" id="sbMeta"></div>
+            </div>
+            <span class="sandbox-lang-badge" id="sbLang">python</span>
+            <button onclick="closeSandbox()" style="background:none;border:none;cursor:pointer;padding:4px;margin-left:4px;color:var(--text-muted);">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="sandbox-body">
+            <div class="sandbox-left">
+                <p class="sandbox-desc" id="sbDesc"></p>
+                <div class="sandbox-tc-title"><span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">science</span> Sample Test Cases</div>
+                <div id="sbTestCases"></div>
+            </div>
+            <div class="sandbox-right">
+                <div class="code-editor-wrap">
+                    <textarea class="code-editor" id="sbEditor" spellcheck="false" placeholder="Write your code here…"
+                        onkeydown="if(event.key==='Tab'){event.preventDefault();var s=this.selectionStart;this.value=this.value.substring(0,s)+'    '+this.value.substring(this.selectionEnd);this.selectionStart=this.selectionEnd=s+4;}"></textarea>
+                </div>
+                <div class="test-results" id="sbResults" style="display:none;"></div>
+                <div class="sandbox-footer">
+                    <button class="btn btn-secondary" id="sbRunBtn" onclick="runCode()" style="font-size:.8rem;">
+                        <span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Run
+                    </button>
+                    <button class="btn btn-primary" id="sbSubmitBtn" onclick="submitCode()" style="font-size:.8rem;">
+                        <span class="material-symbols-outlined" style="font-size:.9rem;">send</span>Submit
+                    </button>
+                    <span class="sb-score-chip" id="sbScore" style="display:none;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
