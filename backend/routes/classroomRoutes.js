@@ -32,6 +32,7 @@
 
 const express = require('express');
 const router  = express.Router();
+const bcrypt  = require('bcrypt');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const dbService = require('../services/dbService');
 const db = require('../config/database');
@@ -230,7 +231,10 @@ router.get('/enrolled', async (req, res) => {
         try {
             const rows = await db.query(
                 `SELECT c.classroom_id AS id, c.name, c.description, c.subject,
-                        u.full_name AS facultyName, e.enrolled_at
+                        c.language, c.banner_image, c.is_active,
+                        u.full_name AS facultyName, e.enrolled_at,
+                        (SELECT COUNT(*) FROM classroom_enrollments ce WHERE ce.classroom_id = c.classroom_id AND ce.status='active') AS student_count,
+                        (SELECT COUNT(*) FROM classroom_lessons cl WHERE cl.classroom_id = c.classroom_id) AS lesson_count
                  FROM classroom_enrollments e
                  JOIN classrooms c ON c.classroom_id = e.classroom_id
                  JOIN users u ON u.user_id = c.faculty_id
@@ -283,11 +287,24 @@ router.get('/:id', async (req, res) => {
     res.json({ success: true, classroom: { ...classroom, studentCount }, source: 'mock' });
 });
 
-// DELETE /api/classrooms/:id — Delete classroom (faculty only)
+// DELETE /api/classrooms/:id — Delete classroom (faculty only, password required)
 router.delete('/:id', async (req, res) => {
     if (!requireFacultyRole(req, res)) return;
     const classroomId = parseInt(req.params.id);
-    const facultyId = req.user.id;
+    const facultyId   = req.user.id;
+    const { password } = req.body;
+
+    if (!password) return res.status(400).json({ success: false, message: 'Password is required to delete a classroom.' });
+
+    // Verify password against stored hash
+    try {
+        const [rows] = await db.query('SELECT password FROM users WHERE user_id = ?', [facultyId]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'User not found.' });
+        const match = await bcrypt.compare(password, rows[0].password);
+        if (!match) return res.status(403).json({ success: false, message: 'Incorrect password.' });
+    } catch {
+        // DB unavailable — skip password check for mock users (dev only)
+    }
 
     if (dbService.isDbAvailable()) {
         try {
@@ -1115,6 +1132,144 @@ router.get('/:id/sessions/:sid/monitor', async (req, res) => {
     }).sort((a, b) => b.points - a.points);
 
     res.json({ success: true, monitor, totalQuestions: totalQ, source: 'mock' });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANNOUNCEMENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+let mockAnnouncements = [];
+let _nextAnnId = 1;
+let mockComments = [];
+let _nextCommentId = 1;
+
+async function ensureAnnouncementsTable() {
+    try {
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS classroom_announcements (
+                announcement_id INT AUTO_INCREMENT PRIMARY KEY,
+                classroom_id    INT NOT NULL,
+                faculty_id      INT NOT NULL,
+                body            TEXT NOT NULL,
+                link_url        VARCHAR(500) DEFAULT '',
+                link_label      VARCHAR(200) DEFAULT '',
+                created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+    } catch { /* DB unavailable */ }
+}
+ensureAnnouncementsTable();
+
+// GET /api/classrooms/:id/announcements
+router.get('/:id/announcements', async (req, res) => {
+    const classroomId = parseInt(req.params.id);
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query(
+                `SELECT a.*, u.full_name AS author_name, u.avatar AS author_avatar
+                 FROM classroom_announcements a
+                 JOIN users u ON u.user_id = a.faculty_id
+                 WHERE a.classroom_id = ?
+                 ORDER BY a.created_at DESC`,
+                [classroomId]
+            );
+            return res.json({ success: true, announcements: rows });
+        } catch (err) { console.error(err); }
+    }
+    const list = mockAnnouncements.filter(a => a.classroom_id === classroomId)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    res.json({ success: true, announcements: list, source: 'mock' });
+});
+
+// POST /api/classrooms/:id/announcements
+router.post('/:id/announcements', async (req, res) => {
+    if (!requireFacultyRole(req, res)) return;
+    const classroomId = parseInt(req.params.id);
+    const { body, link_url, link_label } = req.body;
+    if (!body || !body.trim()) return res.status(400).json({ error: 'body is required' });
+    if (dbService.isDbAvailable()) {
+        try {
+            const result = await db.query(
+                `INSERT INTO classroom_announcements (classroom_id, faculty_id, body, link_url, link_label)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [classroomId, req.user.id, body.trim(), link_url || '', link_label || '']
+            );
+            return res.json({ success: true, announcement_id: result.insertId });
+        } catch (err) { console.error(err); }
+    }
+    const ann = {
+        announcement_id: _nextAnnId++,
+        classroom_id: classroomId,
+        faculty_id: req.user.id,
+        author_name: req.user.fullName || 'Faculty',
+        body: body.trim(),
+        link_url: link_url || '',
+        link_label: link_label || '',
+        created_at: new Date().toISOString()
+    };
+    mockAnnouncements.push(ann);
+    res.json({ success: true, announcement_id: ann.announcement_id, source: 'mock' });
+});
+
+// GET /api/classrooms/:id/announcements/:aid/comments
+router.get('/:id/announcements/:aid/comments', async (req, res) => {
+    const aid = parseInt(req.params.aid);
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query(
+                `SELECT c.*, u.full_name AS author_name, u.role AS author_role
+                 FROM announcement_comments c
+                 JOIN users u ON u.user_id = c.user_id
+                 WHERE c.announcement_id = ?
+                 ORDER BY c.created_at ASC`,
+                [aid]
+            );
+            return res.json({ success: true, comments: rows });
+        } catch (err) { console.error(err); }
+    }
+    const comments = mockComments.filter(c => c.announcement_id === aid);
+    res.json({ success: true, comments, source: 'mock' });
+});
+
+// POST /api/classrooms/:id/announcements/:aid/comments
+router.post('/:id/announcements/:aid/comments', async (req, res) => {
+    const aid = parseInt(req.params.aid);
+    const { body } = req.body;
+    if (!body || !body.trim()) return res.status(400).json({ error: 'body is required' });
+    if (dbService.isDbAvailable()) {
+        try {
+            const result = await db.query(
+                `INSERT INTO announcement_comments (announcement_id, user_id, body) VALUES (?, ?, ?)`,
+                [aid, req.user.id, body.trim()]
+            );
+            return res.json({ success: true, comment_id: result.insertId });
+        } catch (err) { console.error(err); }
+    }
+    const comment = {
+        comment_id: _nextCommentId++,
+        announcement_id: aid,
+        user_id: req.user.id,
+        author_name: req.user.fullName || req.user.full_name || 'Student',
+        author_role: req.user.role || 'student',
+        body: body.trim(),
+        created_at: new Date().toISOString()
+    };
+    mockComments.push(comment);
+    res.json({ success: true, comment_id: comment.comment_id, source: 'mock' });
+});
+
+// DELETE /api/classrooms/:id/announcements/:aid
+router.delete('/:id/announcements/:aid', async (req, res) => {
+    if (!requireFacultyRole(req, res)) return;
+    const aid = parseInt(req.params.aid);
+    if (dbService.isDbAvailable()) {
+        try {
+            await db.query('DELETE FROM classroom_announcements WHERE announcement_id = ? AND faculty_id = ?', [aid, req.user.id]);
+            return res.json({ success: true });
+        } catch (err) { console.error(err); }
+    }
+    mockAnnouncements = mockAnnouncements.filter(a => a.announcement_id !== aid);
+    res.json({ success: true, source: 'mock' });
 });
 
 module.exports = router;

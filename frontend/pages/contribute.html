@@ -57,6 +57,15 @@
         .contrib-card-cover-placeholder .material-symbols-outlined {
             font-size: 2.5rem; opacity: 0.25; color: var(--primary);
         }
+        .cover-edit-btn {
+            position: absolute; bottom: 0.55rem; right: 0.6rem;
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; color: #fff; cursor: pointer;
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; z-index: 2;
+        }
+        .cover-edit-btn:hover { background: rgba(124,58,237,0.7); }
+        .cover-edit-btn .material-symbols-outlined { font-size: 1rem; }
         .type-badge {
             position: absolute; top: 0.6rem; left: 0.6rem;
             font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
@@ -475,10 +484,14 @@ function renderGrid() {
     }
     grid.innerHTML = list.map(c => `
         <div class="contrib-card">
-            <div class="contrib-card-cover">
-                ${c.cover_image ? `<img src="${esc(c.cover_image)}" alt="">` : `<div class="contrib-card-cover-placeholder"><span class="material-symbols-outlined">${c.type === 'blog' ? 'article' : 'school'}</span></div>`}
+            <div class="contrib-card-cover" id="cover-${c.contribution_id}">
+                ${c.cover_image ? `<img src="${esc(c.cover_image)}" alt="" id="cover-img-${c.contribution_id}">` : `<div class="contrib-card-cover-placeholder" id="cover-img-${c.contribution_id}"><span class="material-symbols-outlined">${c.type === 'blog' ? 'article' : 'school'}</span></div>`}
                 <span class="type-badge ${c.type}">${c.type === 'blog' ? 'Blog Post' : 'Course'}</span>
-                <span class="status-badge ${c.status}">${c.status}</span>
+                ${c.status === 'draft' ? `<span class="status-badge draft">Draft</span>` : ''}
+                <button class="cover-edit-btn" onclick="triggerCoverUpload(${c.contribution_id})" title="Change cover">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+                <input type="file" accept="image/*" style="display:none;" id="cover-input-${c.contribution_id}" onchange="handleCoverUpload(event,${c.contribution_id})">
             </div>
             <div class="contrib-card-body">
                 <div class="contrib-card-title">${esc(c.title)}</div>
@@ -755,6 +768,42 @@ function _insertCodeAtCursor(ta, lang) {
     ta.selectionStart = ta.selectionEnd = cursorPos;
     // Sync sections[] if this is a section textarea
     ta.dispatchEvent(new Event('input'));
+}
+
+function triggerCoverUpload(id) {
+    document.getElementById(`cover-input-${id}`).click();
+}
+
+async function handleCoverUpload(event, id) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const cover_image = e.target.result;
+        try {
+            const res = await fetch(`${API}/contributions/${id}/cover`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ cover_image })
+            });
+            if (!res.ok) throw new Error('Failed');
+            const coverEl = document.getElementById(`cover-img-${id}`);
+            if (coverEl) {
+                if (coverEl.tagName === 'IMG') {
+                    coverEl.src = cover_image;
+                } else {
+                    const img = document.createElement('img');
+                    img.id = `cover-img-${id}`;
+                    img.src = cover_image;
+                    coverEl.parentElement.replaceChild(img, coverEl);
+                }
+            }
+            showToast('Cover updated!', 'success');
+        } catch {
+            showToast('Failed to update cover', 'error');
+        }
+    };
+    reader.readAsDataURL(file);
 }
 
 loadContribs();

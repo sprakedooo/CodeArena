@@ -32,7 +32,11 @@
       "Bash(cp C:/Users/jubil/ai-cai-system/backend/server.js C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/backend/server.js)",
       "Bash(cp C:/Users/jubil/ai-cai-system/backend/config/database.js C:/Users/jubil/ai-cai-system/.claude/worktrees/agitated-goldwasser-66d357/backend/config/database.js)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git checkout *)",
+      "PowerShell(Stop-Process -Id 6188 -Force)",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(findstr \":300\")"
     ]
   }
 }

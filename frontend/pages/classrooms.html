@@ -177,18 +177,18 @@
 <!-- ── Header ─────────────────────────────────────────────────────────────── -->
 <div class="page-header">
     <div>
-        <h1>Course Overview</h1>
-        <p>Your enrolled courses. Use an enrollment key to join a new course.</p>
+        <h1>My Classrooms</h1>
+        <p>Your enrolled classrooms. Use an enrollment key to join a new classroom.</p>
     </div>
 </div>
 
-<!-- ── Enroll in a Course ─────────────────────────────────────────────────── -->
+<!-- ── Join a Classroom ────────────────────────────────────────────────────── -->
 <div class="enroll-card">
     <div class="enroll-card-icon">
         <span class="material-symbols-outlined">vpn_key</span>
     </div>
     <div class="enroll-card-text">
-        <h3>Enroll in a Course</h3>
+        <h3>Join a Classroom</h3>
         <p>Enter the enrollment key your instructor provided</p>
     </div>
     <div class="enroll-input-row">
@@ -200,8 +200,8 @@
     </div>
 </div>
 
-<!-- ── My Courses ─────────────────────────────────────────────────────────── -->
-<p class="section-title">My Courses</p>
+<!-- ── My Classrooms ──────────────────────────────────────────────────────── -->
+<p class="section-title">My Classrooms</p>
 <div class="course-grid" id="classroomGrid">
     <div class="course-card" style="min-height:220px;">
         <div style="height:110px;background:var(--bg-surface);"></div>
@@ -269,8 +269,8 @@ function renderGrid(classrooms) {
     if (!classrooms.length) {
         grid.innerHTML = `<div class="empty-state">
             <span class="material-symbols-outlined">school</span>
-            <strong style="color:var(--text);display:block;margin-bottom:0.4rem;">No courses yet</strong>
-            Enter an enrollment key above to join your first course.
+            <strong style="color:var(--text);display:block;margin-bottom:0.4rem;">No classrooms yet</strong>
+            Enter an enrollment key above to join your first classroom.
         </div>`;
         return;
     }
@@ -284,11 +284,16 @@ function renderGrid(classrooms) {
         const faculty = c.facultyName   || c.faculty_name || 'Instructor';
         const desc    = c.description   || c.subject      || '';
         const id      = c.classroom_id  || c.id;
+        const banner  = c.banner_image  || c.bannerImage  || '';
+
+        const bannerStyle = banner
+            ? `background:linear-gradient(to bottom,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${banner}') center/cover no-repeat`
+            : `background:linear-gradient(135deg,${from},${to})`;
 
         return `
         <div class="course-card">
-            <div class="course-banner" style="background:linear-gradient(135deg,${from},${to});">
-                <div class="course-banner-pattern"></div>
+            <div class="course-banner" style="${bannerStyle};">
+                ${!banner ? '<div class="course-banner-pattern"></div>' : ''}
                 <span class="course-banner-lang">${lang}</span>
                 <span class="course-banner-code">${esc(c.name)}</span>
             </div>
@@ -308,7 +313,7 @@ function renderGrid(classrooms) {
                 </div>
                 <a href="classroom_room.html?id=${id}" class="course-enter-btn">
                     <span class="material-symbols-outlined">arrow_forward</span>
-                    Open Course
+                    Open Classroom
                 </a>
             </div>
         </div>`;
