@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,17 +15,27 @@
             border-radius: 16px;
             padding: 1.6rem 2rem;
         }
+
         .welcome-banner h1 {
-            font-size: 1.55rem; font-weight: 700;
-            color: #fff; margin-bottom: 0.3rem;
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.3rem;
         }
-        .welcome-banner p { color: rgba(255,255,255,0.65); font-size: 0.88rem; }
+
+        .welcome-banner p {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.88rem;
+        }
 
         /* ── Section labels ─────────────────────────────────────────────── */
         .section-title {
-            font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1.4px;
-            color: var(--text-muted); margin: 1.6rem 0 0.8rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            color: var(--text-muted);
+            margin: 1.6rem 0 0.8rem;
         }
 
         /* ── Stat strip ─────────────────────────────────────────────────── */
@@ -34,34 +45,96 @@
             gap: 0.85rem;
             margin-bottom: 1.5rem;
         }
+
         .stat-chip {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 1rem 1.15rem;
-            display: flex; align-items: center; gap: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
         }
+
         .stat-chip-icon {
-            width: 40px; height: 40px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
-        .stat-chip-icon .material-symbols-outlined { font-size: 1.25rem; }
-        .stat-chip-info { min-width: 0; }
-        .stat-chip-val  { font-size: 1.35rem; font-weight: 800; color: var(--text); line-height: 1.1; }
-        .stat-chip-lbl  { font-size: 0.7rem; color: var(--text-muted); font-weight: 600;
-                          text-transform: uppercase; letter-spacing: 0.8px; margin-top: 0.15rem; }
-        .chip-xp    { background: rgba(251,191,36,0.15); color: #fbbf24; }
-        .chip-streak{ background: rgba(239,68,68,0.15);  color: #f87171; }
-        .chip-done  { background: rgba(16,185,129,0.15); color: #34d399; }
-        .chip-path  { background: rgba(124,58,237,0.15); color: #a78bfa; }
+
+        .stat-chip-icon .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        .stat-chip-info {
+            min-width: 0;
+        }
+
+        .stat-chip-val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        .stat-chip-lbl {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 0.15rem;
+        }
+
+        .chip-xp {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+
+        .chip-streak {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .chip-done {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .chip-path {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+        }
 
         /* ── Quick Access ───────────────────────────────────────────────── */
-        .qc-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
-        .qc-cyan   { background: rgba(6,182,212,0.15);  color: #22d3ee; }
-        .qc-green  { background: rgba(16,185,129,0.15); color: #34d399; }
-        .qc-red    { background: rgba(239,68,68,0.15);  color: #f87171; }
-        .qc-gold   { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .qc-purple {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+        }
+
+        .qc-cyan {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+        }
+
+        .qc-green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .qc-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .qc-gold {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
 
         /* ── 2-col grid ─────────────────────────────────────────────────── */
         .dash-grid-2 {
@@ -70,7 +143,12 @@
             gap: 1rem;
             margin-bottom: 1rem;
         }
-        @media (max-width: 800px) { .dash-grid-2 { grid-template-columns: 1fr; } }
+
+        @media (max-width: 800px) {
+            .dash-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
 
         /* ── Continue Learning card ─────────────────────────────────────── */
         .continue-card {
@@ -78,67 +156,134 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 1.4rem 1.5rem;
-            display: flex; flex-direction: column; gap: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
         }
+
         .continue-card-top {
-            display: flex; align-items: center; gap: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
         }
-        .continue-card-top .ms-icon { font-size: 1.4rem; color: var(--primary); }
+
+        .continue-card-top .ms-icon {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
         .continue-card-top-text strong {
-            display: block; font-size: 0.95rem; font-weight: 700;
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: var(--text);
         }
-        .continue-card-top-text span { font-size: 0.78rem; color: var(--text-muted); }
+
+        .continue-card-top-text span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
         .continue-lesson-title {
-            font-size: 1.05rem; font-weight: 700; color: var(--text);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
         }
+
         .continue-lesson-meta {
-            display: flex; align-items: center; gap: 1rem;
-            font-size: 0.75rem; color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
-        .continue-lesson-meta span { display: flex; align-items: center; gap: 0.3rem; }
-        .continue-lesson-meta .ms-icon { font-size: 0.95rem; }
+
+        .continue-lesson-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .continue-lesson-meta .ms-icon {
+            font-size: 0.95rem;
+        }
+
         .continue-progress-bar {
-            height: 6px; background: var(--bg-surface);
-            border-radius: 3px; overflow: hidden;
+            height: 6px;
+            background: var(--bg-surface);
+            border-radius: 3px;
+            overflow: hidden;
         }
+
         .continue-progress-fill {
-            height: 100%; border-radius: 3px;
+            height: 100%;
+            border-radius: 3px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transition: width 0.8s ease;
         }
+
         .continue-pct-label {
-            font-size: 0.72rem; color: var(--text-muted);
+            font-size: 0.72rem;
+            color: var(--text-muted);
             margin-top: 0.3rem;
         }
 
         /* ── AI Recommends card ─────────────────────────────────────────── */
         .ai-card {
-            background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08));
-            border: 1px solid rgba(124,58,237,0.3);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(6, 182, 212, 0.08));
+            border: 1px solid rgba(124, 58, 237, 0.3);
             border-radius: var(--radius-lg);
             padding: 1.4rem 1.5rem;
-            display: flex; flex-direction: column; gap: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
+
         .ai-card-header {
-            display: flex; align-items: center; gap: 0.55rem;
-            font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px; color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
         }
-        .ai-card-header .ms-icon { font-size: 1rem; }
+
+        .ai-card-header .ms-icon {
+            font-size: 1rem;
+        }
+
         .ai-card-action {
-            font-size: 1rem; font-weight: 700; color: var(--text); line-height: 1.4;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.4;
         }
+
         .ai-card-reason {
-            font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
         }
+
         .ai-card-type-badge {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.8px; padding: 0.25rem 0.65rem;
-            border-radius: 20px; background: rgba(124,58,237,0.2); color: #a78bfa;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            background: rgba(124, 58, 237, 0.2);
+            color: #a78bfa;
         }
-        .ai-card-type-badge .ms-icon { font-size: 0.85rem; }
+
+        .ai-card-type-badge .ms-icon {
+            font-size: 0.85rem;
+        }
 
         /* ── Weakness alert ─────────────────────────────────────────────── */
         .weakness-card {
@@ -147,50 +292,134 @@
             border-radius: var(--radius-lg);
             padding: 1.2rem 1.5rem;
         }
+
         .weakness-list {
-            display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
         }
+
         .weakness-pill {
-            display: inline-flex; align-items: center; gap: 0.35rem;
-            font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.75rem;
             border-radius: 20px;
-            background: rgba(239,68,68,0.12); color: #f87171;
-            border: 1px solid rgba(239,68,68,0.25);
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.25);
         }
-        .weakness-pill .ms-icon { font-size: 0.9rem; }
-        .weakness-empty { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
-        .weakness-empty .ms-icon { color: #34d399; }
+
+        .weakness-pill .ms-icon {
+            font-size: 0.9rem;
+        }
+
+        .weakness-empty {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .weakness-empty .ms-icon {
+            color: #34d399;
+        }
 
         /* ── Path progress list ─────────────────────────────────────────── */
-        .path-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .path-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
         .path-row {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 1rem 1.15rem;
         }
+
         .path-row-top {
-            display: flex; align-items: center;
-            justify-content: space-between; margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
         }
+
         .path-row-name {
-            display: flex; align-items: center; gap: 0.55rem;
-            font-size: 0.9rem; font-weight: 700; color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
         }
-        .path-row-name .ms-icon { font-size: 1.1rem; }
+
+        .path-row-name .ms-icon {
+            font-size: 1.1rem;
+        }
+
         .path-row-badge {
-            font-size: 0.68rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.7px;
-            padding: 0.2rem 0.6rem; border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
         }
-        .badge-beginner     { background: rgba(16,185,129,0.15); color: #34d399; }
-        .badge-intermediate { background: rgba(6,182,212,0.15);  color: #22d3ee; }
-        .badge-advanced     { background: rgba(124,58,237,0.15); color: #a78bfa; }
-        .path-bar-wrap { display: flex; align-items: center; gap: 0.75rem; }
-        .path-bar { flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden; }
-        .path-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
-        .path-bar-pct { font-size: 0.72rem; font-weight: 700; width: 34px; text-align: right; }
-        .path-row-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; }
+
+        .badge-beginner {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .badge-intermediate {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+        }
+
+        .badge-advanced {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+        }
+
+        .path-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .path-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-surface);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .path-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        .path-bar-pct {
+            font-size: 0.72rem;
+            font-weight: 700;
+            width: 34px;
+            text-align: right;
+        }
+
+        .path-row-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
 
         /* ── Daily Challenge ────────────────────────────────────────────── */
         .daily-challenge-card {
@@ -199,518 +428,543 @@
             border-radius: var(--radius-lg);
             padding: 1.4rem 1.5rem;
         }
+
         .challenge-header {
-            display: flex; justify-content: space-between;
-            align-items: flex-start; margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
         }
+
         .challenge-label {
-            font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: #f97316; display: flex; align-items: center; gap: 0.35rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #f97316;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
             margin-bottom: 0.4rem;
         }
-        .challenge-label .ms-icon { font-size: 0.95rem; }
-        .challenge-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.35rem; }
-        .challenge-desc  { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; }
-        .challenge-meta  { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+        .challenge-label .ms-icon {
+            font-size: 0.95rem;
+        }
+
+        .challenge-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+
+        .challenge-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+
+        .challenge-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
 
         /* XP ring */
-        .xp-ring-wrap { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 1rem; }
-        .xp-ring { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
-        .xp-ring svg { transform: rotate(-90deg); width: 72px; height: 72px; }
-        .xp-ring-label {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            font-size: 0.6rem; font-weight: 700;
-            color: var(--text); line-height: 1.2; text-align: center;
+        .xp-ring-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-bottom: 1rem;
         }
-        .xp-ring-label .xp-num { font-size: 0.85rem; color: #fbbf24; }
+
+        .xp-ring {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            flex-shrink: 0;
+        }
+
+        .xp-ring svg {
+            transform: rotate(-90deg);
+            width: 72px;
+            height: 72px;
+        }
+
+        .xp-ring-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .xp-ring-label .xp-num {
+            font-size: 0.85rem;
+            color: #fbbf24;
+        }
 
         /* Quote */
         .quote-section {
-            background: var(--bg-card); border: 1px solid var(--border);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 1.75rem 2rem; text-align: center; margin-top: 1.5rem;
+            padding: 1.75rem 2rem;
+            text-align: center;
+            margin-top: 1.5rem;
         }
-        .quote-mark { font-size: 2.5rem; line-height: 1; color: var(--primary);
-                      font-family: Georgia,serif; opacity: 0.5; }
-        .quote-text { font-style: italic; color: var(--text-secondary); font-size: 0.9rem;
-                      line-height: 1.7; max-width: 580px; margin: 0.4rem auto; }
-        .quote-author { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
-                        color: var(--text-muted); margin-top: 0.7rem; }
+
+        .quote-mark {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: var(--primary);
+            font-family: Georgia, serif;
+            opacity: 0.5;
+        }
+
+        .quote-text {
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-width: 580px;
+            margin: 0.4rem auto;
+        }
+
+        .quote-author {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-top: 0.7rem;
+        }
 
         /* Skeleton loader */
         .skeleton-line {
-            height: 14px; background: var(--bg-surface);
-            border-radius: 4px; animation: shimmer 1.4s infinite;
+            height: 14px;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            animation: shimmer 1.4s infinite;
             margin-bottom: 0.5rem;
         }
+
         @keyframes shimmer {
-            0%,100%{ opacity: 0.5; } 50%{ opacity: 1; }
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
         @media (max-width: 640px) {
-            .stat-strip { grid-template-columns: repeat(2,1fr); }
+            .stat-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
+
 <body>
 
-<!-- ── Welcome Banner ─────────────────────────────────────────────────────── -->
-<div class="welcome-banner">
-    <h1 id="welcomeMsg">Welcome back! 👋</h1>
-    <p id="welcomeSub">Ready to level up your programming skills today?</p>
-</div>
-<script>
-// Set greeting immediately (synchronous, no flash)
-(function(){
-    const u = JSON.parse(localStorage.getItem('user') || '{}');
-    const name = u.fullName || u.full_name || u.name || '';
-    const first = name.split(' ')[0] || 'there';
-    const h = new Date().getHours();
-    const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-    const el = document.getElementById('welcomeMsg');
-    if (el) el.textContent = greet + ', ' + first + '! 👋';
-})();
-</script>
-
-<!-- ── Stat Strip ──────────────────────────────────────────────────────────── -->
-<div class="stat-strip">
-<div class="stat-chip">
-        <div class="stat-chip-icon chip-streak">
-            <span class="material-symbols-outlined">local_fire_department</span>
-        </div>
-        <div class="stat-chip-info">
-            <div class="stat-chip-val" id="statStreak">—</div>
-            <div class="stat-chip-lbl">Day Streak</div>
-        </div>
+    <!-- ── Welcome Banner ─────────────────────────────────────────────────────── -->
+    <div class="welcome-banner">
+        <h1 id="welcomeMsg">Welcome back! 👋</h1>
+        <p id="welcomeSub">Ready to level up your programming skills today?</p>
     </div>
-    <div class="stat-chip">
-        <div class="stat-chip-icon chip-done">
-            <span class="material-symbols-outlined">check_circle</span>
-        </div>
-        <div class="stat-chip-info">
-            <div class="stat-chip-val" id="statLessons">—</div>
-            <div class="stat-chip-lbl">Lessons Done</div>
-        </div>
-    </div>
-    <div class="stat-chip">
-        <div class="stat-chip-icon chip-path">
-            <span class="material-symbols-outlined">route</span>
-        </div>
-        <div class="stat-chip-info">
-            <div class="stat-chip-val" id="statPaths">—</div>
-            <div class="stat-chip-lbl">Paths Active</div>
-        </div>
-    </div>
-</div>
+    <script>
+        // Set greeting immediately (synchronous, no flash)
+        (function () {
+            const u = JSON.parse(localStorage.getItem('user') || '{}');
+            const name = u.fullName || u.full_name || u.name || '';
+            const first = name.split(' ')[0] || 'there';
+            const h = new Date().getHours();
+            const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+            const el = document.getElementById('welcomeMsg');
+            if (el) el.textContent = greet + ', ' + first + '! 👋';
+        })();
+    </script>
 
-<!-- ── Quick Access ────────────────────────────────────────────────────────── -->
-<p class="section-title">Quick Access</p>
-<div class="quick-grid">
-    <a href="learn.html" class="quick-card">
-        <div class="quick-card-icon qc-purple"><span class="material-symbols-outlined" style="font-size:1.4rem;">menu_book</span></div>
-        <span class="quick-card-label">Learn</span>
-    </a>
-    <a href="classrooms.html" class="quick-card">
-        <div class="quick-card-icon qc-cyan"><span class="material-symbols-outlined" style="font-size:1.4rem;">meeting_room</span></div>
-        <span class="quick-card-label">Classrooms</span>
-    </a>
-    <a href="playground.html" class="quick-card">
-        <div class="quick-card-icon qc-green"><span class="material-symbols-outlined" style="font-size:1.4rem;">terminal</span></div>
-        <span class="quick-card-label">Practice</span>
-    </a>
-    <a href="lesson_game.html" class="quick-card">
-        <div class="quick-card-icon qc-red"><span class="material-symbols-outlined" style="font-size:1.4rem;">sports_esports</span></div>
-        <span class="quick-card-label">Play</span>
-    </a>
-</div>
-
-<!-- ── Continue Learning + AI Recommends ──────────────────────────────────── -->
-<p class="section-title">Your Learning</p>
-<div class="dash-grid-2">
-
-    <!-- Continue Learning -->
-    <div class="continue-card">
-        <div class="continue-card-top">
-            <span class="material-symbols-outlined ms-icon">play_circle</span>
-            <div class="continue-card-top-text">
-                <strong>Continue Learning</strong>
-                <span id="continuePathName">Loading your path…</span>
+    <!-- ── Stat Strip ──────────────────────────────────────────────────────────── -->
+    <div class="stat-strip">
+        <div class="stat-chip">
+            <div class="stat-chip-icon chip-streak">
+                <span class="material-symbols-outlined">local_fire_department</span>
+            </div>
+            <div class="stat-chip-info">
+                <div class="stat-chip-val" id="statStreak">—</div>
+                <div class="stat-chip-lbl">Day Streak</div>
             </div>
         </div>
-        <div id="continueLessonBlock">
-            <div class="skeleton-line" style="width:70%"></div>
-            <div class="skeleton-line" style="width:45%"></div>
-        </div>
-        <div>
-            <div class="continue-progress-bar">
-                <div class="continue-progress-fill" id="continueProgressFill" style="width:0%"></div>
+        <div class="stat-chip">
+            <div class="stat-chip-icon chip-done">
+                <span class="material-symbols-outlined">check_circle</span>
             </div>
-            <div class="continue-pct-label"><span id="continueProgressPct">0</span>% of path complete</div>
+            <div class="stat-chip-info">
+                <div class="stat-chip-val" id="statLessons">—</div>
+                <div class="stat-chip-lbl">Lessons Done</div>
+            </div>
         </div>
-        <a id="continueLessonBtn" href="learn.html" class="btn btn-primary" style="width:100%;justify-content:center;font-size:0.82rem;">
-            <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
-            Continue
+        <div class="stat-chip">
+            <div class="stat-chip-icon chip-path">
+                <span class="material-symbols-outlined">route</span>
+            </div>
+            <div class="stat-chip-info">
+                <div class="stat-chip-val" id="statPaths">—</div>
+                <div class="stat-chip-lbl">Paths Active</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Quick Access ────────────────────────────────────────────────────────── -->
+    <p class="section-title">Quick Access</p>
+    <div class="quick-grid">
+        <a href="learn.html" class="quick-card">
+            <div class="quick-card-icon qc-purple"><span class="material-symbols-outlined"
+                    style="font-size:1.4rem;">menu_book</span></div>
+            <span class="quick-card-label">Learn</span>
+        </a>
+        <a href="classrooms.html" class="quick-card">
+            <div class="quick-card-icon qc-cyan"><span class="material-symbols-outlined"
+                    style="font-size:1.4rem;">meeting_room</span></div>
+            <span class="quick-card-label">Classrooms</span>
+        </a>
+        <a href="playground.html" class="quick-card">
+            <div class="quick-card-icon qc-green"><span class="material-symbols-outlined"
+                    style="font-size:1.4rem;">terminal</span></div>
+            <span class="quick-card-label">Practice</span>
+        </a>
+        <a href="lesson_game.html" class="quick-card">
+            <div class="quick-card-icon qc-red"><span class="material-symbols-outlined"
+                    style="font-size:1.4rem;">sports_esports</span></div>
+            <span class="quick-card-label">Play</span>
         </a>
     </div>
 
-    <!-- AI Recommends -->
-    <div class="ai-card">
-        <div class="ai-card-header">
-            <span class="material-symbols-outlined ms-icon">auto_awesome</span>
-            AI Recommends
-        </div>
-        <div id="aiRecommendBlock">
-            <div class="skeleton-line" style="width:80%;background:rgba(124,58,237,0.2)"></div>
-            <div class="skeleton-line" style="width:55%;background:rgba(124,58,237,0.2)"></div>
-        </div>
-        <div class="ai-card-action" id="aiAction" style="display:none"></div>
-        <div class="ai-card-reason" id="aiReason" style="display:none"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;">
-            <span class="ai-card-type-badge" id="aiTypeBadge" style="display:none">
-                <span class="material-symbols-outlined ms-icon">category</span>
-                <span id="aiTypeLabel">lesson</span>
-            </span>
-            <a id="aiActionBtn" href="learn.html" class="btn btn-primary" style="font-size:0.78rem;display:none;">
-                Let's Go →
-            </a>
-        </div>
-    </div>
-</div>
+    <!-- ── Continue Learning + AI Recommends ──────────────────────────────────── -->
+    <p class="section-title">Your Learning</p>
+    <div class="dash-grid-2">
 
-<!-- ── Weakness Alert + Daily Challenge ───────────────────────────────────── -->
-<div class="dash-grid-2">
-
-    <!-- Weakness Alert -->
-    <div class="weakness-card">
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-            <span class="material-symbols-outlined" style="font-size:1.2rem;color:#f87171;">fitness_center</span>
-            <strong style="font-size:0.92rem;font-weight:700;color:var(--text);">Needs Practice</strong>
-        </div>
-        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.4rem;">Topics where you need more reinforcement.</p>
-        <div class="weakness-list" id="weaknessList">
-            <div class="skeleton-line" style="width:120px;height:28px;border-radius:20px;"></div>
-            <div class="skeleton-line" style="width:100px;height:28px;border-radius:20px;"></div>
-        </div>
-        <div style="margin-top:0.85rem;">
-            <a href="lesson_game.html" class="btn btn-secondary" style="font-size:0.78rem;width:100%;justify-content:center;">
-                <span class="material-symbols-outlined" style="font-size:0.95rem;">sports_esports</span>
-                Practice Weak Topics
-            </a>
-        </div>
-    </div>
-
-    <!-- Daily Challenge -->
-    <div class="daily-challenge-card">
-        <div class="challenge-header">
+        <!-- Continue Learning -->
+        <div class="continue-card">
+            <div class="continue-card-top">
+                <span class="material-symbols-outlined ms-icon">play_circle</span>
+                <div class="continue-card-top-text">
+                    <strong>Continue Learning</strong>
+                    <span id="continuePathName">Loading your path…</span>
+                </div>
+            </div>
+            <div id="continueLessonBlock">
+                <div class="skeleton-line" style="width:70%"></div>
+                <div class="skeleton-line" style="width:45%"></div>
+            </div>
             <div>
-                <div class="challenge-label">
-                    <span class="material-symbols-outlined ms-icon">local_fire_department</span>
-                    Daily Challenge
+                <div class="continue-progress-bar">
+                    <div class="continue-progress-fill" id="continueProgressFill" style="width:0%"></div>
                 </div>
-                <div class="challenge-meta" id="challengeDate">Today · Powered by AI</div>
+                <div class="continue-pct-label"><span id="continueProgressPct">0</span>% of path complete</div>
             </div>
-            <span id="challengeDifficulty" class="level-badge level-beginner" style="display:none">—</span>
+            <a id="continueLessonBtn" href="learn.html" class="btn btn-primary"
+                style="width:100%;justify-content:center;font-size:0.82rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+                Continue
+            </a>
         </div>
-        <div class="xp-ring-wrap">
-            <div class="xp-ring">
-                <svg viewBox="0 0 72 72">
-                    <circle cx="36" cy="36" r="28" fill="none" stroke="var(--bg-surface)" stroke-width="6"/>
-                    <circle id="xpRingFill" cx="36" cy="36" r="28" fill="none"
-                            stroke="#fbbf24" stroke-width="6"
-                            stroke-dasharray="176" stroke-dashoffset="176"
-                            stroke-linecap="round"/>
-                </svg>
-                <div class="xp-ring-label">
-                    <span class="xp-num" id="xpRingVal">50</span>
-                    <span style="color:var(--text-muted);font-size:0.55rem;">XP</span>
+
+        <!-- AI Recommends -->
+        <div class="ai-card">
+            <div class="ai-card-header">
+                <span class="material-symbols-outlined ms-icon">auto_awesome</span>
+                AI Recommends
+            </div>
+            <div id="aiRecommendBlock">
+                <div class="skeleton-line" style="width:80%;background:rgba(124,58,237,0.2)"></div>
+                <div class="skeleton-line" style="width:55%;background:rgba(124,58,237,0.2)"></div>
+            </div>
+            <div class="ai-card-action" id="aiAction" style="display:none"></div>
+            <div class="ai-card-reason" id="aiReason" style="display:none"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;">
+                <span class="ai-card-type-badge" id="aiTypeBadge" style="display:none">
+                    <span class="material-symbols-outlined ms-icon">category</span>
+                    <span id="aiTypeLabel">lesson</span>
+                </span>
+                <a id="aiActionBtn" href="learn.html" class="btn btn-primary" style="font-size:0.78rem;display:none;">
+                    Let's Go →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Weakness Alert + Daily Challenge ───────────────────────────────────── -->
+    <div class="dash-grid-2">
+
+        <!-- Weakness Alert -->
+        <div class="weakness-card">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span class="material-symbols-outlined" style="font-size:1.2rem;color:#f87171;">fitness_center</span>
+                <strong style="font-size:0.92rem;font-weight:700;color:var(--text);">Needs Practice</strong>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.4rem;">Topics where you need more
+                reinforcement.</p>
+            <div class="weakness-list" id="weaknessList">
+                <div class="skeleton-line" style="width:120px;height:28px;border-radius:20px;"></div>
+                <div class="skeleton-line" style="width:100px;height:28px;border-radius:20px;"></div>
+            </div>
+            <div style="margin-top:0.85rem;">
+                <a href="lesson_game.html" class="btn btn-secondary"
+                    style="font-size:0.78rem;width:100%;justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:0.95rem;">sports_esports</span>
+                    Practice Weak Topics
+                </a>
+            </div>
+        </div>
+
+        <!-- Daily Challenge -->
+        <div class="daily-challenge-card">
+            <div class="challenge-header">
+                <div>
+                    <div class="challenge-label">
+                        <span class="material-symbols-outlined ms-icon">local_fire_department</span>
+                        Daily Challenge
+                    </div>
+                    <div class="challenge-meta" id="challengeDate">Today · Powered by AI</div>
+                </div>
+                <span id="challengeDifficulty" class="level-badge level-beginner" style="display:none">—</span>
+            </div>
+            <div class="xp-ring-wrap">
+                <div class="xp-ring">
+                    <svg viewBox="0 0 72 72">
+                        <circle cx="36" cy="36" r="28" fill="none" stroke="var(--bg-surface)" stroke-width="6" />
+                        <circle id="xpRingFill" cx="36" cy="36" r="28" fill="none" stroke="#fbbf24" stroke-width="6"
+                            stroke-dasharray="176" stroke-dashoffset="176" stroke-linecap="round" />
+                    </svg>
+                    <div class="xp-ring-label">
+                        <span class="xp-num" id="xpRingVal">50</span>
+                        <span style="color:var(--text-muted);font-size:0.55rem;">XP</span>
+                    </div>
+                </div>
+                <div style="min-width:0;">
+                    <div class="challenge-title" id="challengeTitle">Loading…</div>
+                    <div class="challenge-desc" id="challengeDesc">Fetching today's challenge…</div>
                 </div>
             </div>
-            <div style="min-width:0;">
-                <div class="challenge-title" id="challengeTitle">Loading…</div>
-                <div class="challenge-desc" id="challengeDesc">Fetching today's challenge…</div>
-            </div>
+            <a id="challengeBtn" href="daily_challenge.html" class="btn btn-primary btn-block"
+                style="font-size:0.82rem;justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">local_fire_department</span>
+                Start Challenge
+            </a>
         </div>
-        <a id="challengeBtn" href="daily_challenge.html" class="btn btn-primary btn-block" style="font-size:0.82rem;justify-content:center;">
-            <span class="material-symbols-outlined" style="font-size:1rem;">local_fire_department</span>
-            Start Challenge
-        </a>
     </div>
-</div>
 
-<!-- ── Learning Path Progress ──────────────────────────────────────────────── -->
-<p class="section-title">Path Progress</p>
-<div class="path-list" id="pathList">
-    <div class="path-row" style="background:var(--bg-card);">
-        <div class="skeleton-line" style="width:40%;margin-bottom:0.7rem;"></div>
-        <div class="skeleton-line" style="height:6px;border-radius:3px;margin-bottom:0;"></div>
+    <!-- ── Learning Path Progress ──────────────────────────────────────────────── -->
+    <p class="section-title">Path Progress</p>
+    <div class="path-list" id="pathList">
+        <div class="path-row" style="background:var(--bg-card);">
+            <div class="skeleton-line" style="width:40%;margin-bottom:0.7rem;"></div>
+            <div class="skeleton-line" style="height:6px;border-radius:3px;margin-bottom:0;"></div>
+        </div>
+        <div class="path-row" style="background:var(--bg-card);">
+            <div class="skeleton-line" style="width:55%;margin-bottom:0.7rem;"></div>
+            <div class="skeleton-line" style="height:6px;border-radius:3px;margin-bottom:0;"></div>
+        </div>
     </div>
-    <div class="path-row" style="background:var(--bg-card);">
-        <div class="skeleton-line" style="width:55%;margin-bottom:0.7rem;"></div>
-        <div class="skeleton-line" style="height:6px;border-radius:3px;margin-bottom:0;"></div>
+
+    <!-- ── Motivational Quote ──────────────────────────────────────────────────── -->
+    <div class="quote-section">
+        <div class="quote-mark">"</div>
+        <p class="quote-text">The expert in anything was once a beginner. Every line of code you write brings you closer
+            to mastery.</p>
+        <p class="quote-author">— CodeArena</p>
     </div>
-</div>
 
-<!-- ── Motivational Quote ──────────────────────────────────────────────────── -->
-<div class="quote-section">
-    <div class="quote-mark">"</div>
-    <p class="quote-text">The expert in anything was once a beginner. Every line of code you write brings you closer to mastery.</p>
-    <p class="quote-author">— CodeArena</p>
-</div>
+    <script src="../js/sidebar.js"></script>
+    <script>
+        const API = `http://${window.location.hostname}:3000/api`;
+        const PATH_COLORS = ['#7c3aed', '#06b6d4', '#f59e0b', '#10b981', '#ef4444'];
 
-<script src="../js/sidebar.js"></script>
-<script>
-const API = `http://${window.location.hostname}:3000/api`;
-const PATH_COLORS = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ef4444'];
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const token = localStorage.getItem('token');
+            if (!user.id) { location.href = 'login.html'; return; }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const user  = JSON.parse(localStorage.getItem('user') || '{}');
-    const token = localStorage.getItem('token');
-    if (!user.id) { location.href = 'login.html'; return; }
+            // ── Greeting (already set synchronously above, but refresh here too)
+            const hour = new Date().getHours();
+            const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+            const firstName = (user.fullName || user.full_name || user.name || 'Student').split(' ')[0];
+            document.getElementById('welcomeMsg').textContent = `${greet}, ${firstName}! 👋`;
 
-    // ── Greeting (already set synchronously above, but refresh here too)
-    const hour      = new Date().getHours();
-    const greet     = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-    const firstName = (user.fullName || user.full_name || user.name || 'Student').split(' ')[0];
-    document.getElementById('welcomeMsg').textContent = `${greet}, ${firstName}! 👋`;
+            // ── Date for challenge
+            document.getElementById('challengeDate').textContent =
+                new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · AI-powered';
 
-    // ── Date for challenge
-    document.getElementById('challengeDate').textContent =
-        new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) + ' · AI-powered';
+            // ── Load in parallel
+            await Promise.allSettled([
+                loadProgress(user.id, token),
+            ]);
 
-    // ── Load in parallel
-    await Promise.allSettled([
-        loadProgress(user.id, token),
-    ]);
-
-    loadDailyChallenge(token);
-    loadAINextTask(user.id, token);
-});
-
-// ── Progress summary ──────────────────────────────────────────────────────────
-async function loadProgress(userId, token) {
-    const headers = { Authorization: `Bearer ${token}` };
-
-    // Tier 1: full paths/progress endpoint (requires DB + learning_paths table)
-    try {
-        const res = await fetch(`${API}/paths/progress/me`, { headers });
-        if (!res.ok) throw new Error('paths api unavailable');
-        const data = await res.json();
-
-        document.getElementById('statStreak').textContent  = (data.user?.streak    || 0) + ' 🔥';
-        document.getElementById('statLessons').textContent = data.completedLessons || 0;
-        const activePaths = (data.paths || []).filter(p => p.completed_count > 0).length;
-        document.getElementById('statPaths').textContent = activePaths;
-
-        const total = data.completedLessons || 0;
-        document.getElementById('welcomeSub').textContent =
-            total > 0
-                ? `You've completed ${total} lesson${total !== 1 ? 's' : ''} and earned ${(data.user?.total_xp || 0).toLocaleString()} XP. Keep going!`
-                : `Start your first lesson to begin tracking your progress.`;
-
-        await buildContinueCard(data.paths || [], data.user?.language, token);
-        buildPathList(data.paths || []);
-        buildWeaknessList(data.weaknesses || []);
-        return;
-    } catch { /* fall through to tier 2 */ }
-
-    // Tier 2: fallback to basic progress + rewards endpoints (have mock data)
-    try {
-        const [progRes, rewardRes] = await Promise.all([
-            fetch(`${API}/progress/${userId}`, { headers }),
-            fetch(`${API}/rewards/${userId}`,  { headers }),
-        ]);
-
-        const prog   = progRes.ok   ? await progRes.json()   : {};
-        const reward = rewardRes.ok ? await rewardRes.json() : {};
-
-        // progress route: { overall:{ totalQuestions, totalCorrect }, byLanguage:{} }
-        // rewards route:  { rewards:{ totalPoints, currentLevel, ... } }
-        const rw      = reward.rewards || {};
-        const xp      = rw.totalPoints  || 0;
-        const level   = rw.currentLevel || 'beginner';
-        const streak  = prog.streak     || 0;   // streak lives on user record
-        // Use totalCorrect as a proxy for "answers given" until lesson_progress exists
-        const lessons = prog.overall?.totalCorrect || prog.completed_lessons || 0;
-
-        document.getElementById('statStreak').textContent  = streak + ' 🔥';
-        document.getElementById('statLessons').textContent = lessons;
-        document.getElementById('statPaths').textContent   = level !== 'beginner' ? '2' : '1';
-
-        document.getElementById('welcomeSub').textContent =
-            lessons > 0
-                ? `You've completed ${lessons} lesson${lessons !== 1 ? 's' : ''}. Keep going!`
-                : `Start your first lesson to begin tracking your progress.`;
-
-        // Build a synthetic path from progress data
-        const syntheticPath = [{
-            path_id: null,
-            title: `${capitalize(prog.language || 'Python')} Fundamentals`,
-            language: prog.language || 'python',
-            difficulty: level,
-            completed_count: lessons,
-            lesson_count: level === 'beginner' ? 6 : level === 'intermediate' ? 12 : 18,
-            progress_pct: Math.min(Math.round((lessons / 6) * 100), 100),
-            xp_earned: xp,
-            xp_reward: 20,
-            estimated_minutes: 10,
-            icon: 'code',
-        }];
-
-        await buildContinueCard(syntheticPath, prog.language, token);
-        buildPathList(syntheticPath);
-        buildWeaknessList([]);
-
-    } catch (err) {
-        console.error('loadProgress fallback failed:', err);
-        ['statStreak','statLessons','statPaths'].forEach(id => {
-            document.getElementById(id).textContent = '—';
+            loadDailyChallenge(token);
+            loadAINextTask(user.id, token);
         });
-        await buildContinueCard([], null, token);
-        buildPathList([]);
-        buildWeaknessList([]);
-    }
-}
 
-async function buildContinueCard(paths, language, token) {
-    const btn = document.getElementById('continueLessonBtn');
+        // ── Modified Progress Summary ──────────────────────────────────────────────
+        async function loadProgress(userId, token) {
+            const headers = { Authorization: `Bearer ${token}` };
 
-    // ── Priority 1: last visited lesson or blog/course (from localStorage) ──────
-    try {
-        const lv = JSON.parse(localStorage.getItem('lastVisited') || 'null');
-        // Consider "recent" if visited in the last 30 days
-        if (lv && lv.title && lv.url && (Date.now() - lv.visitedAt) < 30 * 24 * 60 * 60 * 1000) {
-            const typeIcon = lv.type === 'blog'   ? 'article'  :
-                             lv.type === 'course' ? 'school'   : 'play_circle';
-            const typeLabel = lv.type === 'blog'   ? 'Blog Post' :
-                              lv.type === 'course' ? 'Course'    : 'Lesson';
-            const langLabel = lv.language ? capitalize(lv.language) : null;
-            const timeSince = formatTimeSince(lv.visitedAt);
+            // Try paths endpoint first (requires full DB setup)
+            try {
+                const res = await fetch(`${API}/paths/progress/me`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    populateStats(data, data.user?.streak || 0);
+                    return;
+                }
+            } catch { /* fall through to basic endpoints */ }
 
-            document.getElementById('continuePathName').textContent =
-                lv.type === 'lesson' ? 'Pick up where you left off' :
-                lv.type === 'blog'   ? 'Recently read'              : 'Continue course';
+            // Try basic progress + rewards endpoints (works with your current backend)
+            try {
+                const [progRes, rewardRes] = await Promise.all([
+                    fetch(`${API}/progress/${userId}`, { headers }),
+                    fetch(`${API}/rewards/${userId}`, { headers }),
+                ]);
+
+                const prog = progRes.ok ? await progRes.json() : null;
+                const reward = rewardRes.ok ? await rewardRes.json() : null;
+
+                // Extract data from your actual backend response format
+                const lessons = prog?.overall?.totalCorrect || 0;
+                const streak = 0; // Your progress endpoint doesn't track streak yet
+
+                // Get XP from rewards endpoint
+                const rw = reward?.rewards || {};
+                const xp = rw.totalPoints || 0;
+                const level = rw.currentLevel || 'beginner';
+
+                populateStats({
+                    completedLessons: lessons,
+                    user: { total_xp: xp, streak }
+                }, streak);
+
+                // Build path list from progress data
+                const progressPaths = buildPathsFromProgress(prog, level);
+                buildPathList(progressPaths);
+                buildContinueCardFromProgress(prog, level);
+                buildWeaknessList([]);
+
+            } catch (err) {
+                console.error('loadProgress failed:', err);
+                // Show default values
+                document.getElementById('statStreak').textContent = '0 🔥';
+                document.getElementById('statLessons').textContent = '0';
+                document.getElementById('statPaths').textContent = '0';
+                document.getElementById('welcomeSub').textContent = 'Start your first lesson to begin tracking your progress.';
+
+                buildPathList([]);
+                buildContinueCardFromProgress(null, 'beginner');
+                buildWeaknessList([]);
+            }
+        }
+
+        function populateStats(data, streak) {
+            document.getElementById('statStreak').textContent = (streak || 0) + ' 🔥';
+            document.getElementById('statLessons').textContent = data.completedLessons || 0;
+
+            // Calculate active paths (from language data)
+            const activePaths = data.paths ? data.paths.filter(p => p.completed_count > 0).length : 1;
+            document.getElementById('statPaths').textContent = activePaths;
+
+            const total = data.completedLessons || 0;
+            document.getElementById('welcomeSub').textContent =
+                total > 0
+                    ? `You've completed ${total} lesson${total !== 1 ? 's' : ''} and earned ${(data.user?.total_xp || 0).toLocaleString()} XP. Keep going!`
+                    : `Start your first lesson to begin tracking your progress.`;
+        }
+
+        function buildPathsFromProgress(prog, level) {
+            if (!prog?.byLanguage) return [];
+
+            return Object.entries(prog.byLanguage)
+                .filter(([_, data]) => data.questionsAnswered > 0)
+                .map(([lang, data], index) => ({
+                    path_id: index + 1,
+                    title: `${capitalize(lang)} ${capitalize(data.level || level)}`,
+                    language: lang,
+                    difficulty: data.level || level,
+                    completed_count: data.questionsAnswered || 0,
+                    lesson_count: data.level === 'advanced' ? 18 : data.level === 'intermediate' ? 12 : 6,
+                    progress_pct: data.accuracy || 0,
+                    xp_earned: 0,
+                    icon: 'code'
+                }));
+        }
+
+        function buildContinueCardFromProgress(prog, level) {
+            const btn = document.getElementById('continueLessonBtn');
+
+            if (!prog?.byLanguage) {
+                document.getElementById('continuePathName').textContent = 'No paths enrolled yet.';
+                document.getElementById('continueLessonBlock').innerHTML =
+                    '<p style="font-size:0.83rem;color:var(--text-muted);">Explore learning paths in the Learn section.</p>';
+                return;
+            }
+
+            // Find the most active language
+            const languages = Object.entries(prog.byLanguage)
+                .sort(([, a], [, b]) => b.questionsAnswered - a.questionsAnswered);
+
+            if (languages.length === 0) {
+                document.getElementById('continuePathName').textContent = 'Start learning a language!';
+                document.getElementById('continueLessonBlock').innerHTML =
+                    '<p style="font-size:0.83rem;color:var(--text-muted);">Pick a language to begin.</p>';
+                btn.href = 'select_language.html';
+                return;
+            }
+
+            const [lang, data] = languages[0];
+
+            document.getElementById('continuePathName').textContent = `${capitalize(lang)} Path`;
+            document.getElementById('continueProgressFill').style.width = `${data.accuracy || 0}%`;
+            document.getElementById('continueProgressPct').textContent = data.accuracy || 0;
 
             document.getElementById('continueLessonBlock').innerHTML = `
-                <div class="continue-lesson-title" style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span class="material-symbols-outlined ms-icon" style="color:var(--primary);font-size:1.1rem;margin-top:2px;">${typeIcon}</span>
-                    <span>${esc(lv.title)}</span>
-                </div>
-                <div class="continue-lesson-meta">
-                    <span style="background:rgba(124,58,237,0.12);color:#a78bfa;padding:0.15rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:700;">${typeLabel}</span>
-                    ${langLabel ? `<span><span class="material-symbols-outlined ms-icon">code</span>${langLabel}</span>` : ''}
-                    ${lv.mins ? `<span><span class="material-symbols-outlined ms-icon">schedule</span>${lv.mins} min</span>` : ''}
-                    <span style="margin-left:auto;opacity:0.6;">${timeSince}</span>
-                </div>`;
+        <div class="continue-lesson-title" style="display:flex;align-items:flex-start;gap:0.5rem;">
+            <span class="material-symbols-outlined ms-icon" style="color:var(--primary);font-size:1.1rem;margin-top:2px;">code</span>
+            <span>${capitalize(lang)} ${capitalize(data.level || level)}</span>
+        </div>
+        <div class="continue-lesson-meta">
+            <span style="background:rgba(124,58,237,0.12);color:#a78bfa;padding:0.15rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:700;">${capitalize(data.level || level)}</span>
+            <span><span class="material-symbols-outlined ms-icon">check_circle</span>${data.questionsAnswered} answered</span>
+        </div>`;
 
-            // Update progress bar if it's a lesson with path data
-            if (lv.type === 'lesson' && lv.pathId) {
-                try {
-                    const pr = await fetch(`${API}/paths/${lv.pathId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (pr.ok) {
-                        const pd = await pr.json();
-                        const lessons = pd.lessons || [];
-                        const done  = lessons.filter(l => l.progress_status === 'completed').length;
-                        const total = lessons.length;
-                        const pct   = total ? Math.round(done / total * 100) : 0;
-                        document.getElementById('continuePathName').textContent = esc(pd.path?.title || 'Pick up where you left off');
-                        document.getElementById('continueProgressFill').style.width = pct + '%';
-                        document.getElementById('continueProgressPct').textContent  = pct;
-                    }
-                } catch { /* non-fatal */ }
-            } else {
-                document.getElementById('continueProgressFill').style.width = '0%';
-                document.getElementById('continueProgressPct').textContent  = '—';
-            }
-
-            btn.href = lv.url;
-            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">${typeIcon}</span>
-                Continue ${typeLabel}`;
-            return;
+            btn.href = `learn.html`;
         }
-    } catch { /* fall through to path-based logic */ }
 
-    // ── Priority 2: path progress data ──────────────────────────────────────────
-    const sorted = [...paths].sort((a, b) => {
-        const aMatch = language && a.language === language ? -1 : 0;
-        const bMatch = language && b.language === language ? -1 : 0;
-        if (aMatch !== bMatch) return aMatch - bMatch;
-        const aStarted = a.completed_count > 0 ? -1 : 0;
-        const bStarted = b.completed_count > 0 ? -1 : 0;
-        return aStarted - bStarted;
-    });
-
-    const path = sorted.find(p => p.progress_pct < 100) || paths[0];
-
-    if (!path) {
-        document.getElementById('continuePathName').textContent  = 'No paths enrolled yet.';
-        document.getElementById('continueLessonBlock').innerHTML = '<p style="font-size:0.83rem;color:var(--text-muted);">Explore learning paths in the Learn section.</p>';
-        return;
-    }
-
-    document.getElementById('continuePathName').textContent = path.title;
-    document.getElementById('continueProgressFill').style.width = path.progress_pct + '%';
-    document.getElementById('continueProgressPct').textContent  = path.progress_pct;
-
-    btn.href = `learn.html?path=${path.path_id}`;
-    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span> Continue Lesson`;
-
-    // Try to find the exact next uncompleted lesson and deep-link to it
-    if (path.path_id) try {
-        const res = await fetch(`${API}/paths/${path.path_id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const pd = await res.json();
-            const nextLesson = (pd.lessons || []).find(l => l.progress_status !== 'completed');
-            if (nextLesson) {
-                btn.href = `lesson_view.html?id=${nextLesson.lesson_id}`;
-                document.getElementById('continueLessonBlock').innerHTML = `
-                    <div class="continue-lesson-title">${esc(nextLesson.title)}</div>
-                    <div class="continue-lesson-meta">
-                        <span><span class="material-symbols-outlined ms-icon">schedule</span>${nextLesson.estimated_minutes || 5} min</span>
-                    </div>`;
-            } else {
-                document.getElementById('continueLessonBlock').innerHTML = `
-                    <div class="continue-lesson-title">Lesson ${(path.completed_count||0) + 1} of ${path.lesson_count || '?'}</div>
-                    <div class="continue-lesson-meta">
-                        <span><span class="material-symbols-outlined ms-icon">schedule</span>${path.estimated_minutes || 10} min</span>
-                    </div>`;
-            }
-        }
-    } catch { /* keep fallback href */ }
-}
-
-function formatTimeSince(ts) {
-    const diff = Date.now() - ts;
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1)   return 'Just now';
-    if (mins < 60)  return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24)   return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    if (days === 1) return 'Yesterday';
-    if (days < 7)   return `${days} days ago`;
-    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function buildPathList(paths) {
-    const container = document.getElementById('pathList');
-    if (!paths.length) {
-        container.innerHTML = `<div class="path-row" style="font-size:0.83rem;color:var(--text-muted);text-align:center;padding:1.5rem;">
+        // ── Path List (handles both data sources) ─────────────────────────────────
+        function buildPathList(paths) {
+            const container = document.getElementById('pathList');
+            if (!paths || !paths.length) {
+                container.innerHTML = `<div class="path-row" style="font-size:0.83rem;color:var(--text-muted);text-align:center;padding:1.5rem;">
             No learning paths started yet. <a href="learn.html" style="color:var(--primary);">Explore paths →</a></div>`;
-        return;
-    }
+                return;
+            }
 
-    container.innerHTML = paths.map((p, i) => {
-        const color = PATH_COLORS[i % PATH_COLORS.length];
-        const pct   = p.progress_pct || 0;
-        const diff  = p.difficulty || 'beginner';
-        return `
+            container.innerHTML = paths.map((p, i) => {
+                const color = PATH_COLORS[i % PATH_COLORS.length];
+                const pct = p.progress_pct || 0;
+                const diff = p.difficulty || 'beginner';
+                return `
         <div class="path-row">
             <div class="path-row-top">
                 <div class="path-row-name">
@@ -727,104 +981,103 @@ function buildPathList(paths) {
             </div>
             <div class="path-row-meta">${p.completed_count || 0} / ${p.lesson_count || 0} lessons</div>
         </div>`;
-    }).join('');
-}
+            }).join('');
+        }
 
-function buildWeaknessList(weaknesses) {
-    const container = document.getElementById('weaknessList');
-    if (!weaknesses.length) {
-        container.innerHTML = `<div class="weakness-empty">
+        function buildWeaknessList(weaknesses) {
+            const container = document.getElementById('weaknessList');
+            if (!weaknesses || !weaknesses.length) {
+                container.innerHTML = `<div class="weakness-empty">
             <span class="material-symbols-outlined ms-icon">check_circle</span>
             No weak topics detected yet. Keep learning!
         </div>`;
-        return;
-    }
-    container.innerHTML = weaknesses.map(w => `
+                return;
+            }
+            container.innerHTML = weaknesses.map(w => `
         <span class="weakness-pill">
             <span class="material-symbols-outlined ms-icon">warning</span>
             ${esc(w.topic)} <span style="opacity:0.6;font-size:0.68rem;">(${esc(w.language)})</span>
         </span>`).join('');
-}
+        }
 
-// ── AI Next Task ──────────────────────────────────────────────────────────────
-async function loadAINextTask(userId, token) {
-    const block  = document.getElementById('aiRecommendBlock');
-    const action = document.getElementById('aiAction');
-    const reason = document.getElementById('aiReason');
-    const badge  = document.getElementById('aiTypeBadge');
-    const label  = document.getElementById('aiTypeLabel');
-    const btn    = document.getElementById('aiActionBtn');
+        // ── AI Next Task ──────────────────────────────────────────────────────────
+        async function loadAINextTask(userId, token) {
+            const block = document.getElementById('aiRecommendBlock');
+            const action = document.getElementById('aiAction');
+            const reason = document.getElementById('aiReason');
+            const badge = document.getElementById('aiTypeBadge');
+            const label = document.getElementById('aiTypeLabel');
+            const btn = document.getElementById('aiActionBtn');
 
-    try {
-        const res = await fetch(`${API}/ai/next-task/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error('failed');
-        const data = await res.json();
-        const rec  = data.recommendation;
+            try {
+                const res = await fetch(`${API}/ai/next-task/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('failed');
+                const data = await res.json();
+                // Handle both response formats
+                const rec = data.recommendation || data.task;
 
-        block.style.display = 'none';
-        action.textContent  = rec.nextAction || 'Continue your learning path';
-        reason.textContent  = rec.reason     || 'Based on your current progress.';
-        label.textContent   = capitalize(rec.type || 'lesson');
-        [action, reason, badge, btn].forEach(el => el.style.display = '');
+                block.style.display = 'none';
+                action.textContent = rec?.nextAction || rec?.action || 'Continue your learning path';
+                reason.textContent = rec?.reason || 'Based on your current progress.';
+                label.textContent = capitalize(rec?.type || 'lesson');
+                [action, reason, badge, btn].forEach(el => el.style.display = '');
 
-        const typeHref = {
-            lesson:    'learn.html',
-            practice:  'lesson_game.html',
-            review:    'lesson_game.html',
-            challenge: 'daily_challenge.html',
-        };
-        btn.href = typeHref[rec.type] || 'learn.html';
+                const typeHref = {
+                    lesson: 'learn.html',
+                    practice: 'lesson_game.html',
+                    review: 'lesson_game.html',
+                    challenge: 'daily_challenge.html',
+                };
+                btn.href = typeHref[rec?.type] || 'learn.html';
 
-    } catch {
-        block.style.display = 'none';
-        action.textContent  = 'Continue your current learning path';
-        reason.textContent  = 'Complete your pending lessons to advance to the next level.';
-        label.textContent   = 'Lesson';
-        [action, reason, badge, btn].forEach(el => el.style.display = '');
-    }
-}
+            } catch (err) {
+                console.log('AI recommendation unavailable, using default');
+                block.style.display = 'none';
+                action.textContent = 'Continue your current learning path';
+                reason.textContent = 'Complete your pending lessons to advance to the next level.';
+                label.textContent = 'Lesson';
+                [action, reason, badge, btn].forEach(el => el.style.display = '');
+            }
+        }
 
-// ── Daily Challenge ───────────────────────────────────────────────────────────
-async function loadDailyChallenge(token) {
-    try {
-        const res = await fetch(`${API}/daily-challenge`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        const ch   = data.challenge || data;
+        // ── Daily Challenge ───────────────────────────────────────────────────────
+        async function loadDailyChallenge(token) {
+            try {
+                const res = await fetch(`${API}/daily-challenge`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const ch = data.challenge || data;
 
-        document.getElementById('challengeTitle').textContent = ch.title || 'Daily Coding Challenge';
-        document.getElementById('challengeDesc').textContent  = ch.description || ch.desc || 'Solve today's challenge!';
+                document.getElementById('challengeTitle').textContent = ch.title || 'Daily Coding Challenge';
+                document.getElementById('challengeDesc').textContent = ch.description || ch.desc || 'Solve today\'s challenge!';
 
-        const diff  = ch.difficulty || 'beginner';
-        const badge = document.getElementById('challengeDifficulty');
-        badge.textContent = capitalize(diff);
-        badge.className   = `level-badge level-${diff}`;
-        badge.style.display = '';
+                const diff = ch.difficulty || 'beginner';
+                const badge = document.getElementById('challengeDifficulty');
+                badge.textContent = capitalize(diff);
+                badge.className = `level-badge level-${diff}`;
+                badge.style.display = '';
 
-        const xp = ch.xpReward || ch.xp_reward || 50;
-        document.getElementById('xpRingVal').textContent = xp;
-        const pct = Math.min(xp / 100, 1);
-        document.getElementById('xpRingFill').style.strokeDashoffset = 176 * (1 - pct);
+                const xp = ch.xpReward || ch.xp_reward || 50;
+                document.getElementById('xpRingVal').textContent = xp;
+                const pct = Math.min(xp / 100, 1);
+                document.getElementById('xpRingFill').style.strokeDashoffset = 176 * (1 - pct);
 
-        localStorage.setItem('dailyChallenge', JSON.stringify(ch));
-    } catch {
-        document.getElementById('challengeTitle').textContent = 'Daily Coding Challenge';
-        document.getElementById('challengeDesc').textContent  = 'Complete a coding challenge!';
-    }
-}
+                localStorage.setItem('dailyChallenge', JSON.stringify(ch));
+            } catch {
+                document.getElementById('challengeTitle').textContent = 'Daily Coding Challenge';
+                document.getElementById('challengeDesc').textContent = 'Complete a coding challenge!';
+            }
+        }
 
-function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-function esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-</script>
+        function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+        function esc(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
 </body>
+
 </html>
-
-
-
-
