@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeArena — Start Your Coding Adventure</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         /* ============ RESET / BASE ============ */
         body {
@@ -13,7 +16,10 @@
             color: var(--text);
             overflow-x: hidden;
         }
-        .page { min-height: 100vh; }
+
+        .page {
+            min-height: 100vh;
+        }
 
         /* ============ TOP NAV ============ */
         .top-nav {
@@ -28,23 +34,38 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
+
         .nav-logo {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.9rem;
         }
-        .nav-logo .brk { color: var(--text-muted); }
-        .nav-logo .code { color: var(--primary); }
-        .nav-logo .arena { color: var(--success); }
+
+        .nav-logo .brk {
+            color: var(--text-muted);
+        }
+
+        .nav-logo .code {
+            color: var(--primary);
+        }
+
+        .nav-logo .arena {
+            color: var(--success);
+        }
 
         .nav-links {
             display: none;
             gap: 1.75rem;
             list-style: none;
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
         }
+
         @media (min-width: 900px) {
-            .nav-links { display: flex; }
+            .nav-links {
+                display: flex;
+            }
         }
+
         .nav-links a {
             color: var(--text-secondary);
             font-size: 0.9rem;
@@ -52,7 +73,11 @@
             text-decoration: none;
             transition: color 0.2s;
         }
-        .nav-links a:hover { color: var(--text); }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
         .nav-links .badge-soon {
             background: var(--primary);
             color: white;
@@ -68,6 +93,7 @@
             align-items: center;
             gap: 0.75rem;
         }
+
         .nav-actions .btn-login {
             background: transparent;
             color: var(--text-secondary);
@@ -78,7 +104,11 @@
             cursor: pointer;
             text-decoration: none;
         }
-        .nav-actions .btn-login:hover { color: var(--text); }
+
+        .nav-actions .btn-login:hover {
+            color: var(--text);
+        }
+
         .nav-actions .btn-signup {
             background: linear-gradient(135deg, var(--primary), #9333ea);
             color: white;
@@ -87,11 +117,14 @@
             font-weight: 700;
             font-size: 0.9rem;
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
             transition: transform 0.15s;
         }
-        .nav-actions .btn-signup:hover { transform: translateY(-1px); }
+
+        .nav-actions .btn-signup:hover {
+            transform: translateY(-1px);
+        }
 
         /* ============ HERO ============ */
         .hero {
@@ -104,19 +137,22 @@
             text-align: center;
             overflow: hidden;
             background: linear-gradient(180deg,
-                #010614 0%,
-                #050d28 25%,
-                #090f22 55%,
-                #0b1320 100%
-            );
+                    #010614 0%,
+                    #050d28 25%,
+                    #090f22 55%,
+                    #0b1320 100%);
         }
-        .hero::before { display: none; }
+
+        .hero::before {
+            display: none;
+        }
 
         /* ─── Starfield canvas ─── */
         .star-canvas {
             position: absolute;
             inset: 0;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             z-index: 0;
             pointer-events: none;
         }
@@ -126,28 +162,38 @@
             position: absolute;
             top: 11%;
             right: 17%;
-            width: 88px; height: 88px;
+            width: 88px;
+            height: 88px;
             border-radius: 50%;
             background: radial-gradient(circle at 36% 36%, #fef9e0, #fbbf24 45%, #d97706 85%);
             box-shadow:
-                0 0 0 3px rgba(251,191,36,0.18),
-                0 0 40px rgba(251,191,36,0.55),
-                0 0 100px rgba(251,191,36,0.22);
+                0 0 0 3px rgba(251, 191, 36, 0.18),
+                0 0 40px rgba(251, 191, 36, 0.55),
+                0 0 100px rgba(251, 191, 36, 0.22);
             z-index: 1;
             animation: moonGlow 5s ease-in-out infinite alternate;
         }
+
         .hero-moon::after {
             content: '';
             position: absolute;
-            top: 22%; left: 54%;
-            width: 13px; height: 13px;
+            top: 22%;
+            left: 54%;
+            width: 13px;
+            height: 13px;
             border-radius: 50%;
-            background: rgba(0,0,0,0.14);
-            box-shadow: -16px 10px 0 rgba(0,0,0,0.10), 7px 24px 0 7px rgba(0,0,0,0.07);
+            background: rgba(0, 0, 0, 0.14);
+            box-shadow: -16px 10px 0 rgba(0, 0, 0, 0.10), 7px 24px 0 7px rgba(0, 0, 0, 0.07);
         }
+
         @keyframes moonGlow {
-            0%   { box-shadow: 0 0 0 3px rgba(251,191,36,0.18), 0 0 40px rgba(251,191,36,0.55), 0 0 100px rgba(251,191,36,0.22); }
-            100% { box-shadow: 0 0 0 3px rgba(251,191,36,0.28), 0 0 65px rgba(251,191,36,0.80), 0 0 150px rgba(251,191,36,0.35); }
+            0% {
+                box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.18), 0 0 40px rgba(251, 191, 36, 0.55), 0 0 100px rgba(251, 191, 36, 0.22);
+            }
+
+            100% {
+                box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.28), 0 0 65px rgba(251, 191, 36, 0.80), 0 0 150px rgba(251, 191, 36, 0.35);
+            }
         }
 
         /* ─── Aurora ─── */
@@ -158,68 +204,96 @@
             pointer-events: none;
             overflow: hidden;
         }
+
         .aurora-layer::before {
             content: '';
             position: absolute;
-            top: 2%; left: -15%;
-            width: 85%; height: 45%;
+            top: 2%;
+            left: -15%;
+            width: 85%;
+            height: 45%;
             background: linear-gradient(135deg,
-                transparent 0%,
-                rgba(16,185,129,0.13) 25%,
-                rgba(6,182,212,0.11) 50%,
-                rgba(124,58,237,0.09) 75%,
-                transparent 100%
-            );
+                    transparent 0%,
+                    rgba(16, 185, 129, 0.13) 25%,
+                    rgba(6, 182, 212, 0.11) 50%,
+                    rgba(124, 58, 237, 0.09) 75%,
+                    transparent 100%);
             filter: blur(45px);
             border-radius: 60%;
             animation: aurora1 11s ease-in-out infinite alternate;
         }
+
         .aurora-layer::after {
             content: '';
             position: absolute;
-            top: -5%; right: -15%;
-            width: 65%; height: 55%;
+            top: -5%;
+            right: -15%;
+            width: 65%;
+            height: 55%;
             background: linear-gradient(225deg,
-                transparent 0%,
-                rgba(124,58,237,0.16) 30%,
-                rgba(6,182,212,0.09) 60%,
-                rgba(16,185,129,0.07) 80%,
-                transparent 100%
-            );
+                    transparent 0%,
+                    rgba(124, 58, 237, 0.16) 30%,
+                    rgba(6, 182, 212, 0.09) 60%,
+                    rgba(16, 185, 129, 0.07) 80%,
+                    transparent 100%);
             filter: blur(55px);
             border-radius: 60%;
             animation: aurora2 14s ease-in-out infinite alternate;
         }
+
         @keyframes aurora1 {
-            0%   { transform: translateX(0)   translateY(0)   scale(1);    opacity: 0.55; }
-            100% { transform: translateX(12%) translateY(8%)  scale(1.18); opacity: 1; }
+            0% {
+                transform: translateX(0) translateY(0) scale(1);
+                opacity: 0.55;
+            }
+
+            100% {
+                transform: translateX(12%) translateY(8%) scale(1.18);
+                opacity: 1;
+            }
         }
+
         @keyframes aurora2 {
-            0%   { transform: translateX(0)    scale(1);    opacity: 0.45; }
-            100% { transform: translateX(-12%) scale(1.12); opacity: 0.9; }
+            0% {
+                transform: translateX(0) scale(1);
+                opacity: 0.45;
+            }
+
+            100% {
+                transform: translateX(-12%) scale(1.12);
+                opacity: 0.9;
+            }
         }
 
         /* ─── Mountain layers ─── */
         .mountain-bg {
             position: absolute;
-            left: 0; right: 0; bottom: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             height: 58%;
             background: linear-gradient(180deg, #0e2d52 0%, #081b35 100%);
             clip-path: polygon(0 100%, 0 42%, 6% 28%, 13% 42%, 21% 18%, 29% 36%, 38% 10%, 47% 32%, 55% 14%, 63% 34%, 72% 16%, 81% 38%, 88% 22%, 95% 40%, 100% 26%, 100% 100%);
             z-index: 2;
             opacity: 0.85;
         }
+
         .mountain-mid {
             position: absolute;
-            left: 0; right: 0; bottom: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             height: 44%;
             background: linear-gradient(180deg, #071e3d 0%, #040f20 100%);
             clip-path: polygon(0 100%, 0 58%, 8% 42%, 16% 60%, 25% 38%, 34% 55%, 43% 34%, 52% 52%, 61% 30%, 70% 50%, 79% 36%, 88% 54%, 95% 42%, 100% 56%, 100% 100%);
             z-index: 3;
         }
+
         .mountain-fg {
             position: absolute;
-            left: 0; right: 0; bottom: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             height: 30%;
             background: linear-gradient(180deg, #040b18 0%, #020710 100%);
             clip-path: polygon(0 100%, 0 72%, 10% 58%, 20% 76%, 30% 54%, 40% 70%, 52% 48%, 62% 66%, 72% 50%, 82% 68%, 91% 56%, 100% 72%, 100% 100%);
@@ -230,15 +304,23 @@
         .shooting-star {
             position: absolute;
             height: 2px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(200,230,255,0.4), transparent);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(200, 230, 255, 0.4), transparent);
             border-radius: 2px;
             animation: shoot linear forwards;
             z-index: 1;
             pointer-events: none;
         }
+
         @keyframes shoot {
-            0%   { transform: translateX(0) translateY(0) rotate(-20deg); opacity: 1; }
-            100% { transform: translateX(280px) translateY(140px) rotate(-20deg); opacity: 0; }
+            0% {
+                transform: translateX(0) translateY(0) rotate(-20deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(280px) translateY(140px) rotate(-20deg);
+                opacity: 0;
+            }
         }
 
         /* ─── Floating code particles ─── */
@@ -252,11 +334,25 @@
             z-index: 5;
             user-select: none;
         }
+
         @keyframes floatUp {
-            0%   { transform: translateY(0) rotate(0deg);   opacity: 0; }
-            8%   { opacity: 1; }
-            88%  { opacity: 0.5; }
-            100% { transform: translateY(-105vh) rotate(25deg); opacity: 0; }
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            8% {
+                opacity: 1;
+            }
+
+            88% {
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translateY(-105vh) rotate(25deg);
+                opacity: 0;
+            }
         }
 
         .hero-inner {
@@ -266,6 +362,7 @@
             width: 100%;
             margin: 0 auto;
         }
+
         .hero-eyebrow {
             display: inline-block;
             font-family: 'Press Start 2P', monospace;
@@ -278,18 +375,30 @@
             letter-spacing: 2px;
             margin-bottom: 1.75rem;
         }
+
         .hero-logo-img {
             height: 460px;
             width: auto;
             object-fit: contain;
             margin-bottom: 1.5rem;
-            filter: drop-shadow(0 0 60px rgba(124,58,237,0.7)) drop-shadow(0 0 120px rgba(6,182,212,0.35));
+            filter: drop-shadow(0 0 60px rgba(124, 58, 237, 0.7)) drop-shadow(0 0 120px rgba(6, 182, 212, 0.35));
             animation: logoPulse 3s ease-in-out infinite;
         }
+
         @keyframes logoPulse {
-            0%, 100% { filter: drop-shadow(0 0 60px rgba(124,58,237,0.7)) drop-shadow(0 0 120px rgba(6,182,212,0.35)); transform: scale(1); }
-            50%       { filter: drop-shadow(0 0 80px rgba(124,58,237,0.9)) drop-shadow(0 0 150px rgba(6,182,212,0.5)); transform: scale(1.03); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 60px rgba(124, 58, 237, 0.7)) drop-shadow(0 0 120px rgba(6, 182, 212, 0.35));
+                transform: scale(1);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 80px rgba(124, 58, 237, 0.9)) drop-shadow(0 0 150px rgba(6, 182, 212, 0.5));
+                transform: scale(1.03);
+            }
         }
+
         .hero-title {
             font-family: 'Press Start 2P', monospace;
             font-size: clamp(2rem, 6vw, 4rem);
@@ -299,8 +408,9 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 28px rgba(251,191,36,0.55));
+            filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.55));
         }
+
         .hero-subtitle {
             color: rgba(200, 215, 240, 0.85);
             font-size: 1.1rem;
@@ -308,6 +418,7 @@
             margin: 0 auto 2.5rem;
             line-height: 1.7;
         }
+
         .hero-cta {
             display: inline-flex;
             align-items: center;
@@ -319,13 +430,14 @@
             font-size: 1rem;
             border-radius: 10px;
             text-decoration: none;
-            box-shadow: 0 8px 30px rgba(251,191,36,0.50), 0 0 60px rgba(251,191,36,0.15);
+            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.50), 0 0 60px rgba(251, 191, 36, 0.15);
             border: 2px solid #fde68a;
             transition: transform 0.15s, box-shadow 0.15s;
         }
+
         .hero-cta:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(251,191,36,0.65), 0 0 80px rgba(251,191,36,0.20);
+            box-shadow: 0 12px 40px rgba(251, 191, 36, 0.65), 0 0 80px rgba(251, 191, 36, 0.20);
         }
 
         /* ============ SECTIONS ============ */
@@ -334,6 +446,7 @@
             max-width: 100%;
             margin: 0 auto;
         }
+
         .section-heading {
             font-family: 'Press Start 2P', monospace;
             font-size: clamp(1.2rem, 3vw, 2rem);
@@ -342,6 +455,7 @@
             color: var(--text);
             line-height: 1.4;
         }
+
         .section-sub {
             text-align: center;
             color: var(--text-secondary);
@@ -357,6 +471,7 @@
             flex-wrap: wrap;
             margin-bottom: 3rem;
         }
+
         .cat-tab {
             padding: 0.5rem 1.1rem;
             background: var(--bg-card);
@@ -368,14 +483,24 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .cat-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .cat-tab:hover:not(.active) { border-color: var(--primary); color: var(--text); }
+
+        .cat-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .cat-tab:hover:not(.active) {
+            border-color: var(--primary);
+            color: var(--text);
+        }
 
         .courses-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
         }
+
         .course-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -385,7 +510,12 @@
             display: flex;
             flex-direction: column;
         }
-        .course-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
         .course-thumb {
             height: 160px;
             display: flex;
@@ -395,22 +525,62 @@
             position: relative;
             overflow: hidden;
         }
+
         .course-thumb::after {
             content: '';
-            position: absolute; inset: 0;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px);
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 2px, transparent 2px 4px);
             pointer-events: none;
         }
-        .thumb-python { background: linear-gradient(135deg, #3776ab, #ffd43b); }
-        .thumb-html   { background: linear-gradient(135deg, #e34f26, #f06529); }
-        .thumb-css    { background: linear-gradient(135deg, #2965f1, #264de4); }
-        .thumb-js     { background: linear-gradient(135deg, #f7df1e, #f0db4f); color: #323330; }
-        .thumb-java   { background: linear-gradient(135deg, #ed8b00, #5382a1); }
-        .thumb-cpp    { background: linear-gradient(135deg, #00599c, #004482); }
 
-        .course-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
-        .course-title { font-family: 'Press Start 2P', monospace; font-size: 0.85rem; margin-bottom: 0.6rem; color: var(--text); }
-        .course-desc  { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem; flex: 1; }
+        .thumb-python {
+            background: linear-gradient(135deg, #3776ab, #ffd43b);
+        }
+
+        .thumb-html {
+            background: linear-gradient(135deg, #e34f26, #f06529);
+        }
+
+        .thumb-css {
+            background: linear-gradient(135deg, #2965f1, #264de4);
+        }
+
+        .thumb-js {
+            background: linear-gradient(135deg, #f7df1e, #f0db4f);
+            color: #323330;
+        }
+
+        .thumb-java {
+            background: linear-gradient(135deg, #ed8b00, #5382a1);
+        }
+
+        .thumb-cpp {
+            background: linear-gradient(135deg, #00599c, #004482);
+        }
+
+        .course-body {
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85rem;
+            margin-bottom: 0.6rem;
+            color: var(--text);
+        }
+
+        .course-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+
         .course-btn {
             display: inline-flex;
             align-items: center;
@@ -429,10 +599,27 @@
             border: 2px solid transparent;
             transition: all 0.2s;
         }
-        .course-btn:hover { background: transparent; border-color: var(--primary); color: var(--primary); }
 
-        .explore-all { text-align: center; margin-top: 2.5rem; }
-        .explore-all a { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.95rem; }
+        .course-btn:hover {
+            background: transparent;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .explore-all {
+            text-align: center;
+            margin-top: 2.5rem;
+        }
+
+        .explore-all a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
 
         /* ============ FEATURE ROWS ============ */
         .feature-row {
@@ -442,10 +629,18 @@
             align-items: center;
             padding: 4rem 0;
         }
+
         @media (min-width: 900px) {
-            .feature-row { grid-template-columns: 1fr 1fr; gap: 5rem; }
-            .feature-row.reverse .feature-text { order: 2; }
+            .feature-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 5rem;
+            }
+
+            .feature-row.reverse .feature-text {
+                order: 2;
+            }
         }
+
         .feature-text h3 {
             font-family: 'Press Start 2P', monospace;
             font-size: 1.3rem;
@@ -453,11 +648,13 @@
             color: var(--text);
             line-height: 1.4;
         }
+
         .feature-text p {
             color: var(--text-secondary);
             font-size: 1rem;
             line-height: 1.7;
         }
+
         .feature-visual {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -468,20 +665,34 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
-        .visual-badges { background: linear-gradient(135deg, #1e293b, #0f172a); }
-        .visual-game { background: linear-gradient(135deg, #422006, #292524); }
-        .visual-portfolio { background: linear-gradient(135deg, #064e3b, #022c22); }
+
+        .visual-badges {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+
+        .visual-game {
+            background: linear-gradient(135deg, #422006, #292524);
+        }
+
+        .visual-portfolio {
+            background: linear-gradient(135deg, #064e3b, #022c22);
+        }
+
         .badge-sprites {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             font-size: 2.5rem;
         }
+
         .badge-sprites span {
-            width: 70px; height: 70px;
-            display: flex; align-items: center; justify-content: center;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: rgba(251, 191, 36, 0.12);
             border: 2px solid rgba(251, 191, 36, 0.4);
             border-radius: 12px;
@@ -496,27 +707,27 @@
             overflow: hidden;
             border-top: 1px solid var(--border);
         }
+
         .footer-cta::before {
             content: '';
             position: absolute;
-            left: 0; right: 0; bottom: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             height: 80px;
             background:
-                linear-gradient(
-                    to right,
+                linear-gradient(to right,
                     #1e293b 0 8%, #334155 8% 10%, #1e293b 10% 20%,
                     #475569 20% 22%, #1e293b 22% 35%, #64748b 35% 37%,
                     #1e293b 37% 50%, #475569 50% 52%, #1e293b 52% 68%,
                     #334155 68% 70%, #1e293b 70% 85%, #64748b 85% 87%,
-                    #1e293b 87% 100%
-                );
-            clip-path: polygon(
-                0 100%, 0 60%, 8% 60%, 8% 30%, 12% 30%, 12% 60%, 20% 60%,
-                22% 40%, 30% 40%, 30% 60%, 42% 60%, 42% 20%, 50% 20%,
-                50% 60%, 62% 60%, 62% 45%, 70% 45%, 70% 60%, 82% 60%,
-                82% 35%, 90% 35%, 90% 60%, 100% 60%, 100% 100%
-            );
+                    #1e293b 87% 100%);
+            clip-path: polygon(0 100%, 0 60%, 8% 60%, 8% 30%, 12% 30%, 12% 60%, 20% 60%,
+                    22% 40%, 30% 40%, 30% 60%, 42% 60%, 42% 20%, 50% 20%,
+                    50% 60%, 62% 60%, 62% 45%, 70% 45%, 70% 60%, 82% 60%,
+                    82% 35%, 90% 35%, 90% 60%, 100% 60%, 100% 100%);
         }
+
         .footer-cta h2 {
             font-family: 'Press Start 2P', monospace;
             font-size: clamp(1.3rem, 3vw, 2rem);
@@ -525,6 +736,7 @@
             position: relative;
             z-index: 2;
         }
+
         .footer-cta .btn-free {
             display: inline-block;
             padding: 1rem 2.5rem;
@@ -539,6 +751,7 @@
             z-index: 2;
             margin-bottom: 4rem;
         }
+
         .footer-bottom {
             position: relative;
             z-index: 2;
@@ -548,254 +761,266 @@
         }
     </style>
 </head>
+
 <body>
-<div class="page">
+    <div class="page">
 
-    <!-- ============ TOP NAV ============ -->
-    <nav class="top-nav">
-        <div class="nav-logo"></div>
-        <ul class="nav-links">
-            <li><a href="#courses">Learn</a></li>
-            <li><a href="#features">AI <span class="badge-soon">NEW</span></a></li>
-        </ul>
-        <div class="nav-actions">
-            <a href="pages/login.html" class="btn-login">Log in</a>
-            <a href="pages/intro.html?to=register.html" class="btn-signup">Sign up</a>
-        </div>
-    </nav>
+        <!-- ============ TOP NAV ============ -->
+        <nav class="top-nav">
+            <div class="nav-logo"></div>
+            <ul class="nav-links">
+                <li><a href="#courses">Learn</a></li>
+                <li><a href="#features">AI <span class="badge-soon">NEW</span></a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="pages/login.html" class="btn-login">Log in</a>
+                <a href="pages/intro.html?to=register.html" class="btn-signup">Sign up</a>
+            </div>
+        </nav>
 
-    <!-- ============ HERO ============ -->
-    <section class="hero">
-        <canvas class="star-canvas" id="starCanvas"></canvas>
-        <div class="hero-moon"></div>
-        <div class="aurora-layer"></div>
-        <div class="mountain-bg"></div>
-        <div class="mountain-mid"></div>
-        <div class="mountain-fg"></div>
-        <div class="hero-inner">
-            <img src="../assets/codearena-logo.png" alt="CodeArena" class="hero-logo-img">
-            <p class="hero-subtitle">
-                The most fun and user-friendly way to learn how to code, built for beginners with adaptive AI, real challenges, and instant feedback.
-            </p>
-            <a href="pages/intro.html?to=login.html" class="hero-cta">Get Started &#x2192;</a>
-        </div>
-    </section>
+        <!-- ============ HERO ============ -->
+        <section class="hero">
+            <canvas class="star-canvas" id="starCanvas"></canvas>
+            <div class="hero-moon"></div>
+            <div class="aurora-layer"></div>
+            <div class="mountain-bg"></div>
+            <div class="mountain-mid"></div>
+            <div class="mountain-fg"></div>
+            <div class="hero-inner">
+                <img src="../assets/codearena-logo.png" alt="CodeArena" class="hero-logo-img">
+                <p class="hero-subtitle">
+                    The most fun and user-friendly way to learn how to code, built for beginners with adaptive AI, real
+                    challenges, and instant feedback.
+                </p>
+                <a href="pages/intro.html?to=login.html" class="hero-cta">Get Started &#x2192;</a>
+            </div>
+        </section>
 
-    <!-- ============ COURSES ============ -->
-    <section class="section" id="courses">
-        <h2 class="section-heading">Explore free interactive<br>coding lessons</h2>
+        <!-- ============ COURSES ============ -->
+        <section class="section" id="courses">
+            <h2 class="section-heading">Explore free interactive<br>coding lessons</h2>
 
-        <div class="category-tabs">
-            <div class="cat-tab active">Popular</div>
-            <div class="cat-tab">Web Development</div>
-            <div class="cat-tab">Data Science</div>
-            <div class="cat-tab">Computer Science</div>
-            <div class="cat-tab">Game Dev</div>
-        </div>
+            <div class="category-tabs">
+                <div class="cat-tab active">Popular</div>
+                <div class="cat-tab">Web Development</div>
+                <div class="cat-tab">Data Science</div>
+                <div class="cat-tab">Computer Science</div>
+                <div class="cat-tab">Game Dev</div>
+            </div>
 
-        <div class="courses-grid">
-            <div class="course-card">
-                <div class="course-thumb thumb-python">&#x1F40D;</div>
-                <div class="course-body">
-                    <div class="course-title">Python</div>
-                    <div class="course-desc">Learn programming fundamentals and variables, control flow, and loops with the world's most popular language.</div>
-                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-thumb thumb-python">&#x1F40D;</div>
+                    <div class="course-body">
+                        <div class="course-title">Python</div>
+                        <div class="course-desc">Learn programming fundamentals and variables, control flow, and loops
+                            with the world's most popular language.</div>
+                        <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-thumb thumb-html">&#x1F4C4;</div>
+                    <div class="course-body">
+                        <div class="course-title">HTML</div>
+                        <div class="course-desc">Create your first website with HTML, the building blocks of the web and
+                            structure for any modern site.</div>
+                        <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-thumb thumb-css">&#x1F3A8;</div>
+                    <div class="course-body">
+                        <div class="course-title">CSS</div>
+                        <div class="course-desc">Learn to use CSS creatively and properties to make your HTML pages look
+                            stunning.</div>
+                        <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-thumb thumb-js">&#x26A1;</div>
+                    <div class="course-body">
+                        <div class="course-title">JavaScript</div>
+                        <div class="course-desc">Learn variables, loops, functions and events to start building
+                            interactive dynamic web applications.</div>
+                        <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-thumb thumb-java">&#x2615;</div>
+                    <div class="course-body">
+                        <div class="course-title">Java</div>
+                        <div class="course-desc">Learn classes, inheritance, and object-oriented programming with one of
+                            the most trusted languages.</div>
+                        <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-thumb thumb-cpp">&#x2699;&#xFE0F;</div>
+                    <div class="course-body">
+                        <div class="course-title">C++</div>
+                        <div class="course-desc">Master pointers, memory, and performance with a language that powers
+                            games, systems, and engines.</div>
+                        <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+                    </div>
                 </div>
             </div>
-            <div class="course-card">
-                <div class="course-thumb thumb-html">&#x1F4C4;</div>
-                <div class="course-body">
-                    <div class="course-title">HTML</div>
-                    <div class="course-desc">Create your first website with HTML, the building blocks of the web and structure for any modern site.</div>
-                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+
+            <div class="explore-all">
+                <a href="pages/login.html">Explore All Courses &#x2192;</a>
+            </div>
+        </section>
+
+        <!-- ============ FEATURE ROWS ============ -->
+        <section class="section" id="features">
+
+            <div class="feature-row">
+                <div class="feature-visual visual-badges">
+                    <div class="badge-sprites">
+                        <span>&#x1F3C6;</span><span>&#x2B50;</span><span>&#x1F525;</span>
+                        <span>&#x1F389;</span><span>&#x1F48E;</span><span>&#x1F3AF;</span>
+                    </div>
+                </div>
+                <div class="feature-text">
+                    <h3>Level up your learning</h3>
+                    <p>Earn unique rewards, epic XP and badges as you level up. Start from any theme or role, track your
+                        streak, and celebrate every milestone along the way.</p>
                 </div>
             </div>
-            <div class="course-card">
-                <div class="course-thumb thumb-css">&#x1F3A8;</div>
-                <div class="course-body">
-                    <div class="course-title">CSS</div>
-                    <div class="course-desc">Learn to use CSS creatively and properties to make your HTML pages look stunning.</div>
-                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+
+            <div class="feature-row reverse">
+                <div class="feature-text">
+                    <h3>Practice your coding chops</h3>
+                    <p>Sharpen your skills with bite-sized coding challenges. Test what you've learned in the coding
+                        playground designed for beginners and advanced learners alike.</p>
+                </div>
+                <div class="feature-visual visual-game" style="font-size: 3rem;">
+                    &#x1F3AE;&#x1F4A3;&#x1F3C1;
                 </div>
             </div>
-            <div class="course-card">
-                <div class="course-thumb thumb-js">&#x26A1;</div>
-                <div class="course-body">
-                    <div class="course-title">JavaScript</div>
-                    <div class="course-desc">Learn variables, loops, functions and events to start building interactive dynamic web applications.</div>
-                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
+
+            <div class="feature-row">
+                <div class="feature-visual visual-portfolio" style="font-size: 3rem;">
+                    &#x1F680;&#x1F4BB;&#x2728;
+                </div>
+                <div class="feature-text">
+                    <h3>Build an awesome portfolio</h3>
+                    <p>Create your own creative websites, games, landing pages, and stand-alone apps. Start by mixing
+                        your creativity with code to build a portfolio you'll be proud of.</p>
                 </div>
             </div>
-            <div class="course-card">
-                <div class="course-thumb thumb-java">&#x2615;</div>
-                <div class="course-body">
-                    <div class="course-title">Java</div>
-                    <div class="course-desc">Learn classes, inheritance, and object-oriented programming with one of the most trusted languages.</div>
-                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
-                </div>
+
+
+        </section>
+
+        <!-- ============ FOOTER CTA ============ -->
+        <section class="footer-cta">
+            <h2>Start learning for free</h2>
+            <a href="pages/intro.html?to=register.html" class="btn-free">&#x1F3AE; Start Your Adventure</a>
+            <div class="footer-bottom">
+                &copy; 2026 CodeArena. Made with &#x2764;&#xFE0F; for learners everywhere.
             </div>
-            <div class="course-card">
-                <div class="course-thumb thumb-cpp">&#x2699;&#xFE0F;</div>
-                <div class="course-body">
-                    <div class="course-title">C++</div>
-                    <div class="course-desc">Master pointers, memory, and performance with a language that powers games, systems, and engines.</div>
-                    <a href="pages/login.html" class="course-btn">&#x25B6; LEARN</a>
-                </div>
-            </div>
-        </div>
+        </section>
 
-        <div class="explore-all">
-            <a href="pages/login.html">Explore All Courses &#x2192;</a>
-        </div>
-    </section>
+    </div>
 
-    <!-- ============ FEATURE ROWS ============ -->
-    <section class="section" id="features">
+    <script>
+        // ── Twinkling starfield (canvas) ──────────────────────────────────────────
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
 
-        <div class="feature-row">
-            <div class="feature-visual visual-badges">
-                <div class="badge-sprites">
-                    <span>&#x1F3C6;</span><span>&#x2B50;</span><span>&#x1F525;</span>
-                    <span>&#x1F389;</span><span>&#x1F48E;</span><span>&#x1F3AF;</span>
-                </div>
-            </div>
-            <div class="feature-text">
-                <h3>Level up your learning</h3>
-                <p>Earn unique rewards, epic XP and badges as you level up. Start from any theme or role, track your streak, and celebrate every milestone along the way.</p>
-            </div>
-        </div>
-
-        <div class="feature-row reverse">
-            <div class="feature-text">
-                <h3>Practice your coding chops</h3>
-                <p>Sharpen your skills with bite-sized coding challenges. Test what you've learned in the coding playground designed for beginners and advanced learners alike.</p>
-            </div>
-            <div class="feature-visual visual-game" style="font-size: 3rem;">
-                &#x1F3AE;&#x1F4A3;&#x1F3C1;
-            </div>
-        </div>
-
-        <div class="feature-row">
-            <div class="feature-visual visual-portfolio" style="font-size: 3rem;">
-                &#x1F680;&#x1F4BB;&#x2728;
-            </div>
-            <div class="feature-text">
-                <h3>Build an awesome portfolio</h3>
-                <p>Create your own creative websites, games, landing pages, and stand-alone apps. Start by mixing your creativity with code to build a portfolio you'll be proud of.</p>
-            </div>
-        </div>
-
-
-    </section>
-
-    <!-- ============ FOOTER CTA ============ -->
-    <section class="footer-cta">
-        <h2>Start learning for free</h2>
-        <a href="pages/intro.html?to=register.html" class="btn-free">&#x1F3AE; Start Your Adventure</a>
-        <div class="footer-bottom">
-            &copy; 2026 CodeArena. Made with &#x2764;&#xFE0F; for learners everywhere.
-        </div>
-    </section>
-
-</div>
-
-<script>
-    // ── Twinkling starfield (canvas) ──────────────────────────────────────────
-    const canvas = document.getElementById('starCanvas');
-    const ctx    = canvas.getContext('2d');
-
-    function resizeCanvas() {
-        canvas.width  = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const stars = Array.from({ length: 260 }, () => ({
-        x:     Math.random(),
-        y:     Math.random() * 0.78,   // cluster in upper sky
-        r:     Math.random() * 1.5 + 0.2,
-        phase: Math.random() * Math.PI * 2,
-        speed: Math.random() * 0.018 + 0.004,
-        // occasional slightly warm star
-        warm:  Math.random() < 0.15
-    }));
-
-    function drawStars() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const now = performance.now() * 0.001;
-        stars.forEach(s => {
-            s.phase += s.speed;
-            const opacity = 0.25 + 0.75 * Math.abs(Math.sin(s.phase));
-            const color = s.warm ? `rgba(255,230,180,${opacity})` : `rgba(220,235,255,${opacity})`;
-            ctx.beginPath();
-            ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-        });
-        requestAnimationFrame(drawStars);
-    }
-    drawStars();
-
-    // ── Shooting stars ────────────────────────────────────────────────────────
-    const heroEl = document.querySelector('.hero');
-    function launchShootingStar() {
-        const el = document.createElement('div');
-        el.className = 'shooting-star';
-        const w = Math.random() * 80 + 50;
-        el.style.width  = w + 'px';
-        el.style.top    = (Math.random() * 45 + 3) + '%';
-        el.style.left   = (Math.random() * 55 + 5) + '%';
-        const dur = (Math.random() * 0.8 + 0.5).toFixed(2);
-        el.style.animationDuration = dur + 's';
-        heroEl.appendChild(el);
-        setTimeout(() => el.remove(), +dur * 1000 + 200);
-    }
-    // First one fires quickly, then every 3–5 s
-    setTimeout(launchShootingStar, 600);
-    setInterval(launchShootingStar, 3800);
-    setTimeout(launchShootingStar, 2200);  // stagger a second one
-
-    // ── Floating code particles ───────────────────────────────────────────────
-    const symbols = ['{ }', '</>', '//', '=>', '&&', '++', '==', '01', '()', '[ ]', '!=', '**', '0x', '::'];
-    const palettes = [
-        'rgba(124, 58, 237, 0.50)',
-        'rgba(6,  182, 212, 0.45)',
-        'rgba(16, 185, 129, 0.40)',
-        'rgba(251,191,  36, 0.40)'
-    ];
-    for (let i = 0; i < 22; i++) {
-        const p = document.createElement('div');
-        p.className   = 'code-particle';
-        p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        p.style.left  = Math.random() * 100 + '%';
-        const dur     = Math.random() * 16 + 12;
-        p.style.animationDuration = dur + 's';
-        p.style.animationDelay    = -(Math.random() * dur) + 's';
-        p.style.fontSize          = (Math.random() * 0.5 + 0.6) + 'rem';
-        p.style.color             = palettes[Math.floor(Math.random() * palettes.length)];
-        heroEl.appendChild(p);
-    }
-
-    // ── Category tab switching ────────────────────────────────────────────────
-    document.querySelectorAll('.cat-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-        });
-    });
-
-    // ── Logged-in shortcut ────────────────────────────────────────────────────
-    try {
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (user && localStorage.getItem('token')) {
-            const loginLink  = document.querySelector('.btn-login');
-            const signupLink = document.querySelector('.btn-signup');
-            if (loginLink)  { loginLink.textContent = 'Dashboard'; loginLink.href = 'pages/dashboard.html'; }
-            if (signupLink) { signupLink.style.display = 'none'; }
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-    } catch (e) {}
-</script>
-<script src="../js/theme.js"></script>
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const stars = Array.from({ length: 260 }, () => ({
+            x: Math.random(),
+            y: Math.random() * 0.78,   // cluster in upper sky
+            r: Math.random() * 1.5 + 0.2,
+            phase: Math.random() * Math.PI * 2,
+            speed: Math.random() * 0.018 + 0.004,
+            // occasional slightly warm star
+            warm: Math.random() < 0.15
+        }));
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const now = performance.now() * 0.001;
+            stars.forEach(s => {
+                s.phase += s.speed;
+                const opacity = 0.25 + 0.75 * Math.abs(Math.sin(s.phase));
+                const color = s.warm ? `rgba(255,230,180,${opacity})` : `rgba(220,235,255,${opacity})`;
+                ctx.beginPath();
+                ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+        drawStars();
+
+        // ── Shooting stars ────────────────────────────────────────────────────────
+        const heroEl = document.querySelector('.hero');
+        function launchShootingStar() {
+            const el = document.createElement('div');
+            el.className = 'shooting-star';
+            const w = Math.random() * 80 + 50;
+            el.style.width = w + 'px';
+            el.style.top = (Math.random() * 45 + 3) + '%';
+            el.style.left = (Math.random() * 55 + 5) + '%';
+            const dur = (Math.random() * 0.8 + 0.5).toFixed(2);
+            el.style.animationDuration = dur + 's';
+            heroEl.appendChild(el);
+            setTimeout(() => el.remove(), +dur * 1000 + 200);
+        }
+        // First one fires quickly, then every 3–5 s
+        setTimeout(launchShootingStar, 600);
+        setInterval(launchShootingStar, 3800);
+        setTimeout(launchShootingStar, 2200);  // stagger a second one
+
+        // ── Floating code particles ───────────────────────────────────────────────
+        const symbols = ['{ }', '</>', '//', '=>', '&&', '++', '==', '01', '()', '[ ]', '!=', '**', '0x', '::'];
+        const palettes = [
+            'rgba(124, 58, 237, 0.50)',
+            'rgba(6,  182, 212, 0.45)',
+            'rgba(16, 185, 129, 0.40)',
+            'rgba(251,191,  36, 0.40)'
+        ];
+        for (let i = 0; i < 22; i++) {
+            const p = document.createElement('div');
+            p.className = 'code-particle';
+            p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            p.style.left = Math.random() * 100 + '%';
+            const dur = Math.random() * 16 + 12;
+            p.style.animationDuration = dur + 's';
+            p.style.animationDelay = -(Math.random() * dur) + 's';
+            p.style.fontSize = (Math.random() * 0.5 + 0.6) + 'rem';
+            p.style.color = palettes[Math.floor(Math.random() * palettes.length)];
+            heroEl.appendChild(p);
+        }
+
+        // ── Category tab switching ────────────────────────────────────────────────
+        document.querySelectorAll('.cat-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // ── Logged-in shortcut ────────────────────────────────────────────────────
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (user && localStorage.getItem('token')) {
+                const loginLink = document.querySelector('.btn-login');
+                const signupLink = document.querySelector('.btn-signup');
+                if (loginLink) { loginLink.textContent = 'Dashboard'; loginLink.href = 'pages/dashboard.html'; }
+                if (signupLink) { signupLink.style.display = 'none'; }
+            }
+        } catch (e) { }
+    </script>
+    <script src="../js/theme.js"></script>
 </body>
+
 </html>
