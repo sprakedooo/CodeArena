@@ -195,11 +195,13 @@ router.get('/mine', async (req, res) => {
                 `SELECT c.*,
                     COUNT(DISTINCT e.student_id)   AS studentCount,
                     COUNT(DISTINCT l.lesson_id)    AS lessonCount,
-                    COUNT(DISTINCT q.question_id)  AS questionCount
+                    COUNT(DISTINCT q.question_id)  AS questionCount,
+                    COUNT(DISTINCT s.session_id)   AS session_count
                  FROM classrooms c
                  LEFT JOIN classroom_enrollments e  ON e.classroom_id = c.classroom_id AND e.status = 'active'
                  LEFT JOIN classroom_lessons l      ON l.classroom_id = c.classroom_id
                  LEFT JOIN classroom_questions q    ON q.classroom_id = c.classroom_id
+                 LEFT JOIN classroom_sessions s     ON s.classroom_id = c.classroom_id
                  WHERE c.faculty_id = ?
                  GROUP BY c.classroom_id
                  ORDER BY c.created_at DESC`,
@@ -217,7 +219,8 @@ router.get('/mine', async (req, res) => {
             ...c,
             studentCount:  mockEnrollments.filter(e => e.classroomId === c.id && e.status === 'active').length,
             lessonCount:   mockClLessons.filter(l => l.classroomId === c.id).length,
-            questionCount: mockClQuestions.filter(q => q.classroomId === c.id).length
+            questionCount: mockClQuestions.filter(q => q.classroomId === c.id).length,
+            session_count: mockClSessions.filter(s => s.classroomId === c.id).length
         }));
     res.json({ success: true, classrooms, source: 'mock' });
 });

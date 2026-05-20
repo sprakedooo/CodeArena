@@ -22,7 +22,6 @@ const PORT = process.env.PORT || 3001;
 // Serve static files from frontend directory
 app.use('/css',    express.static(path.join(__dirname, 'css')));
 app.use('/js',     express.static(path.join(__dirname, 'js')));
-app.use('/pages',  express.static(path.join(__dirname, 'pages')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Also serve pages/ at root so relative links (login.html, dashboard.html, etc.)

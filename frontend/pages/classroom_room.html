@@ -1190,11 +1190,11 @@ function showQuestion() {
 
 function parseOptions(q) {
     try {
-        if (Array.isArray(q.options)) return q.options;
-        if (q.options_json) return JSON.parse(q.options_json);
-        if (Array.isArray(q.choices)) return q.choices;
+        if (Array.isArray(q.options) && q.options.length)     return q.options;
+        if (q.options_json) { const p = JSON.parse(q.options_json); if (p && p.length) return p; }
+        if (Array.isArray(q.choices) && q.choices.length)     return q.choices;
     } catch {}
-    return ['Option A','Option B','Option C','Option D'];
+    return ['Option A', 'Option B', 'Option C', 'Option D'];
 }
 
 function startTimer() {
@@ -1218,12 +1218,26 @@ function autoWrong() {
     document.getElementById('nextQBtn').style.display = 'block';
 }
 
+function matchesCorrectAnswer(selected, correctAns) {
+    const sel     = selected.trim();
+    const correct = correctAns.trim();
+    if (!correct) return false;
+    if (sel === correct) return true;
+    // Faculty stored just a letter "A"/"B"/"C"/"D" → match if option starts with that letter
+    if (/^[A-Da-d]$/.test(correct)) {
+        return sel.toUpperCase().startsWith(correct.toUpperCase() + ')');
+    }
+    // Strip "A) " prefix from both sides and compare plain text
+    const strip = s => s.replace(/^[A-D]\)\s*/i, '').trim();
+    return strip(sel) === strip(correct);
+}
+
 async function selectOption(btn, selected, correctAns, questionId) {
     if (answered) return;
     answered = true;
     clearInterval(timerInt);
 
-    const isCorrect = selected.trim() === correctAns.trim();
+    const isCorrect = matchesCorrectAnswer(selected, correctAns);
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
     document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
 

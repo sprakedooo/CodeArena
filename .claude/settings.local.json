@@ -38,7 +38,8 @@
       "Bash(findstr \"LISTENING\")",
       "Bash(findstr \":300\")",
       "Read(//c/Users/jubil/ai-cai-system/**)",
-      "Bash(mysql -u root -pgigatt0702 codearena)"
+      "Bash(mysql -u root -pgigatt0702 codearena)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const html=fs.readFileSync\\('C:/Users/jubil/ai-cai-system/frontend/pages/classroom_manage.html','utf8'\\); console.log\\('File size:', html.length, 'chars'\\); console.log\\('Has spOverlay:', html.includes\\('id=\\\\\"spOverlay\\\\\"'\\)\\); console.log\\('Has viewStudentProfile:', html.includes\\('viewStudentProfile'\\)\\); console.log\\('Has renderSpAchievements:', html.includes\\('renderSpAchievements'\\)\\); console.log\\('Has renderSpCertificates:', html.includes\\('renderSpCertificates'\\)\\); console.log\\('Profile button count:', \\(html.match\\(/Profile/g\\)||[]\\).length\\);\")"
     ]
   }
 }
