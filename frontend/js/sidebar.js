@@ -7,14 +7,27 @@
  */
 
 (function () {
-    // ── 0. Global 401 intercept — force re-login on expired/invalid token ─────
+    // ── 0. Global 401 intercept — redirect only when the JWT is truly expired ───
+    function isTokenExpired() {
+        const token = localStorage.getItem('token');
+        if (!token) return true;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // exp is in seconds; Date.now() is ms
+            return payload.exp && (payload.exp * 1000) < Date.now();
+        } catch (_) {
+            return false; // can't decode → don't assume expired
+        }
+    }
+
     const _origFetch = window.fetch.bind(window);
     window.fetch = function(...args) {
         return _origFetch(...args).then(resp => {
             if (resp.status === 401) {
-                // Only redirect if we're not already on an auth page
                 const onAuthPage = /\/(login|register|oauth-callback)\.html/.test(location.pathname);
-                if (!onAuthPage) {
+                // Only force logout if the token is genuinely missing or expired.
+                // A 401 from a permission-denied resource (wrong role, etc.) should NOT log you out.
+                if (!onAuthPage && isTokenExpired()) {
                     localStorage.removeItem('user');
                     localStorage.removeItem('token');
                     localStorage.removeItem('isLoggedIn');
