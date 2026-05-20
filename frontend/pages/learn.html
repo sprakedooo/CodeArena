@@ -454,6 +454,16 @@ document.getElementById('searchInput').addEventListener('input', e => {
     }, 260);
 });
 
+// Pre-populate search from sidebar global search (e.g. learn.html?q=loops)
+(function applyUrlSearch() {
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) {
+        const input = document.getElementById('searchInput');
+        input.value  = q;
+        searchQuery  = q.trim();
+    }
+})();
+
 load();
 </script>
 </body>

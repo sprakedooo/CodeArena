@@ -216,6 +216,36 @@
             .lesson-article-footer { padding-left: 1.25rem; padding-right: 1.25rem; }
             .lesson-title { font-size: 1.3rem; }
         }
+    /* ── Lesson Certificate overlay ─────────────────────────────────── */
+    .lv-cert-overlay {
+        position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:9000;
+        display:none; align-items:center; justify-content:center;
+        padding:1rem; backdrop-filter:blur(6px);
+    }
+    .lv-cert-overlay.open { display:flex; }
+    .lv-cert-wrap  { width:100%; max-width:660px; }
+    .lv-cert-actions { display:flex; gap:.5rem; justify-content:flex-end; margin-bottom:.65rem; }
+    .lv-certificate {
+        background:#fff; border-radius:14px; padding:2.75rem 3.25rem;
+        text-align:center; color:#1a1a2e; position:relative;
+        box-shadow:0 24px 64px rgba(0,0,0,.5);
+    }
+    .lv-cert-accent { position:absolute; left:14px; right:14px; height:4px; border-radius:2px; background:linear-gradient(90deg,#7c3aed,#06b6d4,#10b981); }
+    .lv-cert-accent.top{top:14px;} .lv-cert-accent.bot{bottom:14px;}
+    .lv-cert-logo img { height:54px; margin-bottom:.4rem; }
+    .lv-cert-headline { font-family:'Press Start 2P',monospace; font-size:.6rem; color:#7c3aed; letter-spacing:2px; margin:.6rem 0 .4rem; }
+    .lv-cert-sub    { font-size:.82rem; color:#6b7280; margin-bottom:.4rem; }
+    .lv-cert-name   { font-size:1.85rem; font-weight:800; color:#111827; font-style:italic; border-bottom:2px solid #e5e7eb; padding-bottom:.45rem; margin:.6rem 2.5rem .8rem; }
+    .lv-cert-body   { font-size:.88rem; color:#4b5563; margin:.6rem 0 .25rem; }
+    .lv-cert-course { font-size:1.25rem; font-weight:800; color:#7c3aed; margin:.2rem 0 .8rem; }
+    .lv-cert-pill   { display:inline-block; background:linear-gradient(135deg,#7c3aed,#06b6d4); color:#fff; padding:.4rem 1.4rem; border-radius:30px; font-size:.88rem; font-weight:700; margin-bottom:1.4rem; }
+    .lv-cert-stats  { display:flex; justify-content:center; gap:2.5rem; margin-bottom:1.2rem; }
+    .lv-cert-stat-v { font-size:1.3rem; font-weight:800; color:#111827; display:block; }
+    .lv-cert-stat-l { font-size:.68rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; }
+    .lv-cert-issued { font-size:.78rem; color:#9ca3af; margin-bottom:1.4rem; }
+    .lv-cert-footer { display:flex; justify-content:center; }
+    .lv-cert-sig-l  { font-size:.95rem; font-weight:700; color:#1a1a2e; border-top:1px solid #e5e7eb; padding-top:.4rem; }
+    .lv-cert-sig-s  { font-size:.7rem; color:#9ca3af; }
     </style>
 </head>
 <body>
@@ -479,15 +509,15 @@ async function markComplete() {
             if (!data.alreadyCompleted) {
                 // Refresh path progress bar
                 loadPathProgress(lessonData.path_id, token);
-            }
-
-            // Auto-advance to next lesson after 1.5s if available
-            if (nextLesson) {
+                // Show certificate for first-time completion
+                setTimeout(() => showLessonCertificate(), 600);
+            } else if (nextLesson) {
+                // Already completed — just offer to advance
                 setTimeout(() => {
                     if (confirm(`Lesson complete! 🎉 Move on to "${nextLesson.title}"?`)) {
                         goLesson('next');
                     }
-                }, 1600);
+                }, 400);
             }
         } else {
             btn.disabled  = false;
@@ -559,7 +589,108 @@ function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 function escHtml(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ── Lesson Certificate ────────────────────────────────────────────────────────
+function showLessonCertificate() {
+    const user       = JSON.parse(localStorage.getItem('user') || '{}');
+    const studentName= user.fullName || user.full_name || user.name || 'Student';
+    const dateStr    = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+    const title      = lessonData?.title  || 'Lesson';
+    const language   = lessonData?.language || '';
+    const langDisp   = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' }[language] || 'Programming';
+    const pathTitle  = lessonData?.path_title || (langDisp + ' Path');
+
+    document.getElementById('lvCertStudent').textContent = studentName;
+    document.getElementById('lvCertCourse').textContent  = title;
+    document.getElementById('lvCertPill').textContent    = '📖 Lesson Completed';
+    document.getElementById('lvCertLangDisp').textContent= langDisp;
+    document.getElementById('lvCertPath').textContent    = pathTitle;
+    document.getElementById('lvCertDate').textContent    = 'Issued on ' + dateStr;
+
+    // Persist
+    try {
+        const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
+        const alreadySaved = certs.some(c => c.lessonId === lessonData?.lesson_id);
+        if (!alreadySaved) {
+            certs.push({
+                id: Date.now(), lessonId: lessonData?.lesson_id,
+                type: 'lesson', course: title, lang: language, language: langDisp,
+                mastery: 'Completed', masteryLevel: 'Completed',
+                path: pathTitle, dateStr, earnedAt: new Date().toISOString()
+            });
+            localStorage.setItem('certificates', JSON.stringify(certs));
+        }
+    } catch(_) {}
+
+    document.getElementById('lvCertOverlay').classList.add('open');
+}
+function closeLvCert() { document.getElementById('lvCertOverlay').classList.remove('open'); }
+function printLvCert() {
+    const cert = document.getElementById('lvCertContent');
+    if (!cert) return;
+    const win = window.open('', '_blank', 'width=780,height=700');
+    win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><title>CodeArena Certificate</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;display:flex;justify-content:center;padding:2rem;font-family:'Inter',sans-serif}
+  .lv-certificate{background:#fff;border-radius:14px;padding:2.75rem 3.25rem;text-align:center;color:#1a1a2e;position:relative;border:2px solid #7c3aed;max-width:660px;width:100%}
+  .lv-cert-accent{position:absolute;left:14px;right:14px;height:4px;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4,#10b981)}
+  .lv-cert-accent.top{top:14px}.lv-cert-accent.bot{bottom:14px}
+  .lv-cert-logo img{height:54px;margin-bottom:.4rem}
+  .lv-cert-headline{font-family:'Press Start 2P',monospace;font-size:.6rem;color:#7c3aed;letter-spacing:2px;margin:.6rem 0 .4rem}
+  .lv-cert-sub{font-size:.82rem;color:#6b7280;margin-bottom:.4rem}
+  .lv-cert-name{font-size:1.85rem;font-weight:800;color:#111827;font-style:italic;border-bottom:2px solid #e5e7eb;padding-bottom:.45rem;margin:.6rem 2.5rem .8rem}
+  .lv-cert-body{font-size:.88rem;color:#4b5563;margin:.6rem 0 .25rem}
+  .lv-cert-course{font-size:1.25rem;font-weight:800;color:#7c3aed;margin:.2rem 0 .8rem}
+  .lv-cert-pill{display:inline-block;background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff;padding:.4rem 1.4rem;border-radius:30px;font-size:.88rem;font-weight:700;margin-bottom:1.4rem}
+  .lv-cert-stats{display:flex;justify-content:center;gap:2.5rem;margin-bottom:1.2rem}
+  .lv-cert-stat-v{font-size:1.3rem;font-weight:800;color:#111827;display:block}
+  .lv-cert-stat-l{font-size:.68rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px}
+  .lv-cert-issued{font-size:.78rem;color:#9ca3af;margin-bottom:1.4rem}
+  .lv-cert-footer{display:flex;justify-content:center}
+  .lv-cert-sig-l{font-size:.95rem;font-weight:700;color:#1a1a2e;border-top:1px solid #e5e7eb;padding-top:.4rem}
+  .lv-cert-sig-s{font-size:.7rem;color:#9ca3af}
+</style>
+</head><body>${cert.outerHTML}</body></html>`);
+    win.document.close(); win.focus();
+    setTimeout(() => win.print(), 600);
+}
 </script>
+
+<!-- ── Lesson Certificate Overlay ──────────────────────────────────────── -->
+<div class="lv-cert-overlay" id="lvCertOverlay" onclick="if(event.target===this)closeLvCert()">
+    <div class="lv-cert-wrap">
+        <div class="lv-cert-actions">
+            <button onclick="printLvCert()" class="btn btn-secondary" style="font-size:.8rem;">🖨️ Print / Save PDF</button>
+            <button onclick="closeLvCert()"  class="btn btn-secondary" style="font-size:.8rem;">✕ Close</button>
+        </div>
+        <div class="lv-certificate" id="lvCertContent">
+            <div class="lv-cert-accent top"></div>
+            <div class="lv-cert-logo"><img src="../assets/codearena-logo.png" alt="CodeArena" onerror="this.style.display='none'"></div>
+            <div class="lv-cert-headline">Certificate of Completion</div>
+            <div class="lv-cert-sub">This is to certify that</div>
+            <div class="lv-cert-name" id="lvCertStudent">—</div>
+            <div class="lv-cert-body">has successfully completed the lesson</div>
+            <div class="lv-cert-course" id="lvCertCourse">—</div>
+            <div class="lv-cert-pill" id="lvCertPill">📖 Lesson Completed</div>
+            <div class="lv-cert-stats">
+                <div><span class="lv-cert-stat-v" id="lvCertLangDisp">—</span><span class="lv-cert-stat-l">Language</span></div>
+                <div><span class="lv-cert-stat-v" id="lvCertPath">—</span><span class="lv-cert-stat-l">Learning Path</span></div>
+            </div>
+            <div class="lv-cert-issued" id="lvCertDate">—</div>
+            <div class="lv-cert-footer">
+                <div>
+                    <div class="lv-cert-sig-l">CodeArena Platform</div>
+                    <div class="lv-cert-sig-s">AI-Powered Programming Education</div>
+                </div>
+            </div>
+            <div class="lv-cert-accent bot"></div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 

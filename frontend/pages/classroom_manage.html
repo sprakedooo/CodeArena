@@ -361,6 +361,72 @@
         .level-badge-sm.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
         .level-badge-sm.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
         .level-badge-sm.advanced     { background:rgba(239,68,68,.12);   color:var(--danger);   border:1px solid rgba(239,68,68,.22); }
+        /* ── Student Profile Modal ─────────────────────────────────────── */
+        .sp-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:900;
+            display:flex; align-items:center; justify-content:center; padding:1rem;
+            backdrop-filter:blur(4px); display:none;
+        }
+        .sp-modal {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:16px; width:100%; max-width:520px; max-height:90vh;
+            overflow-y:auto; padding:0; position:relative;
+        }
+        .sp-header {
+            background:linear-gradient(135deg,#1e1040,#2d1b69);
+            border-radius:16px 16px 0 0; padding:1.5rem 1.75rem;
+            display:flex; align-items:center; gap:1.1rem; position:relative;
+        }
+        .sp-avatar {
+            width:64px; height:64px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.5rem; font-weight:800; color:#fff;
+            border:3px solid rgba(255,255,255,.15);
+        }
+        .sp-name   { font-size:1.15rem; font-weight:700; color:#fff; margin:0 0 .2rem; }
+        .sp-email  { font-size:.78rem; color:rgba(255,255,255,.5); }
+        .sp-close  {
+            position:absolute; top:.75rem; right:.75rem;
+            background:rgba(255,255,255,.1); border:none; border-radius:8px;
+            width:30px; height:30px; cursor:pointer; color:#fff; font-size:.85rem;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .sp-close:hover { background:rgba(255,255,255,.2); }
+        .sp-body   { padding:1.5rem 1.75rem; }
+        .sp-section-title {
+            font-size:.68rem; font-weight:700; text-transform:uppercase;
+            letter-spacing:1px; color:var(--text-muted); margin:1.2rem 0 .65rem;
+            display:flex; align-items:center; gap:.35rem;
+        }
+        .sp-section-title:first-child { margin-top:0; }
+        .sp-stats-row  { display:flex; gap:.75rem; flex-wrap:wrap; margin-bottom:.5rem; }
+        .sp-stat-chip  {
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:10px; padding:.65rem .9rem; text-align:center; flex:1; min-width:80px;
+        }
+        .sp-stat-val { font-size:1.1rem; font-weight:800; color:var(--text); display:block; }
+        .sp-stat-lbl { font-size:.62rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; }
+        .sp-ach-grid { display:flex; flex-wrap:wrap; gap:.5rem; }
+        .sp-ach-chip {
+            display:flex; align-items:center; gap:.4rem;
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:8px; padding:.38rem .7rem; font-size:.78rem; color:var(--text-muted);
+            opacity:.45; transition:opacity .15s;
+        }
+        .sp-ach-chip.earned { opacity:1; color:var(--text); border-color:rgba(124,58,237,.35); background:rgba(124,58,237,.08); }
+        .sp-stat-chip span { font-size:1.05rem; font-weight:800; color:var(--text); display:block; }
+        .sp-stat-chip small { font-size:.6rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; }
+        .sp-cert-row {
+            display:flex; align-items:center; gap:.75rem; padding:.65rem .8rem;
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:10px; margin-bottom:.5rem;
+        }
+        .sp-cert-icon { font-size:1.4rem; flex-shrink:0; }
+        .sp-cert-title { font-size:.85rem; font-weight:600; color:var(--text); }
+        .sp-cert-meta  { font-size:.72rem; color:var(--text-muted); margin-top:.1rem; }
+        .sp-empty { text-align:center; font-size:.8rem; color:var(--text-muted); padding:.75rem 0; }
+
         .ai-insight-btn {
             display:flex; align-items:center; gap:6px; margin-top:12px; width:100%;
             background:rgba(124,58,237,.07); border:1px dashed rgba(124,58,237,.3);
@@ -680,6 +746,51 @@
     </div>
 
 </main>
+
+<!-- ══ STUDENT PROFILE MODAL ═════════════════════════════════════════════ -->
+<div class="sp-overlay" id="spOverlay" onclick="closeStudentProfile(event)">
+    <div class="sp-modal" onclick="event.stopPropagation()">
+        <div class="sp-header">
+            <div class="sp-avatar" id="spAvatar">?</div>
+            <div class="sp-info">
+                <div class="sp-name" id="spName">—</div>
+                <div class="sp-email" id="spEmail">—</div>
+                <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;" id="spBadgeRow"></div>
+            </div>
+            <button class="sp-close" onclick="document.getElementById('spOverlay').style.display='none'">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="sp-body">
+            <!-- Game Stats -->
+            <div class="sp-section-title">
+                <span class="material-symbols-outlined" style="font-size:1rem;">sports_esports</span> Game Stats
+            </div>
+            <div class="sp-stats-row" id="spStatsRow">
+                <div class="sp-stat-chip"><span id="spAccuracy">0%</span><small>Accuracy</small></div>
+                <div class="sp-stat-chip"><span id="spAnswered">0</span><small>Answered</small></div>
+                <div class="sp-stat-chip"><span id="spLevel">—</span><small>Level</small></div>
+                <div class="sp-stat-chip"><span id="spXP">—</span><small>XP</small></div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="sp-section-title" style="margin-top:1.1rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">military_tech</span> Arena Achievements
+            </div>
+            <div class="sp-ach-grid" id="spAchGrid">
+                <div class="sp-empty">Loading achievements…</div>
+            </div>
+
+            <!-- Certificates -->
+            <div class="sp-section-title" style="margin-top:1.1rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">workspace_premium</span> Certificates
+            </div>
+            <div id="spCertList">
+                <div class="sp-empty">Loading certificates…</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ══ DELETE CLASSROOM MODAL ════════════════════════════════════════════ -->
 <div class="delete-modal-overlay" id="deleteClassroomModal">
@@ -1126,9 +1237,14 @@
                     <div class="people-stat"><span class="people-stat-val">${relativeTime(s.enrolledAt||s.enrolled_at)}</span><span class="people-stat-label">Joined</span></div>
                 </div>
                 <span class="level-badge-sm ${level}">${level}</span>
-                <button class="ai-insight-btn" onclick="getStudentAIInsight('${s.id||s.student_id||s.user_id}','${escHtml(name)}',${acc},${qs},'${level}')">
-                    <span class="ai-btn-icon">✦</span> AI Insight
-                </button>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button class="ai-insight-btn" style="margin-top:0;flex:1;" onclick="getStudentAIInsight('${s.id||s.student_id||s.user_id}','${escHtml(name)}',${acc},${qs},'${level}')">
+                        <span class="ai-btn-icon">✦</span> AI Insight
+                    </button>
+                    <button class="ai-insight-btn" style="margin-top:0;flex:1;background:rgba(6,182,212,.07);border-color:rgba(6,182,212,.3);color:var(--secondary);" onclick="viewStudentProfile('${s.id||s.student_id||s.user_id}','${escHtml(name)}','${escHtml(s.email||'')}',${acc},${qs},'${level}')">
+                        <span class="material-symbols-outlined" style="font-size:.9rem;">person</span> Profile
+                    </button>
+                </div>
                 <div class="ai-insight-panel" id="ai-insight-${s.id||s.student_id||s.user_id}"></div>
             </div>`;
         }).join('');
@@ -1171,6 +1287,114 @@
             await fetch(`${API}/classrooms/${classroomId}/students/${studentId}`, {method:'DELETE',headers:getAuthHeaders()});
             loadStudents();
         } catch { alert('Failed to remove student.'); }
+    }
+
+    // ── Student Profile Modal ─────────────────────────────────────────────────
+    const ARENA_ACHIEVEMENTS_SP = [
+        {id:'arena_first',    icon:'🎮', name:'First Arena',    desc:'Complete your first game'},
+        {id:'arena_perfect',  icon:'💯', name:'Perfect Game',   desc:'100% accuracy in a game'},
+        {id:'arena_streak5',  icon:'🔥', name:'On Fire',        desc:'5-answer streak'},
+        {id:'arena_streak10', icon:'⚡', name:'Lightning',      desc:'10-answer streak'},
+        {id:'arena_bigbrain', icon:'🧠', name:'Big Brain',      desc:'80%+ accuracy, 10+ questions'},
+        {id:'arena_diamond',  icon:'💎', name:'Diamond',        desc:'90%+ accuracy, 15+ questions'},
+        {id:'arena_veteran',  icon:'🏆', name:'Veteran',        desc:'Complete 10 games'},
+        {id:'arena_python',   icon:'🐍', name:'Pythonista',     desc:'Complete a Python game'},
+        {id:'arena_js',       icon:'⚙️', name:'JS Hacker',      desc:'Complete a JavaScript game'},
+        {id:'arena_java',     icon:'☕', name:'Java Brew',      desc:'Complete a Java game'},
+        {id:'arena_cpp',      icon:'⚔️', name:'C++ Warrior',    desc:'Complete a C++ game'},
+        {id:'arena_polyglot', icon:'🌐', name:'Polyglot',       desc:'Complete games in 3+ languages'},
+    ];
+
+    const MASTERY_COLOR = { Expert:'#fbbf24', Proficient:'#10b981', Competent:'#06b6d4' };
+
+    function closeStudentProfile(e) {
+        if (e.target === document.getElementById('spOverlay'))
+            document.getElementById('spOverlay').style.display = 'none';
+    }
+
+    async function viewStudentProfile(studentId, name, email, acc, qs, level) {
+        // Populate static info immediately
+        document.getElementById('spAvatar').textContent = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() || '?';
+        document.getElementById('spName').textContent   = name;
+        document.getElementById('spEmail').textContent  = email || '—';
+        document.getElementById('spAccuracy').textContent = acc + '%';
+        document.getElementById('spAnswered').textContent  = qs;
+        document.getElementById('spLevel').textContent     = level;
+        document.getElementById('spXP').textContent        = '…';
+
+        // Badge row: mastery level chip
+        const lvlColors = {beginner:'var(--success)',intermediate:'var(--warning)',advanced:'var(--danger)'};
+        document.getElementById('spBadgeRow').innerHTML =
+            `<span style="font-size:.7rem;padding:3px 9px;border-radius:20px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--primary);">
+                ${level.charAt(0).toUpperCase()+level.slice(1)}
+             </span>`;
+
+        // Reset dynamic sections
+        document.getElementById('spAchGrid').innerHTML  = '<div class="sp-empty">Loading…</div>';
+        document.getElementById('spCertList').innerHTML = '<div class="sp-empty">Loading…</div>';
+
+        // Show overlay
+        document.getElementById('spOverlay').style.display = 'flex';
+
+        // Fetch XP from rewards API
+        try {
+            const res  = await fetch(`${API}/rewards/${studentId}`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            if (data.totalPoints !== undefined) {
+                document.getElementById('spXP').textContent = data.totalPoints + ' XP';
+            } else { document.getElementById('spXP').textContent = '—'; }
+        } catch { document.getElementById('spXP').textContent = '—'; }
+
+        // Achievements: stored client-side in localStorage — works when student uses the same browser
+        // For a multi-device setup, these would come from a DB. For thesis prototype, localStorage is acceptable.
+        const earned = JSON.parse(localStorage.getItem(`earnedAchievements_${studentId}`) ||
+                                  localStorage.getItem('earnedAchievements') || '[]').map(a => a.id || a);
+        renderSpAchievements(earned);
+
+        // Certificates: same localStorage fallback
+        const certs = JSON.parse(localStorage.getItem(`certificates_${studentId}`) ||
+                                 localStorage.getItem('certificates') || '[]');
+        renderSpCertificates(certs);
+    }
+
+    function renderSpAchievements(earnedIds) {
+        const grid = document.getElementById('spAchGrid');
+        if (!earnedIds.length) {
+            grid.innerHTML = '<div class="sp-empty">No achievements yet.</div>';
+            return;
+        }
+        grid.innerHTML = ARENA_ACHIEVEMENTS_SP.map(a => {
+            const has = earnedIds.includes(a.id);
+            return `<div class="sp-ach-chip ${has?'earned':''}" title="${a.desc}">
+                <span>${a.icon}</span>
+                <span style="font-size:.68rem;line-height:1.2;">${a.name}</span>
+            </div>`;
+        }).join('');
+    }
+
+    function renderSpCertificates(certs) {
+        const el = document.getElementById('spCertList');
+        if (!certs.length) {
+            el.innerHTML = '<div class="sp-empty">No certificates earned yet.</div>';
+            return;
+        }
+        const masteryColor = { Expert:'#fbbf24', Proficient:'#10b981', Competent:'#06b6d4' };
+        el.innerHTML = [...certs].reverse().map(c => {
+            const mastery = c.mastery || c.masteryLevel || '';
+            const color   = masteryColor[mastery] || 'var(--text-muted)';
+            const lang    = c.lang || c.language || '—';
+            const score   = c.score !== undefined ? c.score : (c.finalScore || '—');
+            const date    = c.issuedAt ? new Date(c.issuedAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—';
+            return `<div class="sp-cert-row">
+                <div class="sp-cert-icon">🏅</div>
+                <div>
+                    <div class="sp-cert-title">${escHtml(c.course||c.language||lang)} — ${mastery||'Certificate'}
+                        <span style="font-size:.68rem;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid ${color};color:${color};margin-left:6px;">${mastery}</span>
+                    </div>
+                    <div class="sp-cert-meta">Score: ${score} &nbsp;|&nbsp; ${lang.toUpperCase()} &nbsp;|&nbsp; ${date}</div>
+                </div>
+            </div>`;
+        }).join('');
     }
 
     // ── Lessons ───────────────────────────────────────────────────────────────

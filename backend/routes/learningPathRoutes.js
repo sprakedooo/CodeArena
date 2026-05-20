@@ -69,7 +69,7 @@ router.get('/', authMiddleware, async (req, res) => {
         res.json({ success: true, paths: result });
     } catch (err) {
         console.error('[Paths] GET / error:', err.message);
-        res.status(500).json({ error: err.message });
+        res.json({ success: false, paths: [] }); // graceful empty list
     }
 });
 
@@ -80,7 +80,13 @@ router.get('/progress/me', authMiddleware, async (req, res) => {
         await sendProgressSummary(req.user.id, res);
     } catch (err) {
         console.error('[Paths] progress/me error:', err.message);
-        res.status(500).json({ error: err.message });
+        // Graceful fallback so dashboard/profile/feedback pages don't crash
+        res.json({
+            success: false,
+            paths: [], completedLessons: 0, weakTopics: [],
+            user: { id: req.user.id, fullName: req.user.fullName, total_xp: 0, streak: 0 },
+            overall: { totalQuestions: 0, totalCorrect: 0, accuracy: 0 }
+        });
     }
 });
 

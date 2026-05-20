@@ -1192,11 +1192,11 @@ router.get('/', async (req, res) => {
         const dbQuestions = await dbService.getQuestions(language.toLowerCase(), targetLevel.toLowerCase());
         if (dbQuestions && dbQuestions.length > 0) {
             questionsForStudent = dbQuestions.map(q => ({
-                id: q.id,
-                question: q.question,
-                options: q.options || [],
-                topic: q.topic,
-                level: q.level
+                id: q.id, question: q.question, options: q.options || [],
+                topic: q.topic, level: q.level, correctAnswer: q.correctAnswer,
+                hint: q.hint, explanation: q.explanation,
+                questionType: q.questionType || 'multiple_choice',
+                codeSnippet: q.codeSnippet || null
             }));
         }
     }
@@ -1206,13 +1206,13 @@ router.get('/', async (req, res) => {
         const filteredQuestions = questionBank.filter(
             q => q.language === language.toLowerCase() && q.level === targetLevel.toLowerCase()
         );
-
         questionsForStudent = filteredQuestions.map(q => ({
-            id: q.id,
-            question: q.question,
-            options: q.options,
-            topic: q.topic,
-            level: q.level
+            id: q.id, question: q.question, options: q.options || [],
+            topic: q.topic, level: q.level, correctAnswer: q.correctAnswer,
+            hint: q.hint, explanation: q.explanation,
+            questionType: q.questionType || 'multiple_choice',
+            codeSnippet: q.codeSnippet || null,
+            codeLines: q.codeLines || null, correctOrder: q.correctOrder || null
         }));
     }
 
@@ -1222,6 +1222,57 @@ router.get('/', async (req, res) => {
         level: targetLevel,
         totalQuestions: questionsForStudent.length,
         questions: questionsForStudent
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: Get Single Question  (MUST be before /:language/:level)
+// GET /api/questions/id/:id
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/id/:id', (req, res) => {
+    const questionId = parseInt(req.params.id);
+    const question = questionBank.find(q => q.id === questionId);
+    if (!question) return res.status(404).json({ success: false, message: 'Question not found' });
+    res.json({
+        success: true,
+        question: {
+            id: question.id, question: question.question, options: question.options,
+            topic: question.topic, level: question.level, language: question.language,
+            correctAnswer: question.correctAnswer, hint: question.hint,
+            questionType: question.questionType || 'multiple_choice',
+            codeSnippet: question.codeSnippet || null
+        }
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTE: Get Next Adaptive Question  (MUST be before /:language/:level)
+// GET /api/questions/next/:userId
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/next/:userId', (req, res) => {
+    const userId = parseInt(req.params.userId);
+    const { language } = req.query;
+    if (!language) return res.status(400).json({ success: false, message: 'Language query parameter required' });
+
+    // Resolve actual user level from progressRoutes in-memory store
+    const progressRoutes = require('./progressRoutes');
+    const userLangProgress = progressRoutes.userProgress?.[userId]?.[language.toLowerCase()];
+    const userLevel = userLangProgress?.level || 'beginner';
+
+    const availableQuestions = questionBank.filter(
+        q => q.language === language.toLowerCase() && q.level === userLevel
+    );
+    if (availableQuestions.length === 0) {
+        return res.json({ success: false, message: 'No questions available for this language and level' });
+    }
+    const q = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    res.json({
+        success: true,
+        question: {
+            id: q.id, question: q.question, options: q.options, topic: q.topic,
+            level: q.level, correctAnswer: q.correctAnswer, hint: q.hint,
+            questionType: q.questionType || 'multiple_choice', codeSnippet: q.codeSnippet || null
+        }
     });
 });
 
@@ -1296,93 +1347,6 @@ router.get('/:language/:level', async (req, res) => {
         level: level,
         totalQuestions: questionsForStudent.length,
         questions: questionsForStudent
-    });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get Single Question
-// GET /api/questions/id/:id
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Retrieves a specific question by ID
- * Used during game play
- */
-router.get('/id/:id', (req, res) => {
-    const questionId = parseInt(req.params.id);
-
-    const question = questionBank.find(q => q.id === questionId);
-
-    if (!question) {
-        return res.status(404).json({
-            success: false,
-            message: 'Question not found'
-        });
-    }
-
-    // Return question without answer
-    res.json({
-        success: true,
-        question: {
-            id: question.id,
-            question: question.question,
-            options: question.options,
-            topic: question.topic,
-            level: question.level,
-            language: question.language
-        }
-    });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get Next Adaptive Question
-// GET /api/questions/next/:userId
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Gets the next appropriate question based on user's current level
- * This demonstrates the ADAPTIVE feature
- */
-router.get('/next/:userId', (req, res) => {
-    const userId = parseInt(req.params.userId);
-    const { language } = req.query;
-
-    if (!language) {
-        return res.status(400).json({
-            success: false,
-            message: 'Language query parameter required'
-        });
-    }
-
-    // In production, would fetch user's actual level from database
-    // For demo, default to beginner
-    const userLevel = 'beginner';
-
-    // Get questions for user's level
-    const availableQuestions = questionBank.filter(
-        q => q.language === language.toLowerCase() && q.level === userLevel
-    );
-
-    if (availableQuestions.length === 0) {
-        return res.json({
-            success: false,
-            message: 'No questions available for this language and level'
-        });
-    }
-
-    // Select a random question
-    const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-    const selectedQuestion = availableQuestions[randomIndex];
-
-    res.json({
-        success: true,
-        question: {
-            id: selectedQuestion.id,
-            question: selectedQuestion.question,
-            options: selectedQuestion.options,
-            topic: selectedQuestion.topic,
-            level: selectedQuestion.level
-        }
     });
 });
 

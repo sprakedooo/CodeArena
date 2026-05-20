@@ -829,6 +829,9 @@
                 if (res.ok) {
                     const data = await res.json();
                     populateStats(data, data.user?.streak || 0);
+                    buildPathList(data.paths || []);
+                    buildWeaknessList(data.weakTopics || []);
+                    buildContinueCardFromProgress(null, data.user?.level || 'beginner');
                     return;
                 }
             } catch { /* fall through to basic endpoints */ }
@@ -878,7 +881,10 @@
         }
 
         function populateStats(data, streak) {
-            document.getElementById('statStreak').textContent = (streak || 0) + ' 🔥';
+            // Streak: prefer API value, fall back to localStorage user object
+            const cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const resolvedStreak = streak || data.user?.streak || cachedUser.streak || 0;
+            document.getElementById('statStreak').textContent = resolvedStreak + ' 🔥';
             document.getElementById('statLessons').textContent = data.completedLessons || 0;
 
             // Calculate active paths (from language data)
@@ -911,44 +917,96 @@
         }
 
         function buildContinueCardFromProgress(prog, level) {
-            const btn = document.getElementById('continueLessonBtn');
+            const btn        = document.getElementById('continueLessonBtn');
+            const pathName   = document.getElementById('continuePathName');
+            const block      = document.getElementById('continueLessonBlock');
+            const fillEl     = document.getElementById('continueProgressFill');
+            const pctEl      = document.getElementById('continueProgressPct');
 
-            if (!prog?.byLanguage) {
-                document.getElementById('continuePathName').textContent = 'No paths enrolled yet.';
-                document.getElementById('continueLessonBlock').innerHTML =
-                    '<p style="font-size:0.83rem;color:var(--text-muted);">Explore learning paths in the Learn section.</p>';
+            // ── 1. Last visited lesson/course (highest priority) ────────────────
+            let last = null;
+            try { last = JSON.parse(localStorage.getItem('lastVisited') || 'null'); } catch(_) {}
+
+            if (last && last.title && last.url) {
+                const typeIcon  = last.type === 'lesson' ? 'menu_book' : last.type === 'blog' ? 'article' : 'school';
+                const typeLabel = last.type === 'lesson' ? 'Lesson' : last.type === 'blog' ? 'Blog' : 'Course';
+                const langLabel = last.language
+                    ? { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' }[last.language] || capitalize(last.language)
+                    : '';
+                const timeAgo   = last.visitedAt ? formatTimeAgo(last.visitedAt) : '';
+
+                // Path name = language + type (e.g. "Python Course")
+                pathName.textContent = langLabel
+                    ? `${langLabel} ${typeLabel}`
+                    : (last.type === 'lesson' ? 'Lesson Path' : 'Community Content');
+
+                // Lesson title block
+                block.innerHTML = `
+                    <div style="display:flex;align-items:flex-start;gap:.5rem;">
+                        <span class="material-symbols-outlined ms-icon" style="color:var(--primary);font-size:1.1rem;margin-top:2px;">${typeIcon}</span>
+                        <span style="font-size:.875rem;font-weight:600;color:var(--text);line-height:1.35;">${esc(last.title)}</span>
+                    </div>
+                    <div class="continue-lesson-meta">
+                        ${langLabel ? `<span style="background:rgba(124,58,237,.12);color:#a78bfa;padding:.15rem .55rem;border-radius:20px;font-size:.68rem;font-weight:700;">${langLabel}</span>` : ''}
+                        ${timeAgo   ? `<span><span class="material-symbols-outlined ms-icon">schedule</span>${timeAgo}</span>` : ''}
+                        ${last.author ? `<span><span class="material-symbols-outlined ms-icon">person</span>${esc(last.author)}</span>` : ''}
+                    </div>`;
+
+                // Progress bar: use accuracy from progress data if we have it
+                let pct = 0;
+                if (prog?.byLanguage && last.language && prog.byLanguage[last.language]) {
+                    pct = prog.byLanguage[last.language].accuracy || 0;
+                }
+                fillEl.style.width  = `${pct}%`;
+                pctEl.textContent   = pct;
+
+                btn.href = last.url;
                 return;
             }
 
-            // Find the most active language
+            // ── 2. Fallback: most-active language from quiz progress ────────────
+            if (!prog?.byLanguage) {
+                pathName.textContent = 'No paths started yet.';
+                block.innerHTML = '<p style="font-size:0.83rem;color:var(--text-muted);">Open any lesson or course to continue here.</p>';
+                btn.href = 'learn.html';
+                return;
+            }
+
             const languages = Object.entries(prog.byLanguage)
                 .sort(([, a], [, b]) => b.questionsAnswered - a.questionsAnswered);
 
             if (languages.length === 0) {
-                document.getElementById('continuePathName').textContent = 'Start learning a language!';
-                document.getElementById('continueLessonBlock').innerHTML =
-                    '<p style="font-size:0.83rem;color:var(--text-muted);">Pick a language to begin.</p>';
+                pathName.textContent = 'Start learning a language!';
+                block.innerHTML = '<p style="font-size:0.83rem;color:var(--text-muted);">Pick a language to begin.</p>';
                 btn.href = 'select_language.html';
                 return;
             }
 
             const [lang, data] = languages[0];
-
-            document.getElementById('continuePathName').textContent = `${capitalize(lang)} Path`;
-            document.getElementById('continueProgressFill').style.width = `${data.accuracy || 0}%`;
-            document.getElementById('continueProgressPct').textContent = data.accuracy || 0;
-
-            document.getElementById('continueLessonBlock').innerHTML = `
-        <div class="continue-lesson-title" style="display:flex;align-items:flex-start;gap:0.5rem;">
-            <span class="material-symbols-outlined ms-icon" style="color:var(--primary);font-size:1.1rem;margin-top:2px;">code</span>
-            <span>${capitalize(lang)} ${capitalize(data.level || level)}</span>
-        </div>
-        <div class="continue-lesson-meta">
-            <span style="background:rgba(124,58,237,0.12);color:#a78bfa;padding:0.15rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:700;">${capitalize(data.level || level)}</span>
-            <span><span class="material-symbols-outlined ms-icon">check_circle</span>${data.questionsAnswered} answered</span>
-        </div>`;
-
+            pathName.textContent           = `${capitalize(lang)} Path`;
+            fillEl.style.width             = `${data.accuracy || 0}%`;
+            pctEl.textContent              = data.accuracy || 0;
+            block.innerHTML = `
+                <div class="continue-lesson-title" style="display:flex;align-items:flex-start;gap:0.5rem;">
+                    <span class="material-symbols-outlined ms-icon" style="color:var(--primary);font-size:1.1rem;margin-top:2px;">code</span>
+                    <span>${capitalize(lang)} ${capitalize(data.level || level)}</span>
+                </div>
+                <div class="continue-lesson-meta">
+                    <span style="background:rgba(124,58,237,0.12);color:#a78bfa;padding:0.15rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:700;">${capitalize(data.level || level)}</span>
+                    <span><span class="material-symbols-outlined ms-icon">check_circle</span>${data.questionsAnswered} answered</span>
+                </div>`;
             btn.href = `learn.html`;
+        }
+
+        function formatTimeAgo(ts) {
+            const diff = Date.now() - ts;
+            const m = Math.floor(diff / 60000);
+            if (m < 1)   return 'just now';
+            if (m < 60)  return `${m}m ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24)  return `${h}h ago`;
+            const d = Math.floor(h / 24);
+            return `${d}d ago`;
         }
 
         // ── Path List (handles both data sources) ─────────────────────────────────

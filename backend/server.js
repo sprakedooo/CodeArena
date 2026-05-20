@@ -218,7 +218,8 @@ app.get('/api/analytics/me', _auth, async (req, res) => {
 
         res.json({ success: true, user, paths, weaknesses: weakRows, completedLessons, langBreakdown, recentActivity: actRows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        // Graceful fallback — DB unavailable
+        res.json({ success: false, user: {}, paths: [], weaknesses: [], completedLessons: 0, langBreakdown: [], recentActivity: [] });
     }
 });
 

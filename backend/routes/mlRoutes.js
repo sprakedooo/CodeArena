@@ -37,33 +37,43 @@ const {
     trainingDataSample
 } = require('../services/decisionTreeML');
 
-// Mock progress data store (in production, this would come from database)
+// Shared progress store (fallback if progressRoutes not loaded yet)
 let progressStore = {};
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER: Get or Create Progress Data
+// HELPER: Get or Create Progress Data  (reads from progressRoutes in-memory store)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function getProgressData(userId, language) {
-    const key = `${userId}_${language}`;
+    // Prefer live data from progressRoutes' in-memory store
+    try {
+        const progressRoutes = require('./progressRoutes');
+        const liveData = progressRoutes.userProgress?.[userId]?.[language.toLowerCase()];
+        if (liveData) {
+            return {
+                userId, language,
+                accuracy:           liveData.accuracy            || 0,
+                consecutiveCorrect: liveData.consecutiveCorrect  || 0,
+                consecutiveWrong:   liveData.consecutiveWrong    || 0,
+                questionsAnswered:  liveData.questionsAnswered    || 0,
+                correctAnswers:     liveData.correctAnswers       || 0,
+                currentLevel:       liveData.level               || 'beginner',
+                totalPoints:        liveData.totalPoints          || 0,
+                topicPerformance:   liveData.topicProgress        || {},
+                lastUpdated:        liveData.lastActive           || new Date().toISOString()
+            };
+        }
+    } catch (_) { /* fall through to local store */ }
 
+    const key = `${userId}_${language}`;
     if (!progressStore[key]) {
-        // Default progress for new users
         progressStore[key] = {
-            userId: userId,
-            language: language,
-            accuracy: 0,
-            consecutiveCorrect: 0,
-            consecutiveWrong: 0,
-            questionsAnswered: 0,
-            correctAnswers: 0,
-            currentLevel: 'beginner',
-            totalPoints: 0,
-            topicPerformance: {},
+            userId, language, accuracy: 0, consecutiveCorrect: 0,
+            consecutiveWrong: 0, questionsAnswered: 0, correctAnswers: 0,
+            currentLevel: 'beginner', totalPoints: 0, topicPerformance: {},
             lastUpdated: new Date().toISOString()
         };
     }
-
     return progressStore[key];
 }
 

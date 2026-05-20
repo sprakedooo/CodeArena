@@ -181,7 +181,7 @@ router.post('/ask', authMiddleware, async (req, res) => {
             const weakTopics = await getUserWeaknesses(req.user.id);
 
             const studentName = user ? (user.full_name || 'Student') : 'Student';
-            const level       = user ? (user.selected_language || 'beginner') : 'beginner';
+            const level       = user ? (user.current_level || user.level || 'beginner') : 'beginner';
             const language    = user ? (user.selected_language || 'python')   : 'python';
             const lastLesson  = progress.length ? `${progress[0].title} (${progress[0].language})` : null;
 
@@ -306,6 +306,7 @@ router.get('/next-task/:userId', authMiddleware, async (req, res) => {
 
         const studentName    = user.full_name || 'Student';
         const language       = user.selected_language || 'python';
+        const level          = user.current_level || user.level || 'beginner';
         const lastLesson     = progress.length ? progress[0].title : null;
         const completedCount = progress.filter(p => p.status === 'completed').length;
 
@@ -322,7 +323,7 @@ router.get('/next-task/:userId', authMiddleware, async (req, res) => {
 
         const recommendation = await recommendNextTask({
             studentName,
-            level: 'beginner',
+            level,
             language,
             lastLesson,
             weakTopics,
@@ -359,7 +360,7 @@ router.post('/ask-code', authMiddleware, async (req, res) => {
         const user   = await getUserRow(req.user.id);
         const weakTopics = await getUserWeaknesses(req.user.id);
         const studentName = user?.full_name || 'Student';
-        const level       = user?.selected_language || 'beginner';
+        const level       = user?.current_level || user?.level || 'beginner';
 
         const reply = await globalAssistant({
             message,

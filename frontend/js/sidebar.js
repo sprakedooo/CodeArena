@@ -7,6 +7,24 @@
  */
 
 (function () {
+    // ── 0. Global 401 intercept — force re-login on expired/invalid token ─────
+    const _origFetch = window.fetch.bind(window);
+    window.fetch = function(...args) {
+        return _origFetch(...args).then(resp => {
+            if (resp.status === 401) {
+                // Only redirect if we're not already on an auth page
+                const onAuthPage = /\/(login|register|oauth-callback)\.html/.test(location.pathname);
+                if (!onAuthPage) {
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('isLoggedIn');
+                    location.href = 'login.html?expired=1';
+                }
+            }
+            return resp;
+        });
+    };
+
     // ── 1. Apply saved theme immediately (no flash) ───────────────────────────
     const savedTheme = localStorage.getItem('theme') || 'dark';
     if (savedTheme === 'light') document.documentElement.classList.add('light-mode');
@@ -222,9 +240,21 @@
 
         document.getElementById('topbarLogoutBtn').addEventListener('click', () => {
             if (!confirm('Are you sure you want to log out?')) return;
+            // Core auth keys
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             localStorage.removeItem('isLoggedIn');
+            // Game / progress keys that should not bleed to next user
+            localStorage.removeItem('arenaStats');
+            localStorage.removeItem('earnedAchievements');
+            localStorage.removeItem('certificates');
+            localStorage.removeItem('lastVisited');
+            localStorage.removeItem('dailyChallenge');
+            localStorage.removeItem('notifReadAt');
+            // Clear per-language lesson progress and course progress
+            Object.keys(localStorage)
+                .filter(k => k.startsWith('completedLessons_') || k.startsWith('course_progress_') || k.startsWith('ch_completed_'))
+                .forEach(k => localStorage.removeItem(k));
             location.href = 'login.html';
         });
 

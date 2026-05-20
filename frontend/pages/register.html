@@ -3,55 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - CodeArena</title>
+    <title>Sign Up - CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         body {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            position: relative;
             overflow-x: hidden;
         }
 
-        .register-page {
-            flex: 1;
+        /* ── Auth Nav ── */
+        .auth-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 2rem;
+            background: rgba(13, 17, 23, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 50;
+        }
+        .auth-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .auth-nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .auth-nav-links a:hover { color: var(--text); }
+        .auth-nav-links .btn-login {
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            color: #fff !important;
+            padding: 0.45rem 1.1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .auth-nav-links .btn-login:hover { opacity: 0.9; }
+
+        /* ── Two-column layout ── */
+        .signup-layout {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+        @media (max-width: 820px) {
+            .signup-layout { grid-template-columns: 1fr; }
+            .signup-hero   { display: none; }
+        }
+
+        /* ── Left Hero Panel ── */
+        .signup-hero {
+            background: linear-gradient(145deg, #0d1117 0%, #1a1040 60%, #0d1117 100%);
+            display: flex;
+            flex-direction: column;
             justify-content: center;
-            padding: 2rem;
+            padding: 3rem 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .signup-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(124,58,237,0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,58,237,0.07) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        /* Glowing orbs */
+        .signup-hero::after {
+            content: '';
+            position: absolute;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+            top: -80px; right: -80px;
+        }
+        .hero-orb-2 {
+            position: absolute;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
+            bottom: 40px; left: -40px;
+        }
+
+        .hero-content {
             position: relative;
             z-index: 1;
         }
+        .hero-logo-img {
+            height: 72px; width: auto;
+            margin-bottom: 1.75rem;
+        }
+        .hero-headline {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.95rem;
+            color: #fff;
+            line-height: 2;
+            margin-bottom: 0.75rem;
+        }
+        .hero-sub {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.88rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+            max-width: 340px;
+        }
 
-        .register-container {
+        .hero-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            margin-bottom: 2.5rem;
+        }
+        .hero-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            color: rgba(255,255,255,0.82);
+            font-size: 0.88rem;
+        }
+        .feat-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .feat-icon.purple { background: rgba(124,58,237,0.25); border: 1px solid rgba(124,58,237,0.3); }
+        .feat-icon.cyan   { background: rgba(6,182,212,0.20);  border: 1px solid rgba(6,182,212,0.25); }
+        .feat-icon.green  { background: rgba(16,185,129,0.20); border: 1px solid rgba(16,185,129,0.25); }
+        .feat-icon.gold   { background: rgba(251,191,36,0.20); border: 1px solid rgba(251,191,36,0.25); }
+
+        .hero-langs {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+        .hero-lang-pill {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            padding: 5px 12px;
+            color: rgba(255,255,255,0.72);
+            font-size: 0.78rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .hero-lang-pill:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.22);
+        }
+        .hero-lang-pill img { width: 16px; height: 16px; }
+
+        /* ── Right Form Panel ── */
+        .signup-form-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            background: var(--bg-dark);
+        }
+        .signup-container {
             width: 100%;
             max-width: 420px;
         }
 
-        .register-hero {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .register-hero .hero-logo {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.4rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .register-hero .hero-logo .code { color: var(--primary); }
-        .register-hero .hero-logo .arena { color: var(--success); }
-        .register-hero .hero-logo .brackets { color: var(--text-muted); }
-
-        .register-hero .hero-tagline {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .register-card {
+        .signup-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
@@ -59,115 +187,201 @@
             position: relative;
             overflow: hidden;
         }
-
-        .register-card::before {
+        .signup-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
+            top: 0; left: 0; right: 0; height: 3px;
             background: linear-gradient(90deg, var(--secondary), var(--primary), var(--success));
         }
-
-        .register-card h2 {
+        .signup-card h2 {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
+            font-size: 0.63rem;
             color: var(--text);
             margin-bottom: 1.5rem;
             text-align: center;
             letter-spacing: 1px;
         }
 
-        .register-footer {
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 18px 0 6px;
+        }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-text { font-size: 0.75rem; color: var(--text-muted); }
+
+        .signup-footer {
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 1.25rem;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+        .signup-footer a { color: var(--primary); font-weight: 600; }
+
+        /* Password strength */
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--bg-surface);
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .password-strength-bar {
+            height: 100%; border-radius: 2px;
+            transition: width 0.3s ease, background 0.3s ease;
+            width: 0%;
+        }
+        .strength-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            min-height: 1em;
         }
 
-        .register-footer a {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .grid-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Google OAuth btn */
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: 0;
+            padding: 11px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: border-color 0.2s, background 0.2s;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .google-btn:hover {
+            border-color: #4285F4;
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        /* Light-mode overrides for auth-specific elements */
+        .light-mode .auth-nav {
+            background: rgba(255, 255, 255, 0.92);
+        }
+        .light-mode .signup-hero {
+            background: linear-gradient(145deg, #1e1b4b 0%, #3b2e8c 50%, #1e1b4b 100%);
         }
     </style>
 </head>
 <body>
-    <div class="grid-bg"></div>
-    <div class="particles-bg" id="particles"></div>
 
-    <div class="register-page">
-        <div class="register-container">
-            <div class="register-hero">
-                <div class="hero-logo">
-                    <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:140px;width:auto;object-fit:contain;">
+<!-- ── Navigation ── -->
+<nav class="auth-nav">
+    <a href="index.html">
+        <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:44px;width:auto;object-fit:contain;vertical-align:middle;">
+    </a>
+    <div class="auth-nav-links" id="authNavLinks">
+        <a href="index.html">Home</a>
+        <a href="login.html" class="btn-login">Log In</a>
+    </div>
+</nav>
+
+<!-- ── Two-Column Layout ── -->
+<div class="signup-layout">
+
+    <!-- Left: Hero Panel -->
+    <div class="signup-hero">
+        <div class="hero-orb-2"></div>
+        <div class="hero-content">
+            <img src="../assets/codearena-logo.png" alt="CodeArena" class="hero-logo-img">
+            <div class="hero-headline">Level Up Your<br>Coding Skills</div>
+            <p class="hero-sub">Join thousands of students mastering programming through AI-powered adaptive challenges and game mechanics.</p>
+
+            <ul class="hero-features">
+                <li>
+                    <div class="feat-icon purple">🧠</div>
+                    <span>AI-powered hints &amp; personalized feedback</span>
+                </li>
+                <li>
+                    <div class="feat-icon cyan">🎮</div>
+                    <span>Game mechanics: XP, streaks, badges &amp; leaderboards</span>
+                </li>
+                <li>
+                    <div class="feat-icon green">📈</div>
+                    <span>Adaptive difficulty that grows with you</span>
+                </li>
+                <li>
+                    <div class="feat-icon gold">🏆</div>
+                    <span>Daily challenges &amp; classroom competitions</span>
+                </li>
+            </ul>
+
+            <div class="hero-langs">
+                <div class="hero-lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python"> Python
                 </div>
-                <div class="hero-tagline">Join The Adventure</div>
+                <div class="hero-lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript"> JavaScript
+                </div>
+                <div class="hero-lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java"> Java
+                </div>
+                <div class="hero-lang-pill">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="C++"> C++
+                </div>
             </div>
+        </div>
+    </div>
 
-            <div class="register-card fade-in">
-                <h2>CREATE YOUR CHARACTER</h2>
+    <!-- Right: Form Panel -->
+    <div class="signup-form-panel">
+        <div class="signup-container">
+            <div class="signup-card fade-in">
+                <h2>Create Your Account</h2>
 
                 <div id="alertBox"></div>
 
-                <form id="registerForm">
+                <form id="registerForm" autocomplete="off">
                     <div class="form-group">
                         <label class="form-label">Full Name</label>
-                        <input type="text" id="fullName" class="form-input" placeholder="Enter your full name" required>
+                        <input type="text" id="fullName" class="form-input" placeholder="Your full name" required autofocus>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                        <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input type="password" id="password" class="form-input" placeholder="Create a password" required>
+                        <input type="password" id="password" class="form-input" placeholder="Create a strong password" required>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="strength-label" id="strengthLabel"></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Confirm Password</label>
-                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="Repeat your password" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Role</label>
+                        <label class="form-label">I am a...</label>
                         <select id="role" class="form-input">
-                            <option value="student">Student</option>
-                            <option value="faculty">Faculty</option>
+                            <option value="student">🎓 Student</option>
+                            <option value="faculty">👨‍🏫 Faculty / Instructor</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:0.5rem;">
+                        Create Account
+                    </button>
                 </form>
 
-                <!-- ── Divider ── -->
-                <div style="display:flex;align-items:center;gap:12px;margin:20px 0 4px;">
-                    <div style="flex:1;height:1px;background:var(--border);"></div>
-                    <span style="font-size:0.75rem;color:var(--text-muted);">or</span>
-                    <div style="flex:1;height:1px;background:var(--border);"></div>
+                <!-- Divider -->
+                <div class="divider">
+                    <div class="divider-line"></div>
+                    <span class="divider-text">or</span>
+                    <div class="divider-line"></div>
                 </div>
 
-                <!-- ── Google OAuth button ── -->
-                <a id="google-oauth-btn" href="#"
-                   onclick="this.href=`http://${window.location.hostname}:3000/api/auth/google`"
-                   style="display:flex;align-items:center;justify-content:center;gap:10px;
-                          width:100%;padding:11px 0;border-radius:8px;
-                          border:1px solid var(--border);background:var(--bg-surface);
-                          color:var(--text);font-size:0.9rem;font-weight:500;
-                          text-decoration:none;transition:border-color 0.2s,background 0.2s;
-                          margin-bottom:20px;"
-                   onmouseover="this.style.borderColor='#4285F4';this.style.background='var(--bg-card)';"
-                   onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg-surface)';">
+                <!-- Google OAuth -->
+                <a class="google-btn" href="#"
+                   onclick="this.href=`http://${window.location.hostname}:3000/api/auth/google`">
                     <svg width="18" height="18" viewBox="0 0 48 48">
                         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                         <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -178,89 +392,97 @@
                     Sign up with Google
                 </a>
 
-                <div class="register-footer">
-                    Already a player? <a href="login.html">Login here</a>
+                <div class="signup-footer">
+                    Already have an account? <a href="login.html">Log in here</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const API = `http://${window.location.hostname}:3000/api`;
+<script>
+    const API = `http://${window.location.hostname}:3000/api`;
 
-        // Create particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 15; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            particle.style.animationDelay = (Math.random() * 10) + 's';
-            particle.style.width = (Math.random() * 4 + 2) + 'px';
-            particle.style.height = particle.style.width;
-            const colors = ['var(--primary)', 'var(--success)', 'var(--secondary)'];
-            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-            particlesContainer.appendChild(particle);
+    // ── Password strength meter ──────────────────────────────────────────────
+    const pwdInput      = document.getElementById('password');
+    const strengthBar   = document.getElementById('strengthBar');
+    const strengthLabel = document.getElementById('strengthLabel');
+
+    pwdInput.addEventListener('input', () => {
+        const v = pwdInput.value;
+        let score = 0;
+        if (v.length >= 8)          score++;
+        if (/[A-Z]/.test(v))        score++;
+        if (/[0-9]/.test(v))        score++;
+        if (/[^A-Za-z0-9]/.test(v)) score++;
+
+        const levels = [
+            { pct: '0%',   color: '',                text: '' },
+            { pct: '25%',  color: '#ef4444',          text: '⚠ Weak' },
+            { pct: '50%',  color: '#f59e0b',          text: '◑ Fair' },
+            { pct: '75%',  color: '#06b6d4',          text: '◕ Good' },
+            { pct: '100%', color: 'var(--success)',    text: '✓ Strong' },
+        ];
+        const lv = levels[score];
+        strengthBar.style.width      = v.length ? lv.pct : '0%';
+        strengthBar.style.background = lv.color;
+        strengthLabel.textContent    = v.length ? lv.text : '';
+        strengthLabel.style.color    = lv.color || 'var(--text-muted)';
+    });
+
+    // ── Register form ────────────────────────────────────────────────────────
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName        = document.getElementById('fullName').value.trim();
+        const email           = document.getElementById('email').value.trim();
+        const password        = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const role            = document.getElementById('role').value;
+
+        const alertBox = document.getElementById('alertBox');
+
+        if (password !== confirmPassword) {
+            alertBox.innerHTML = '<div class="alert alert-error">Passwords do not match.</div>';
+            return;
         }
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fullName = document.getElementById('fullName').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const role = document.getElementById('role').value;
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.textContent = 'Creating…';
+        btn.disabled = true;
 
-            if (password !== confirmPassword) {
-                document.getElementById('alertBox').innerHTML =
-                    '<div class="alert alert-error">Passwords do not match</div>';
-                return;
-            }
+        try {
+            const res  = await fetch(`${API}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName, email, password, role })
+            });
+            const data = await res.json();
 
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.textContent = 'Creating...';
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(`${API}/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullName, email, password, role })
-                });
-                const data = await res.json();
-
-                if (data.success && data.needsVerification) {
-                    // OTP sent — redirect to verify page
-                    document.getElementById('alertBox').innerHTML =
-                        '<div class="alert alert-success">Verification code sent! Check your email.</div>';
-                    setTimeout(() => {
-                        window.location.href = `verify-email.html?email=${encodeURIComponent(data.email)}`;
-                    }, 1000);
-                } else if (data.success) {
-                    // Fallback: direct registration (should not happen now)
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('isLoggedIn', 'true');
-                    setTimeout(() => {
-                        if (data.user.role === 'faculty') {
-                            window.location.href = 'faculty_dashboard.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    }, 1200);
-                } else {
-                    document.getElementById('alertBox').innerHTML =
-                        `<div class="alert alert-error">${data.message}</div>`;
-                    btn.textContent = 'Create Account';
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                document.getElementById('alertBox').innerHTML =
-                    '<div class="alert alert-error">Cannot connect to server</div>';
+            if (data.success && data.needsVerification) {
+                alertBox.innerHTML = '<div class="alert alert-success">Verification code sent! Check your email.</div>';
+                setTimeout(() => {
+                    window.location.href = `verify-email.html?email=${encodeURIComponent(data.email)}`;
+                }, 1000);
+            } else if (data.success) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('isLoggedIn', 'true');
+                alertBox.innerHTML = '<div class="alert alert-success">Account created! Redirecting…</div>';
+                setTimeout(() => {
+                    window.location.href = data.user.role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html';
+                }, 1200);
+            } else {
+                alertBox.innerHTML = `<div class="alert alert-error">${data.message}</div>`;
                 btn.textContent = 'Create Account';
                 btn.disabled = false;
             }
-        });
-    </script>
+        } catch (err) {
+            alertBox.innerHTML = '<div class="alert alert-error">Cannot connect to server.</div>';
+            btn.textContent = 'Create Account';
+            btn.disabled = false;
+        }
+    });
+</script>
+<script src="../js/theme.js"></script>
 </body>
 </html>

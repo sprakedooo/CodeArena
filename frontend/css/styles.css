@@ -141,6 +141,28 @@
 /* Logo tagline opacity boost so it's legible */
 .light-mode .logo-tagline           { opacity: 0.65; }
 
+/* ── Light-mode auth nav (login.html / register.html) ───────────────────── */
+.light-mode .login-nav,
+.light-mode .auth-nav {
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom-color: var(--border);
+}
+.light-mode .login-nav-links a,
+.light-mode .auth-nav-links a {
+    color: var(--text-secondary);
+}
+.light-mode .login-nav-links a:hover,
+.light-mode .auth-nav-links a:hover {
+    color: var(--text);
+}
+
+/* Grid background toned down in light mode */
+.light-mode .grid-bg {
+    background-image:
+        linear-gradient(rgba(109,40,217,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(109,40,217,0.04) 1px, transparent 1px);
+}
+
 /* Theme toggle button */
 .theme-toggle {
     background: none;

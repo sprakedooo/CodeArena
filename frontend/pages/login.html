@@ -205,6 +205,19 @@
     <script>
         const API = `http://${window.location.hostname}:3000/api`;
 
+        // Show "session expired" notice if redirected here by 401 interceptor
+        (function() {
+            const params = new URLSearchParams(location.search);
+            if (params.get('expired')) {
+                document.getElementById('alertBox').innerHTML =
+                    '<div class="alert alert-error">⏰ Your session expired. Please log in again.</div>';
+            }
+            if (params.get('error') === 'oauth_failed') {
+                document.getElementById('alertBox').innerHTML =
+                    '<div class="alert alert-error">Google sign-in failed. Please try again or use email login.</div>';
+            }
+        })();
+
         function clearUserProgress() {
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {

@@ -114,7 +114,7 @@ router.get('/:userId', async (req, res) => {
     // Try database first
     if (dbService.isDbAvailable()) {
         try {
-            const languages = ['python', 'java', 'cpp'];
+            const languages = ['python', 'javascript', 'java', 'cpp'];
             const byLanguage = {};
             let totalQuestions = 0;
             let totalCorrect = 0;
@@ -169,9 +169,11 @@ router.get('/:userId', async (req, res) => {
     let totalQuestions = 0;
     let totalCorrect = 0;
 
-    ['python', 'java', 'cpp'].forEach(lang => {
-        totalQuestions += progress[lang].questionsAnswered;
-        totalCorrect += progress[lang].correctAnswers;
+    ['python', 'javascript', 'java', 'cpp'].forEach(lang => {
+        if (progress[lang]) {
+            totalQuestions += progress[lang].questionsAnswered;
+            totalCorrect   += progress[lang].correctAnswers;
+        }
     });
 
     const overallAccuracy = totalQuestions > 0 ?
@@ -187,9 +189,10 @@ router.get('/:userId', async (req, res) => {
             accuracy: overallAccuracy
         },
         byLanguage: {
-            python: formatProgressSummary(progress.python, 'Python'),
-            java: formatProgressSummary(progress.java, 'Java'),
-            cpp: formatProgressSummary(progress.cpp, 'C++')
+            python:     formatProgressSummary(progress.python,      'Python'),
+            javascript: formatProgressSummary(progress.javascript,  'JavaScript'),
+            java:       formatProgressSummary(progress.java,        'Java'),
+            cpp:        formatProgressSummary(progress.cpp,         'C++')
         }
     });
 });

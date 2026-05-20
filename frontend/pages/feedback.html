@@ -42,7 +42,7 @@
         /* ── Stat strip ── */
         .stat-strip {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, 1fr); /* 4 cards */
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -65,9 +65,10 @@
             color: var(--text-muted);
         }
         .stat-card.accent-xp   .stat-val { color: #fbbf24; }
-        .stat-card.accent-green .stat-val { color: #10b981; }
-        .stat-card.accent-blue  .stat-val { color: #06b6d4; }
-        .stat-card.accent-red   .stat-val { color: #ef4444; }
+        .stat-card.accent-green  .stat-val { color: #10b981; }
+        .stat-card.accent-blue   .stat-val { color: #06b6d4; }
+        .stat-card.accent-red    .stat-val { color: #ef4444; }
+        .stat-card.accent-purple .stat-val { color: #a78bfa; }
 
         /* ── Section cards ── */
         .section-card {
@@ -310,6 +311,10 @@
             <div class="stat-val skeleton" id="statWeaknesses" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
             <div class="stat-label">Weak Areas</div>
         </div>
+        <div class="stat-card accent-purple">
+            <div class="stat-val skeleton" id="statXP" style="height:1.5rem;margin-bottom:0.4rem;">&nbsp;</div>
+            <div class="stat-label">Total XP</div>
+        </div>
     </div>
 
     <!-- Next recommended task -->
@@ -381,6 +386,7 @@ function fillStats(xp, lessons, streak, weakCount) {
     set('statLessons',    lessons);
     set('statStreak',     streak + '🔥');
     set('statWeaknesses', weakCount);
+    set('statXP',         xp.toLocaleString() + ' XP');
 }
 
 // ── Render next task hero ───────────────────────────────────────────────────

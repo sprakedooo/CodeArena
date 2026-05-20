@@ -122,7 +122,9 @@ router.post('/check', async (req, res) => {
             isCorrect = selectedAnswer.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase();
             break;
         case 'output_prediction':
-            isCorrect = selectedAnswer.trim() === question.correctAnswer.trim();
+            // Trim whitespace + normalize newlines; case-insensitive
+            isCorrect = selectedAnswer.trim().replace(/\r\n/g,'\n').toLowerCase()
+                     === question.correctAnswer.trim().replace(/\r\n/g,'\n').toLowerCase();
             break;
         case 'code_ordering':
             isCorrect = Array.isArray(submittedOrder) &&

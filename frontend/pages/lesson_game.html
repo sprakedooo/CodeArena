@@ -316,6 +316,79 @@
             .hud-chip:nth-child(4) { display: none; }
             .q-option .opt-kb { display: none !important; }
         }
+
+        /* ── Achievement Popup ──────────────────────────────────────────────── */
+        .achievement-popup {
+            position: fixed; bottom: 5.5rem; left: 50%; transform: translateX(-50%);
+            z-index: 700; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+        }
+        .ach-item {
+            background: linear-gradient(135deg, #1e1040, #2a0d6e);
+            border: 1px solid rgba(251,191,36,0.55);
+            border-radius: 14px; padding: 0.8rem 1.4rem;
+            display: flex; align-items: center; gap: 0.85rem;
+            color: #fff; font-size: 0.9rem; font-weight: 700;
+            box-shadow: 0 6px 28px rgba(251,191,36,0.2);
+            transform: translateY(24px) scale(0.9); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
+        }
+        .ach-item.show { transform: translateY(0) scale(1); opacity: 1; }
+        .ach-item-icon { font-size: 1.6rem; }
+        .ach-item-texts { display: flex; flex-direction: column; gap: 1px; }
+        .ach-item-label { font-size: 0.6rem; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
+        .ach-item-name  { font-size: 0.9rem; font-weight: 700; color: #fff; }
+
+        /* ── Certificate Modal ──────────────────────────────────────────────── */
+        .cert-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 900; display: flex; align-items: center; justify-content: center;
+            padding: 1rem; backdrop-filter: blur(6px);
+        }
+        .cert-modal-wrap { width: 100%; max-width: 660px; }
+        .cert-actions {
+            display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.65rem;
+        }
+        .certificate {
+            background: #fff; border-radius: 14px; padding: 2.75rem 3.25rem;
+            text-align: center; color: #1a1a2e; position: relative;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+        }
+        .cert-top-accent, .cert-bot-accent {
+            position: absolute; left: 14px; right: 14px; height: 4px; border-radius: 2px;
+            background: linear-gradient(90deg, #7c3aed, #06b6d4, #10b981);
+        }
+        .cert-top-accent { top: 14px; }
+        .cert-bot-accent  { bottom: 14px; }
+        .cert-logo-row    { margin-bottom: 0.4rem; }
+        .cert-logo-row img { height: 54px; }
+        .cert-headline    { font-family: 'Press Start 2P', monospace; font-size: 0.6rem; color: #7c3aed; letter-spacing: 2px; margin: 0.6rem 0 0.4rem; }
+        .cert-subtitle    { font-size: 0.82rem; color: #6b7280; margin-bottom: 0.4rem; }
+        .cert-student-name{ font-size: 1.85rem; font-weight: 800; color: #111827; font-style: italic; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.45rem; margin: 0.6rem 2.5rem 0.8rem; }
+        .cert-body-text   { font-size: 0.88rem; color: #4b5563; margin: 0.6rem 0 0.25rem; }
+        .cert-course-name { font-size: 1.25rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0 0.8rem; }
+        .cert-mastery-pill{
+            display: inline-block;
+            background: linear-gradient(135deg,#7c3aed,#06b6d4);
+            color: #fff; padding: 0.4rem 1.4rem; border-radius: 30px;
+            font-size: 0.88rem; font-weight: 700; margin-bottom: 1.4rem;
+        }
+        .cert-stats-row   { display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 1.2rem; }
+        .cert-stat-val    { font-size: 1.3rem; font-weight: 800; color: #111827; display: block; }
+        .cert-stat-lbl    { font-size: 0.68rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cert-issued      { font-size: 0.78rem; color: #9ca3af; margin-bottom: 1.4rem; }
+        .cert-footer-row  { display: flex; justify-content: center; }
+        .cert-sig-line    { font-size: 0.95rem; font-weight: 700; color: #1a1a2e; border-top: 1px solid #e5e7eb; padding-top: 0.4rem; }
+        .cert-sig-sub     { font-size: 0.7rem; color: #9ca3af; }
+
+        @media print {
+            .cert-actions { display: none !important; }
+            .cert-overlay { background: none; position: static; padding: 0; backdrop-filter: none; }
+            .cert-modal-wrap { max-width: 100%; }
+            .certificate { box-shadow: none; border: 2px solid #7c3aed; }
+            body > *:not(.cert-overlay) { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -523,6 +596,44 @@
 
 <!-- XP toast -->
 <div class="xp-toast" id="xpToast">+10 XP</div>
+
+<!-- Achievement Popup -->
+<div class="achievement-popup" id="achievementPopup">
+    <div id="achievementInner"></div>
+</div>
+
+<!-- Certificate Modal -->
+<div class="cert-overlay" id="certOverlay" style="display:none;" onclick="if(event.target===this)closeCertificate()">
+    <div class="cert-modal-wrap">
+        <div class="cert-actions">
+            <button onclick="printCertificate()" class="btn btn-secondary" style="font-size:.8rem;">🖨️ Print / Save PDF</button>
+            <button onclick="closeCertificate()" class="btn btn-secondary" style="font-size:.8rem;">✕ Close</button>
+        </div>
+        <div class="certificate" id="certContent">
+            <div class="cert-top-accent"></div>
+            <div class="cert-logo-row"><img src="../assets/codearena-logo.png" alt="CodeArena"></div>
+            <div class="cert-headline">Certificate of Achievement</div>
+            <div class="cert-subtitle">This is to certify that</div>
+            <div class="cert-student-name" id="certName">Student Name</div>
+            <div class="cert-body-text">has successfully demonstrated <strong id="certMastery">Proficient</strong> mastery in</div>
+            <div class="cert-course-name" id="certCourse">Python Programming</div>
+            <div class="cert-mastery-pill" id="certMasteryPill">🏆 Proficient Level</div>
+            <div class="cert-stats-row">
+                <div><span class="cert-stat-val" id="certScore">—</span><span class="cert-stat-lbl">Score</span></div>
+                <div><span class="cert-stat-val" id="certAccuracy">—</span><span class="cert-stat-lbl">Accuracy</span></div>
+                <div><span class="cert-stat-val" id="certLevelDisp">—</span><span class="cert-stat-lbl">Difficulty</span></div>
+            </div>
+            <div class="cert-issued" id="certDate">Issued on —</div>
+            <div class="cert-footer-row">
+                <div>
+                    <div class="cert-sig-line">CodeArena AI System</div>
+                    <div class="cert-sig-sub">Adaptive Learning Platform</div>
+                </div>
+            </div>
+            <div class="cert-bot-accent"></div>
+        </div>
+    </div>
+</div>
 
 <script>window.SIDEBAR_PAGE = 'play';</script>
 <script src="../js/sidebar.js"></script>
@@ -750,13 +861,18 @@ function showQuestion() {
 function renderMCQ(container, q) {
     const opts = getOptions(q);
     container.innerHTML = opts.map((o, i) =>
-        `<button class="q-option" onclick="selectMCQ(this, ${JSON.stringify(String(o))})">
+        `<button class="q-option" data-value="${esc(String(o))}">
             <span class="opt-letter">${String.fromCharCode(65+i)}.</span>
             <span class="opt-text">${esc(String(o))}</span>
             <span class="opt-kb">${i+1}</span>
             <span class="opt-check"></span>
         </button>`
     ).join('');
+    // Attach click handlers via JS — avoids inline onclick double-quote conflicts
+    // that would break the HTML attribute when option text contains quotes.
+    container.querySelectorAll('.q-option').forEach(btn => {
+        btn.addEventListener('click', () => selectMCQ(btn, btn.dataset.value));
+    });
 }
 
 function selectMCQ(btn, selected) {
@@ -1162,6 +1278,13 @@ async function endGame() {
         });
         if (res.ok) showXpToast(`+${xp} XP saved!`);
     } catch { /* non-fatal — XP saving is best-effort */ }
+
+    // ── Check achievements & show certificate ─────────────────────────────
+    const gameData = { accuracy, score, bestStreak, lang: setupLang, level: setupLevel };
+    const newAchs  = checkAchievements(gameData);
+    // Show certificate after achievements (if accuracy is good enough)
+    const certDelay = newAchs.length > 0 ? newAchs.length * 600 + 2500 : 1200;
+    setTimeout(() => showCertificate(gameData), certDelay);
 }
 
 function quitGame()    { endGame(); }
@@ -1208,6 +1331,161 @@ function esc(s) {
         .replace(/</g,'&lt;')
         .replace(/>/g,'&gt;')
         .replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACHIEVEMENT SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+const ARENA_ACHIEVEMENTS = [
+    { id:'arena_first',      icon:'🎮', name:'First Battle',    desc:'Complete your first Arena session',            check: d => d.totalGames >= 1 },
+    { id:'arena_perfect',    icon:'🎯', name:'Perfect Score',   desc:'100% accuracy in a session',                   check: d => d.accuracy === 100 },
+    { id:'arena_streak5',    icon:'🔥', name:'On Fire',         desc:'Achieve a 5-streak in one game',               check: d => d.bestStreak >= 5 },
+    { id:'arena_streak10',   icon:'⚡', name:'Unstoppable',     desc:'Achieve a 10-streak in one game',              check: d => d.bestStreak >= 10 },
+    { id:'arena_bigbrain',   icon:'🧠', name:'Big Brain',       desc:'Score 150+ points in one session',             check: d => d.score >= 150 },
+    { id:'arena_diamond',    icon:'💎', name:'Diamond Coder',   desc:'90%+ accuracy on Advanced difficulty',         check: d => d.level === 'advanced' && d.accuracy >= 90 },
+    { id:'arena_veteran',    icon:'🏆', name:'Arena Veteran',   desc:'Complete 10 arena sessions',                   check: d => d.totalGames >= 10 },
+    { id:'arena_python',     icon:'🐍', name:'Pythonista',      desc:'Complete 3 games in Python',                   check: d => (d.langGames['python']||0) >= 3 },
+    { id:'arena_js',         icon:'💛', name:'JS Ninja',        desc:'Complete 3 games in JavaScript',               check: d => (d.langGames['javascript']||0) >= 3 },
+    { id:'arena_java',       icon:'☕', name:'Java Master',     desc:'Complete 3 games in Java',                     check: d => (d.langGames['java']||0) >= 3 },
+    { id:'arena_cpp',        icon:'⚙️', name:'C++ Warrior',    desc:'Complete 3 games in C++',                      check: d => (d.langGames['cpp']||0) >= 3 },
+    { id:'arena_polyglot',   icon:'🌍', name:'Polyglot',        desc:'Play in all 4 programming languages',          check: d => Object.keys(d.langGames).filter(k=>d.langGames[k]>0).length >= 4 },
+];
+
+function getArenaStats()        { try { return JSON.parse(localStorage.getItem('arenaStats')||'{}'); } catch { return {}; } }
+function saveArenaStats(s)      { localStorage.setItem('arenaStats', JSON.stringify(s)); }
+function getEarnedAchievements(){ try { return JSON.parse(localStorage.getItem('earnedAchievements')||'[]'); } catch { return []; } }
+function saveEarnedAchievements(a){ localStorage.setItem('earnedAchievements', JSON.stringify(a)); }
+
+function checkAchievements(gameData) {
+    const stats        = getArenaStats();
+    stats.totalGames   = (stats.totalGames || 0) + 1;
+    stats.langGames    = stats.langGames   || {};
+    stats.langGames[gameData.lang] = (stats.langGames[gameData.lang] || 0) + 1;
+    saveArenaStats(stats);
+
+    const checkData = {
+        accuracy:   gameData.accuracy,
+        score:      gameData.score,
+        bestStreak: gameData.bestStreak,
+        level:      gameData.level,
+        totalGames: stats.totalGames,
+        langGames:  stats.langGames,
+    };
+
+    const earned    = getEarnedAchievements();
+    const earnedIds = new Set(earned.map(a => a.id));
+    const newlyEarned = ARENA_ACHIEVEMENTS.filter(a => !earnedIds.has(a.id) && a.check(checkData));
+
+    if (newlyEarned.length) {
+        newlyEarned.forEach(a => earned.push({ id: a.id, earnedAt: new Date().toISOString() }));
+        saveEarnedAchievements(earned);
+        showAchievementPopup(newlyEarned);
+    }
+    return newlyEarned;
+}
+
+function showAchievementPopup(achievements) {
+    const inner = document.getElementById('achievementInner');
+    inner.innerHTML = '';
+    achievements.forEach((ach, i) => {
+        const el = document.createElement('div');
+        el.className = 'ach-item';
+        el.innerHTML = `
+            <span class="ach-item-icon">${ach.icon}</span>
+            <div class="ach-item-texts">
+                <span class="ach-item-label">Achievement Unlocked!</span>
+                <span class="ach-item-name">${ach.name}</span>
+            </div>`;
+        inner.appendChild(el);
+        setTimeout(() => el.classList.add('show'), i * 500 + 150);
+        setTimeout(() => el.classList.remove('show'), i * 500 + 3800);
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CERTIFICATE SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+function getMasteryLabel(accuracy) {
+    if (accuracy >= 90) return 'Expert';
+    if (accuracy >= 75) return 'Proficient';
+    if (accuracy >= 60) return 'Competent';
+    return null;
+}
+
+function showCertificate(gameData) {
+    const mastery = getMasteryLabel(gameData.accuracy);
+    if (!mastery) return;   // below 60% — no certificate
+
+    const LANG_NAMES = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' };
+    const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅' };
+    const studentName = me.fullName || me.full_name || me.name || 'Student';
+    const langName    = LANG_NAMES[gameData.lang] || gameData.lang;
+    const dateStr     = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const levelCap    = gameData.level.charAt(0).toUpperCase() + gameData.level.slice(1);
+
+    document.getElementById('certName').textContent        = studentName;
+    document.getElementById('certCourse').textContent      = langName + ' Programming — ' + levelCap;
+    document.getElementById('certMastery').textContent     = mastery;
+    document.getElementById('certMasteryPill').textContent = MASTERY_ICONS[mastery] + ' ' + mastery + ' Level';
+    document.getElementById('certScore').textContent       = gameData.score;
+    document.getElementById('certAccuracy').textContent    = gameData.accuracy + '%';
+    document.getElementById('certLevelDisp').textContent   = levelCap;
+    document.getElementById('certDate').textContent        = 'Issued on ' + dateStr;
+
+    // Persist certificate to localStorage
+    const certs = getCertificates();
+    certs.push({
+        id: Date.now(),
+        type: 'arena',
+        course: langName + ' Programming — ' + levelCap,
+        lang: gameData.lang, language: langName,
+        studentName, langName, level: gameData.level, mastery, masteryLevel: mastery,
+        score: gameData.score, accuracy: gameData.accuracy,
+        dateStr, earnedAt: new Date().toISOString()
+    });
+    localStorage.setItem('certificates', JSON.stringify(certs));
+
+    document.getElementById('certOverlay').style.display = 'flex';
+}
+
+function getCertificates() { try { return JSON.parse(localStorage.getItem('certificates')||'[]'); } catch { return []; } }
+function closeCertificate() { document.getElementById('certOverlay').style.display = 'none'; }
+function printCertificate() {
+    const cert = document.getElementById('certContent');
+    if (!cert) return;
+    const html = cert.outerHTML;
+    const win = window.open('', '_blank', 'width=780,height=700');
+    win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>CodeArena Certificate</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; display: flex; justify-content: center; align-items: flex-start; padding: 2rem; font-family: 'Inter', sans-serif; }
+  .certificate { background:#fff; border-radius:14px; padding:2.75rem 3.25rem; text-align:center; color:#1a1a2e; position:relative; border:2px solid #7c3aed; max-width:660px; width:100%; }
+  .cert-top-accent,.cert-bot-accent { position:absolute; left:14px; right:14px; height:4px; border-radius:2px; background:linear-gradient(90deg,#7c3aed,#06b6d4,#10b981); }
+  .cert-top-accent { top:14px; } .cert-bot-accent { bottom:14px; }
+  .cert-logo-row { margin-bottom:.4rem; } .cert-logo-row img { height:54px; }
+  .cert-headline { font-family:'Press Start 2P',monospace; font-size:.6rem; color:#7c3aed; letter-spacing:2px; margin:.6rem 0 .4rem; }
+  .cert-subtitle { font-size:.82rem; color:#6b7280; margin-bottom:.4rem; }
+  .cert-student-name { font-size:1.85rem; font-weight:800; color:#111827; font-style:italic; border-bottom:2px solid #e5e7eb; padding-bottom:.45rem; margin:.6rem 2.5rem .8rem; }
+  .cert-body-text { font-size:.88rem; color:#4b5563; margin:.6rem 0 .25rem; }
+  .cert-course-name { font-size:1.25rem; font-weight:800; color:#7c3aed; margin:.2rem 0 .8rem; }
+  .cert-mastery-pill { display:inline-block; background:linear-gradient(135deg,#7c3aed,#06b6d4); color:#fff; padding:.4rem 1.4rem; border-radius:30px; font-size:.88rem; font-weight:700; margin-bottom:1.4rem; }
+  .cert-stats-row { display:flex; justify-content:center; gap:2.5rem; margin-bottom:1.2rem; }
+  .cert-stat-val { font-size:1.3rem; font-weight:800; color:#111827; display:block; }
+  .cert-stat-lbl { font-size:.68rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; }
+  .cert-issued { font-size:.78rem; color:#9ca3af; margin-bottom:1.4rem; }
+  .cert-footer-row { display:flex; justify-content:center; }
+  .cert-sig-line { font-size:.95rem; font-weight:700; color:#1a1a2e; border-top:1px solid #e5e7eb; padding-top:.4rem; }
+  .cert-sig-sub { font-size:.7rem; color:#9ca3af; }
+  @media print { body { padding:0; } .certificate { border-radius:0; } }
+</style>
+</head><body>${html}</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 600);
 }
 
 function showAlert(msg) {
