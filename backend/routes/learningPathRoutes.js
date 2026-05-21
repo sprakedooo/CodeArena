@@ -37,7 +37,7 @@ router.get('/', authMiddleware, async (req, res) => {
             params.push(language);
         }
 
-        sql += ' GROUP BY lp.path_id ORDER BY lp.order_index ASC';
+        sql += ' GROUP BY lp.path_id HAVING lesson_count > 0 ORDER BY lp.order_index ASC';
 
         const [paths] = await pool.query(sql, params);
 
@@ -141,18 +141,21 @@ async function sendProgressSummary(userId, res) {
     const lessonCountMap = {};
     lessonCounts.forEach(r => { lessonCountMap[r.path_id] = r.cnt; });
 
-    const pathSummaries = paths.map(path => {
-        const lessons  = progressRows.filter(r => r.path_id === path.path_id);
-        const completed = lessons.filter(r => r.status === 'completed').length;
-        const total    = lessonCountMap[path.path_id] || 0;
-        return {
-            ...path,
-            lesson_count:    total,
-            completed_count: completed,
-            progress_pct:    total ? Math.round((completed / total) * 100) : 0,
-            xp_earned:       lessons.filter(r => r.status === 'completed').reduce((s, r) => s + (r.xp_reward || 0), 0),
-        };
-    });
+    const pathSummaries = paths
+        .map(path => {
+            const lessons   = progressRows.filter(r => r.path_id === path.path_id);
+            const completed = lessons.filter(r => r.status === 'completed').length;
+            const total     = lessonCountMap[path.path_id] || 0;
+            return {
+                ...path,
+                lesson_count:    total,
+                completed_count: completed,
+                progress_pct:    total ? Math.round((completed / total) * 100) : 0,
+                xp_earned:       lessons.filter(r => r.status === 'completed').reduce((s, r) => s + (r.xp_reward || 0), 0),
+            };
+        })
+        // Don't send empty paths — they have no content and confuse the dashboard
+        .filter(p => p.lesson_count > 0);
 
     res.json({
         success: true,
