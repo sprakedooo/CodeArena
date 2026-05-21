@@ -482,16 +482,16 @@
 
     <!-- Tab bar -->
     <div class="tab-bar" style="margin-top:0; border-radius:0 0 0 0;">
-        <button class="tab-btn active" onclick="switchTab('stream',this)">
+        <button class="tab-btn active" data-tab="stream"    onclick="switchTab('stream',this)">
             <span class="material-symbols-outlined">campaign</span>Stream
         </button>
-        <button class="tab-btn" onclick="switchTab('classwork',this)">
+        <button class="tab-btn" data-tab="classwork" onclick="switchTab('classwork',this)">
             <span class="material-symbols-outlined">assignment</span>Classwork
         </button>
-        <button class="tab-btn" onclick="switchTab('play',this)">
+        <button class="tab-btn" data-tab="play"      onclick="switchTab('play',this)">
             <span class="material-symbols-outlined">sports_esports</span>Play
         </button>
-        <button class="tab-btn" onclick="switchTab('progress',this)">
+        <button class="tab-btn" data-tab="progress"  onclick="switchTab('progress',this)">
             <span class="material-symbols-outlined">bar_chart</span>Progress
         </button>
     </div>
@@ -662,7 +662,7 @@
                 <div><div class="end-stat-val" id="endTotal">0</div><div class="end-stat-lbl">Total</div></div>
                 <div><div class="end-stat-val" id="endAcc">0%</div><div class="end-stat-lbl">Accuracy</div></div>
             </div>
-            <button class="btn btn-primary" onclick="switchTab('progress', document.querySelectorAll('.tab-btn')[3])" style="font-size:.85rem;">
+            <button class="btn btn-primary" onclick="switchTab('progress', document.querySelector('.tab-btn[data-tab=progress]'))" style="font-size:.85rem;">
                 <span class="material-symbols-outlined" style="font-size:1rem;">bar_chart</span>
                 View My Progress
             </button>
@@ -1131,6 +1131,18 @@ function renderChallenges(qs) {
 }
 
 // ── Play / Game session ────────────────────────────────────────────────────────
+let _sessionPoll = null;
+
+function startSessionPolling() {
+    if (_sessionPoll) return; // already running
+    _sessionPoll = setInterval(checkForSession, 5000);
+}
+
+function stopSessionPolling() {
+    clearInterval(_sessionPoll);
+    _sessionPoll = null;
+}
+
 async function checkForSession() {
     try {
         const res  = await fetch(API + '/classrooms/' + classroomId + '/sessions/active', { headers: getAuthHeaders() });
@@ -1138,6 +1150,8 @@ async function checkForSession() {
         const data = await res.json();
         const sess = data.session || data;
         if (!sess || !sess.session_id) { showIdle(); return; }
+        // Session found — stop polling, start the game
+        stopSessionPolling();
         sessionId = sess.session_id;
         const qs  = data.questions || sess.questions || [];
         if (!qs.length) { showWaiting(); return; }
@@ -1154,6 +1168,7 @@ function showIdle() {
     document.getElementById('playWait').style.display   = 'none';
     document.getElementById('playActive').style.display = 'none';
     document.getElementById('playEnd').style.display    = 'none';
+    startSessionPolling(); // auto-poll until a session goes live
 }
 function showWaiting() {
     document.getElementById('playIdle').style.display   = 'none';
@@ -1171,7 +1186,16 @@ function showQuestion() {
 
     const q = questions[qIndex];
     document.getElementById('qMeta').textContent   = 'Question ' + (qIndex + 1) + ' of ' + questions.length + ' · ' + (q.difficulty || 'medium');
-    document.getElementById('qText').textContent   = q.question_text || q.text || '—';
+
+    // Render question text; if it contains a code snippet, split it out into a <pre> block
+    const rawText = q.question_text || q.text || '—';
+    const codeSnippet = q.code_snippet || q.codeSnippet || '';
+    const qTextEl = document.getElementById('qText');
+    if (codeSnippet) {
+        qTextEl.innerHTML = esc(rawText) + '<pre style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-top:.75rem;font-size:.85rem;overflow-x:auto;white-space:pre-wrap;">' + esc(codeSnippet) + '</pre>';
+    } else {
+        qTextEl.textContent = rawText;
+    }
     document.getElementById('hudQ').textContent    = (qIndex + 1) + '/' + questions.length;
     document.getElementById('qFeedback').className = 'q-feedback';
     document.getElementById('nextQBtn').style.display = 'none';

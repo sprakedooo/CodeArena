@@ -269,10 +269,16 @@ router.get('/:id', async (req, res) => {
         try {
             const rows = await db.query(
                 `SELECT c.*, u.full_name AS facultyName,
-                    COUNT(DISTINCT e.student_id) AS studentCount
+                    COUNT(DISTINCT e.student_id)  AS studentCount,
+                    COUNT(DISTINCT l.lesson_id)   AS lesson_count,
+                    COUNT(DISTINCT q.question_id) AS challenge_count,
+                    COUNT(DISTINCT s.session_id)  AS session_count
                  FROM classrooms c
                  JOIN users u ON u.user_id = c.faculty_id
                  LEFT JOIN classroom_enrollments e ON e.classroom_id = c.classroom_id AND e.status = 'active'
+                 LEFT JOIN classroom_lessons l      ON l.classroom_id = c.classroom_id
+                 LEFT JOIN classroom_questions q    ON q.classroom_id = c.classroom_id
+                 LEFT JOIN classroom_sessions s     ON s.classroom_id = c.classroom_id
                  WHERE c.classroom_id = ?
                  GROUP BY c.classroom_id`,
                 [classroomId]
@@ -286,8 +292,11 @@ router.get('/:id', async (req, res) => {
 
     const classroom = mockClassrooms.find(c => c.id === classroomId);
     if (!classroom) return res.status(404).json({ success: false, message: 'Classroom not found' });
-    const studentCount = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active').length;
-    res.json({ success: true, classroom: { ...classroom, studentCount }, source: 'mock' });
+    const studentCount    = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active').length;
+    const lesson_count    = mockClLessons.filter(l => l.classroomId === classroomId).length;
+    const challenge_count = mockClQuestions.filter(q => q.classroomId === classroomId).length;
+    const session_count   = mockClSessions.filter(s => s.classroomId === classroomId).length;
+    res.json({ success: true, classroom: { ...classroom, studentCount, lesson_count, challenge_count, session_count }, source: 'mock' });
 });
 
 // DELETE /api/classrooms/:id — Delete classroom (faculty only, password required)

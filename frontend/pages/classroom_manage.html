@@ -1535,6 +1535,8 @@
             document.getElementById('sessionsCount').textContent = sessionsList.length;
             document.getElementById('statSessions').textContent  = sessionsList.length;
             renderSessions();
+            // If a session is already live when the page loads, start polling immediately
+            if (sessionsList.some(s => s.status === 'active')) startLivePolling();
         } catch { document.getElementById('sessionsContainer').innerHTML = `<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`; }
     }
 
@@ -1664,7 +1666,11 @@
         const errEl=document.getElementById('questionErr');
         if (!question_text||!correct_answer){errEl.textContent='Question and correct answer are required.';errEl.style.display='block';return;}
         let options=null;
-        if (type==='mcq'){const[a,b,c,d]=['optA','optB','optC','optD'].map(x=>document.getElementById(x).value.trim());options=[a&&`A) ${a}`,b&&`B) ${b}`,c&&`C) ${c}`,d&&`D) ${d}`].filter(Boolean);}
+        if (type==='mcq'){
+            const[a,b,c,d]=['optA','optB','optC','optD'].map(x=>document.getElementById(x).value.trim());
+            options=[a&&`A) ${a}`,b&&`B) ${b}`,c&&`C) ${c}`,d&&`D) ${d}`].filter(Boolean);
+            if (options.length < 2){errEl.textContent='MCQ questions require at least 2 answer options (A and B).';errEl.style.display='block';return;}
+        }
         const btn=document.getElementById('questionSaveBtn');btn.disabled=true;btn.textContent='Saving…';errEl.style.display='none';
         try {
             const url=id?`${API}/classrooms/${classroomId}/questions/${id}`:`${API}/classrooms/${classroomId}/questions`;
@@ -1695,7 +1701,7 @@
     function renderSessionQuestionPicker() {
         const picker=document.getElementById('sessionQuestionPicker');
         if (!classroomQuestions.length){picker.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:8px 0;">No challenges yet. Add some in the Classwork tab first.</div>`;return;}
-        picker.innerHTML=classroomQuestions.map(q=>`<label style="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:.83rem;color:var(--text);border-bottom:1px solid var(--border);"><input type="checkbox" value="${q.question_id||q.id}" style="accent-color:var(--primary);width:15px;height:15px;"><span>${escHtml((q.question_text||q.questionText||'').substring(0,70))}…</span></label>`).join('');
+        picker.innerHTML=classroomQuestions.map(q=>{const txt=(q.question_text||q.questionText||'');const preview=txt.length>70?txt.substring(0,70)+'…':txt;return`<label style="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:.83rem;color:var(--text);border-bottom:1px solid var(--border);"><input type="checkbox" value="${q.question_id||q.id}" style="accent-color:var(--primary);width:15px;height:15px;"><span>${escHtml(preview)}</span></label>`;}).join('');
     }
 
     async function createSession() {
@@ -1726,19 +1732,18 @@
         try {
             const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{headers:getAuthHeaders()});
             const data=await res.json();const fresh=data.success?(data.sessions||[]):[];
-            sessionsList=fresh;const active=fresh.filter(s=>s.status==='active');
-            for (const s of active){const sid=s.session_id||s.id;fetchAnswerCount(sid);fetchMonitor(sid);}
+            const hadActive = sessionsList.some(s=>s.status==='active');
+            sessionsList=fresh;
+            const active=fresh.filter(s=>s.status==='active');
+            // Re-render if session statuses changed (e.g. pending→active or active→closed)
+            const hasActive = active.length > 0;
+            if (hadActive !== hasActive) renderSessions();
+            for (const s of active){const sid=s.session_id||s.id;fetchMonitor(sid);}
             if (!active.length) stopLivePolling();
         } catch(_){}
     }
 
-    async function fetchAnswerCount(sessionId) {
-        try {
-            const res=await fetch(`${API}/classrooms/${classroomId}/analytics`,{headers:getAuthHeaders()});
-            const data=await res.json();const el=document.getElementById(`answerCount-${sessionId}`);
-            if (el&&data.success){const count=data.analytics?.totalAnswers||0;el.textContent=`· ${count} response${count!==1?'s':''} so far`;}
-        } catch(_){}
-    }
+    // fetchAnswerCount removed — response count is now updated by fetchMonitor below
 
     async function fetchMonitor(sessionId) {
         try {
@@ -1748,6 +1753,9 @@
             if (refreshEl) refreshEl.textContent=`Last updated ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
             if (!data.success){rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:6px 0;">Monitor unavailable.</div>`;return;}
             const{monitor=[],totalQuestions=0}=data;
+            // Update the response count chip in the session card header
+            const countEl=document.getElementById(`answerCount-${sessionId}`);
+            if (countEl){const respondents=monitor.filter(m=>(m.answered||0)>0).length;countEl.textContent=`· ${respondents} student${respondents!==1?'s':''} responding`;}
             if (!monitor.length){rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:8px 0;">No students joined yet.</div>`;return;}
             const sorted=[...monitor].sort((a,b)=>(b.points||0)-(a.points||0));
             rowsEl.innerHTML=sorted.map(m=>{
