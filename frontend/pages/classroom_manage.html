@@ -448,36 +448,6 @@
         }
         .ai-insight-loading { color:var(--text-muted); font-style:italic; }
 
-        /* ══ SESSIONS ════════════════════════════════════════════════════ */
-        .sessions-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-        .sessions-header h2 { font-size:.95rem; font-weight:700; color:var(--text); margin:0; display:flex; align-items:center; gap:8px; }
-        .sessions-list { display:flex; flex-direction:column; gap:14px; }
-        .session-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-        .session-card-main { display:flex; align-items:center; gap:16px; padding:18px 20px; }
-        .session-card.live { border-color:rgba(16,185,129,.35); background:linear-gradient(135deg,var(--bg-card) 0%,rgba(16,185,129,.03) 100%); }
-        .session-info { flex:1; min-width:0; }
-        .session-title { font-size:.95rem; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-        .live-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(16,185,129,.15); color:var(--success); border:1px solid rgba(16,185,129,.3); border-radius:20px; font-size:.6rem; font-weight:700; letter-spacing:1px; padding:2px 9px; }
-        .live-dot { width:6px; height:6px; background:var(--success); border-radius:50%; animation:livePulse 1.2s ease-in-out infinite; }
-        @keyframes livePulse { 0%,100%{opacity:1}50%{opacity:.35} }
-        .session-meta { font-size:.8rem; color:var(--text-secondary); margin-top:4px; }
-        .status-pill { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:4px 12px; border-radius:20px; flex-shrink:0; }
-        .status-pill.pending  { background:rgba(245,158,11,.12); color:var(--warning); border:1px solid rgba(245,158,11,.25); }
-        .status-pill.active   { background:rgba(16,185,129,.12); color:var(--success); border:1px solid rgba(16,185,129,.25); }
-        .status-pill.closed   { background:var(--bg-surface); color:var(--text-muted); border:1px solid var(--border); }
-        .session-actions { display:flex; gap:8px; flex-shrink:0; }
-        .monitor-panel { background:rgba(16,185,129,.04); border-top:1px solid rgba(16,185,129,.2); padding:18px 20px; }
-        .monitor-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-        .monitor-title { font-size:.82rem; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; }
-        .monitor-refresh { font-size:.72rem; color:var(--text-muted); }
-        .monitor-row { display:grid; grid-template-columns:160px 1fr 120px 70px; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); }
-        .monitor-row:last-child { border-bottom:none; }
-        .monitor-name { font-size:.8rem; font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .monitor-bar-wrap { height:6px; background:var(--bg-surface); border-radius:3px; overflow:hidden; }
-        .monitor-bar-fill { height:100%; border-radius:3px; transition:width .3s; }
-        .monitor-stats { font-size:.75rem; color:var(--text-secondary); text-align:right; }
-        .monitor-pts { font-family:'Press Start 2P',monospace; font-size:.62rem; color:var(--xp-gold); text-align:right; }
-
         /* ══ SHARED EMPTIES ══════════════════════════════════════════════ */
         .empty-state { text-align:center; padding:36px 16px; color:var(--text-muted); }
         .empty-state-icon { font-size:2rem; display:block; margin-bottom:8px; opacity:.5; }
@@ -563,7 +533,6 @@
                     <div class="hero-stat"><span class="hero-stat-val" id="statStudents">—</span><span class="hero-stat-label">Students</span></div>
                     <div class="hero-stat"><span class="hero-stat-val" id="statLessons">—</span><span class="hero-stat-label">Lessons</span></div>
                     <div class="hero-stat"><span class="hero-stat-val" id="statChallenges">—</span><span class="hero-stat-label">Challenges</span></div>
-                    <div class="hero-stat"><span class="hero-stat-val" id="statSessions">—</span><span class="hero-stat-label">Sessions</span></div>
                 </div>
             </div>
         </div>
@@ -579,9 +548,6 @@
         </button>
         <button class="tab-btn" onclick="switchTab('people',this)">
             <span class="material-symbols-outlined">group</span>Students
-        </button>
-        <button class="tab-btn" onclick="switchTab('sessions',this)">
-            <span class="material-symbols-outlined">sports_esports</span>Sessions
         </button>
     </div>
 
@@ -741,21 +707,6 @@
     </div>
 
     <!-- ── SESSIONS ───────────────────────────────────────────────────── -->
-    <div class="tab-panel" id="tab-sessions">
-        <div class="sessions-header">
-            <h2>
-                <span class="material-symbols-outlined" style="font-size:1.1rem;color:var(--primary);">sports_esports</span>
-                Game Sessions
-                <span class="cw-count" id="sessionsCount">0</span>
-            </h2>
-            <button class="btn btn-primary" style="font-size:.8rem;" onclick="openModal('session')">
-                <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Create Session
-            </button>
-        </div>
-        <div class="sessions-list" id="sessionsContainer">
-            <div class="loading-text">Loading sessions…</div>
-        </div>
-    </div>
 
 </main>
 
@@ -901,21 +852,6 @@
         <div class="modal-actions">
             <button class="btn btn-outline" onclick="closeModal('questionModal')">Cancel</button>
             <button class="btn btn-primary" id="questionSaveBtn" onclick="saveQuestion()">Save Challenge</button>
-        </div>
-    </div>
-</div>
-
-<!-- ══ SESSION MODAL ═════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="sessionModal" onclick="handleOverlayClick(event,'sessionModal')">
-    <div class="modal-box" style="padding:28px;">
-        <div class="modal-title">Create Session</div>
-        <div class="modal-field"><label>Session Title *</label><input type="text" class="form-input" id="sessionTitle" placeholder="e.g. Week 3 Quiz"></div>
-        <div class="modal-field"><label>Game Mode</label><select class="form-input" id="sessionMode"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option><option value="ordering">Code Ordering</option></select></div>
-        <div class="modal-field"><label>Select Challenges</label><div id="sessionQuestionPicker" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--bg-surface);"><div class="loading-text" style="padding:12px;">Loading challenges…</div></div></div>
-        <div class="err-msg" id="sessionErr"></div>
-        <div class="modal-actions">
-            <button class="btn btn-outline" onclick="closeModal('sessionModal')">Cancel</button>
-            <button class="btn btn-primary" id="sessionSaveBtn" onclick="createSession()">Create Session</button>
         </div>
     </div>
 </div>
@@ -1497,7 +1433,7 @@
     function renderChallenges() {
         const el = document.getElementById('challengesList');
         if (!classroomQuestions.length) {
-            el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">❓</span><div class="empty-state-title">No challenges yet</div><div class="empty-state-sub">Add questions to use in game sessions</div></div>`;
+            el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">❓</span><div class="empty-state-title">No challenges yet</div><div class="empty-state-sub">Add questions to challenge your students</div></div>`;
             return;
         }
         const typeLabel = {mcq:'MCQ',fill_blank:'Fill Blank',output_pred:'Output',ordering:'Ordering'};
@@ -1570,48 +1506,6 @@
         }).join('');
     }
 
-    // ── Sessions ──────────────────────────────────────────────────────────────
-    let sessionsList = [];
-
-    async function loadSessions() {
-        try {
-            const res  = await fetch(`${API}/classrooms/${classroomId}/sessions`, {headers:getAuthHeaders()});
-            const data = await res.json();
-            sessionsList = data.success ? (data.sessions||[]) : [];
-            document.getElementById('sessionsCount').textContent = sessionsList.length;
-            document.getElementById('statSessions').textContent  = sessionsList.length;
-            renderSessions();
-            // If a session is already live when the page loads, start polling immediately
-            if (sessionsList.some(s => s.status === 'active')) startLivePolling();
-        } catch { document.getElementById('sessionsContainer').innerHTML = `<div class="loading-text" style="color:var(--danger);">Failed to load sessions.</div>`; }
-    }
-
-    function renderSessions() {
-        const container = document.getElementById('sessionsContainer');
-        if (!sessionsList.length) {
-            container.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🎮</span><div class="empty-state-title">No sessions yet</div><div class="empty-state-sub">Create a session and students can join with the classroom key</div></div>`;
-            return;
-        }
-        container.innerHTML = sessionsList.map(s => {
-            const sid = s.session_id||s.id;
-            const isLive = s.status==='active';
-            return `<div class="session-card ${isLive?'live':''}">
-                <div class="session-card-main">
-                    <div class="session-info">
-                        <div class="session-title">${isLive?`<span class="live-badge"><span class="live-dot"></span>LIVE</span>`:''} ${escHtml(s.title)}</div>
-                        <div class="session-meta">Mode: ${s.game_mode||'—'} · Created ${relativeTime(s.created_at||s.createdAt)}${isLive?`<span id="answerCount-${sid}" style="color:var(--success);margin-left:8px;">· Loading…</span>`:''}</div>
-                    </div>
-                    <span class="status-pill ${s.status}">${s.status}</span>
-                    <div class="session-actions">
-                        ${s.status==='pending'?`<button class="btn btn-primary" style="font-size:.78rem;" onclick="setSessionStatus(${sid},'active')">▶ Launch</button>`:''}
-                        ${isLive?`<button class="btn btn-outline" style="font-size:.78rem;color:var(--danger);border-color:var(--danger);" onclick="setSessionStatus(${sid},'closed')">■ End</button>`:''}
-                    </div>
-                </div>
-                ${isLive?`<div class="monitor-panel" id="monitor-${sid}"><div class="monitor-header"><span class="monitor-title"><span class="material-symbols-outlined" style="font-size:.95rem;color:var(--success);">sensors</span>Live Student Monitor</span><span class="monitor-refresh" id="monitorRefresh-${sid}">Refreshing…</span></div><div id="monitorRows-${sid}"><div class="loading-text" style="padding:8px 0;">Waiting for students…</div></div></div>`:''}
-            </div>`;
-        }).join('');
-    }
-
     // ── Modals ────────────────────────────────────────────────────────────────
     function openModal(type) {
         if (type === 'lesson') {
@@ -1633,12 +1527,6 @@
             document.getElementById('questionErr').style.display = 'none';
             toggleMCQOptions();
             document.getElementById('questionModal').classList.add('open');
-        } else if (type === 'session') {
-            document.getElementById('sessionTitle').value = '';
-            document.getElementById('sessionMode').value = 'mcq';
-            document.getElementById('sessionErr').style.display = 'none';
-            renderSessionQuestionPicker();
-            document.getElementById('sessionModal').classList.add('open');
         }
     }
     function closeModal(id)              { document.getElementById(id).classList.remove('open'); }
@@ -1742,74 +1630,6 @@
         if (!confirm('Delete this challenge?')) return;
         try { await fetch(`${API}/classrooms/${classroomId}/questions/${id}`,{method:'DELETE',headers:getAuthHeaders()}); loadQuestions(); }
         catch { alert('Failed to delete challenge.'); }
-    }
-
-    function renderSessionQuestionPicker() {
-        const picker=document.getElementById('sessionQuestionPicker');
-        if (!classroomQuestions.length){picker.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:8px 0;">No challenges yet. Add some in the Classwork tab first.</div>`;return;}
-        picker.innerHTML=classroomQuestions.map(q=>{const txt=(q.question_text||q.questionText||'');const preview=txt.length>70?txt.substring(0,70)+'…':txt;return`<label style="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:.83rem;color:var(--text);border-bottom:1px solid var(--border);"><input type="checkbox" value="${q.question_id||q.id}" style="accent-color:var(--primary);width:15px;height:15px;"><span>${escHtml(preview)}</span></label>`;}).join('');
-    }
-
-    async function createSession() {
-        const title=document.getElementById('sessionTitle').value.trim(),game_mode=document.getElementById('sessionMode').value;
-        const checked=[...document.querySelectorAll('#sessionQuestionPicker input[type=checkbox]:checked')].map(c=>parseInt(c.value));
-        const errEl=document.getElementById('sessionErr');
-        if (!title){errEl.textContent='Session title is required.';errEl.style.display='block';return;}
-        if (!checked.length){errEl.textContent='Select at least one challenge.';errEl.style.display='block';return;}
-        const btn=document.getElementById('sessionSaveBtn');btn.disabled=true;btn.textContent='Creating…';errEl.style.display='none';
-        try {
-            const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({title,game_mode,question_ids:checked})});
-            const data=await res.json();if (!data.success) throw new Error(data.message);
-            closeModal('sessionModal');loadSessions();
-        } catch(err){errEl.textContent=err.message||'Failed.';errEl.style.display='block';}
-        finally{btn.disabled=false;btn.textContent='Create Session';}
-    }
-
-    async function setSessionStatus(id,status) {
-        try { await fetch(`${API}/classrooms/${classroomId}/sessions/${id}`,{method:'PATCH',headers:getAuthHeaders(),body:JSON.stringify({status})}); await loadSessions(); if (status==='active') startLivePolling(); if (status==='closed') stopLivePolling(); }
-        catch { alert('Failed to update session.'); }
-    }
-
-    let livePoll=null;
-    function startLivePolling(){if (livePoll) return;livePoll=setInterval(pollLiveSessions,5000);pollLiveSessions();}
-    function stopLivePolling(){clearInterval(livePoll);livePoll=null;}
-
-    async function pollLiveSessions() {
-        try {
-            const res=await fetch(`${API}/classrooms/${classroomId}/sessions`,{headers:getAuthHeaders()});
-            const data=await res.json();const fresh=data.success?(data.sessions||[]):[];
-            const hadActive = sessionsList.some(s=>s.status==='active');
-            sessionsList=fresh;
-            const active=fresh.filter(s=>s.status==='active');
-            // Re-render if session statuses changed (e.g. pending→active or active→closed)
-            const hasActive = active.length > 0;
-            if (hadActive !== hasActive) renderSessions();
-            for (const s of active){const sid=s.session_id||s.id;fetchMonitor(sid);}
-            if (!active.length) stopLivePolling();
-        } catch(_){}
-    }
-
-    // fetchAnswerCount removed — response count is now updated by fetchMonitor below
-
-    async function fetchMonitor(sessionId) {
-        try {
-            const res=await fetch(`${API}/classrooms/${classroomId}/sessions/${sessionId}/monitor`,{headers:getAuthHeaders()});
-            const data=await res.json();const rowsEl=document.getElementById(`monitorRows-${sessionId}`);const refreshEl=document.getElementById(`monitorRefresh-${sessionId}`);
-            if (!rowsEl) return;
-            if (refreshEl) refreshEl.textContent=`Last updated ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
-            if (!data.success){rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:6px 0;">Monitor unavailable.</div>`;return;}
-            const{monitor=[],totalQuestions=0}=data;
-            // Update the response count chip in the session card header
-            const countEl=document.getElementById(`answerCount-${sessionId}`);
-            if (countEl){const respondents=monitor.filter(m=>(m.answered||0)>0).length;countEl.textContent=`· ${respondents} student${respondents!==1?'s':''} responding`;}
-            if (!monitor.length){rowsEl.innerHTML=`<div style="color:var(--text-muted);font-size:.8rem;padding:8px 0;">No students joined yet.</div>`;return;}
-            const sorted=[...monitor].sort((a,b)=>(b.points||0)-(a.points||0));
-            rowsEl.innerHTML=sorted.map(m=>{
-                const answered=m.answered||0,total=totalQuestions||1,pct=Math.min(100,Math.round((answered/total)*100));
-                const barColor=m.correct/Math.max(answered,1)>=.7?'var(--success)':m.correct/Math.max(answered,1)>=.4?'var(--warning)':'var(--danger)';
-                return `<div class="monitor-row"><div class="monitor-name" title="${escHtml(m.fullName||m.full_name||'Student')}">${escHtml(m.fullName||m.full_name||'Student')}</div><div class="monitor-bar-wrap"><div class="monitor-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><div class="monitor-stats">${answered}/${total} · ${m.correct||0} correct</div><div class="monitor-pts">${m.points||0} pts</div></div>`;
-            }).join('');
-        } catch(_){}
     }
 
     // ── Assignments (modals) ──────────────────────────────────────────────────
@@ -1926,7 +1746,6 @@
     loadStudents();
     loadLessons();
     loadQuestions();
-    loadSessions();
     loadAssignments();
 </script>
 

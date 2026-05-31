@@ -296,13 +296,6 @@
         </div>
     </div>
     <div class="stat-chip">
-        <div class="stat-chip-icon chip-green"><span class="material-symbols-outlined">play_circle</span></div>
-        <div>
-            <div class="stat-chip-val" id="statSessions">—</div>
-            <div class="stat-chip-lbl">Sessions Run</div>
-        </div>
-    </div>
-    <div class="stat-chip">
         <div class="stat-chip-icon chip-gold"><span class="material-symbols-outlined">menu_book</span></div>
         <div>
             <div class="stat-chip-val" id="statLessons">—</div>
@@ -471,8 +464,6 @@ function updateStats(classrooms) {
     document.getElementById('statClassrooms').textContent = classrooms.length;
     const totalStudents = classrooms.reduce((s, c) => s + (c.student_count || c.studentCount || 0), 0);
     document.getElementById('statStudents').textContent = totalStudents;
-    const totalSessions = classrooms.reduce((s, c) => s + (c.session_count || 0), 0);
-    document.getElementById('statSessions').textContent = totalSessions;
     const langs = new Set(classrooms.map(c => (c.language || 'python').toLowerCase()));
     document.getElementById('statLessons').textContent = langs.size;
 }

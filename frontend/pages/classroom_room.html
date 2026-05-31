@@ -253,72 +253,6 @@
         .level-pill.advanced     { background:rgba(239,68,68,.12);   color:var(--danger);   border:1px solid rgba(239,68,68,.22); }
         .type-chip { display:inline-flex; align-items:center; gap:4px; font-size:.7rem; color:var(--text-secondary); background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 7px; }
 
-        /* ══ PLAY ════════════════════════════════════════════════════════ */
-        .session-idle {
-            text-align:center; padding:3.5rem 1.5rem;
-            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
-        }
-        .session-idle .material-symbols-outlined { font-size:3rem; color:var(--primary); display:block; margin-bottom:.75rem; }
-        .session-idle h3 { font-size:1rem; font-weight:700; color:var(--text); margin:0 0 .4rem; }
-        .session-idle p  { font-size:.82rem; color:var(--text-muted); margin:0 0 1.25rem; }
-
-        .live-badge {
-            display:inline-flex; align-items:center; gap:6px;
-            background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.25);
-            border-radius:20px; padding:5px 12px; font-size:.75rem; font-weight:700; color:var(--success);
-            margin-bottom:1rem;
-        }
-        .live-dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:livepulse 1.4s ease infinite; }
-        @keyframes livepulse { 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
-
-        .game-hud {
-            display:grid; grid-template-columns:repeat(4,1fr);
-            gap:.65rem; margin-bottom:1.25rem;
-        }
-        .hud-chip {
-            background:var(--bg-card); border:1px solid var(--border);
-            border-radius:10px; padding:.75rem .9rem; text-align:center;
-        }
-        .hud-val { font-size:1.15rem; font-weight:800; color:var(--text); }
-        .hud-lbl { font-size:.62rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-top:.15rem; }
-        .hud-timer .hud-val { color:#f87171; }
-        .hud-score .hud-val { color:#fbbf24; }
-        .hud-streak .hud-val { color:#f97316; }
-
-        .q-card {
-            background:var(--bg-card); border:1px solid var(--border);
-            border-radius:14px; padding:1.5rem; margin-bottom:1rem;
-        }
-        .q-meta { font-size:.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.75rem; }
-        .q-text { font-size:1rem; font-weight:600; color:var(--text); line-height:1.6; margin-bottom:1.1rem; }
-        .q-options { display:flex; flex-direction:column; gap:.5rem; }
-        .q-option {
-            background:var(--bg-surface); border:1px solid var(--border);
-            border-radius:8px; padding:.75rem 1rem;
-            cursor:pointer; transition:all .15s; font-size:.88rem; color:var(--text); text-align:left;
-        }
-        .q-option:hover:not(:disabled) { border-color:var(--primary); background:rgba(124,58,237,.08); }
-        .q-option.correct  { border-color:var(--success); background:rgba(16,185,129,.12); color:#34d399; }
-        .q-option.wrong    { border-color:var(--danger);  background:rgba(239,68,68,.12);  color:#f87171; }
-        .q-option:disabled { cursor:default; }
-        .q-feedback {
-            display:none; padding:.85rem 1rem; border-radius:8px;
-            font-size:.85rem; margin-top:.75rem; line-height:1.5;
-        }
-        .q-feedback.correct { display:block; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); color:#34d399; }
-        .q-feedback.wrong   { display:block; background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#f87171; }
-
-        .wait-screen, .end-screen {
-            text-align:center; padding:2.5rem 1.5rem;
-            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
-        }
-        .wait-screen .spinner { width:36px; height:36px; border-radius:50%; border:3px solid var(--bg-surface); border-top-color:var(--primary); animation:spin .8s linear infinite; margin:0 auto 1rem; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-        .end-score { font-size:2.5rem; font-weight:900; color:#fbbf24; margin:.5rem 0; }
-        .end-stats { display:flex; justify-content:center; gap:2rem; margin:1rem 0 1.5rem; }
-        .end-stat-val { font-size:1.1rem; font-weight:700; color:var(--text); display:block; }
-        .end-stat-lbl { font-size:.7rem; color:var(--text-muted); text-transform:uppercase; }
-
         /* ══ PROGRESS ════════════════════════════════════════════════════ */
         .progress-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:28px; }
         .progress-stat-card {
@@ -474,7 +408,6 @@
                 <div class="hero-stats">
                     <div class="hero-stat"><span class="hero-stat-val" id="heroLessons">0</span><span class="hero-stat-label">Lessons</span></div>
                     <div class="hero-stat"><span class="hero-stat-val" id="heroChallenges">0</span><span class="hero-stat-label">Challenges</span></div>
-                    <div class="hero-stat"><span class="hero-stat-val" id="heroSessions">0</span><span class="hero-stat-label">Sessions</span></div>
                 </div>
             </div>
         </div>
@@ -487,9 +420,6 @@
         </button>
         <button class="tab-btn" data-tab="classwork" onclick="switchTab('classwork',this)">
             <span class="material-symbols-outlined">assignment</span>Classwork
-        </button>
-        <button class="tab-btn" data-tab="play"      onclick="switchTab('play',this)">
-            <span class="material-symbols-outlined">sports_esports</span>Play
         </button>
         <button class="tab-btn" data-tab="progress"  onclick="switchTab('progress',this)">
             <span class="material-symbols-outlined">bar_chart</span>Progress
@@ -612,63 +542,6 @@
         </div>
     </div>
 
-    <!-- ══════════════ PLAY TAB ══════════════════════════════════════════ -->
-    <div id="tab-play" class="tab-panel">
-        <!-- Idle: no active session -->
-        <div class="session-idle" id="playIdle">
-            <span class="material-symbols-outlined">sports_esports</span>
-            <h3>No Active Session</h3>
-            <p>Your instructor will start a live game session soon. Check back here!</p>
-            <button class="btn btn-secondary" onclick="checkForSession()" style="font-size:.82rem;">
-                <span class="material-symbols-outlined" style="font-size:.95rem;">refresh</span>
-                Check Now
-            </button>
-        </div>
-
-        <!-- Session found: waiting for questions -->
-        <div class="wait-screen" id="playWait" style="display:none;">
-            <div class="live-badge"><div class="live-dot"></div>Session Live</div>
-            <div class="spinner"></div>
-            <p style="font-size:.88rem;color:var(--text-muted);">Session in progress — waiting for questions…</p>
-        </div>
-
-        <!-- Active question -->
-        <div id="playActive" style="display:none;">
-            <div class="game-hud">
-                <div class="hud-chip hud-score"><div class="hud-val" id="hudScore">0</div><div class="hud-lbl">Score</div></div>
-                <div class="hud-chip hud-streak"><div class="hud-val" id="hudStreak">0🔥</div><div class="hud-lbl">Streak</div></div>
-                <div class="hud-chip hud-timer"><div class="hud-val" id="hudTimer">30</div><div class="hud-lbl">Seconds</div></div>
-                <div class="hud-chip"><div class="hud-val" id="hudQ">1/—</div><div class="hud-lbl">Question</div></div>
-            </div>
-            <div class="q-card" id="qCard">
-                <div class="q-meta" id="qMeta">Question</div>
-                <div class="q-text" id="qText">—</div>
-                <div class="q-options" id="qOptions"></div>
-                <div class="q-feedback" id="qFeedback"></div>
-            </div>
-            <button id="nextQBtn" class="btn btn-primary" style="display:none;width:100%;justify-content:center;" onclick="nextQuestion()">
-                Next Question →
-            </button>
-        </div>
-
-        <!-- End screen -->
-        <div class="end-screen" id="playEnd" style="display:none;">
-            <span class="material-symbols-outlined" style="font-size:2.5rem;color:#fbbf24;">emoji_events</span>
-            <div style="font-size:.85rem;color:var(--text-muted);margin-top:.5rem;">Session Complete!</div>
-            <div class="end-score" id="endScore">0</div>
-            <div style="font-size:.82rem;color:var(--text-muted);">points earned</div>
-            <div class="end-stats">
-                <div><div class="end-stat-val" id="endCorrect">0</div><div class="end-stat-lbl">Correct</div></div>
-                <div><div class="end-stat-val" id="endTotal">0</div><div class="end-stat-lbl">Total</div></div>
-                <div><div class="end-stat-val" id="endAcc">0%</div><div class="end-stat-lbl">Accuracy</div></div>
-            </div>
-            <button class="btn btn-primary" onclick="switchTab('progress', document.querySelector('.tab-btn[data-tab=progress]'))" style="font-size:.85rem;">
-                <span class="material-symbols-outlined" style="font-size:1rem;">bar_chart</span>
-                View My Progress
-            </button>
-        </div>
-    </div>
-
     <!-- ══════════════ PROGRESS TAB ══════════════════════════════════════ -->
     <div id="tab-progress" class="tab-panel">
         <!-- My stats -->
@@ -757,18 +630,6 @@ function getAuthHeaders() {
     return { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
 }
 
-// ── Game state ─────────────────────────────────────────────────────────────────
-let sessionId  = null;
-let questions  = [];
-let qIndex     = 0;
-let score      = 0;
-let streak     = 0;
-let bestStreak = 0;
-let correct    = 0;
-let timerInt   = null;
-let timerSec   = 30;
-let answered   = false;
-
 // Completed lessons stored in localStorage per classroom
 const DONE_KEY = 'doneLesson_' + classroomId;
 function getDoneLessons() {
@@ -784,7 +645,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadClassroomInfo();
     loadAnnouncements();
     loadClasswork();
-    checkForSession();
     loadLeaderboard();
     loadMyProgress();
 });
@@ -803,7 +663,7 @@ async function loadClassroomInfo() {
         const count   = cl.student_count || cl.studentCount || 0;
         const lessons = cl.lesson_count  || cl.lessonCount  || 0;
         const challs  = cl.challenge_count || cl.challengeCount || 0;
-        const sessions= cl.session_count || cl.sessionCount || 0;
+
 
         document.title = name + ' – CodeArena';
         document.getElementById('breadcrumbName').textContent = name;
@@ -811,7 +671,7 @@ async function loadClassroomInfo() {
         document.getElementById('heroDesc').textContent       = desc;
         document.getElementById('heroLessons').textContent    = lessons;
         document.getElementById('heroChallenges').textContent = challs;
-        document.getElementById('heroSessions').textContent   = sessions;
+
 
         // Teacher badge
         const initials = faculty.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
@@ -1130,193 +990,6 @@ function renderChallenges(qs) {
     }).join('');
 }
 
-// ── Play / Game session ────────────────────────────────────────────────────────
-let _sessionPoll = null;
-
-function startSessionPolling() {
-    if (_sessionPoll) return; // already running
-    _sessionPoll = setInterval(checkForSession, 5000);
-}
-
-function stopSessionPolling() {
-    clearInterval(_sessionPoll);
-    _sessionPoll = null;
-}
-
-async function checkForSession() {
-    try {
-        const res  = await fetch(API + '/classrooms/' + classroomId + '/sessions/active', { headers: getAuthHeaders() });
-        if (!res.ok) { showIdle(); return; }
-        const data = await res.json();
-        const sess = data.session || data;
-        if (!sess || !sess.session_id) { showIdle(); return; }
-        // Session found — stop polling, start the game
-        stopSessionPolling();
-        sessionId = sess.session_id;
-        const qs  = data.questions || sess.questions || [];
-        if (!qs.length) { showWaiting(); return; }
-        questions = qs;
-        qIndex = 0; score = 0; streak = 0; bestStreak = 0; correct = 0;
-        showQuestion();
-    } catch {
-        showIdle();
-    }
-}
-
-function showIdle() {
-    document.getElementById('playIdle').style.display   = 'block';
-    document.getElementById('playWait').style.display   = 'none';
-    document.getElementById('playActive').style.display = 'none';
-    document.getElementById('playEnd').style.display    = 'none';
-    startSessionPolling(); // auto-poll until a session goes live
-}
-function showWaiting() {
-    document.getElementById('playIdle').style.display   = 'none';
-    document.getElementById('playWait').style.display   = 'block';
-    document.getElementById('playActive').style.display = 'none';
-    document.getElementById('playEnd').style.display    = 'none';
-}
-
-function showQuestion() {
-    if (qIndex >= questions.length) { showEnd(); return; }
-    document.getElementById('playIdle').style.display   = 'none';
-    document.getElementById('playWait').style.display   = 'none';
-    document.getElementById('playActive').style.display = 'block';
-    document.getElementById('playEnd').style.display    = 'none';
-
-    const q = questions[qIndex];
-    document.getElementById('qMeta').textContent   = 'Question ' + (qIndex + 1) + ' of ' + questions.length + ' · ' + (q.difficulty || 'medium');
-
-    // Render question text; if it contains a code snippet, split it out into a <pre> block
-    const rawText = q.question_text || q.text || '—';
-    const codeSnippet = q.code_snippet || q.codeSnippet || '';
-    const qTextEl = document.getElementById('qText');
-    if (codeSnippet) {
-        qTextEl.innerHTML = esc(rawText) + '<pre style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-top:.75rem;font-size:.85rem;overflow-x:auto;white-space:pre-wrap;">' + esc(codeSnippet) + '</pre>';
-    } else {
-        qTextEl.textContent = rawText;
-    }
-    document.getElementById('hudQ').textContent    = (qIndex + 1) + '/' + questions.length;
-    document.getElementById('qFeedback').className = 'q-feedback';
-    document.getElementById('nextQBtn').style.display = 'none';
-    answered = false;
-
-    const opts = parseOptions(q);
-    const correctAns = String(q.correct_answer || q.correctAnswer || opts[0]);
-    document.getElementById('qOptions').innerHTML = opts.map((o, i) =>
-        '<button class="q-option" onclick="selectOption(this,\'' + escQ(String(o)) + '\',\'' + escQ(correctAns) + '\',' + (q.question_id || q.id || 0) + ')">' +
-            '<span style="font-weight:700;margin-right:.5rem;">' + String.fromCharCode(65 + i) + '.</span>' + esc(String(o)) +
-        '</button>'
-    ).join('');
-
-    startTimer();
-}
-
-function parseOptions(q) {
-    try {
-        if (Array.isArray(q.options) && q.options.length)     return q.options;
-        if (q.options_json) { const p = JSON.parse(q.options_json); if (p && p.length) return p; }
-        if (Array.isArray(q.choices) && q.choices.length)     return q.choices;
-    } catch {}
-    return ['Option A', 'Option B', 'Option C', 'Option D'];
-}
-
-function startTimer() {
-    clearInterval(timerInt);
-    timerSec = 30;
-    document.getElementById('hudTimer').textContent = timerSec;
-    timerInt = setInterval(() => {
-        timerSec--;
-        document.getElementById('hudTimer').textContent = timerSec;
-        if (timerSec <= 0) { clearInterval(timerInt); if (!answered) autoWrong(); }
-    }, 1000);
-}
-
-function autoWrong() {
-    answered = true; streak = 0;
-    document.getElementById('hudStreak').textContent = '0🔥';
-    document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
-    const fb = document.getElementById('qFeedback');
-    fb.className   = 'q-feedback wrong';
-    fb.textContent = '⏱ Time\'s up!';
-    document.getElementById('nextQBtn').style.display = 'block';
-}
-
-function matchesCorrectAnswer(selected, correctAns) {
-    const sel     = selected.trim();
-    const correct = correctAns.trim();
-    if (!correct) return false;
-    if (sel === correct) return true;
-    // Faculty stored just a letter "A"/"B"/"C"/"D" → match if option starts with that letter
-    if (/^[A-Da-d]$/.test(correct)) {
-        return sel.toUpperCase().startsWith(correct.toUpperCase() + ')');
-    }
-    // Strip "A) " prefix from both sides and compare plain text
-    const strip = s => s.replace(/^[A-D]\)\s*/i, '').trim();
-    return strip(sel) === strip(correct);
-}
-
-async function selectOption(btn, selected, correctAns, questionId) {
-    if (answered) return;
-    answered = true;
-    clearInterval(timerInt);
-
-    const isCorrect = matchesCorrectAnswer(selected, correctAns);
-    btn.classList.add(isCorrect ? 'correct' : 'wrong');
-    document.querySelectorAll('.q-option').forEach(b => b.disabled = true);
-
-    if (isCorrect) {
-        score += 10; correct++; streak++;
-        if (streak > bestStreak) bestStreak = streak;
-        document.getElementById('hudScore').textContent  = score;
-        document.getElementById('hudStreak').textContent = streak + '🔥';
-    } else {
-        streak = 0;
-        document.getElementById('hudStreak').textContent = '0🔥';
-    }
-
-    const fb = document.getElementById('qFeedback');
-    fb.className   = 'q-feedback ' + (isCorrect ? 'correct' : 'wrong');
-    fb.textContent = isCorrect ? '✓ Correct! Well done.' : '✗ Incorrect. Correct answer: ' + correctAns;
-
-    if (sessionId && questionId) {
-        try {
-            await fetch(API + '/classrooms/' + classroomId + '/sessions/' + sessionId + '/answer', {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ questionId, selectedAnswer: selected, isCorrect })
-            });
-        } catch {}
-    }
-
-    document.getElementById('nextQBtn').style.display = 'block';
-}
-
-function nextQuestion() { qIndex++; showQuestion(); }
-
-function showEnd() {
-    clearInterval(timerInt);
-    document.getElementById('playIdle').style.display   = 'none';
-    document.getElementById('playWait').style.display   = 'none';
-    document.getElementById('playActive').style.display = 'none';
-    document.getElementById('playEnd').style.display    = 'block';
-
-    const acc = questions.length ? Math.round((correct / questions.length) * 100) : 0;
-    document.getElementById('endScore').textContent   = score;
-    document.getElementById('endCorrect').textContent = correct;
-    document.getElementById('endTotal').textContent   = questions.length;
-    document.getElementById('endAcc').textContent     = acc + '%';
-
-    // Update accuracy sidebar
-    document.getElementById('accuracyTxt').textContent      = acc + '%';
-    document.getElementById('accuracyBar').style.width      = acc + '%';
-    document.getElementById('statAccuracy').textContent     = acc + '%';
-    document.getElementById('statAnswered').textContent     = questions.length;
-    document.getElementById('statStreak').textContent       = bestStreak;
-
-    loadLeaderboard();
-}
-
 // ── Progress ───────────────────────────────────────────────────────────────────
 async function loadMyProgress() {
     try {
@@ -1572,7 +1245,6 @@ function switchTab(name, btn) {
     if (btn) btn.classList.add('active');
 
     if (name === 'progress') { loadLeaderboard(); loadAIFeedback(); }
-    if (name === 'play')     { checkForSession(); }
     if (name === 'classwork') { loadClasswork(); }
 }
 

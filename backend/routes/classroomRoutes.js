@@ -15,19 +15,15 @@
  *   POST   /api/classrooms/:id/questions           - Create challenge
  *   PUT    /api/classrooms/:id/questions/:qid      - Edit challenge
  *   DELETE /api/classrooms/:id/questions/:qid      - Delete challenge
- *   POST   /api/classrooms/:id/sessions            - Create game session
- *   PATCH  /api/classrooms/:id/sessions/:sid       - Start / close session
  *   GET    /api/classrooms/:id/analytics           - Classroom analytics
  *
  * STUDENT endpoints:
  *   POST   /api/classrooms/join                    - Enroll with key
  *   GET    /api/classrooms/enrolled                - My enrolled classrooms
  *   GET    /api/classrooms/:id/lessons             - View lessons (enrolled only)
- *   GET    /api/classrooms/:id/sessions/active     - Active session
- *   POST   /api/classrooms/:id/sessions/:sid/answer - Submit answer
  *
  * SHARED:
- *   GET    /api/classrooms/:id/leaderboard         - Session leaderboard
+ *   GET    /api/classrooms/:id/leaderboard         - Classroom leaderboard
  */
 
 const express = require('express');
@@ -46,7 +42,6 @@ let mockClassrooms   = [];
 let mockEnrollments  = [];
 let mockClLessons    = [];
 let mockClQuestions  = [];
-let mockClSessions   = [];
 let mockClAnswers    = [];
 let _nextId = { cl: 1, en: 1, le: 1, qu: 1, se: 1, an: 1 };
 
@@ -195,13 +190,11 @@ router.get('/mine', async (req, res) => {
                 `SELECT c.*,
                     COUNT(DISTINCT e.student_id)   AS studentCount,
                     COUNT(DISTINCT l.lesson_id)    AS lessonCount,
-                    COUNT(DISTINCT q.question_id)  AS questionCount,
-                    COUNT(DISTINCT s.session_id)   AS session_count
+                    COUNT(DISTINCT q.question_id)  AS questionCount
                  FROM classrooms c
                  LEFT JOIN classroom_enrollments e  ON e.classroom_id = c.classroom_id AND e.status = 'active'
                  LEFT JOIN classroom_lessons l      ON l.classroom_id = c.classroom_id
                  LEFT JOIN classroom_questions q    ON q.classroom_id = c.classroom_id
-                 LEFT JOIN classroom_sessions s     ON s.classroom_id = c.classroom_id
                  WHERE c.faculty_id = ?
                  GROUP BY c.classroom_id
                  ORDER BY c.created_at DESC`,
@@ -219,8 +212,7 @@ router.get('/mine', async (req, res) => {
             ...c,
             studentCount:  mockEnrollments.filter(e => e.classroomId === c.id && e.status === 'active').length,
             lessonCount:   mockClLessons.filter(l => l.classroomId === c.id).length,
-            questionCount: mockClQuestions.filter(q => q.classroomId === c.id).length,
-            session_count: mockClSessions.filter(s => s.classroomId === c.id).length
+            questionCount: mockClQuestions.filter(q => q.classroomId === c.id).length
         }));
     res.json({ success: true, classrooms, source: 'mock' });
 });
@@ -271,14 +263,12 @@ router.get('/:id', async (req, res) => {
                 `SELECT c.*, u.full_name AS facultyName,
                     COUNT(DISTINCT e.student_id)  AS studentCount,
                     COUNT(DISTINCT l.lesson_id)   AS lesson_count,
-                    COUNT(DISTINCT q.question_id) AS challenge_count,
-                    COUNT(DISTINCT s.session_id)  AS session_count
+                    COUNT(DISTINCT q.question_id) AS challenge_count
                  FROM classrooms c
                  JOIN users u ON u.user_id = c.faculty_id
                  LEFT JOIN classroom_enrollments e ON e.classroom_id = c.classroom_id AND e.status = 'active'
                  LEFT JOIN classroom_lessons l      ON l.classroom_id = c.classroom_id
                  LEFT JOIN classroom_questions q    ON q.classroom_id = c.classroom_id
-                 LEFT JOIN classroom_sessions s     ON s.classroom_id = c.classroom_id
                  WHERE c.classroom_id = ?
                  GROUP BY c.classroom_id`,
                 [classroomId]
@@ -295,8 +285,7 @@ router.get('/:id', async (req, res) => {
     const studentCount    = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active').length;
     const lesson_count    = mockClLessons.filter(l => l.classroomId === classroomId).length;
     const challenge_count = mockClQuestions.filter(q => q.classroomId === classroomId).length;
-    const session_count   = mockClSessions.filter(s => s.classroomId === classroomId).length;
-    res.json({ success: true, classroom: { ...classroom, studentCount, lesson_count, challenge_count, session_count }, source: 'mock' });
+    res.json({ success: true, classroom: { ...classroom, studentCount, lesson_count, challenge_count }, source: 'mock' });
 });
 
 // DELETE /api/classrooms/:id — Delete classroom (faculty only, password required)
@@ -670,289 +659,36 @@ router.post('/:id/questions/generate', async (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// GAME SESSIONS
-// ═════════════════════════════════════════════════════════════════════════════
-
-// POST /api/classrooms/:id/sessions — Create (and optionally activate) session
-router.post('/:id/sessions', async (req, res) => {
-    if (!requireFacultyRole(req, res)) return;
-    const classroomId = parseInt(req.params.id);
-    const title       = req.body.title;
-    const gameMode    = req.body.gameMode    || req.body.game_mode    || 'mcq';
-    const questionIds = req.body.questionIds || req.body.question_ids || [];
-    const status      = req.body.status;
-    if (!title) return res.status(400).json({ success: false, message: 'Session title is required' });
-
-    const initialStatus = ['active','pending','closed'].includes(status) ? status : 'pending';
-
-    if (dbService.isDbAvailable()) {
-        try {
-            await ensureUserInDb(req.user);
-            const result = await db.query(
-                'INSERT INTO classroom_sessions (classroom_id, faculty_id, title, game_mode, question_ids, status) VALUES (?, ?, ?, ?, ?, ?)',
-                [classroomId, req.user.id, title, gameMode || 'mcq', JSON.stringify(questionIds || []), initialStatus]
-            );
-            const sessionId = result.insertId;
-            return res.status(201).json({
-                success: true,
-                session: { session_id: sessionId, classroom_id: classroomId, title, game_mode: gameMode || 'mcq', status: initialStatus },
-                sessionId,
-                source: 'database'
-            });
-        } catch (err) { console.error(err); }
-    }
-
-    const session = { id: _nextId.se++, session_id: _nextId.se - 1, classroomId, facultyId: req.user.id, title, gameMode: gameMode || 'mcq', questionIds: questionIds || [], status: initialStatus, createdAt: new Date().toISOString() };
-    mockClSessions.push(session);
-    res.status(201).json({ success: true, session, sessionId: session.id, source: 'mock' });
-});
-
-// GET /api/classrooms/:id/sessions — List sessions
-router.get('/:id/sessions', async (req, res) => {
-    const classroomId = parseInt(req.params.id);
-
-    if (dbService.isDbAvailable()) {
-        try {
-            const rows = await db.query('SELECT * FROM classroom_sessions WHERE classroom_id = ? ORDER BY created_at DESC', [classroomId]);
-            return res.json({ success: true, sessions: rows, source: 'database' });
-        } catch (err) { console.error(err); }
-    }
-
-    const sessions = mockClSessions.filter(s => s.classroomId === classroomId);
-    res.json({ success: true, sessions, source: 'mock' });
-});
-
-// GET /api/classrooms/:id/sessions/active — Active session for students (includes questions)
-router.get('/:id/sessions/active', async (req, res) => {
-    const classroomId = parseInt(req.params.id);
-
-    if (dbService.isDbAvailable()) {
-        try {
-            const rows = await db.query(
-                'SELECT * FROM classroom_sessions WHERE classroom_id = ? AND status = "active" LIMIT 1',
-                [classroomId]
-            );
-            if (!rows.length) return res.json({ success: true, session: null, questions: [], source: 'database' });
-
-            const session = rows[0];
-
-            // mysql2 auto-parses JSON columns — handle both already-parsed arrays and raw strings
-            let qIds = session.question_ids;
-            if (typeof qIds === 'string') { try { qIds = JSON.parse(qIds); } catch { qIds = []; } }
-            if (!Array.isArray(qIds)) qIds = [];
-
-            let questions = [];
-            if (qIds.length) {
-                // Fetch only the selected questions
-                const placeholders = qIds.map(() => '?').join(',');
-                questions = await db.query(
-                    `SELECT * FROM classroom_questions WHERE question_id IN (${placeholders})`,
-                    qIds
-                );
-                // Preserve the faculty-chosen order
-                const orderMap = {};
-                qIds.forEach((id, i) => { orderMap[id] = i; });
-                questions.sort((a, b) => (orderMap[a.question_id] ?? 99) - (orderMap[b.question_id] ?? 99));
-            } else {
-                // No specific IDs chosen — use all questions for this classroom
-                questions = await db.query(
-                    'SELECT * FROM classroom_questions WHERE classroom_id = ? ORDER BY question_id',
-                    [classroomId]
-                );
-            }
-
-            // Normalise options: mysql2 auto-parses JSON columns, but guard against strings/nulls
-            questions = questions.map(q => {
-                let options = q.options;
-                if (typeof options === 'string') { try { options = JSON.parse(options); } catch { options = []; } }
-                if (!Array.isArray(options)) options = [];
-                return { ...q, options, question_id: q.question_id };
-            });
-
-            return res.json({ success: true, session, questions, source: 'database' });
-        } catch (err) { console.error('DB active session error:', err); }
-    }
-
-    // ── Mock fallback ─────────────────────────────────────────────────────────
-    const session = mockClSessions.find(s => s.classroomId === classroomId && s.status === 'active') || null;
-    if (!session) return res.json({ success: true, session: null, questions: [], source: 'mock' });
-
-    let questions = [];
-    const qIds = session.questionIds || [];
-    if (qIds.length) {
-        questions = mockClQuestions.filter(q => qIds.includes(q.id));
-    } else {
-        questions = mockClQuestions.filter(q => q.classroomId === classroomId);
-    }
-    res.json({ success: true, session, questions, source: 'mock' });
-});
-
-// PATCH /api/classrooms/:id/sessions/:sid — Start or close session
-router.patch('/:id/sessions/:sid', async (req, res) => {
-    if (!requireFacultyRole(req, res)) return;
-    const classroomId = parseInt(req.params.id);
-    const sessionId   = parseInt(req.params.sid);
-    const { status } = req.body; // 'active' or 'closed'
-
-    if (!['active', 'closed', 'pending'].includes(status)) {
-        return res.status(400).json({ success: false, message: 'Status must be active, closed, or pending' });
-    }
-
-    if (dbService.isDbAvailable()) {
-        try {
-            await db.query(
-                'UPDATE classroom_sessions SET status = ? WHERE session_id = ? AND classroom_id = ?',
-                [status, sessionId, classroomId]
-            );
-            return res.json({ success: true, message: `Session ${status}`, source: 'database' });
-        } catch (err) { console.error(err); }
-    }
-
-    const session = mockClSessions.find(s => s.id === sessionId && s.classroomId === classroomId);
-    if (session) session.status = status;
-    res.json({ success: true, message: `Session ${status}`, source: 'mock' });
-});
-
-// POST /api/classrooms/:id/sessions/:sid/answer — Student submits answer
-router.post('/:id/sessions/:sid/answer', async (req, res) => {
-    cacheUser(req);
-    const classroomId = parseInt(req.params.id);
-    const sessionId   = parseInt(req.params.sid);
-    const studentId   = req.user.id;
-    const { questionId, answer } = req.body;
-
-    if (dbService.isDbAvailable()) {
-        try {
-            await ensureUserInDb(req.user);
-
-            // Fetch question from DB for authoritative correctness check
-            const qRows = await db.query('SELECT * FROM classroom_questions WHERE question_id = ?', [questionId]);
-            const question   = qRows[0];
-            const isCorrect  = question
-                ? String(question.correct_answer).toLowerCase().trim() === String(answer).toLowerCase().trim()
-                : false;
-            const pointsEarned = isCorrect ? (question?.points || 10) : 0;
-
-            await db.query(
-                'INSERT INTO classroom_answers (session_id, student_id, question_id, answer, is_correct, points_earned) VALUES (?, ?, ?, ?, ?, ?)',
-                [sessionId, studentId, questionId, answer, isCorrect, pointsEarned]
-            );
-
-            // Award XP for correct answers
-            if (isCorrect && pointsEarned > 0) {
-                await db.query('UPDATE users SET total_xp = total_xp + ? WHERE user_id = ?', [pointsEarned, studentId]);
-            }
-
-            // Track weakness for wrong answers
-            if (!isCorrect && question?.topic) {
-                const classroom = await db.query('SELECT language FROM classrooms WHERE classroom_id = ?', [classroomId]);
-                const language  = classroom[0]?.language || 'python';
-                await db.query(
-                    `INSERT INTO weaknesses (user_id, topic, language, error_count, total_attempts, error_rate)
-                     VALUES (?, ?, ?, 1, 1, 100.00)
-                     ON DUPLICATE KEY UPDATE
-                       error_count    = error_count + 1,
-                       total_attempts = total_attempts + 1,
-                       error_rate     = ROUND((error_count + 1) / (total_attempts + 1) * 100, 2),
-                       last_detected_at = NOW()`,
-                    [studentId, question.topic, language]
-                );
-            } else if (isCorrect && question?.topic) {
-                // Reduce error rate on correct answers (improvement tracking)
-                const classroom = await db.query('SELECT language FROM classrooms WHERE classroom_id = ?', [classroomId]);
-                const language  = classroom[0]?.language || 'python';
-                await db.query(
-                    `UPDATE weaknesses
-                     SET total_attempts = total_attempts + 1,
-                         error_rate     = ROUND(error_count / (total_attempts + 1) * 100, 2),
-                         resolved       = IF(error_rate <= 25, 1, 0)
-                     WHERE user_id = ? AND topic = ? AND language = ?`,
-                    [studentId, question.topic, language]
-                );
-            }
-
-            return res.json({
-                success: true, isCorrect, pointsEarned,
-                hint: (!isCorrect && question?.hint) ? question.hint : null,
-                source: 'database'
-            });
-        } catch (err) { console.error('Answer submit error:', err.message); }
-    }
-
-    // Mock fallback
-    const question = mockClQuestions.find(q => q.id === questionId);
-    const isCorrect    = question ? String(question.correctAnswer).toLowerCase() === String(answer).toLowerCase() : false;
-    const pointsEarned = isCorrect ? (question?.points || 10) : 0;
-    mockClAnswers.push({ id: _nextId.an++, sessionId, studentId, questionId, answer, isCorrect, pointsEarned, answeredAt: new Date().toISOString() });
-    res.json({ success: true, isCorrect, pointsEarned, hint: (!isCorrect && question?.hint) || null, source: 'mock' });
-});
-
-// ═════════════════════════════════════════════════════════════════════════════
 // LEADERBOARD & ANALYTICS
 // ═════════════════════════════════════════════════════════════════════════════
 
 // GET /api/classrooms/:id/leaderboard
 router.get('/:id/leaderboard', async (req, res) => {
     const classroomId = parseInt(req.params.id);
-    const { sessionId } = req.query;
 
     if (dbService.isDbAvailable()) {
         try {
-            let sql, params;
-            if (sessionId) {
-                sql = `SELECT u.user_id AS id, u.full_name AS fullName,
-                              SUM(ca.points_earned) AS totalPoints,
-                              COUNT(ca.answer_id) AS answered,
-                              SUM(ca.is_correct) AS correct
-                       FROM classroom_answers ca
-                       JOIN classroom_sessions cs ON cs.session_id = ca.session_id
-                       JOIN users u ON u.user_id = ca.student_id
-                       WHERE ca.session_id = ? AND cs.classroom_id = ?
-                       GROUP BY ca.student_id
-                       ORDER BY totalPoints DESC`;
-                params = [sessionId, classroomId];
-            } else {
-                sql = `SELECT u.user_id AS id, u.full_name AS fullName,
-                              SUM(ca.points_earned) AS totalPoints,
-                              COUNT(ca.answer_id) AS answered,
-                              SUM(ca.is_correct) AS correct
-                       FROM classroom_answers ca
-                       JOIN classroom_sessions cs ON cs.session_id = ca.session_id
-                       JOIN users u ON u.user_id = ca.student_id
-                       WHERE cs.classroom_id = ?
-                       GROUP BY ca.student_id
-                       ORDER BY totalPoints DESC`;
-                params = [classroomId];
-            }
-            const rows = await db.query(sql, params);
+            const rows = await db.query(
+                `SELECT u.user_id AS id, u.full_name AS fullName,
+                        u.total_xp AS totalPoints,
+                        (SELECT COUNT(*) FROM user_answers ua WHERE ua.user_id = u.user_id) AS answered,
+                        (SELECT SUM(is_correct) FROM user_answers ua WHERE ua.user_id = u.user_id) AS correct
+                 FROM classroom_enrollments ce
+                 JOIN users u ON u.user_id = ce.student_id
+                 WHERE ce.classroom_id = ? AND ce.status = 'active'
+                 ORDER BY totalPoints DESC`,
+                [classroomId]
+            );
             return res.json({ success: true, leaderboard: rows, source: 'database' });
         } catch (err) { console.error('Leaderboard error:', err); }
     }
 
-    // Mock leaderboard from in-memory answers
-    const sessionIds = sessionId
-        ? [parseInt(sessionId)]
-        : mockClSessions.filter(s => s.classroomId === classroomId).map(s => s.id);
-
-    const grouped = {};
-    mockClAnswers
-        .filter(a => sessionIds.includes(a.sessionId))
-        .forEach(a => {
-            if (!grouped[a.studentId]) {
-                const enr    = mockEnrollments.find(e => e.studentId === a.studentId) || {};
-                const cached = mockUserCache[a.studentId] || {};
-                grouped[a.studentId] = {
-                    student_id:  a.studentId,
-                    fullName:    enr.fullName || cached.fullName || `Student #${a.studentId}`,
-                    totalPoints: 0, answered: 0, correct: 0
-                };
-            }
-            grouped[a.studentId].totalPoints += a.pointsEarned;
-            grouped[a.studentId].answered++;
-            if (a.isCorrect) grouped[a.studentId].correct++;
-        });
-
-    const leaderboard = Object.values(grouped).sort((a, b) => b.totalPoints - a.totalPoints);
+    // Mock: rank enrolled students by XP
+    const enrolled = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active');
+    const leaderboard = enrolled.map(e => {
+        const cached = mockUserCache[e.studentId] || {};
+        return { id: e.studentId, fullName: e.fullName || cached.fullName || `Student #${e.studentId}`, totalPoints: cached.total_xp || 0, answered: 0, correct: 0 };
+    }).sort((a, b) => b.totalPoints - a.totalPoints);
     res.json({ success: true, leaderboard, source: 'mock' });
 });
 
@@ -963,23 +699,13 @@ router.get('/:id/analytics', async (req, res) => {
 
     if (dbService.isDbAvailable()) {
         try {
-            const [enrollCount]  = await db.query('SELECT COUNT(*) AS total FROM classroom_enrollments WHERE classroom_id = ? AND status = "active"', [classroomId]);
-            const [sessionCount] = await db.query('SELECT COUNT(*) AS total FROM classroom_sessions WHERE classroom_id = ?', [classroomId]);
-            const [answerStats]  = await db.query('SELECT COUNT(*) AS total, SUM(is_correct) AS correct FROM classroom_answers ca JOIN classroom_sessions cs ON cs.session_id = ca.session_id WHERE cs.classroom_id = ?', [classroomId]);
-
-            const accuracy = answerStats.total > 0 ? Math.round((answerStats.correct / answerStats.total) * 100) : 0;
-            return res.json({ success: true, analytics: { enrolledStudents: enrollCount.total, totalSessions: sessionCount.total, totalAnswers: answerStats.total, avgAccuracy: accuracy }, source: 'database' });
+            const [enrollCount] = await db.query('SELECT COUNT(*) AS total FROM classroom_enrollments WHERE classroom_id = ? AND status = "active"', [classroomId]);
+            return res.json({ success: true, analytics: { enrolledStudents: enrollCount.total }, source: 'database' });
         } catch (err) { console.error(err); }
     }
 
     const enrolled = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active').length;
-    const sessions = mockClSessions.filter(s => s.classroomId === classroomId).length;
-    const sessionIds = mockClSessions.filter(s => s.classroomId === classroomId).map(s => s.id);
-    const answers = mockClAnswers.filter(a => sessionIds.includes(a.sessionId));
-    const correct = answers.filter(a => a.isCorrect).length;
-    const accuracy = answers.length > 0 ? Math.round((correct / answers.length) * 100) : 0;
-
-    res.json({ success: true, analytics: { enrolledStudents: enrolled, totalSessions: sessions, totalAnswers: answers.length, avgAccuracy: accuracy }, source: 'mock' });
+    res.json({ success: true, analytics: { enrolledStudents: enrolled }, source: 'mock' });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1000,16 +726,14 @@ router.get('/:id/feedback', async (req, res) => {
             answers = await db.query(
                 `SELECT ca.*, cq.topic, cq.difficulty, cq.points
                  FROM classroom_answers ca
-                 JOIN classroom_sessions cs ON cs.session_id = ca.session_id
                  LEFT JOIN classroom_questions cq ON cq.question_id = ca.question_id
-                 WHERE cs.classroom_id = ? AND ca.student_id = ?`,
+                 WHERE cq.classroom_id = ? AND ca.student_id = ?`,
                 [classroomId, studentId]
             );
             questions = await db.query('SELECT * FROM classroom_questions WHERE classroom_id = ?', [classroomId]);
         } catch (err) { console.error(err); }
     } else {
-        const sessionIds = mockClSessions.filter(s => s.classroomId === classroomId).map(s => s.id);
-        answers = mockClAnswers.filter(a => sessionIds.includes(a.sessionId) && a.studentId === studentId);
+        answers = mockClAnswers.filter(a => a.classroomId === classroomId && a.studentId === studentId);
         questions = mockClQuestions.filter(q => q.classroomId === classroomId);
     }
 
@@ -1017,10 +741,10 @@ router.get('/:id/feedback', async (req, res) => {
         return res.json({
             success: true,
             feedback: {
-                overallAssessment: "You haven't played any sessions in this classroom yet. Join an active session to get personalized feedback!",
+                overallAssessment: "You haven't answered any questions in this classroom yet. Complete some challenges to get personalized feedback!",
                 weakAreas: [],
                 strongAreas: [],
-                recommendations: ['Participate in classroom sessions to unlock AI feedback.'],
+                recommendations: ['Complete classroom challenges to unlock AI feedback.'],
                 stats: { total: 0, correct: 0, accuracy: 0 }
             }
         });
@@ -1045,9 +769,9 @@ router.get('/:id/feedback', async (req, res) => {
     // Recommendations (always rule-based — fast, free)
     const recommendations = [];
     if (weakAreas.length)  recommendations.push(`Review these topics: ${weakAreas.map(w => w.topic).join(', ')}.`);
-    if (accuracy < 70)     recommendations.push('Re-read the classroom lessons before your next session.');
+    if (accuracy < 70)     recommendations.push('Re-read the classroom lessons before attempting more challenges.');
     if (accuracy >= 80)    recommendations.push('Try the advanced challenges to push yourself further!');
-    if (total < 5)         recommendations.push('Participate in more sessions for a more accurate assessment.');
+    if (total < 5)         recommendations.push('Complete more challenges for a more accurate assessment.');
     if (!recommendations.length) recommendations.push('Keep practising consistently to maintain your performance!');
 
     // AI-generated overall assessment via OpenAI (with rule-based fallback)
@@ -1086,64 +810,6 @@ router.get('/:id/feedback', async (req, res) => {
         overallAssessment, weakAreas, strongAreas, recommendations,
         stats: { totalAnswered: total, correctAnswers: correct, accuracy }
     });
-});
-
-// ═════════════════════════════════════════════════════════════════════════════
-// PHASE 7 — LIVE MONITORING (faculty: per-student progress in a session)
-// ═════════════════════════════════════════════════════════════════════════════
-
-// GET /api/classrooms/:id/sessions/:sid/monitor
-router.get('/:id/sessions/:sid/monitor', async (req, res) => {
-    if (!requireFacultyRole(req, res)) return;
-    const classroomId = parseInt(req.params.id);
-    const sessionId   = parseInt(req.params.sid);
-
-    if (dbService.isDbAvailable()) {
-        try {
-            // Per-student stats for this session
-            const rows = await db.query(
-                `SELECT u.user_id AS studentId, u.full_name AS fullName,
-                        COUNT(ca.answer_id) AS answered,
-                        SUM(ca.is_correct)  AS correct,
-                        SUM(ca.points_earned) AS points
-                 FROM classroom_enrollments ce
-                 JOIN users u ON u.user_id = ce.student_id
-                 LEFT JOIN classroom_answers ca ON ca.student_id = ce.student_id AND ca.session_id = ?
-                 WHERE ce.classroom_id = ? AND ce.status = 'active'
-                 GROUP BY ce.student_id
-                 ORDER BY points DESC`,
-                [sessionId, classroomId]
-            );
-
-            // Get total questions in this session
-            const [sessionRow] = await db.query('SELECT question_ids FROM classroom_sessions WHERE session_id = ?', [sessionId]);
-            let totalQ = 0;
-            if (sessionRow) {
-                try { totalQ = JSON.parse(sessionRow.question_ids || '[]').length; } catch (_) {}
-            }
-
-            return res.json({ success: true, monitor: rows, totalQuestions: totalQ, source: 'database' });
-        } catch (err) { console.error(err); }
-    }
-
-    // Mock fallback
-    const session = mockClSessions.find(s => s.id === sessionId && s.classroomId === classroomId);
-    const totalQ  = session ? (session.questionIds || []).length : 0;
-    const enrolled = mockEnrollments.filter(e => e.classroomId === classroomId && e.status === 'active');
-
-    const monitor = enrolled.map(e => {
-        const studentAnswers = mockClAnswers.filter(a => a.sessionId === sessionId && a.studentId === e.studentId);
-        const cached = mockUserCache[e.studentId] || {};
-        return {
-            studentId: e.studentId,
-            fullName: e.fullName || cached.fullName || `Student #${e.studentId}`,
-            answered: studentAnswers.length,
-            correct: studentAnswers.filter(a => a.isCorrect).length,
-            points: studentAnswers.reduce((s, a) => s + a.pointsEarned, 0)
-        };
-    }).sort((a, b) => b.points - a.points);
-
-    res.json({ success: true, monitor, totalQuestions: totalQ, source: 'mock' });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
