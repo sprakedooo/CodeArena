@@ -277,24 +277,6 @@
         .lesson-row-meta { font-size:.75rem; color:var(--text-muted); margin-top:2px; }
         .lesson-row-actions { display:flex; gap:6px; flex-shrink:0; }
 
-        /* Challenge list */
-        .challenge-list { display:flex; flex-direction:column; gap:10px; }
-        .challenge-row {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
-            padding:14px 18px; display:flex; align-items:center; gap:14px;
-            transition:border-color .15s;
-        }
-        .challenge-row:hover { border-color:rgba(124,58,237,.3); }
-        .challenge-row-icon {
-            width:38px; height:38px; border-radius:8px;
-            background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.2);
-            display:flex; align-items:center; justify-content:center; flex-shrink:0;
-        }
-        .challenge-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--primary); }
-        .challenge-row-body { flex:1; min-width:0; }
-        .challenge-row-text { font-size:.88rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:500px; }
-        .challenge-row-meta { display:flex; align-items:center; gap:10px; margin-top:4px; flex-wrap:wrap; }
-        .challenge-row-actions { display:flex; gap:6px; flex-shrink:0; }
         .level-pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
         .level-pill.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
         .level-pill.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
@@ -532,7 +514,7 @@
                 <div class="hero-stats">
                     <div class="hero-stat"><span class="hero-stat-val" id="statStudents">—</span><span class="hero-stat-label">Students</span></div>
                     <div class="hero-stat"><span class="hero-stat-val" id="statLessons">—</span><span class="hero-stat-label">Lessons</span></div>
-                    <div class="hero-stat"><span class="hero-stat-val" id="statChallenges">—</span><span class="hero-stat-label">Challenges</span></div>
+                    <div class="hero-stat"><span class="hero-stat-val" id="statAssignments">—</span><span class="hero-stat-label">Assignments</span></div>
                 </div>
             </div>
         </div>
@@ -579,11 +561,6 @@
                         <span class="material-symbols-outlined">menu_book</span>
                         Lessons
                         <span class="stream-info-val" id="sidebarLessons">—</span>
-                    </div>
-                    <div class="stream-info-row">
-                        <span class="material-symbols-outlined">quiz</span>
-                        Challenges
-                        <span class="stream-info-val" id="sidebarChallenges">—</span>
                     </div>
                     <div class="stream-info-row">
                         <span class="material-symbols-outlined">terminal</span>
@@ -641,23 +618,6 @@
             </div>
             <div class="lesson-list" id="lessonsGrid">
                 <div class="loading-text">Loading lessons…</div>
-            </div>
-        </div>
-
-        <!-- Challenges section -->
-        <div class="classwork-section">
-            <div class="classwork-section-header">
-                <h2 class="classwork-section-title">
-                    <span class="material-symbols-outlined">quiz</span>
-                    Challenges
-                    <span class="cw-count" id="challengesCount">0</span>
-                </h2>
-                <button class="btn btn-primary" style="font-size:.8rem;" onclick="openModal('question')">
-                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Add Challenge
-                </button>
-            </div>
-            <div class="challenge-list" id="challengesList">
-                <div class="loading-text">Loading challenges…</div>
             </div>
         </div>
 
@@ -807,55 +767,6 @@
     </div>
 </div>
 
-<!-- ══ CHALLENGE MODAL ═══════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="questionModal" onclick="handleOverlayClick(event,'questionModal')">
-    <div class="modal-box" style="padding:28px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-            <div class="modal-title" id="questionModalTitle" style="margin:0;">Add Challenge</div>
-            <button class="btn btn-outline" id="aiGenBtn" onclick="openAIGenPanel()" style="font-size:.75rem;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:.95rem;">auto_awesome</span>Generate with AI</button>
-        </div>
-        <div id="aiGenPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
-            <div style="font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:.35rem;"><span class="material-symbols-outlined" style="font-size:.9rem;">auto_awesome</span>AI Question Generator</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="aiTopic" placeholder="e.g. For Loops…" style="font-size:.82rem;"></div>
-                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="aiLanguage" style="font-size:.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label><select class="form-input" id="aiDifficulty" style="font-size:.82rem;"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
-                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Type</label><select class="form-input" id="aiType" style="font-size:.82rem;"><option value="mcq">Multiple Choice</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option></select></div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-                <button class="btn btn-primary" id="aiGenerateBtn" onclick="generateQuestion()" style="font-size:.78rem;">✨ Generate</button>
-                <button class="btn btn-outline" onclick="closeAIGenPanel()" style="font-size:.78rem;">Cancel</button>
-                <span id="aiGenStatus" style="font-size:.75rem;color:var(--text-muted);margin-left:4px;"></span>
-            </div>
-        </div>
-        <input type="hidden" id="questionEditId">
-        <div class="modal-field"><label>Question *</label><textarea class="form-input" id="questionText" rows="3" placeholder="Question text…" style="resize:vertical;font-family:inherit;"></textarea></div>
-        <div class="modal-field"><label>Type</label><select class="form-input" id="questionType" onchange="toggleMCQOptions()"><option value="mcq">Multiple Choice (MCQ)</option><option value="fill_blank">Fill in the Blank</option><option value="output_pred">Output Prediction</option><option value="ordering">Code Ordering</option></select></div>
-        <div id="mcqOptionsGroup">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="modal-field"><label>Option A</label><input type="text" class="form-input" id="optA" placeholder="Option A"></div>
-                <div class="modal-field"><label>Option B</label><input type="text" class="form-input" id="optB" placeholder="Option B"></div>
-                <div class="modal-field"><label>Option C</label><input type="text" class="form-input" id="optC" placeholder="Option C"></div>
-                <div class="modal-field"><label>Option D</label><input type="text" class="form-input" id="optD" placeholder="Option D"></div>
-            </div>
-        </div>
-        <div class="modal-field"><label>Correct Answer *</label><input type="text" class="form-input" id="correctAnswer" placeholder="e.g. A  or  exact text"></div>
-        <div class="modal-field"><label>Hint</label><input type="text" class="form-input" id="questionHint" placeholder="Optional hint"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div class="modal-field"><label>Difficulty</label><select class="form-input" id="questionDiff"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
-            <div class="modal-field"><label>Points</label><input type="number" class="form-input" id="questionPoints" value="10" min="1" max="100"></div>
-            <div class="modal-field"><label>Topic</label><input type="text" class="form-input" id="questionTopic" placeholder="e.g. Loops"></div>
-        </div>
-        <div class="err-msg" id="questionErr"></div>
-        <div class="modal-actions">
-            <button class="btn btn-outline" onclick="closeModal('questionModal')">Cancel</button>
-            <button class="btn btn-primary" id="questionSaveBtn" onclick="saveQuestion()">Save Challenge</button>
-        </div>
-    </div>
-</div>
-
 <!-- ══ ASSIGNMENT MODAL ══════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal-box" style="max-width:760px;width:95vw;max-height:90vh;overflow-y:auto;padding:28px;">
@@ -969,7 +880,7 @@
     }
 
     // ── Classroom info ────────────────────────────────────────────────────────
-    let classroomData = null, classroomQuestions = [];
+    let classroomData = null;
 
     async function loadClassroom() {
         try {
@@ -1417,48 +1328,6 @@
         } catch { /* non-fatal */ }
     }
 
-    // ── Challenges ────────────────────────────────────────────────────────────
-    async function loadQuestions() {
-        try {
-            const res  = await fetch(`${API}/classrooms/${classroomId}/questions`, {headers:getAuthHeaders()});
-            const data = await res.json();
-            classroomQuestions = data.success ? (data.questions||[]) : [];
-            document.getElementById('challengesCount').textContent = classroomQuestions.length;
-            document.getElementById('statChallenges').textContent  = classroomQuestions.length;
-            document.getElementById('sidebarChallenges').textContent = classroomQuestions.length;
-            renderChallenges();
-        } catch { document.getElementById('challengesList').innerHTML = `<div class="empty-state">Failed to load challenges.</div>`; }
-    }
-
-    function renderChallenges() {
-        const el = document.getElementById('challengesList');
-        if (!classroomQuestions.length) {
-            el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">❓</span><div class="empty-state-title">No challenges yet</div><div class="empty-state-sub">Add questions to challenge your students</div></div>`;
-            return;
-        }
-        const typeLabel = {mcq:'MCQ',fill_blank:'Fill Blank',output_pred:'Output',ordering:'Ordering'};
-        el.innerHTML = classroomQuestions.map(q => {
-            const id = q.question_id||q.id;
-            const text = (q.question_text||q.questionText||'').substring(0,90);
-            return `<div class="challenge-row">
-                <div class="challenge-row-icon"><span class="material-symbols-outlined">quiz</span></div>
-                <div class="challenge-row-body">
-                    <div class="challenge-row-text">${escHtml(text)}${text.length>=90?'…':''}</div>
-                    <div class="challenge-row-meta">
-                        <span class="level-pill ${q.difficulty||'beginner'}">${q.difficulty||'beginner'}</span>
-                        <span class="type-chip">${typeLabel[q.type]||q.type||'MCQ'}</span>
-                        <span class="pts-badge">${q.points||10} pts</span>
-                        ${q.topic?`<span style="font-size:.72rem;color:var(--text-muted);">${escHtml(q.topic)}</span>`:''}
-                    </div>
-                </div>
-                <div class="challenge-row-actions">
-                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 12px;" onclick="editQuestion(${id})">Edit</button>
-                    <button class="btn btn-outline" style="font-size:.75rem;padding:5px 10px;color:var(--danger);border-color:var(--danger);" onclick="deleteQuestion(${id})"><span class="material-symbols-outlined" style="font-size:.9rem;">delete</span></button>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
     // ── Assignments ───────────────────────────────────────────────────────────
     let assignmentsList = [];
 
@@ -1468,6 +1337,7 @@
             const data = await res.json();
             assignmentsList = data.success ? (data.assignments||[]) : [];
             document.getElementById('assignmentsCount').textContent = assignmentsList.length;
+            document.getElementById('statAssignments').textContent   = assignmentsList.length;
             document.getElementById('sidebarAssignments').textContent = assignmentsList.length;
             renderAssignments();
         } catch { document.getElementById('assignmentsList').innerHTML = `<div class="empty-state">Failed to load assignments.</div>`; }
@@ -1516,17 +1386,6 @@
             document.getElementById('lessonErr').style.display = 'none';
             document.getElementById('lessonModal').classList.add('open');
             setTimeout(()=>document.getElementById('lessonTitle').focus(),80);
-        } else if (type === 'question') {
-            document.getElementById('questionModalTitle').textContent = 'Add Challenge';
-            document.getElementById('questionEditId').value = '';
-            document.getElementById('questionText').value = '';
-            document.getElementById('questionType').value = 'mcq';
-            ['optA','optB','optC','optD','correctAnswer','questionHint','questionTopic'].forEach(id=>document.getElementById(id).value='');
-            document.getElementById('questionDiff').value = 'beginner';
-            document.getElementById('questionPoints').value = '10';
-            document.getElementById('questionErr').style.display = 'none';
-            toggleMCQOptions();
-            document.getElementById('questionModal').classList.add('open');
         }
     }
     function closeModal(id)              { document.getElementById(id).classList.remove('open'); }
@@ -1566,70 +1425,6 @@
         if (!confirm('Delete this lesson?')) return;
         try { await fetch(`${API}/classrooms/${classroomId}/lessons/${id}`,{method:'DELETE',headers:getAuthHeaders()}); loadLessons(); }
         catch { alert('Failed to delete lesson.'); }
-    }
-
-    function toggleMCQOptions() {
-        document.getElementById('mcqOptionsGroup').style.display = document.getElementById('questionType').value==='mcq'?'block':'none';
-    }
-    function openAIGenPanel()  { document.getElementById('aiGenPanel').style.display='block'; document.getElementById('aiGenBtn').style.display='none'; document.getElementById('questionErr').style.display='none'; document.getElementById('aiTopic').focus(); }
-    function closeAIGenPanel() { document.getElementById('aiGenPanel').style.display='none'; document.getElementById('aiGenBtn').style.display='flex'; document.getElementById('aiGenStatus').textContent=''; }
-
-    async function generateQuestion() {
-        const topic=document.getElementById('aiTopic').value.trim(),language=document.getElementById('aiLanguage').value,difficulty=document.getElementById('aiDifficulty').value,type=document.getElementById('aiType').value;
-        const statusEl=document.getElementById('aiGenStatus'),genBtn=document.getElementById('aiGenerateBtn');
-        if (!topic) { statusEl.textContent='Enter a topic first.'; statusEl.style.color='var(--danger)'; return; }
-        genBtn.disabled=true; statusEl.style.color='var(--text-muted)'; statusEl.textContent='Generating…';
-        try {
-            const res=await fetch(`${API}/classrooms/${classroomId}/questions/generate`,{method:'POST',headers:getAuthHeaders(),body:JSON.stringify({topic,language,difficulty,type})});
-            const data=await res.json(); if (!data.success) throw new Error(data.message);
-            const q=data.question;
-            document.getElementById('questionText').value=q.question_text||'';document.getElementById('questionType').value=q.type||type;
-            document.getElementById('correctAnswer').value=q.correct_answer||'';document.getElementById('questionHint').value=q.hint||'';
-            document.getElementById('questionDiff').value=q.difficulty||difficulty;document.getElementById('questionPoints').value=10;
-            document.getElementById('questionTopic').value=q.topic||topic;toggleMCQOptions();
-            if (q.type==='mcq'&&Array.isArray(q.options)){const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/i,''));['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||'');}
-            statusEl.style.color='var(--success)';statusEl.textContent='✔ Done!';setTimeout(closeAIGenPanel,1200);
-        } catch(err) { statusEl.style.color='var(--danger)';statusEl.textContent=err.message||'Failed.'; }
-        finally { genBtn.disabled=false; }
-    }
-
-    async function saveQuestion() {
-        const id=document.getElementById('questionEditId').value,question_text=document.getElementById('questionText').value.trim(),type=document.getElementById('questionType').value;
-        const correct_answer=document.getElementById('correctAnswer').value.trim(),hint=document.getElementById('questionHint').value.trim();
-        const difficulty=document.getElementById('questionDiff').value,points=parseInt(document.getElementById('questionPoints').value)||10,topic=document.getElementById('questionTopic').value.trim();
-        const errEl=document.getElementById('questionErr');
-        if (!question_text||!correct_answer){errEl.textContent='Question and correct answer are required.';errEl.style.display='block';return;}
-        let options=null;
-        if (type==='mcq'){
-            const[a,b,c,d]=['optA','optB','optC','optD'].map(x=>document.getElementById(x).value.trim());
-            options=[a&&`A) ${a}`,b&&`B) ${b}`,c&&`C) ${c}`,d&&`D) ${d}`].filter(Boolean);
-            if (options.length < 2){errEl.textContent='MCQ questions require at least 2 answer options (A and B).';errEl.style.display='block';return;}
-        }
-        const btn=document.getElementById('questionSaveBtn');btn.disabled=true;btn.textContent='Saving…';errEl.style.display='none';
-        try {
-            const url=id?`${API}/classrooms/${classroomId}/questions/${id}`:`${API}/classrooms/${classroomId}/questions`;
-            const res=await fetch(url,{method:id?'PUT':'POST',headers:getAuthHeaders(),body:JSON.stringify({question_text,type,options,correct_answer,hint,difficulty,points,topic})});
-            const data=await res.json();if (!data.success) throw new Error(data.message);
-            closeModal('questionModal');loadQuestions();
-        } catch(err){errEl.textContent=err.message||'Failed to save challenge.';errEl.style.display='block';}
-        finally{btn.disabled=false;btn.textContent='Save Challenge';}
-    }
-
-    function editQuestion(id) {
-        const q=classroomQuestions.find(x=>(x.question_id||x.id)===id);if (!q) return;
-        document.getElementById('questionModalTitle').textContent='Edit Challenge';document.getElementById('questionEditId').value=id;
-        document.getElementById('questionText').value=q.question_text||q.questionText||'';document.getElementById('questionType').value=q.type||'mcq';
-        document.getElementById('correctAnswer').value=q.correct_answer||q.correctAnswer||'';document.getElementById('questionHint').value=q.hint||'';
-        document.getElementById('questionDiff').value=q.difficulty||'beginner';document.getElementById('questionPoints').value=q.points||10;document.getElementById('questionTopic').value=q.topic||'';
-        toggleMCQOptions();
-        if (q.type==='mcq'&&Array.isArray(q.options)){const opts=q.options.map(o=>o.replace(/^[A-D]\)\s*/,''));['optA','optB','optC','optD'].forEach((id,i)=>document.getElementById(id).value=opts[i]||'');}
-        document.getElementById('questionErr').style.display='none';document.getElementById('questionModal').classList.add('open');
-    }
-
-    async function deleteQuestion(id) {
-        if (!confirm('Delete this challenge?')) return;
-        try { await fetch(`${API}/classrooms/${classroomId}/questions/${id}`,{method:'DELETE',headers:getAuthHeaders()}); loadQuestions(); }
-        catch { alert('Failed to delete challenge.'); }
     }
 
     // ── Assignments (modals) ──────────────────────────────────────────────────
@@ -1745,7 +1540,6 @@
     loadAnnouncements();
     loadStudents();
     loadLessons();
-    loadQuestions();
     loadAssignments();
 </script>
 

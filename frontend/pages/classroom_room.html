@@ -230,23 +230,6 @@
             border-radius:20px; padding:3px 10px;
         }
 
-        .challenge-list { display:flex; flex-direction:column; gap:10px; }
-        .challenge-row {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
-            padding:14px 18px; display:flex; align-items:center; gap:14px;
-            transition:border-color .15s;
-        }
-        .challenge-row:hover { border-color:rgba(124,58,237,.3); }
-        .challenge-row-icon {
-            width:38px; height:38px; border-radius:8px;
-            background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.2);
-            display:flex; align-items:center; justify-content:center; flex-shrink:0;
-        }
-        .challenge-row-icon .material-symbols-outlined { font-size:1.1rem; color:var(--primary); }
-        .challenge-row-body { flex:1; min-width:0; }
-        .challenge-row-text { font-size:.88rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:500px; }
-        .challenge-row-meta { display:flex; align-items:center; gap:10px; margin-top:4px; flex-wrap:wrap; }
-        .challenge-row-actions { display:flex; gap:6px; flex-shrink:0; }
         .level-pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
         .level-pill.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
         .level-pill.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
@@ -407,7 +390,6 @@
                 </div>
                 <div class="hero-stats">
                     <div class="hero-stat"><span class="hero-stat-val" id="heroLessons">0</span><span class="hero-stat-label">Lessons</span></div>
-                    <div class="hero-stat"><span class="hero-stat-val" id="heroChallenges">0</span><span class="hero-stat-label">Challenges</span></div>
                 </div>
             </div>
         </div>
@@ -500,20 +482,6 @@
             </div>
         </div>
 
-        <!-- Challenges section -->
-        <div class="classwork-section">
-            <div class="classwork-section-header">
-                <h3 class="classwork-section-title">
-                    <span class="material-symbols-outlined">quiz</span>
-                    Challenges
-                    <span class="cw-count" id="challengeCount">0</span>
-                </h3>
-            </div>
-            <div class="challenge-list" id="challengeList">
-                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
-                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
-            </div>
-        </div>
         <!-- Assignments section -->
         <div class="classwork-section">
             <div class="classwork-section-header">
@@ -662,15 +630,12 @@ async function loadClassroomInfo() {
         const faculty = cl.faculty_name || cl.facultyName || 'Instructor';
         const count   = cl.student_count || cl.studentCount || 0;
         const lessons = cl.lesson_count  || cl.lessonCount  || 0;
-        const challs  = cl.challenge_count || cl.challengeCount || 0;
-
 
         document.title = name + ' – CodeArena';
         document.getElementById('breadcrumbName').textContent = name;
         document.getElementById('heroName').textContent       = name;
         document.getElementById('heroDesc').textContent       = desc;
         document.getElementById('heroLessons').textContent    = lessons;
-        document.getElementById('heroChallenges').textContent = challs;
 
 
         // Teacher badge
@@ -889,7 +854,7 @@ async function postComment(aid) {
 
 // ── Classwork ──────────────────────────────────────────────────────────────────
 async function loadClasswork() {
-    await Promise.all([loadLessons(), loadChallenges(), loadAssignments()]);
+    await Promise.all([loadLessons(), loadAssignments()]);
 }
 
 async function loadLessons() {
@@ -947,47 +912,6 @@ function updateProgressSidebar(done, total) {
     document.getElementById('lessonProgressTxt').textContent  = done + ' / ' + total;
     document.getElementById('lessonProgressBar').style.width  = pct + '%';
     document.getElementById('statLessons').textContent        = done;
-}
-
-async function loadChallenges() {
-    try {
-        const res  = await fetch(API + '/classrooms/' + classroomId + '/questions', { headers: getAuthHeaders() });
-        const data = await res.json();
-        renderChallenges(data.questions || data || []);
-    } catch {
-        renderChallenges([]);
-    }
-}
-
-function renderChallenges(qs) {
-    const list = document.getElementById('challengeList');
-    document.getElementById('challengeCount').textContent = qs.length;
-
-    if (!qs.length) {
-        list.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">quiz</span>No challenges assigned yet.</div>';
-        return;
-    }
-
-    list.innerHTML = qs.map((q, i) => {
-        const level = (q.difficulty || q.level || 'beginner').toLowerCase();
-        const type  = q.question_type || q.type || 'multiple_choice';
-        const txt   = esc(q.question_text || q.text || 'Question ' + (i + 1));
-        return '<div class="challenge-row">' +
-            '<div class="challenge-row-icon"><span class="material-symbols-outlined">quiz</span></div>' +
-            '<div class="challenge-row-body">' +
-                '<div class="challenge-row-text">' + txt + '</div>' +
-                '<div class="challenge-row-meta">' +
-                    '<span class="level-pill ' + level + '">' + level + '</span>' +
-                    '<span class="type-chip"><span class="material-symbols-outlined" style="font-size:.8rem;">edit_note</span>' + esc(type.replace(/_/g,' ')) + '</span>' +
-                '</div>' +
-            '</div>' +
-            '<div class="challenge-row-actions">' +
-                '<button class="btn btn-primary" style="font-size:.75rem;" onclick="switchTab(\'play\',document.querySelectorAll(\'.tab-btn\')[2])">' +
-                    '<span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Play' +
-                '</button>' +
-            '</div>' +
-        '</div>';
-    }).join('');
 }
 
 // ── Progress ───────────────────────────────────────────────────────────────────
