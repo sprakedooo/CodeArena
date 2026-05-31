@@ -1,1027 +1,781 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeArena — Start Your Coding Adventure</title>
+    <title>CodeArena — AI-Powered Programming Education</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
     <style>
-        /* ============ RESET / BASE ============ */
-        body {
-            background: var(--bg-dark);
-            color: var(--text);
-            overflow-x: hidden;
-        }
+        body { background: var(--bg-dark); color: var(--text); overflow-x: hidden; }
 
-        .page {
-            min-height: 100vh;
-        }
-
-        /* ============ TOP NAV ============ */
+        /* ── TOP NAV ─────────────────────────────────────────────────────── */
         .top-nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.9rem 18%;
-            background: rgba(13, 17, 23, 0.85);
-            backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 8%; height: 64px;
+            background: rgba(13,17,23,0.9); backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--border);
         }
-
-        .nav-logo {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.9rem;
-        }
-
-        .nav-logo .brk {
-            color: var(--text-muted);
-        }
-
-        .nav-logo .code {
-            color: var(--primary);
-        }
-
-        .nav-logo .arena {
-            color: var(--success);
-        }
-
-        .nav-links {
-            display: none;
-            gap: 1.75rem;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        @media (min-width: 900px) {
-            .nav-links {
-                display: flex;
-            }
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text);
-        }
-
-        .nav-links .badge-soon {
-            background: var(--primary);
-            color: white;
-            font-size: 0.6rem;
-            padding: 0.1rem 0.4rem;
-            border-radius: 6px;
-            margin-left: 0.3rem;
-            vertical-align: middle;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .nav-actions .btn-login {
-            background: transparent;
-            color: var(--text-secondary);
-            border: none;
-            padding: 0.5rem 0.85rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .nav-actions .btn-login:hover {
-            color: var(--text);
-        }
-
-        .nav-actions .btn-signup {
+        .nav-logo img { height: 44px; width: auto; object-fit: contain; }
+        .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; margin: 0; padding: 0; }
+        .nav-links a { color: var(--text-secondary); font-size: .9rem; font-weight: 500; text-decoration: none; transition: color .2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-actions { display: flex; align-items: center; gap: .75rem; }
+        .btn-login { background: transparent; color: var(--text-secondary); font-size: .9rem; font-weight: 600; text-decoration: none; padding: .5rem .85rem; transition: color .2s; }
+        .btn-login:hover { color: var(--text); }
+        .btn-signup {
             background: linear-gradient(135deg, var(--primary), #9333ea);
-            color: white;
-            padding: 0.55rem 1.1rem;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-decoration: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-            transition: transform 0.15s;
+            color: #fff; padding: .55rem 1.2rem; border-radius: 8px;
+            font-weight: 700; font-size: .88rem; text-decoration: none;
+            box-shadow: 0 4px 14px rgba(124,58,237,.35); transition: transform .15s, box-shadow .15s;
         }
+        .btn-signup:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,.45); color: #fff; }
+        @media (max-width: 768px) { .nav-links { display: none; } }
 
-        .nav-actions .btn-signup:hover {
-            transform: translateY(-1px);
-        }
-
-        /* ============ HERO ============ */
+        /* ── HERO ────────────────────────────────────────────────────────── */
         .hero {
-            position: relative;
-            min-height: 100vh;
-            padding: 8vh 1.5rem 26vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            overflow: hidden;
-            background: linear-gradient(180deg,
-                    #010614 0%,
-                    #050d28 25%,
-                    #090f22 55%,
-                    #0b1320 100%);
+            position: relative; min-height: 92vh;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; padding: 6rem 8% 4rem;
+            background: linear-gradient(160deg, #010614 0%, #050d28 40%, #0a0e1f 100%);
         }
-
-        .hero::before {
-            display: none;
-        }
-
-        /* ─── Starfield canvas ─── */
-        .star-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* ─── Moon ─── */
-        .hero-moon {
-            position: absolute;
-            top: 11%;
-            right: 17%;
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 36% 36%, #fef9e0, #fbbf24 45%, #d97706 85%);
-            box-shadow:
-                0 0 0 3px rgba(251, 191, 36, 0.18),
-                0 0 40px rgba(251, 191, 36, 0.55),
-                0 0 100px rgba(251, 191, 36, 0.22);
-            z-index: 1;
-            animation: moonGlow 5s ease-in-out infinite alternate;
-        }
-
-        .hero-moon::after {
-            content: '';
-            position: absolute;
-            top: 22%;
-            left: 54%;
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.14);
-            box-shadow: -16px 10px 0 rgba(0, 0, 0, 0.10), 7px 24px 0 7px rgba(0, 0, 0, 0.07);
-        }
-
-        @keyframes moonGlow {
-            0% {
-                box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.18), 0 0 40px rgba(251, 191, 36, 0.55), 0 0 100px rgba(251, 191, 36, 0.22);
-            }
-
-            100% {
-                box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.28), 0 0 65px rgba(251, 191, 36, 0.80), 0 0 150px rgba(251, 191, 36, 0.35);
-            }
-        }
-
-        /* ─── Aurora ─── */
-        .aurora-layer {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
+        .star-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .aurora-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
         .aurora-layer::before {
-            content: '';
-            position: absolute;
-            top: 2%;
-            left: -15%;
-            width: 85%;
-            height: 45%;
-            background: linear-gradient(135deg,
-                    transparent 0%,
-                    rgba(16, 185, 129, 0.13) 25%,
-                    rgba(6, 182, 212, 0.11) 50%,
-                    rgba(124, 58, 237, 0.09) 75%,
-                    transparent 100%);
-            filter: blur(45px);
-            border-radius: 60%;
-            animation: aurora1 11s ease-in-out infinite alternate;
+            content: ''; position: absolute; top: 0; left: -10%; width: 70%; height: 50%;
+            background: linear-gradient(135deg, transparent 0%, rgba(124,58,237,.1) 30%, rgba(6,182,212,.08) 60%, transparent 100%);
+            filter: blur(50px); border-radius: 60%; animation: aurora1 12s ease-in-out infinite alternate;
         }
-
         .aurora-layer::after {
-            content: '';
-            position: absolute;
-            top: -5%;
-            right: -15%;
-            width: 65%;
-            height: 55%;
-            background: linear-gradient(225deg,
-                    transparent 0%,
-                    rgba(124, 58, 237, 0.16) 30%,
-                    rgba(6, 182, 212, 0.09) 60%,
-                    rgba(16, 185, 129, 0.07) 80%,
-                    transparent 100%);
-            filter: blur(55px);
-            border-radius: 60%;
-            animation: aurora2 14s ease-in-out infinite alternate;
+            content: ''; position: absolute; top: -10%; right: -10%; width: 60%; height: 60%;
+            background: linear-gradient(225deg, transparent 0%, rgba(124,58,237,.13) 35%, rgba(16,185,129,.07) 70%, transparent 100%);
+            filter: blur(60px); border-radius: 60%; animation: aurora2 15s ease-in-out infinite alternate;
         }
+        @keyframes aurora1 { 0%{transform:translateX(0) scale(1);opacity:.6} 100%{transform:translateX(10%) translateY(8%) scale(1.2);opacity:1} }
+        @keyframes aurora2 { 0%{transform:translateX(0) scale(1);opacity:.5} 100%{transform:translateX(-10%) scale(1.15);opacity:.9} }
 
-        @keyframes aurora1 {
-            0% {
-                transform: translateX(0) translateY(0) scale(1);
-                opacity: 0.55;
-            }
-
-            100% {
-                transform: translateX(12%) translateY(8%) scale(1.18);
-                opacity: 1;
-            }
+        .hero-grid {
+            position: relative; z-index: 10;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+            align-items: center; max-width: 1200px; width: 100%; margin: 0 auto;
         }
-
-        @keyframes aurora2 {
-            0% {
-                transform: translateX(0) scale(1);
-                opacity: 0.45;
-            }
-
-            100% {
-                transform: translateX(-12%) scale(1.12);
-                opacity: 0.9;
-            }
-        }
-
-        /* ─── Mountain layers ─── */
-        .mountain-bg {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 58%;
-            background: linear-gradient(180deg, #0e2d52 0%, #081b35 100%);
-            clip-path: polygon(0 100%, 0 42%, 6% 28%, 13% 42%, 21% 18%, 29% 36%, 38% 10%, 47% 32%, 55% 14%, 63% 34%, 72% 16%, 81% 38%, 88% 22%, 95% 40%, 100% 26%, 100% 100%);
-            z-index: 2;
-            opacity: 0.85;
-        }
-
-        .mountain-mid {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 44%;
-            background: linear-gradient(180deg, #071e3d 0%, #040f20 100%);
-            clip-path: polygon(0 100%, 0 58%, 8% 42%, 16% 60%, 25% 38%, 34% 55%, 43% 34%, 52% 52%, 61% 30%, 70% 50%, 79% 36%, 88% 54%, 95% 42%, 100% 56%, 100% 100%);
-            z-index: 3;
-        }
-
-        .mountain-fg {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 30%;
-            background: linear-gradient(180deg, #040b18 0%, #020710 100%);
-            clip-path: polygon(0 100%, 0 72%, 10% 58%, 20% 76%, 30% 54%, 40% 70%, 52% 48%, 62% 66%, 72% 50%, 82% 68%, 91% 56%, 100% 72%, 100% 100%);
-            z-index: 4;
-        }
-
-        /* ─── Shooting stars ─── */
-        .shooting-star {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(200, 230, 255, 0.4), transparent);
-            border-radius: 2px;
-            animation: shoot linear forwards;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        @keyframes shoot {
-            0% {
-                transform: translateX(0) translateY(0) rotate(-20deg);
-                opacity: 1;
-            }
-
-            100% {
-                transform: translateX(280px) translateY(140px) rotate(-20deg);
-                opacity: 0;
-            }
-        }
-
-        /* ─── Floating code particles ─── */
-        .code-particle {
-            position: absolute;
-            bottom: 0;
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            pointer-events: none;
-            animation: floatUp linear infinite;
-            z-index: 5;
-            user-select: none;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0;
-            }
-
-            8% {
-                opacity: 1;
-            }
-
-            88% {
-                opacity: 0.5;
-            }
-
-            100% {
-                transform: translateY(-105vh) rotate(25deg);
-                opacity: 0;
-            }
-        }
-
-        .hero-inner {
-            position: relative;
-            z-index: 10;
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-        }
+        @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 3rem; text-align: center; } }
 
         .hero-eyebrow {
-            display: inline-block;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-            color: var(--warning);
-            background: rgba(251, 191, 36, 0.12);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            letter-spacing: 2px;
-            margin-bottom: 1.75rem;
+            display: inline-flex; align-items: center; gap: .5rem;
+            font-size: .72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--secondary); background: rgba(6,182,212,.1); border: 1px solid rgba(6,182,212,.25);
+            padding: .45rem 1rem; border-radius: 20px; margin-bottom: 1.5rem;
         }
-
-        .hero-logo-img {
-            height: 460px;
-            width: auto;
-            object-fit: contain;
-            margin-bottom: 1.5rem;
-            filter: drop-shadow(0 0 60px rgba(124, 58, 237, 0.7)) drop-shadow(0 0 120px rgba(6, 182, 212, 0.35));
-            animation: logoPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes logoPulse {
-
-            0%,
-            100% {
-                filter: drop-shadow(0 0 60px rgba(124, 58, 237, 0.7)) drop-shadow(0 0 120px rgba(6, 182, 212, 0.35));
-                transform: scale(1);
-            }
-
-            50% {
-                filter: drop-shadow(0 0 80px rgba(124, 58, 237, 0.9)) drop-shadow(0 0 150px rgba(6, 182, 212, 0.5));
-                transform: scale(1.03);
-            }
-        }
-
+        .hero-eyebrow .material-symbols-outlined { font-size: 1rem; }
         .hero-title {
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(2rem, 6vw, 4rem);
-            line-height: 1.15;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 35%, #f59e0b 60%, #ec4899 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.55));
+            font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+            line-height: 1.45; margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #e0e7ff 0%, #a78bfa 45%, #06b6d4 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
-
         .hero-subtitle {
-            color: rgba(200, 215, 240, 0.85);
-            font-size: 1.1rem;
-            max-width: 620px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.7;
+            color: rgba(200,215,240,.8); font-size: 1.05rem;
+            line-height: 1.75; margin-bottom: 2.5rem; max-width: 520px;
         }
-
-        .hero-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 1rem 2.4rem;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #0d1117;
-            font-weight: 800;
-            font-size: 1rem;
-            border-radius: 10px;
-            text-decoration: none;
-            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.50), 0 0 60px rgba(251, 191, 36, 0.15);
-            border: 2px solid #fde68a;
-            transition: transform 0.15s, box-shadow 0.15s;
+        @media (max-width: 900px) { .hero-subtitle { margin: 0 auto 2.5rem; } }
+        .hero-cta-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+        @media (max-width: 900px) { .hero-cta-row { justify-content: center; } }
+        .cta-faculty {
+            display: inline-flex; align-items: center; gap: .55rem;
+            padding: .9rem 1.8rem; border-radius: 10px; font-weight: 700; font-size: .95rem;
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            color: #fff; text-decoration: none;
+            box-shadow: 0 6px 24px rgba(124,58,237,.4); transition: transform .15s, box-shadow .15s;
         }
-
-        .hero-cta:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(251, 191, 36, 0.65), 0 0 80px rgba(251, 191, 36, 0.20);
+        .cta-faculty:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(124,58,237,.5); color: #fff; }
+        .cta-student {
+            display: inline-flex; align-items: center; gap: .55rem;
+            padding: .9rem 1.8rem; border-radius: 10px; font-weight: 700; font-size: .95rem;
+            background: transparent; color: var(--text); text-decoration: none;
+            border: 1px solid rgba(255,255,255,.15); transition: border-color .15s, background .15s;
         }
+        .cta-student:hover { border-color: rgba(255,255,255,.35); background: rgba(255,255,255,.05); color: var(--text); }
+        .cta-faculty .material-symbols-outlined,
+        .cta-student .material-symbols-outlined { font-size: 1.1rem; }
 
-        /* ============ SECTIONS ============ */
-        .section {
-            padding: 5rem 18%;
-            max-width: 100%;
-            margin: 0 auto;
+        /* ── Hero right: mock UI card ──────────────────────────────────── */
+        .hero-ui-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px;
+            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(124,58,237,.12);
         }
+        .hui-bar {
+            display: flex; align-items: center; gap: .5rem; padding: 10px 16px;
+            background: var(--bg-surface); border-bottom: 1px solid var(--border);
+        }
+        .hui-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .hui-bar-title {
+            flex: 1; text-align: center; font-size: .72rem; color: var(--text-muted);
+            font-family: monospace; margin-left: -3.5rem;
+        }
+        .hui-body { padding: 20px; }
+        .hui-section-label {
+            font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin-bottom: 10px;
+        }
+        .hui-classroom-card {
+            background: var(--bg-surface); border: 1px solid rgba(124,58,237,.25);
+            border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; cursor: pointer;
+            transition: border-color .15s;
+        }
+        .hui-classroom-card:hover { border-color: rgba(124,58,237,.5); }
+        .hui-cl-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .hui-cl-name { font-size: .82rem; font-weight: 700; color: var(--text); }
+        .hui-cl-lang {
+            font-size: .65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px;
+            background: rgba(6,182,212,.1); color: var(--secondary); border-radius: 20px; border: 1px solid rgba(6,182,212,.2);
+        }
+        .hui-cl-stats { display: flex; gap: 16px; }
+        .hui-cl-stat { font-size: .72rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+        .hui-cl-stat .material-symbols-outlined { font-size: .82rem; }
+        .hui-ai-chip {
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(6,182,212,.08));
+            border: 1px solid rgba(124,58,237,.2); border-radius: 10px;
+            padding: 12px 14px; margin-top: 4px;
+        }
+        .hui-ai-icon { font-size: .9rem; flex-shrink: 0; }
+        .hui-ai-text { font-size: .75rem; color: var(--text-secondary); line-height: 1.4; }
+        .hui-ai-text strong { color: var(--primary); display: block; font-size: .72rem; margin-bottom: 2px; }
 
+        /* ── STAT BAR ────────────────────────────────────────────────────── */
+        .stat-bar {
+            background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        }
+        .stat-bar-inner {
+            max-width: 1200px; margin: 0 auto; padding: 0 8%;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+        }
+        .stat-item {
+            padding: 1.75rem 1rem; text-align: center;
+            border-right: 1px solid var(--border);
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-val {
+            font-family: 'Press Start 2P', monospace; font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            display: block; margin-bottom: .4rem;
+        }
+        .stat-lbl { font-size: .78rem; color: var(--text-secondary); }
+        @media (max-width: 640px) { .stat-bar-inner { grid-template-columns: repeat(2,1fr); } .stat-item { border-right: none; border-bottom: 1px solid var(--border); } }
+
+        /* ── SECTION BASE ────────────────────────────────────────────────── */
+        .section { padding: 5.5rem 8%; max-width: 100%; }
+        .section-center { text-align: center; max-width: 640px; margin: 0 auto 3.5rem; }
+        .section-eyebrow {
+            display: inline-flex; align-items: center; gap: .4rem;
+            font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--primary); background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
+            padding: .38rem .9rem; border-radius: 20px; margin-bottom: 1rem;
+        }
+        .section-eyebrow .material-symbols-outlined { font-size: .88rem; }
         .section-heading {
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(1.2rem, 3vw, 2rem);
-            text-align: center;
-            margin-bottom: 0.75rem;
-            color: var(--text);
-            line-height: 1.4;
+            font-size: clamp(1rem, 2.5vw, 1.6rem); line-height: 1.5;
+            color: var(--text); margin-bottom: .85rem;
+        }
+        .section-sub { color: var(--text-secondary); font-size: .95rem; line-height: 1.7; }
+
+        /* ── HOW IT WORKS ────────────────────────────────────────────────── */
+        .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
+        @media (max-width: 768px) { .steps-grid { grid-template-columns: 1fr; } }
+        .step-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 28px 26px; position: relative; transition: border-color .2s, transform .2s;
+        }
+        .step-card:hover { border-color: rgba(124,58,237,.4); transform: translateY(-3px); }
+        .step-num {
+            font-family: 'Press Start 2P', monospace; font-size: .65rem;
+            color: var(--primary); background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
+            width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+        }
+        .step-icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+        .step-title { font-size: .92rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+        .step-desc { font-size: .82rem; color: var(--text-secondary); line-height: 1.65; }
+        .step-connector {
+            display: none;
+        }
+        @media (min-width: 769px) {
+            .steps-grid { position: relative; }
+            .step-card::after {
+                content: '→'; position: absolute; right: -1.2rem; top: 50%; transform: translateY(-50%);
+                color: var(--border); font-size: 1.2rem; z-index: 2;
+            }
+            .step-card:last-child::after { display: none; }
         }
 
-        .section-sub {
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 3rem;
+        /* ── AUDIENCE SPLIT ─────────────────────────────────────────────── */
+        .audience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1100px; margin: 0 auto; }
+        @media (max-width: 768px) { .audience-grid { grid-template-columns: 1fr; } }
+        .audience-card {
+            border-radius: 18px; overflow: hidden;
+            border: 1px solid var(--border); transition: border-color .2s, transform .2s;
         }
-
-        /* ============ COURSE CARDS ============ */
-        .category-tabs {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 3rem;
+        .audience-card:hover { transform: translateY(-4px); }
+        .audience-card.faculty { border-color: rgba(124,58,237,.3); }
+        .audience-card.student { border-color: rgba(6,182,212,.3); }
+        .audience-card-header {
+            padding: 28px 28px 0;
+            background: linear-gradient(135deg, #161b22, #1a1f29);
         }
-
-        .cat-tab {
-            padding: 0.5rem 1.1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+        .audience-card.faculty .audience-card-header { background: linear-gradient(135deg, #16103a, #1a1040); }
+        .audience-card.student .audience-card-header { background: linear-gradient(135deg, #0c2233, #071c30); }
+        .audience-role {
+            display: inline-flex; align-items: center; gap: .45rem;
+            font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+            padding: .35rem .9rem; border-radius: 20px; margin-bottom: 14px;
         }
-
-        .cat-tab.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+        .audience-card.faculty .audience-role { color: #a78bfa; background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.25); }
+        .audience-card.student .audience-role { color: #22d3ee; background: rgba(6,182,212,.12); border: 1px solid rgba(6,182,212,.22); }
+        .audience-role .material-symbols-outlined { font-size: .9rem; }
+        .audience-title { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .audience-desc { font-size: .88rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 24px; }
+        .audience-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+        .audience-feat {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: .84rem; color: var(--text-secondary);
         }
-
-        .cat-tab:hover:not(.active) {
-            border-color: var(--primary);
-            color: var(--text);
+        .audience-feat .material-symbols-outlined { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+        .audience-card.faculty .audience-feat .material-symbols-outlined { color: #a78bfa; }
+        .audience-card.student .audience-feat .material-symbols-outlined { color: #22d3ee; }
+        .audience-feat strong { color: var(--text); font-weight: 600; }
+        .audience-cta {
+            display: inline-flex; align-items: center; gap: .5rem;
+            padding: .75rem 1.5rem; border-radius: 9px; font-weight: 700; font-size: .88rem;
+            text-decoration: none; transition: transform .15s, box-shadow .15s; margin-bottom: 28px;
         }
-
-        .courses-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+        .audience-card.faculty .audience-cta {
+            background: linear-gradient(135deg, var(--primary), #9333ea);
+            color: #fff; box-shadow: 0 4px 16px rgba(124,58,237,.35);
         }
-
-        .course-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
-            display: flex;
-            flex-direction: column;
+        .audience-card.faculty .audience-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,.45); color: #fff; }
+        .audience-card.student .audience-cta {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: #fff; box-shadow: 0 4px 16px rgba(6,182,212,.3);
         }
+        .audience-card.student .audience-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(6,182,212,.4); color: #fff; }
 
-        .course-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
+        /* ── AI FEATURES ─────────────────────────────────────────────────── */
+        .ai-section { background: linear-gradient(180deg, transparent, rgba(124,58,237,.04) 50%, transparent); }
+        .ai-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1.25rem; max-width: 1100px; margin: 0 auto; }
+        .ai-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 24px 22px; transition: border-color .2s, transform .2s;
+            position: relative; overflow: hidden;
         }
-
-        .course-thumb {
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            position: relative;
-            overflow: hidden;
+        .ai-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0; transition: opacity .2s;
         }
+        .ai-card:hover { border-color: rgba(124,58,237,.35); transform: translateY(-3px); }
+        .ai-card:hover::before { opacity: 1; }
+        .ai-card-icon {
+            width: 44px; height: 44px; border-radius: 10px; margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
+        }
+        .ai-card-icon .material-symbols-outlined { font-size: 1.3rem; color: var(--primary); }
+        .ai-card-icon.cyan { background: rgba(6,182,212,.1); border-color: rgba(6,182,212,.2); }
+        .ai-card-icon.cyan .material-symbols-outlined { color: var(--secondary); }
+        .ai-card-icon.green { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.2); }
+        .ai-card-icon.green .material-symbols-outlined { color: var(--success); }
+        .ai-card-title { font-size: .92rem; font-weight: 700; color: var(--text); margin-bottom: 7px; }
+        .ai-card-desc { font-size: .82rem; color: var(--text-secondary); line-height: 1.6; }
+        .ai-badge {
+            display: inline-flex; align-items: center; gap: 4px; margin-top: 10px;
+            font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+            color: var(--primary); background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.18);
+            padding: 2px 8px; border-radius: 20px;
+        }
+        .ai-badge .material-symbols-outlined { font-size: .75rem; }
 
-        .course-thumb::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 2px, transparent 2px 4px);
+        /* ── LANGUAGES ───────────────────────────────────────────────────── */
+        .lang-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; max-width: 900px; margin: 0 auto; }
+        @media (max-width: 640px) { .lang-grid { grid-template-columns: repeat(2,1fr); } }
+        .lang-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 28px 20px; text-align: center; transition: border-color .2s, transform .2s;
+        }
+        .lang-card:hover { transform: translateY(-3px); }
+        .lang-card.py:hover { border-color: rgba(59,130,246,.4); }
+        .lang-card.js:hover { border-color: rgba(245,158,11,.4); }
+        .lang-card.java:hover { border-color: rgba(237,139,0,.4); }
+        .lang-card.cpp:hover { border-color: rgba(0,89,156,.4); }
+        .lang-icon { width: 52px; height: 52px; margin: 0 auto 12px; object-fit: contain; }
+        .lang-name { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .lang-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.5; }
+
+        /* ── TESTIMONIAL / QUOTE STRIP ───────────────────────────────────── */
+        .quote-strip {
+            background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            padding: 3.5rem 8%;
+        }
+        .quote-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+        @media (max-width: 768px) { .quote-inner { grid-template-columns: 1fr; } }
+        .quote-card { padding: 0 1rem; }
+        .quote-text {
+            font-size: .92rem; color: var(--text-secondary); line-height: 1.7;
+            font-style: italic; margin-bottom: 14px;
+        }
+        .quote-text::before { content: '"'; color: var(--primary); font-size: 1.4rem; font-style: normal; line-height: 0; vertical-align: -.25em; margin-right: 3px; }
+        .quote-author { display: flex; align-items: center; gap: 10px; }
+        .quote-avatar {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem; font-weight: 700; color: #fff;
+        }
+        .quote-name { font-size: .82rem; font-weight: 700; color: var(--text); }
+        .quote-role { font-size: .72rem; color: var(--text-muted); }
+
+        /* ── FOOTER CTA ──────────────────────────────────────────────────── */
+        .footer-cta {
+            padding: 5rem 8%; text-align: center;
+            background: linear-gradient(160deg, #0d1117, #130f2a, #0d1117);
+            border-top: 1px solid var(--border); position: relative; overflow: hidden;
+        }
+        .footer-cta::before {
+            content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 300px;
+            background: radial-gradient(ellipse, rgba(124,58,237,.15) 0%, transparent 70%);
             pointer-events: none;
         }
-
-        .thumb-python {
-            background: linear-gradient(135deg, #3776ab, #ffd43b);
-        }
-
-        .thumb-html {
-            background: linear-gradient(135deg, #e34f26, #f06529);
-        }
-
-        .thumb-css {
-            background: linear-gradient(135deg, #2965f1, #264de4);
-        }
-
-        .thumb-js {
-            background: linear-gradient(135deg, #f7df1e, #f0db4f);
-            color: #323330;
-        }
-
-        .thumb-java {
-            background: linear-gradient(135deg, #ed8b00, #5382a1);
-        }
-
-        .thumb-cpp {
-            background: linear-gradient(135deg, #00599c, #004482);
-        }
-
-        .course-body {
-            padding: 1.25rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .course-title {
+        .footer-cta-inner { position: relative; z-index: 2; max-width: 580px; margin: 0 auto; }
+        .footer-cta-title {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.85rem;
-            margin-bottom: 0.6rem;
-            color: var(--text);
+            font-size: clamp(1rem, 2.5vw, 1.5rem); line-height: 1.5; color: var(--text); margin-bottom: 1rem;
         }
-
-        .course-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 1rem;
-            flex: 1;
-        }
-
-        .course-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.6rem 1rem;
-            background: var(--primary);
-            color: white;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.8rem;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            align-self: flex-start;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .course-btn:hover {
-            background: transparent;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .explore-all {
-            text-align: center;
-            margin-top: 2.5rem;
-        }
-
-        .explore-all a {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            color: var(--primary);
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-
-        /* ============ FEATURE ROWS ============ */
-        .feature-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 3rem;
-            align-items: center;
-            padding: 4rem 0;
-        }
-
-        @media (min-width: 900px) {
-            .feature-row {
-                grid-template-columns: 1fr 1fr;
-                gap: 5rem;
-            }
-
-            .feature-row.reverse .feature-text {
-                order: 2;
-            }
-        }
-
-        .feature-text h3 {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: var(--text);
-            line-height: 1.4;
-        }
-
-        .feature-text p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            line-height: 1.7;
-        }
-
-        .feature-visual {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            height: 280px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .visual-badges {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-        }
-
-        .visual-game {
-            background: linear-gradient(135deg, #422006, #292524);
-        }
-
-        .visual-portfolio {
-            background: linear-gradient(135deg, #064e3b, #022c22);
-        }
-
-        .badge-sprites {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            font-size: 2.5rem;
-        }
-
-        .badge-sprites span {
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(251, 191, 36, 0.12);
-            border: 2px solid rgba(251, 191, 36, 0.4);
-            border-radius: 12px;
-        }
-
-        /* ============ FOOTER CTA ============ */
-        .footer-cta {
-            background: linear-gradient(180deg, #0d1117, #1a2332);
-            padding: 5rem 18% 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-cta::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 80px;
-            background:
-                linear-gradient(to right,
-                    #1e293b 0 8%, #334155 8% 10%, #1e293b 10% 20%,
-                    #475569 20% 22%, #1e293b 22% 35%, #64748b 35% 37%,
-                    #1e293b 37% 50%, #475569 50% 52%, #1e293b 52% 68%,
-                    #334155 68% 70%, #1e293b 70% 85%, #64748b 85% 87%,
-                    #1e293b 87% 100%);
-            clip-path: polygon(0 100%, 0 60%, 8% 60%, 8% 30%, 12% 30%, 12% 60%, 20% 60%,
-                    22% 40%, 30% 40%, 30% 60%, 42% 60%, 42% 20%, 50% 20%,
-                    50% 60%, 62% 60%, 62% 45%, 70% 45%, 70% 60%, 82% 60%,
-                    82% 35%, 90% 35%, 90% 60%, 100% 60%, 100% 100%);
-        }
-
-        .footer-cta h2 {
-            font-family: 'Press Start 2P', monospace;
-            font-size: clamp(1.3rem, 3vw, 2rem);
-            margin-bottom: 2rem;
-            color: var(--text);
-            position: relative;
-            z-index: 2;
-        }
-
-        .footer-cta .btn-free {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #0d1117;
-            font-weight: 800;
-            border-radius: 10px;
-            text-decoration: none;
-            border: 2px solid #fde68a;
-            box-shadow: 0 8px 24px rgba(251, 191, 36, 0.35);
-            position: relative;
-            z-index: 2;
-            margin-bottom: 4rem;
-        }
-
-        .footer-bottom {
-            position: relative;
-            z-index: 2;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            padding-top: 2rem;
-        }
+        .footer-cta-sub { color: var(--text-secondary); font-size: .95rem; line-height: 1.7; margin-bottom: 2.5rem; }
+        .footer-cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3.5rem; }
+        .footer-bottom { color: var(--text-muted); font-size: .78rem; padding-top: 2rem; border-top: 1px solid var(--border); max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+        .footer-bottom-links { display: flex; gap: 1.5rem; }
+        .footer-bottom-links a { color: var(--text-muted); text-decoration: none; font-size: .78rem; transition: color .2s; }
+        .footer-bottom-links a:hover { color: var(--text-secondary); }
     </style>
 </head>
-
 <body>
-    <div class="page">
 
-        <!-- ============ TOP NAV ============ -->
-        <nav class="top-nav">
-            <div class="nav-logo"></div>
-            <ul class="nav-links">
-                <li><a href="#courses">Learn</a></li>
-                <li><a href="#features">AI <span class="badge-soon">NEW</span></a></li>
-            </ul>
-            <div class="nav-actions">
-                <a href="login.html" class="btn-login">Log in</a>
-                <a href="intro.html?to=register.html" class="btn-signup">Sign up</a>
-            </div>
-        </nav>
-
-        <!-- ============ HERO ============ -->
-        <section class="hero">
-            <canvas class="star-canvas" id="starCanvas"></canvas>
-            <div class="hero-moon"></div>
-            <div class="aurora-layer"></div>
-            <div class="mountain-bg"></div>
-            <div class="mountain-mid"></div>
-            <div class="mountain-fg"></div>
-            <div class="hero-inner">
-                <img src="../assets/codearena-logo.png" alt="CodeArena" class="hero-logo-img">
-                <p class="hero-subtitle">
-                    The most fun and user-friendly way to learn how to code, built for beginners with adaptive AI, real
-                    challenges, and instant feedback.
-                </p>
-                <a href="intro.html?to=login.html" class="hero-cta">Get Started &#x2192;</a>
-            </div>
-        </section>
-
-        <!-- ============ COURSES ============ -->
-        <section class="section" id="courses">
-            <h2 class="section-heading">Explore free interactive<br>coding lessons</h2>
-
-            <div class="category-tabs">
-                <div class="cat-tab active">Popular</div>
-                <div class="cat-tab">Web Development</div>
-                <div class="cat-tab">Data Science</div>
-                <div class="cat-tab">Computer Science</div>
-                <div class="cat-tab">Game Dev</div>
-            </div>
-
-            <div class="courses-grid">
-                <div class="course-card">
-                    <div class="course-thumb thumb-python">&#x1F40D;</div>
-                    <div class="course-body">
-                        <div class="course-title">Python</div>
-                        <div class="course-desc">Learn programming fundamentals and variables, control flow, and loops
-                            with the world's most popular language.</div>
-                        <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
-                    </div>
-                </div>
-                <div class="course-card">
-                    <div class="course-thumb thumb-html">&#x1F4C4;</div>
-                    <div class="course-body">
-                        <div class="course-title">HTML</div>
-                        <div class="course-desc">Create your first website with HTML, the building blocks of the web and
-                            structure for any modern site.</div>
-                        <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
-                    </div>
-                </div>
-                <div class="course-card">
-                    <div class="course-thumb thumb-css">&#x1F3A8;</div>
-                    <div class="course-body">
-                        <div class="course-title">CSS</div>
-                        <div class="course-desc">Learn to use CSS creatively and properties to make your HTML pages look
-                            stunning.</div>
-                        <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
-                    </div>
-                </div>
-                <div class="course-card">
-                    <div class="course-thumb thumb-js">&#x26A1;</div>
-                    <div class="course-body">
-                        <div class="course-title">JavaScript</div>
-                        <div class="course-desc">Learn variables, loops, functions and events to start building
-                            interactive dynamic web applications.</div>
-                        <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
-                    </div>
-                </div>
-                <div class="course-card">
-                    <div class="course-thumb thumb-java">&#x2615;</div>
-                    <div class="course-body">
-                        <div class="course-title">Java</div>
-                        <div class="course-desc">Learn classes, inheritance, and object-oriented programming with one of
-                            the most trusted languages.</div>
-                        <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
-                    </div>
-                </div>
-                <div class="course-card">
-                    <div class="course-thumb thumb-cpp">&#x2699;&#xFE0F;</div>
-                    <div class="course-body">
-                        <div class="course-title">C++</div>
-                        <div class="course-desc">Master pointers, memory, and performance with a language that powers
-                            games, systems, and engines.</div>
-                        <a href="login.html" class="course-btn">&#x25B6; LEARN</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="explore-all">
-                <a href="login.html">Explore All Courses &#x2192;</a>
-            </div>
-        </section>
-
-        <!-- ============ FEATURE ROWS ============ -->
-        <section class="section" id="features">
-
-            <div class="feature-row">
-                <div class="feature-visual visual-badges">
-                    <div class="badge-sprites">
-                        <span>&#x1F3C6;</span><span>&#x2B50;</span><span>&#x1F525;</span>
-                        <span>&#x1F389;</span><span>&#x1F48E;</span><span>&#x1F3AF;</span>
-                    </div>
-                </div>
-                <div class="feature-text">
-                    <h3>Level up your learning</h3>
-                    <p>Earn unique rewards, epic XP and badges as you level up. Start from any theme or role, track your
-                        streak, and celebrate every milestone along the way.</p>
-                </div>
-            </div>
-
-            <div class="feature-row reverse">
-                <div class="feature-text">
-                    <h3>Practice your coding chops</h3>
-                    <p>Sharpen your skills with bite-sized coding challenges. Test what you've learned in the coding
-                        playground designed for beginners and advanced learners alike.</p>
-                </div>
-                <div class="feature-visual visual-game" style="font-size: 3rem;">
-                    &#x1F3AE;&#x1F4A3;&#x1F3C1;
-                </div>
-            </div>
-
-            <div class="feature-row">
-                <div class="feature-visual visual-portfolio" style="font-size: 3rem;">
-                    &#x1F680;&#x1F4BB;&#x2728;
-                </div>
-                <div class="feature-text">
-                    <h3>Build an awesome portfolio</h3>
-                    <p>Create your own creative websites, games, landing pages, and stand-alone apps. Start by mixing
-                        your creativity with code to build a portfolio you'll be proud of.</p>
-                </div>
-            </div>
-
-
-        </section>
-
-        <!-- ============ FOOTER CTA ============ -->
-        <section class="footer-cta">
-            <h2>Start learning for free</h2>
-            <a href="intro.html?to=register.html" class="btn-free">&#x1F3AE; Start Your Adventure</a>
-            <div class="footer-bottom">
-                &copy; 2026 CodeArena. Made with &#x2764;&#xFE0F; for learners everywhere.
-            </div>
-        </section>
-
+<!-- ══ TOP NAV ══════════════════════════════════════════════════════════════ -->
+<nav class="top-nav">
+    <a href="index.html">
+        <img src="../assets/codearena-logo.png" alt="CodeArena" style="height:48px;width:auto;object-fit:contain;">
+    </a>
+    <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#ai-features">AI Features</a></li>
+        <li><a href="#languages">Languages</a></li>
+    </ul>
+    <div class="nav-actions">
+        <a href="login.html" class="btn-login">Log in</a>
+        <a href="register.html" class="btn-signup">Get Started Free</a>
     </div>
+</nav>
 
-    <script>
-        // ── Twinkling starfield (canvas) ──────────────────────────────────────────
-        const canvas = document.getElementById('starCanvas');
-        const ctx = canvas.getContext('2d');
+<!-- ══ HERO ══════════════════════════════════════════════════════════════════ -->
+<section class="hero">
+    <canvas class="star-canvas" id="starCanvas"></canvas>
+    <div class="aurora-layer"></div>
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+    <div class="hero-grid">
+        <!-- Left: Copy -->
+        <div>
+            <div class="hero-eyebrow">
+                <span class="material-symbols-outlined">auto_awesome</span>
+                AI-Powered Computer-Aided Instruction
+            </div>
+            <h1 class="hero-title">Smarter Teaching.<br>Deeper Learning.</h1>
+            <p class="hero-subtitle">
+                CodeArena connects faculty and students in AI-enhanced classrooms. Faculty create lessons and coding assignments; students learn with personalized AI feedback — all in one platform.
+            </p>
+            <div class="hero-cta-row">
+                <a href="register.html?role=faculty" class="cta-faculty">
+                    <span class="material-symbols-outlined">school</span>
+                    I'm a Faculty
+                </a>
+                <a href="register.html?role=student" class="cta-student">
+                    <span class="material-symbols-outlined">person</span>
+                    I'm a Student
+                </a>
+            </div>
+        </div>
 
-        const stars = Array.from({ length: 260 }, () => ({
-            x: Math.random(),
-            y: Math.random() * 0.78,   // cluster in upper sky
-            r: Math.random() * 1.5 + 0.2,
-            phase: Math.random() * Math.PI * 2,
-            speed: Math.random() * 0.018 + 0.004,
-            // occasional slightly warm star
-            warm: Math.random() < 0.15
-        }));
+        <!-- Right: Mock UI -->
+        <div class="hero-ui-card">
+            <div class="hui-bar">
+                <div class="hui-dot" style="background:#ef4444;"></div>
+                <div class="hui-dot" style="background:#f59e0b;margin-left:5px;"></div>
+                <div class="hui-dot" style="background:#10b981;margin-left:5px;"></div>
+                <div class="hui-bar-title">My Classrooms</div>
+            </div>
+            <div class="hui-body">
+                <div class="hui-section-label">Active Classrooms</div>
 
-        function drawStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const now = performance.now() * 0.001;
-            stars.forEach(s => {
-                s.phase += s.speed;
-                const opacity = 0.25 + 0.75 * Math.abs(Math.sin(s.phase));
-                const color = s.warm ? `rgba(255,230,180,${opacity})` : `rgba(220,235,255,${opacity})`;
-                ctx.beginPath();
-                ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.fill();
-            });
-            requestAnimationFrame(drawStars);
-        }
-        drawStars();
+                <div class="hui-classroom-card">
+                    <div class="hui-cl-header">
+                        <span class="hui-cl-name">CS101 — Intro to Python</span>
+                        <span class="hui-cl-lang">Python</span>
+                    </div>
+                    <div class="hui-cl-stats">
+                        <span class="hui-cl-stat"><span class="material-symbols-outlined">group</span>28 students</span>
+                        <span class="hui-cl-stat"><span class="material-symbols-outlined">menu_book</span>6 lessons</span>
+                        <span class="hui-cl-stat"><span class="material-symbols-outlined">terminal</span>3 assignments</span>
+                    </div>
+                </div>
 
-        // ── Shooting stars ────────────────────────────────────────────────────────
-        const heroEl = document.querySelector('.hero');
-        function launchShootingStar() {
-            const el = document.createElement('div');
-            el.className = 'shooting-star';
-            const w = Math.random() * 80 + 50;
-            el.style.width = w + 'px';
-            el.style.top = (Math.random() * 45 + 3) + '%';
-            el.style.left = (Math.random() * 55 + 5) + '%';
-            const dur = (Math.random() * 0.8 + 0.5).toFixed(2);
-            el.style.animationDuration = dur + 's';
-            heroEl.appendChild(el);
-            setTimeout(() => el.remove(), +dur * 1000 + 200);
-        }
-        // First one fires quickly, then every 3–5 s
-        setTimeout(launchShootingStar, 600);
-        setInterval(launchShootingStar, 3800);
-        setTimeout(launchShootingStar, 2200);  // stagger a second one
+                <div class="hui-classroom-card" style="border-color:rgba(6,182,212,.25);">
+                    <div class="hui-cl-header">
+                        <span class="hui-cl-name">WebDev — JavaScript Basics</span>
+                        <span class="hui-cl-lang" style="color:#f59e0b;background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);">JS</span>
+                    </div>
+                    <div class="hui-cl-stats">
+                        <span class="hui-cl-stat"><span class="material-symbols-outlined">group</span>15 students</span>
+                        <span class="hui-cl-stat"><span class="material-symbols-outlined">menu_book</span>4 lessons</span>
+                        <span class="hui-cl-stat"><span class="material-symbols-outlined">terminal</span>2 assignments</span>
+                    </div>
+                </div>
 
-        // ── Floating code particles ───────────────────────────────────────────────
-        const symbols = ['{ }', '</>', '//', '=>', '&&', '++', '==', '01', '()', '[ ]', '!=', '**', '0x', '::'];
-        const palettes = [
-            'rgba(124, 58, 237, 0.50)',
-            'rgba(6,  182, 212, 0.45)',
-            'rgba(16, 185, 129, 0.40)',
-            'rgba(251,191,  36, 0.40)'
-        ];
-        for (let i = 0; i < 22; i++) {
-            const p = document.createElement('div');
-            p.className = 'code-particle';
-            p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-            p.style.left = Math.random() * 100 + '%';
-            const dur = Math.random() * 16 + 12;
-            p.style.animationDuration = dur + 's';
-            p.style.animationDelay = -(Math.random() * dur) + 's';
-            p.style.fontSize = (Math.random() * 0.5 + 0.6) + 'rem';
-            p.style.color = palettes[Math.floor(Math.random() * palettes.length)];
-            heroEl.appendChild(p);
-        }
+                <div class="hui-ai-chip">
+                    <span class="hui-ai-icon">✨</span>
+                    <div class="hui-ai-text">
+                        <strong>AI Insight</strong>
+                        3 students in CS101 are struggling with loops. Consider assigning the "Loop Practice" lesson.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-        // ── Category tab switching ────────────────────────────────────────────────
-        document.querySelectorAll('.cat-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-            });
+<!-- ══ STAT BAR ══════════════════════════════════════════════════════════════ -->
+<div class="stat-bar">
+    <div class="stat-bar-inner">
+        <div class="stat-item">
+            <span class="stat-val">4</span>
+            <span class="stat-lbl">Programming Languages</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val">AI</span>
+            <span class="stat-lbl">Content Generation</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val">Auto</span>
+            <span class="stat-lbl">Assignment Grading</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val">Live</span>
+            <span class="stat-lbl">Student Feedback</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══ HOW IT WORKS ══════════════════════════════════════════════════════════ -->
+<section class="section" id="how-it-works">
+    <div class="section-center">
+        <div class="section-eyebrow"><span class="material-symbols-outlined">account_tree</span>Process</div>
+        <h2 class="section-heading">How CodeArena Works</h2>
+        <p class="section-sub">A simple three-step loop that connects faculty and students through AI-enhanced learning.</p>
+    </div>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-num">01</div>
+            <span class="step-icon">🏫</span>
+            <div class="step-title">Faculty Creates a Classroom</div>
+            <p class="step-desc">Set up a virtual classroom, choose a programming language, and generate an enrollment key. Add AI-generated lessons and coding assignments in minutes.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">02</div>
+            <span class="step-icon">🧑‍💻</span>
+            <div class="step-title">Students Join & Learn</div>
+            <p class="step-desc">Students enroll with a key, read lessons curated by their instructor, and tackle coding assignments — writing real code in a built-in playground.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">03</div>
+            <span class="step-icon">✨</span>
+            <div class="step-title">AI Provides Feedback</div>
+            <p class="step-desc">AI reviews submissions against test cases, flags weak areas, generates personalized feedback reports, and suggests next steps for each student.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FOR FACULTY / FOR STUDENTS ════════════════════════════════════════════ -->
+<section class="section" style="padding-top:0;">
+    <div class="section-center">
+        <div class="section-eyebrow"><span class="material-symbols-outlined">diversity_3</span>Roles</div>
+        <h2 class="section-heading">Built for Both Sides of the Classroom</h2>
+        <p class="section-sub">Whether you're teaching or learning, CodeArena gives you the tools and AI support you need.</p>
+    </div>
+    <div class="audience-grid">
+        <!-- Faculty card -->
+        <div class="audience-card faculty">
+            <div class="audience-card-header">
+                <div class="audience-role"><span class="material-symbols-outlined">school</span>For Faculty</div>
+                <div class="audience-title">Teach smarter, not harder</div>
+                <div class="audience-desc">Create and manage classrooms, generate AI-written lessons and assignments, and track every student's progress from a single dashboard.</div>
+                <div class="audience-features">
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span><strong>Create classrooms</strong> for each course with a unique enrollment key</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        <span><strong>Generate lessons</strong> with AI — just enter a topic and difficulty</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">terminal</span>
+                        <span><strong>Assign coding problems</strong> with automated test-case grading</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">bar_chart</span>
+                        <span><strong>Monitor student submissions</strong> and AI-generated performance insights</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">campaign</span>
+                        <span><strong>Post announcements</strong> to your class stream in real time</span>
+                    </div>
+                </div>
+                <a href="register.html?role=faculty" class="audience-cta">
+                    <span class="material-symbols-outlined">arrow_forward</span> Create a Classroom
+                </a>
+            </div>
+        </div>
+
+        <!-- Student card -->
+        <div class="audience-card student">
+            <div class="audience-card-header">
+                <div class="audience-role"><span class="material-symbols-outlined">person</span>For Students</div>
+                <div class="audience-title">Learn with AI by your side</div>
+                <div class="audience-desc">Join your instructor's classroom, work through structured lessons, submit coding assignments, and receive personalized AI feedback.</div>
+                <div class="audience-features">
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">key</span>
+                        <span><strong>Enroll instantly</strong> using your instructor's classroom key</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">menu_book</span>
+                        <span><strong>Read structured lessons</strong> curated by your faculty</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">code</span>
+                        <span><strong>Submit coding assignments</strong> in a built-in code editor</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span><strong>Get AI feedback</strong> on your strengths, weak areas, and next steps</span>
+                    </div>
+                    <div class="audience-feat">
+                        <span class="material-symbols-outlined">auto_stories</span>
+                        <span><strong>Browse community contributions</strong> — lessons shared by peers</span>
+                    </div>
+                </div>
+                <a href="register.html?role=student" class="audience-cta">
+                    <span class="material-symbols-outlined">arrow_forward</span> Join a Classroom
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ AI FEATURES ════════════════════════════════════════════════════════════ -->
+<section class="section ai-section" id="ai-features">
+    <div class="section-center">
+        <div class="section-eyebrow"><span class="material-symbols-outlined">auto_awesome</span>AI Capabilities</div>
+        <h2 class="section-heading">AI at Every Step</h2>
+        <p class="section-sub">From content creation to performance analysis, AI assists both instructors and learners throughout the learning journey.</p>
+    </div>
+    <div class="ai-grid">
+        <div class="ai-card">
+            <div class="ai-card-icon">
+                <span class="material-symbols-outlined">edit_document</span>
+            </div>
+            <div class="ai-card-title">AI Lesson Generator</div>
+            <p class="ai-card-desc">Faculty enter a topic, language, and difficulty level. AI writes a complete, structured lesson — ready to assign in seconds.</p>
+            <div class="ai-badge"><span class="material-symbols-outlined">school</span>For Faculty</div>
+        </div>
+        <div class="ai-card">
+            <div class="ai-card-icon cyan">
+                <span class="material-symbols-outlined">terminal</span>
+            </div>
+            <div class="ai-card-title">AI Assignment Creator</div>
+            <p class="ai-card-desc">Generate coding assignments with problem descriptions, starter code, and test cases — all written by AI based on your topic and language.</p>
+            <div class="ai-badge"><span class="material-symbols-outlined">school</span>For Faculty</div>
+        </div>
+        <div class="ai-card">
+            <div class="ai-card-icon green">
+                <span class="material-symbols-outlined">psychology</span>
+            </div>
+            <div class="ai-card-title">Personalized AI Feedback</div>
+            <p class="ai-card-desc">After submitting work, students receive a tailored feedback report identifying strong areas, weak topics, and specific recommendations for improvement.</p>
+            <div class="ai-badge" style="color:var(--success);background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);">
+                <span class="material-symbols-outlined">person</span>For Students
+            </div>
+        </div>
+        <div class="ai-card">
+            <div class="ai-card-icon">
+                <span class="material-symbols-outlined">lightbulb</span>
+            </div>
+            <div class="ai-card-title">Adaptive Hints</div>
+            <p class="ai-card-desc">When students are stuck, the AI provides context-aware hints — never giving the answer outright, but guiding students toward the solution.</p>
+            <div class="ai-badge" style="color:var(--success);background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);">
+                <span class="material-symbols-outlined">person</span>For Students
+            </div>
+        </div>
+        <div class="ai-card">
+            <div class="ai-card-icon cyan">
+                <span class="material-symbols-outlined">rule</span>
+            </div>
+            <div class="ai-card-title">Auto-Graded Submissions</div>
+            <p class="ai-card-desc">Coding assignments are graded automatically against test cases. Partial credit is awarded per passing test, with detailed result breakdowns.</p>
+            <div class="ai-badge"><span class="material-symbols-outlined">school</span>For Faculty</div>
+        </div>
+        <div class="ai-card">
+            <div class="ai-card-icon green">
+                <span class="material-symbols-outlined">bar_chart</span>
+            </div>
+            <div class="ai-card-title">Learning Analytics</div>
+            <p class="ai-card-desc">Instructors see per-student accuracy, submission rates, and topic-level performance. AI highlights which students need the most attention.</p>
+            <div class="ai-badge"><span class="material-symbols-outlined">school</span>For Faculty</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ LANGUAGES ═════════════════════════════════════════════════════════════ -->
+<section class="section" id="languages" style="padding-top:0;">
+    <div class="section-center">
+        <div class="section-eyebrow"><span class="material-symbols-outlined">code</span>Languages</div>
+        <h2 class="section-heading">4 Languages Supported</h2>
+        <p class="section-sub">Faculty choose a language when creating a classroom. AI content generation, code execution, and auto-grading all support all four.</p>
+    </div>
+    <div class="lang-grid">
+        <div class="lang-card py">
+            <img class="lang-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python">
+            <div class="lang-name">Python</div>
+            <div class="lang-desc">Variables, loops, functions, OOP</div>
+        </div>
+        <div class="lang-card js">
+            <img class="lang-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript">
+            <div class="lang-name">JavaScript</div>
+            <div class="lang-desc">DOM, async, modern ES6+</div>
+        </div>
+        <div class="lang-card java">
+            <img class="lang-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java">
+            <div class="lang-name">Java</div>
+            <div class="lang-desc">Classes, inheritance, generics</div>
+        </div>
+        <div class="lang-card cpp">
+            <img class="lang-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="C++">
+            <div class="lang-name">C++</div>
+            <div class="lang-desc">Pointers, memory, STL</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ QUOTE STRIP ════════════════════════════════════════════════════════════ -->
+<div class="quote-strip">
+    <div class="quote-inner">
+        <div class="quote-card">
+            <p class="quote-text">The AI lesson generator saved me hours of prep work. I can spin up a full lesson on any topic in under two minutes.</p>
+            <div class="quote-author">
+                <div class="quote-avatar" style="background:linear-gradient(135deg,var(--primary),#9333ea);">RC</div>
+                <div>
+                    <div class="quote-name">Prof. R. Cruz</div>
+                    <div class="quote-role">Faculty · CS Department</div>
+                </div>
+            </div>
+        </div>
+        <div class="quote-card">
+            <p class="quote-text">Getting a personal AI feedback report after every submission helped me understand exactly what I needed to study next.</p>
+            <div class="quote-author">
+                <div class="quote-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4);">ML</div>
+                <div>
+                    <div class="quote-name">M. Lim</div>
+                    <div class="quote-role">Student · 2nd Year BSCS</div>
+                </div>
+            </div>
+        </div>
+        <div class="quote-card">
+            <p class="quote-text">Auto-graded assignments cut my grading time to zero. I focus on teaching; CodeArena handles the evaluation.</p>
+            <div class="quote-author">
+                <div class="quote-avatar" style="background:linear-gradient(135deg,#065f46,#10b981);">JS</div>
+                <div>
+                    <div class="quote-name">Prof. J. Santos</div>
+                    <div class="quote-role">Faculty · Programming Fundamentals</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ FOOTER CTA ══════════════════════════════════════════════════════════════ -->
+<section class="footer-cta">
+    <div class="footer-cta-inner">
+        <h2 class="footer-cta-title">Ready to transform your classroom?</h2>
+        <p class="footer-cta-sub">Join faculty and students already using CodeArena to make programming education smarter, faster, and more personalized.</p>
+        <div class="footer-cta-btns">
+            <a href="register.html?role=faculty" class="cta-faculty">
+                <span class="material-symbols-outlined">school</span>Start as Faculty
+            </a>
+            <a href="register.html?role=student" class="cta-student" style="border-color:rgba(255,255,255,.2);">
+                <span class="material-symbols-outlined">person</span>Join as Student
+            </a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>&copy; 2026 CodeArena — AI-Powered Programming Education</span>
+        <div class="footer-bottom-links">
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+            <a href="admin.html">Admin</a>
+        </div>
+    </div>
+</section>
+
+<script>
+    // ── Twinkling starfield ───────────────────────────────────────────────────
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = canvas.parentElement.offsetHeight; }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    const stars = Array.from({length: 220}, () => ({
+        x: Math.random(), y: Math.random() * .85,
+        r: Math.random() * 1.4 + .2,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * .016 + .004,
+        warm: Math.random() < .12
+    }));
+    function drawStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.phase += s.speed;
+            const op = .2 + .7 * Math.abs(Math.sin(s.phase));
+            ctx.beginPath();
+            ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.warm ? `rgba(255,220,170,${op})` : `rgba(210,230,255,${op})`;
+            ctx.fill();
         });
+        requestAnimationFrame(drawStars);
+    }
+    drawStars();
 
-        // ── Logged-in shortcut ────────────────────────────────────────────────────
-        try {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (user && localStorage.getItem('token')) {
-                const loginLink = document.querySelector('.btn-login');
-                const signupLink = document.querySelector('.btn-signup');
-                const dest = user.role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html';
-                if (loginLink) { loginLink.textContent = 'Dashboard'; loginLink.href = dest; }
-                if (signupLink) { signupLink.style.display = 'none'; }
-            }
-        } catch (e) { }
-    </script>
-    <script src="../js/theme.js"></script>
+    // ── Logged-in shortcut ────────────────────────────────────────────────────
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (user && localStorage.getItem('token')) {
+            const dest = user.role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html';
+            document.querySelector('.btn-login').textContent = 'Dashboard';
+            document.querySelector('.btn-login').href = dest;
+        }
+    } catch(e) {}
+</script>
 </body>
-
 </html>
