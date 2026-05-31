@@ -199,7 +199,12 @@
             width: 28px; height: 28px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
         }
-        .step-icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+        .step-icon {
+            width: 52px; height: 52px; border-radius: 14px; margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.22);
+        }
+        .step-icon .material-symbols-outlined { font-size: 1.6rem; color: var(--primary); }
         .step-title { font-size: .92rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
         .step-desc { font-size: .82rem; color: var(--text-secondary); line-height: 1.65; }
         .step-connector {
@@ -445,7 +450,7 @@
                 </div>
 
                 <div class="hui-ai-chip">
-                    <span class="hui-ai-icon">✨</span>
+                    <span class="hui-ai-icon material-symbols-outlined" style="font-size:1.1rem;color:var(--primary);">auto_awesome</span>
                     <div class="hui-ai-text">
                         <strong>AI Insight</strong>
                         3 students in CS101 are struggling with loops. Consider assigning the "Loop Practice" lesson.
@@ -488,19 +493,19 @@
     <div class="steps-grid">
         <div class="step-card">
             <div class="step-num">01</div>
-            <span class="step-icon">🏫</span>
+            <div class="step-icon"><span class="material-symbols-outlined">cast_for_education</span></div>
             <div class="step-title">Faculty Creates a Classroom</div>
             <p class="step-desc">Set up a virtual classroom, choose a programming language, and generate an enrollment key. Add AI-generated lessons and coding assignments in minutes.</p>
         </div>
         <div class="step-card">
             <div class="step-num">02</div>
-            <span class="step-icon">🧑‍💻</span>
+            <div class="step-icon"><span class="material-symbols-outlined">laptop_mac</span></div>
             <div class="step-title">Students Join & Learn</div>
             <p class="step-desc">Students enroll with a key, read lessons curated by their instructor, and tackle coding assignments — writing real code in a built-in playground.</p>
         </div>
         <div class="step-card">
             <div class="step-num">03</div>
-            <span class="step-icon">✨</span>
+            <div class="step-icon" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2);"><span class="material-symbols-outlined" style="color:var(--secondary);">auto_awesome</span></div>
             <div class="step-title">AI Provides Feedback</div>
             <p class="step-desc">AI reviews submissions against test cases, flags weak areas, generates personalized feedback reports, and suggests next steps for each student.</p>
         </div>
