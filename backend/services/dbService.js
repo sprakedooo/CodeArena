@@ -82,18 +82,53 @@ async function createUser(userData) {
 }
 
 /**
- * Update user login timestamp
+ * Update user login timestamp and day streak.
+ * - Same calendar day as last login  → keep streak unchanged
+ * - Exactly 1 calendar day ago       → increment streak
+ * - More than 1 day ago              → reset streak to 1
+ * Returns the new streak value.
  */
 async function updateUserLogin(userId) {
-    if (!dbAvailable) return;
+    if (!dbAvailable) return 0;
 
     try {
-        await db.query(
-            'UPDATE users SET last_activity_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+        const rows = await db.query(
+            'SELECT streak, last_activity_at FROM users WHERE user_id = ?',
             [userId]
         );
+        if (!rows.length) return 0;
+
+        const { streak, last_activity_at } = rows[0];
+        const now  = new Date();
+        const last = last_activity_at ? new Date(last_activity_at) : null;
+
+        let newStreak = streak || 0;
+
+        if (!last) {
+            newStreak = 1;
+        } else {
+            const todayDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const lastDay  = new Date(last.getFullYear(), last.getMonth(), last.getDate());
+            const diffDays = Math.round((todayDay - lastDay) / 86400000);
+
+            if (diffDays === 0) {
+                // Same day — keep current streak
+            } else if (diffDays === 1) {
+                newStreak = (streak || 0) + 1; // Consecutive day
+            } else {
+                newStreak = 1; // Missed a day — reset
+            }
+        }
+
+        await db.query(
+            'UPDATE users SET last_activity_at = CURRENT_TIMESTAMP, streak = ? WHERE user_id = ?',
+            [newStreak, userId]
+        );
+
+        return newStreak;
     } catch (error) {
-        console.error('Error updating login:', error);
+        console.error('Error updating login streak:', error);
+        return 0;
     }
 }
 

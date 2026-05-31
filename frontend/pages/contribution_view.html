@@ -132,11 +132,15 @@
             padding: 0 1rem 1.5rem;
         }
         .ai-panel-overlay.open { display: flex; }
-        .ai-panel {
+        /* Higher specificity than sidebar.js's .ai-panel so our styles win */
+        .ai-panel-overlay .ai-panel {
+            position: static !important;
             width: 100%; max-width: 680px;
             background: var(--bg-card); border: 1px solid rgba(6,182,212,0.3);
             border-radius: var(--radius-lg); box-shadow: 0 -8px 48px rgba(0,0,0,0.6);
             display: flex; flex-direction: column; max-height: 78vh;
+            opacity: 1 !important; pointer-events: all !important;
+            transform: none;
             animation: panel-up 0.22s cubic-bezier(.22,.61,.36,1);
         }
         @keyframes panel-up { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
@@ -646,11 +650,13 @@ function openAskAI(idx) {
     appendAIMsg('ai', `Hi! I can see the **${lang || 'code'}** snippet above. What would you like to know about it?\n\nYou can ask me to explain it, help debug, suggest improvements, or anything else!`);
 
     document.getElementById('aiOverlay').classList.add('open');
+    document.getElementById('aiPanel').classList.add('open');
     setTimeout(() => document.getElementById('aiInput').focus(), 200);
 }
 
 function closeAskAI() {
     document.getElementById('aiOverlay').classList.remove('open');
+    document.getElementById('aiPanel').classList.remove('open');
 }
 
 function handleOverlayClick(e) {

@@ -372,14 +372,14 @@ router.post('/login', async (req, res) => {
         try {
             const user = await dbService.findUserByEmail(email);
             if (user && await bcrypt.compare(password, user.password)) {
-                await dbService.updateUserLogin(user.user_id);
+                const newStreak = await dbService.updateUserLogin(user.user_id);
                 const userData = {
                     id: user.user_id,
                     email: user.email,
                     fullName: user.full_name,
                     role: user.role || 'student',
                     totalXp: user.total_xp || 0,
-                    streak: user.streak || 0,
+                    streak: newStreak ?? user.streak ?? 0,
                     badges: [],
                     selectedLanguage: user.selected_language
                 };

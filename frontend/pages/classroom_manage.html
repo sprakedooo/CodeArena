@@ -695,6 +695,18 @@
             </div>
         </div>
 
+        <!-- Community Contributions (same language as classroom) -->
+        <div class="classwork-section" id="contribSection" style="display:none;">
+            <div class="classwork-section-header">
+                <h2 class="classwork-section-title">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                    Community Contributions
+                    <span class="cw-count" id="contribCount">0</span>
+                </h2>
+            </div>
+            <div class="lesson-list" id="contribList"></div>
+        </div>
+
         <!-- Assignments section -->
         <div class="classwork-section">
             <div class="classwork-section-header">
@@ -1040,6 +1052,8 @@
             // Set composer avatar
             const av = initials(user?.fullName || user?.name || 'F');
             document.getElementById('composerAvatar').textContent = av;
+            // Load community contributions matching this classroom's language
+            loadContributions(classroomData.language || 'python');
         } catch(err) {
             document.getElementById('classroomName').textContent = 'Classroom not found';
         }
@@ -1433,6 +1447,38 @@
                 </div>
             </div>`;
         }).join('');
+    }
+
+    // ── Community Contributions (same language as classroom) ──────────────────
+    async function loadContributions(lang) {
+        try {
+            const res  = await fetch(`${API}/contributions?language=${encodeURIComponent(lang)}&status=published`, {headers:getAuthHeaders()});
+            const data = await res.json();
+            const items = (data.contributions || []).filter(c => c.status !== 'draft');
+            if (!items.length) return;
+
+            document.getElementById('contribSection').style.display = 'block';
+            document.getElementById('contribCount').textContent = items.length;
+
+            const langIcon = { python:'🐍', javascript:'💛', java:'☕', cpp:'⚙️', general:'📖' };
+            document.getElementById('contribList').innerHTML = items.map(c => {
+                const typeIcon = c.type === 'course' ? '📚' : '📝';
+                const author   = c.author_name || 'Faculty';
+                const views    = c.view_count  || 0;
+                const dateStr  = c.created_at  ? new Date(c.created_at).toLocaleDateString() : '';
+                const cid      = c.contribution_id || c.id;
+                return `<div class="lesson-row" style="cursor:pointer;" onclick="window.open('contribution_view.html?id=${cid}','_blank')">
+                    <div class="lesson-row-icon"><span class="material-symbols-outlined">${c.type==='course'?'school':'article'}</span></div>
+                    <div class="lesson-row-body">
+                        <div class="lesson-row-title">${typeIcon} ${escHtml(c.title)}</div>
+                        <div class="lesson-row-meta">by ${escHtml(author)} &nbsp;·&nbsp; ${views} views${dateStr ? ' &nbsp;·&nbsp; '+dateStr : ''}</div>
+                    </div>
+                    <div class="lesson-row-actions">
+                        <span class="done-badge" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:#22d3ee;">${escHtml((c.language||'').toUpperCase())}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch { /* non-fatal */ }
     }
 
     // ── Challenges ────────────────────────────────────────────────────────────
