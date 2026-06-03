@@ -24,6 +24,7 @@ let dbAvailable = false;
 async function init() {
     try {
         dbAvailable = await db.testConnection();
+        if (dbAvailable) await ensureQuestionColumns();
         return dbAvailable;
     } catch (error) {
         console.log('Database not available, using mock data');
@@ -37,6 +38,40 @@ async function init() {
  */
 function isDbAvailable() {
     return dbAvailable;
+}
+
+/**
+ * Ensure the questions table has the columns introduced for multi-type support.
+ * Safe to run on every startup — uses ALTER TABLE only when the column is absent.
+ */
+async function ensureQuestionColumns() {
+    if (!dbAvailable) return;
+    const newCols = [
+        ["question_type",  "ALTER TABLE questions ADD COLUMN question_type VARCHAR(30) DEFAULT 'multiple_choice'"],
+        ["code_snippet",   "ALTER TABLE questions ADD COLUMN code_snippet TEXT DEFAULT NULL"],
+        ["code_lines",     "ALTER TABLE questions ADD COLUMN code_lines JSON DEFAULT NULL"],
+    ];
+    // Widen correct_answer so it can hold fill-blank/output answers (more than 1 char)
+    const widenCorrect = "ALTER TABLE questions MODIFY COLUMN correct_answer VARCHAR(500) NOT NULL DEFAULT ''";
+    try {
+        const [cols] = await db.pool.query("SHOW COLUMNS FROM questions");
+        const existing = cols.map(c => c.Field);
+        for (const [col, sql] of newCols) {
+            if (!existing.includes(col)) {
+                await db.pool.query(sql);
+                console.log(`✓ questions: added column ${col}`);
+            }
+        }
+        // Widen correct_answer if it is still CHAR(1)
+        const caCol = cols.find(c => c.Field === 'correct_answer');
+        if (caCol && caCol.Type === 'char(1)') {
+            await db.pool.query(widenCorrect);
+            console.log('✓ questions: widened correct_answer to VARCHAR(500)');
+        }
+    } catch (e) {
+        // Non-fatal — will fall back to in-memory for any incompatible query
+        console.warn('ensureQuestionColumns warning:', e.message);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,19 +180,17 @@ async function getQuestions(language, level) {
     try {
         const results = await db.query(
             `SELECT question_id as id, language_code as language, level, topic,
-                    question_text as question, options, correct_answer as correctAnswer,
+                    question_text as question,
+                    COALESCE(question_type, 'multiple_choice') as questionType,
+                    options, correct_answer as correctAnswer,
+                    code_snippet as codeSnippet, code_lines as codeLines,
                     hint, explanation, points_value as points
              FROM questions
              WHERE language_code = ? AND level = ?`,
             [language, level]
         );
 
-        // Parse JSON options — mysql2 may already have auto-parsed the JSON column
-        return results.map(q => ({
-            ...q,
-            options: Array.isArray(q.options) ? q.options
-                   : (q.options ? (() => { try { return JSON.parse(q.options); } catch { return []; } })() : [])
-        }));
+        return results.map(parseQuestionRow);
     } catch (error) {
         console.error('Error getting questions:', error);
         return null;
@@ -173,22 +206,150 @@ async function getQuestionById(questionId) {
     try {
         const results = await db.query(
             `SELECT question_id as id, language_code as language, level, topic,
-                    question_text as question, options, correct_answer as correctAnswer,
+                    question_text as question,
+                    COALESCE(question_type, 'multiple_choice') as questionType,
+                    options, correct_answer as correctAnswer,
+                    code_snippet as codeSnippet, code_lines as codeLines,
                     hint, explanation, points_value as points
              FROM questions WHERE question_id = ?`,
             [questionId]
         );
 
         if (results.length === 0) return null;
-
-        const q = results[0];
-        return {
-            ...q,
-            options: Array.isArray(q.options) ? q.options
-                   : (q.options ? (() => { try { return JSON.parse(q.options); } catch { return []; } })() : [])
-        };
+        return parseQuestionRow(results[0]);
     } catch (error) {
         console.error('Error getting question:', error);
+        return null;
+    }
+}
+
+function parseQuestionRow(q) {
+    const parseJson = (v) => {
+        if (Array.isArray(v)) return v;
+        if (!v) return [];
+        try { return JSON.parse(v); } catch { return []; }
+    };
+    return {
+        ...q,
+        options:    parseJson(q.options),
+        codeLines:  q.codeLines  ? (Array.isArray(q.codeLines)  ? q.codeLines  : (() => { try { return JSON.parse(q.codeLines);  } catch { return null; } })()) : null,
+    };
+}
+
+/**
+ * Get all questions (optionally filtered by language/level) — faculty CMS
+ */
+async function getAllQuestions({ language, level } = {}) {
+    if (!dbAvailable) return null;
+
+    try {
+        let sql = `SELECT question_id AS id, language_code AS language, level, topic,
+                          question_text AS question,
+                          COALESCE(question_type, 'multiple_choice') AS questionType,
+                          options, correct_answer AS correctAnswer,
+                          code_snippet AS codeSnippet, code_lines AS codeLines,
+                          hint, explanation, points_value AS points
+                   FROM questions`;
+        const where = [];
+        const params = [];
+        if (language) { where.push('language_code = ?'); params.push(language.toLowerCase()); }
+        if (level)    { where.push('level = ?');         params.push(level.toLowerCase()); }
+        if (where.length) sql += ' WHERE ' + where.join(' AND ');
+        sql += ' ORDER BY question_id DESC';
+
+        const results = await db.query(sql, params);
+        return results.map(parseQuestionRow);
+    } catch (error) {
+        console.error('Error getting all questions:', error);
+        return null;
+    }
+}
+
+/**
+ * Create a question — faculty CMS. Returns the new question id, or null on failure.
+ */
+async function createQuestion(q) {
+    if (!dbAvailable) return null;
+
+    const type = q.questionType || q.type || 'multiple_choice';
+    try {
+        const result = await db.query(
+            `INSERT INTO questions
+               (language_code, level, topic, question_text, question_type,
+                options, correct_answer, code_snippet, code_lines,
+                hint, explanation, points_value)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                (q.language || '').toLowerCase(),
+                (q.level || 'beginner').toLowerCase(),
+                q.topic || 'General',
+                q.question || '',
+                type,
+                JSON.stringify(q.options || []),
+                (q.correctAnswer || '').toString().trim(),
+                q.codeSnippet || null,
+                q.codeLines ? JSON.stringify(q.codeLines) : null,
+                q.hint || '',
+                q.explanation || '',
+                parseInt(q.points) || 10
+            ]
+        );
+        return result.insertId;
+    } catch (error) {
+        console.error('Error creating question:', error);
+        return null;
+    }
+}
+
+/**
+ * Update a question by id — faculty CMS. Returns affected row count, or null on failure.
+ */
+async function updateQuestion(id, q) {
+    if (!dbAvailable) return null;
+
+    const type = q.questionType || q.type || 'multiple_choice';
+    try {
+        const result = await db.query(
+            `UPDATE questions SET
+                language_code = ?, level = ?, topic = ?, question_text = ?,
+                question_type = ?, options = ?, correct_answer = ?,
+                code_snippet = ?, code_lines = ?,
+                hint = ?, explanation = ?, points_value = ?
+             WHERE question_id = ?`,
+            [
+                (q.language || '').toLowerCase(),
+                (q.level || 'beginner').toLowerCase(),
+                q.topic || 'General',
+                q.question || '',
+                type,
+                JSON.stringify(q.options || []),
+                (q.correctAnswer || '').toString().trim(),
+                q.codeSnippet || null,
+                q.codeLines ? JSON.stringify(q.codeLines) : null,
+                q.hint || '',
+                q.explanation || '',
+                parseInt(q.points) || 10,
+                id
+            ]
+        );
+        return result.affectedRows;
+    } catch (error) {
+        console.error('Error updating question:', error);
+        return null;
+    }
+}
+
+/**
+ * Delete a question by id — faculty CMS. Returns affected row count, or null on failure.
+ */
+async function deleteQuestion(id) {
+    if (!dbAvailable) return null;
+
+    try {
+        const result = await db.query('DELETE FROM questions WHERE question_id = ?', [id]);
+        return result.affectedRows;
+    } catch (error) {
+        console.error('Error deleting question:', error);
         return null;
     }
 }
@@ -488,6 +649,11 @@ module.exports = {
     // Questions
     getQuestions,
     getQuestionById,
+    getAllQuestions,
+    createQuestion,
+    updateQuestion,
+    deleteQuestion,
+    ensureQuestionColumns,
 
     // Answers
     saveAnswer,

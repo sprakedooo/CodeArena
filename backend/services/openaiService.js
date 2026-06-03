@@ -28,40 +28,59 @@ function getClient() {
 async function generateQuestion({ topic, difficulty = 'beginner', language = 'python', type = 'mcq' }) {
     const client = getClient();
 
+    // Normalise incoming type aliases
+    const typeMap = { multiple_choice: 'mcq', fill_blank: 'fill_blank', output_prediction: 'output_pred', output_pred: 'output_pred', code_ordering: 'ordering', ordering: 'ordering' };
+    const normType = typeMap[type] || 'mcq';
+
     const typeInstructions = {
-        mcq: 'Generate a multiple-choice question with exactly 4 options labeled A, B, C, D. The correct_answer field must be the letter (A, B, C, or D).',
-        fill_blank: 'Generate a fill-in-the-blank question where the student types the missing word or value. The correct_answer is the exact word/value.',
-        output_pred: 'Generate a code snippet question asking "What is the output of this code?". The correct_answer is the exact console output.',
-        ordering: 'Generate a code-ordering question with 4 lines of code that must be arranged correctly. The correct_answer is the correct order as letters, e.g. "B,A,D,C".',
+        mcq: `Generate a multiple-choice question with exactly 4 options labeled "A) ...", "B) ...", "C) ...", "D) ...".
+Set "correct_answer" to the single capital letter of the right option (A, B, C, or D).
+Set "code_snippet" to null and "code_lines" to null.`,
+
+        fill_blank: `Generate a fill-in-the-blank question where the student types the missing word or value.
+Set "code_snippet" to a short code snippet that contains ___ (three underscores) where the blank is.
+Set "correct_answer" to the exact word/value that fills the blank.
+Set "options" to [] and "code_lines" to null.`,
+
+        output_pred: `Generate an output-prediction question: show a short code snippet and ask "What will this code output?".
+Set "question_text" to "What will this code output?".
+Set "code_snippet" to the runnable code the student must trace.
+Set "correct_answer" to the exact console output (trim trailing whitespace, use \\n for multi-line output).
+Set "options" to [] and "code_lines" to null.`,
+
+        ordering: `Generate a code-ordering question: provide 4–6 lines of code that must be arranged in the correct sequence.
+Set "code_lines" to an array of strings in the CORRECT order — the game will shuffle them for the student.
+Set "question_text" to a short instruction like "Arrange these lines to define a function that ...".
+Set "correct_answer" to "" (empty — correctness is determined by the order of code_lines).
+Set "options" to [] and "code_snippet" to null.`,
     };
 
     const prompt = `You are a programming teacher creating a ${difficulty}-level ${language} quiz question about "${topic}".
 
-${typeInstructions[type] || typeInstructions.mcq}
+${typeInstructions[normType]}
 
-Respond with ONLY valid JSON matching this exact shape (no markdown, no extra text):
+Respond with ONLY valid JSON (no markdown, no extra text):
 {
   "question_text": "...",
-  "type": "${type}",
-  "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
+  "type": "${normType}",
+  "options": [],
   "correct_answer": "...",
-  "hint": "...",
+  "code_snippet": null,
+  "code_lines": null,
+  "hint": "A short hint (1 sentence) without giving away the answer",
+  "explanation": "A brief explanation of the correct answer",
   "difficulty": "${difficulty}",
   "topic": "${topic}"
-}
-
-For non-MCQ types, set "options" to an empty array [].`;
+}`;
 
     const response = await client.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 700,
     });
 
     const raw = response.choices[0].message.content.trim();
-
-    // Strip markdown code fences if GPT wraps in ```json ... ```
     const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
     return JSON.parse(jsonStr);
 }

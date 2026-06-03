@@ -1107,23 +1107,48 @@ router.post('/generate', requireFaculty, async (req, res) => {
 // ROUTE: Get All Questions (Admin)
 // GET /api/questions/all
 // ─────────────────────────────────────────────────────────────────────────────
-router.get('/all', requireFaculty, (req, res) => {
+router.get('/all', requireFaculty, async (req, res) => {
     const { language, level } = req.query;
+
+    // Prefer the database (shared, persistent) when available
+    if (dbService.isDbAvailable()) {
+        const dbQuestions = await dbService.getAllQuestions({ language, level });
+        if (dbQuestions) {
+            return res.json({ success: true, count: dbQuestions.length, questions: dbQuestions, source: 'db' });
+        }
+    }
+
+    // Fallback to in-memory question bank
     let results = [...questionBank];
     if (language) results = results.filter(q => q.language === language.toLowerCase());
     if (level) results = results.filter(q => q.level === level.toLowerCase());
-    res.json({ success: true, count: results.length, questions: results });
+    res.json({ success: true, count: results.length, questions: results, source: 'memory' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTE: Create Question (Admin/Faculty)
 // POST /api/questions
 // ─────────────────────────────────────────────────────────────────────────────
-router.post('/', requireFaculty, (req, res) => {
-    const { language, level, topic, question, options, correctAnswer, hint, explanation, questionType } = req.body;
+router.post('/', requireFaculty, async (req, res) => {
+    const { language, level, topic, question, options, correctAnswer, hint, explanation, questionType, points } = req.body;
     if (!language || !level || !question || !options || !correctAnswer) {
         return res.status(400).json({ success: false, message: 'Required: language, level, question, options, correctAnswer' });
     }
+
+    // Persist to the database (shared with students) when available
+    if (dbService.isDbAvailable()) {
+        const newId = await dbService.createQuestion({ language, level, topic, question, options, correctAnswer, hint, explanation, points });
+        if (newId) {
+            return res.status(201).json({
+                success: true, message: 'Question created', source: 'db',
+                question: { id: newId, language: language.toLowerCase(), level: level.toLowerCase(),
+                            topic: topic || 'General', question, options, correctAnswer,
+                            hint: hint || '', explanation: explanation || '' }
+            });
+        }
+    }
+
+    // Fallback to in-memory question bank
     const maxId = questionBank.reduce((m, q) => Math.max(m, q.id), 0);
     const newQuestion = {
         id: maxId + 1, language: language.toLowerCase(), level: level.toLowerCase(),
@@ -1131,32 +1156,58 @@ router.post('/', requireFaculty, (req, res) => {
         question, options, correctAnswer, hint: hint || '', explanation: explanation || ''
     };
     questionBank.push(newQuestion);
-    res.status(201).json({ success: true, message: 'Question created', question: newQuestion });
+    res.status(201).json({ success: true, message: 'Question created', question: newQuestion, source: 'memory' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTE: Update Question (Admin/Faculty)
 // PUT /api/questions/:id
 // ─────────────────────────────────────────────────────────────────────────────
-router.put('/:id', requireFaculty, (req, res) => {
+router.put('/:id', requireFaculty, async (req, res) => {
     const id = parseInt(req.params.id);
+
+    // Update in the database when available
+    if (dbService.isDbAvailable()) {
+        const existing = await dbService.getQuestionById(id);
+        if (existing) {
+            const merged = { ...existing, ...req.body };
+            const affected = await dbService.updateQuestion(id, merged);
+            if (affected !== null) {
+                return res.json({ success: true, message: 'Question updated', source: 'db', question: { ...merged, id } });
+            }
+        }
+        // If not found in DB, fall through to in-memory (may be a seed-bank question)
+    }
+
+    // Fallback to in-memory question bank
     const idx = questionBank.findIndex(q => q.id === id);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Question not found' });
     const fields = ['language','level','topic','questionType','question','options','correctAnswer','hint','explanation'];
     fields.forEach(f => { if (req.body[f] !== undefined) questionBank[idx][f] = req.body[f]; });
-    res.json({ success: true, message: 'Question updated', question: questionBank[idx] });
+    res.json({ success: true, message: 'Question updated', question: questionBank[idx], source: 'memory' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTE: Delete Question (Admin/Faculty)
 // DELETE /api/questions/:id
 // ─────────────────────────────────────────────────────────────────────────────
-router.delete('/:id', requireFaculty, (req, res) => {
+router.delete('/:id', requireFaculty, async (req, res) => {
     const id = parseInt(req.params.id);
+
+    // Delete from the database when available
+    if (dbService.isDbAvailable()) {
+        const affected = await dbService.deleteQuestion(id);
+        if (affected) {
+            return res.json({ success: true, message: 'Question deleted', source: 'db' });
+        }
+        // affected === 0 or null → not in DB, fall through to in-memory
+    }
+
+    // Fallback to in-memory question bank
     const idx = questionBank.findIndex(q => q.id === id);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Question not found' });
     questionBank.splice(idx, 1);
-    res.json({ success: true, message: 'Question deleted' });
+    res.json({ success: true, message: 'Question deleted', source: 'memory' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

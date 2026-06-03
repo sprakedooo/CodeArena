@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena – CodeArena</title>
+    <title>Assessment – CodeArena</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         /* ── Layout ───────────────────────────────────────────────────────── */
@@ -397,8 +397,8 @@
 <div id="screenSetup" class="screen active">
     <div class="setup-screen">
         <div class="setup-header">
-            <h1>🎮 Arena Mode</h1>
-            <p>Adaptive solo quiz with AI-powered hints</p>
+            <h1>🎮 Assessment Mode</h1>
+            <p>20 questions per level with AI-powered hints</p>
         </div>
         <div class="setup-card">
             <div class="form-group">
@@ -430,18 +430,9 @@
                     </button>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Number of Questions</label>
-                <select id="setupCount">
-                    <option value="5">5 questions (~5 min)</option>
-                    <option value="10" selected>10 questions (~10 min)</option>
-                    <option value="15">15 questions (~15 min)</option>
-                    <option value="20">20 questions (~20 min)</option>
-                </select>
-            </div>
             <button class="btn btn-primary" onclick="startGame()" style="justify-content:center;font-size:0.92rem;padding:0.8rem;">
                 <span class="material-symbols-outlined" style="font-size:1.1rem;">play_circle</span>
-                Start Arena
+                Start Assessment
             </button>
         </div>
     </div>
@@ -662,7 +653,8 @@ let currentCorrect = '';   // resolved correct answer for current question
 let orderAnswer    = [];   // for code_ordering: user's chosen line indices
 let setupLang  = 'python';
 let setupLevel = 'beginner';
-let setupCount = 10;
+const QUESTIONS_PER_LEVEL = 20;
+let setupCount = QUESTIONS_PER_LEVEL;
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -703,7 +695,7 @@ function selectDiff(btn) {
 async function startGame() {
     setupLang  = document.getElementById('setupLang').value;
     setupLevel = document.querySelector('.diff-btn.active')?.dataset.level || 'beginner';
-    setupCount = parseInt(document.getElementById('setupCount').value) || 10;
+    setupCount = QUESTIONS_PER_LEVEL;
     showScreen('game');
     await loadQuestions();
 }
@@ -1412,9 +1404,13 @@ function getMasteryLabel(accuracy) {
     return null;
 }
 
+// A level certificate is earned by completing an Arena run at that difficulty
+// with at least 75% accuracy. One certificate per (language, level).
+const CERT_PASS_ACCURACY = 75;
+
 function showCertificate(gameData) {
-    const mastery = getMasteryLabel(gameData.accuracy);
-    if (!mastery) return;   // below 60% — no certificate
+    if (gameData.accuracy < CERT_PASS_ACCURACY) return;   // below 75% — no certificate
+    const mastery = getMasteryLabel(gameData.accuracy) || 'Proficient';
 
     const LANG_NAMES = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' };
     const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅' };
@@ -1432,9 +1428,11 @@ function showCertificate(gameData) {
     document.getElementById('certLevelDisp').textContent   = levelCap;
     document.getElementById('certDate').textContent        = 'Issued on ' + dateStr;
 
-    // Persist certificate to localStorage
+    // Persist certificate to localStorage (offline cache).
+    // One certificate per (language, level) — replace any existing entry, keeping the best.
     const certs = getCertificates();
-    certs.push({
+    const existingIdx = certs.findIndex(c => c.lang === gameData.lang && c.level === gameData.level);
+    const certEntry = {
         id: Date.now(),
         type: 'arena',
         course: langName + ' Programming — ' + levelCap,
@@ -1442,8 +1440,24 @@ function showCertificate(gameData) {
         studentName, langName, level: gameData.level, mastery, masteryLevel: mastery,
         score: gameData.score, accuracy: gameData.accuracy,
         dateStr, earnedAt: new Date().toISOString()
-    });
+    };
+    if (existingIdx !== -1) {
+        // Keep the better result if the player already holds this level's certificate
+        if (gameData.accuracy >= (certs[existingIdx].accuracy || 0)) certs[existingIdx] = certEntry;
+    } else {
+        certs.push(certEntry);
+    }
     localStorage.setItem('certificates', JSON.stringify(certs));
+
+    // Persist to the database (best-effort — survives across devices)
+    fetch(`${API}/certificates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+            language: gameData.lang, level: gameData.level,
+            mastery, score: gameData.score, accuracy: gameData.accuracy
+        })
+    }).catch(() => { /* non-fatal — localStorage already has it */ });
 
     document.getElementById('certOverlay').style.display = 'flex';
 }

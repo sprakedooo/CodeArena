@@ -60,6 +60,7 @@ const dailyChallengeRoutes = require('./routes/dailyChallengeRoutes'); // Daily 
 const aiRoutes             = require('./routes/aiRoutes');             // Phase 1 AI endpoints
 const learningPathRoutes   = require('./routes/learningPathRoutes');   // Phase 1 Learning Paths
 const contributionRoutes   = require('./routes/contributionRoutes');   // Faculty contributions (blogs & courses)
+const certificateRoutes    = require('./routes/certificateRoutes');    // Per-level mastery certificates
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2: INITIALIZE EXPRESS APPLICATION
@@ -158,6 +159,9 @@ app.use('/api/paths', learningPathRoutes);
 
 // Faculty Contributions (blogs & courses): /api/contributions/...
 app.use('/api/contributions', contributionRoutes);
+
+// Certificates: /api/certificates (per-level mastery, JWT required)
+app.use('/api/certificates', authMiddleware, certificateRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INLINE HELPERS  (must be declared before use)

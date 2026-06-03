@@ -274,9 +274,56 @@
         .toast.success { border-color: var(--success); }
         .toast.error   { border-color: var(--danger); }
 
+        /* ── Question type grid ────────────────────────────────────────────── */
+        .q-type-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;
+        }
+        .q-type-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+            padding: 0.65rem 0.5rem; border-radius: var(--radius);
+            border: 1px solid var(--border); background: var(--bg-surface);
+            cursor: pointer; text-align: center; color: var(--text-muted);
+            font-size: 0.75rem; font-weight: 600; font-family: inherit;
+            transition: all 0.15s; line-height: 1.3;
+        }
+        .q-type-btn .material-symbols-outlined { font-size: 1.3rem; }
+        .q-type-sub { font-size: 0.62rem; font-weight: 400; color: var(--text-muted); }
+        .q-type-btn:hover:not(.active) { border-color: rgba(124,58,237,0.4); color: var(--text); }
+        .q-type-btn.active { border-color: var(--primary); background: rgba(124,58,237,0.1); color: var(--primary); }
+        .q-type-btn.active .q-type-sub { color: rgba(167,139,250,0.75); }
+        @media (max-width: 560px) { .q-type-grid { grid-template-columns: repeat(2,1fr); } }
+
+        /* ── Question bank ─────────────────────────────────────────────────── */
+        .q-row {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 0.9rem 1.1rem;
+            display: flex; align-items: flex-start; gap: 0.9rem; margin-bottom: 0.7rem;
+        }
+        .q-row:hover { border-color: rgba(124,58,237,0.4); }
+        .q-row-main { flex: 1; min-width: 0; }
+        .q-row-text { font-size: 0.9rem; font-weight: 600; color: var(--text); line-height: 1.45; margin-bottom: 0.4rem; }
+        .q-row-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+        .q-chip {
+            font-size: 0.62rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 20px;
+            text-transform: capitalize; border: 1px solid var(--border); color: var(--text-muted);
+        }
+        .q-chip.lvl-beginner     { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.25); }
+        .q-chip.lvl-intermediate { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.25); }
+        .q-chip.lvl-advanced     { background: rgba(239,68,68,0.1);  color: #f87171; border-color: rgba(239,68,68,0.25); }
+        .q-chip.ans { background: rgba(124,58,237,0.12); color: #a78bfa; border-color: rgba(124,58,237,0.3); }
+        .q-row-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+        .q-row-actions .btn { font-size: 0.72rem; padding: 0.38rem 0.6rem; }
+        .q-opt-row { display: flex; align-items: center; gap: 0.55rem; }
+        .q-opt-row input[type=text] { flex: 1; }
+        .q-opt-row input[type=radio] { width: 16px; height: 16px; accent-color: var(--primary); flex-shrink: 0; }
+        .q-opt-letter { font-weight: 800; color: var(--text-muted); min-width: 1rem; }
+
         @media (max-width: 640px) {
             .form-row { grid-template-columns: 1fr; }
             .type-selector { flex-direction: column; }
+            .q-row { flex-direction: column; }
+            .q-row-actions { width: 100%; }
+            .q-row-actions .btn { flex: 1; }
         }
     </style>
 </head>
@@ -379,6 +426,18 @@
     </div>
 </div>
 
+<!-- ── Top-level view switcher ─────────────────────────────────────────────── -->
+<div class="type-tabs" style="margin-bottom:1.5rem;">
+    <button class="type-tab active" id="navContrib" onclick="switchView('contributions',this)">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;">menu_book</span> Contributions
+    </button>
+    <button class="type-tab" id="navQuestions" onclick="switchView('questions',this)">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;">quiz</span> Question Bank
+    </button>
+</div>
+
+<!-- ── VIEW: Contributions ─────────────────────────────────────────────────── -->
+<div id="viewContributions">
 <!-- ── Page content (injected by sidebar.js) ──────────────────────────────── -->
 <div class="contrib-header">
     <div>
@@ -411,6 +470,183 @@
     <div class="empty-contrib">
         <span class="material-symbols-outlined">hourglass_empty</span>
         <p>Loading your contributions…</p>
+    </div>
+</div>
+</div><!-- /viewContributions -->
+
+<!-- ── VIEW: Question Bank ─────────────────────────────────────────────────── -->
+<div id="viewQuestions" style="display:none;">
+    <div class="contrib-header">
+        <div>
+            <h1>Question Bank</h1>
+            <p>Create and manage quiz questions students answer in the Arena</p>
+        </div>
+        <button class="btn btn-primary" onclick="openQuestionCreate()" style="display:flex;align-items:center;gap:0.4rem;">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>
+            New Question
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+        <div class="form-group" style="min-width:160px;">
+            <label>Language</label>
+            <select id="qfLanguage" onchange="loadQuestions()">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+        <div class="form-group" style="min-width:160px;">
+            <label>Level</label>
+            <select id="qfLevel" onchange="loadQuestions()">
+                <option value="">All levels</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="q-table-wrap" id="questionList">
+        <div class="empty-contrib">
+            <span class="material-symbols-outlined">hourglass_empty</span>
+            <p>Loading questions…</p>
+        </div>
+    </div>
+</div>
+
+<!-- ── Question modal ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="questionModal">
+    <div class="modal-box" style="max-width:740px;">
+        <div class="modal-header">
+            <div class="modal-title" id="qModalTitle">New Question</div>
+            <button class="modal-close-btn" onclick="closeQuestionModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="modal-body">
+
+            <!-- Row 1: lang / level / topic -->
+            <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+                <div class="form-group">
+                    <label>Language *</label>
+                    <select id="qLanguage">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Level *</label>
+                    <select id="qLevel">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" id="qTopic" placeholder="e.g. Loops, Functions">
+                </div>
+            </div>
+
+            <!-- Question type selector -->
+            <div class="form-group">
+                <label>Question Type *</label>
+                <div class="q-type-grid" id="qTypeGrid">
+                    <button type="button" class="q-type-btn active" data-type="multiple_choice" onclick="selectQType('multiple_choice',this)">
+                        <span class="material-symbols-outlined">quiz</span>
+                        <span>Multiple Choice</span>
+                        <span class="q-type-sub">4 options, pick one</span>
+                    </button>
+                    <button type="button" class="q-type-btn" data-type="fill_blank" onclick="selectQType('fill_blank',this)">
+                        <span class="material-symbols-outlined">text_fields</span>
+                        <span>Fill in the Blank</span>
+                        <span class="q-type-sub">type the missing word</span>
+                    </button>
+                    <button type="button" class="q-type-btn" data-type="output_prediction" onclick="selectQType('output_prediction',this)">
+                        <span class="material-symbols-outlined">terminal</span>
+                        <span>Output Prediction</span>
+                        <span class="q-type-sub">what does this code print?</span>
+                    </button>
+                    <button type="button" class="q-type-btn" data-type="code_ordering" onclick="selectQType('code_ordering',this)">
+                        <span class="material-symbols-outlined">reorder</span>
+                        <span>Code Ordering</span>
+                        <span class="q-type-sub">arrange lines in order</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Generate -->
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.25rem;">
+                <button type="button" class="btn btn-secondary" id="qAiBtn" onclick="aiGenerateQuestion()" style="font-size:0.78rem;padding:0.38rem 0.9rem;">
+                    <span class="material-symbols-outlined" style="font-size:0.95rem;">auto_awesome</span>
+                    AI Generate
+                </button>
+                <span id="qAiStatus" style="font-size:0.75rem;color:var(--text-muted);"></span>
+            </div>
+
+            <!-- Question text -->
+            <div class="form-group">
+                <label>Question Text *</label>
+                <textarea id="qQuestion" rows="2" placeholder="Enter the question…"></textarea>
+            </div>
+
+            <!-- MCQ options -->
+            <div id="qFieldsMCQ">
+                <div class="form-group">
+                    <label>Options * <span style="font-weight:400;text-transform:none;">(click the radio next to the correct answer)</span></label>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                        <label class="q-opt-row"><input type="radio" name="qCorrect" value="A"><span class="q-opt-letter">A</span><input type="text" id="qOptA" placeholder="Option A"></label>
+                        <label class="q-opt-row"><input type="radio" name="qCorrect" value="B"><span class="q-opt-letter">B</span><input type="text" id="qOptB" placeholder="Option B"></label>
+                        <label class="q-opt-row"><input type="radio" name="qCorrect" value="C"><span class="q-opt-letter">C</span><input type="text" id="qOptC" placeholder="Option C"></label>
+                        <label class="q-opt-row"><input type="radio" name="qCorrect" value="D"><span class="q-opt-letter">D</span><input type="text" id="qOptD" placeholder="Option D"></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fill-blank & Output-prediction: code snippet + answer text -->
+            <div id="qFieldsCodeAnswer" style="display:none;">
+                <div class="form-group">
+                    <label id="qCodeSnippetLabel">Code Snippet</label>
+                    <textarea id="qCodeSnippet" rows="5" placeholder="Enter the code here (use ___ for the blank)" style="font-family:'Courier New',monospace;font-size:0.83rem;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label id="qAnswerLabel">Correct Answer *</label>
+                    <input type="text" id="qAnswerText" placeholder="Exact answer the student must type">
+                </div>
+            </div>
+
+            <!-- Code ordering: one line per row -->
+            <div id="qFieldsOrdering" style="display:none;">
+                <div class="form-group">
+                    <label>Code Lines * <span style="font-weight:400;text-transform:none;">(enter in the correct order — the game will shuffle them)</span></label>
+                    <textarea id="qCodeLines" rows="6" placeholder="Line 1&#10;Line 2&#10;Line 3&#10;Line 4" style="font-family:'Courier New',monospace;font-size:0.83rem;"></textarea>
+                </div>
+            </div>
+
+            <!-- Hint + explanation (shared) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Hint</label>
+                    <input type="text" id="qHint" placeholder="Shown when the student is wrong">
+                </div>
+                <div class="form-group">
+                    <label>Explanation</label>
+                    <input type="text" id="qExplanation" placeholder="Brief explanation of the correct answer">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeQuestionModal()">Cancel</button>
+            <button class="btn btn-primary" id="qSaveBtn" onclick="saveQuestion()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">save</span>
+                Save Question
+            </button>
+        </div>
     </div>
 </div>
 
@@ -804,6 +1040,298 @@ async function handleCoverUpload(event, id) {
         }
     };
     reader.readAsDataURL(file);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// QUESTION BANK
+// ════════════════════════════════════════════════════════════════════════════
+let allQuestions    = [];
+let editingQuestionId = null;
+let currentQType    = 'multiple_choice';
+
+const Q_TYPE_LABELS = {
+    multiple_choice: 'MCQ',
+    fill_blank:      'Fill Blank',
+    output_prediction: 'Output',
+    code_ordering:   'Ordering',
+};
+
+function switchView(view, btn) {
+    document.querySelectorAll('#navContrib, #navQuestions').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const showQuestions = view === 'questions';
+    document.getElementById('viewContributions').style.display = showQuestions ? 'none' : '';
+    document.getElementById('viewQuestions').style.display     = showQuestions ? '' : 'none';
+    if (showQuestions && !allQuestions.length) loadQuestions();
+}
+
+async function loadQuestions() {
+    const language = document.getElementById('qfLanguage').value;
+    const level    = document.getElementById('qfLevel').value;
+    const list     = document.getElementById('questionList');
+    list.innerHTML = `<div class="empty-contrib"><span class="material-symbols-outlined">hourglass_empty</span><p>Loading questions…</p></div>`;
+
+    const params = new URLSearchParams({ language });
+    if (level) params.set('level', level);
+    try {
+        const res  = await fetch(`${API}/questions/all?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        allQuestions = data.questions || [];
+    } catch { allQuestions = []; }
+    renderQuestions();
+}
+
+function renderQuestions() {
+    const list = document.getElementById('questionList');
+    if (!allQuestions.length) {
+        list.innerHTML = `<div class="empty-contrib">
+            <span class="material-symbols-outlined">quiz</span>
+            <p>No questions for this selection yet.</p>
+            <button class="btn btn-primary" onclick="openQuestionCreate()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">add</span> Add one
+            </button>
+        </div>`;
+        return;
+    }
+    list.innerHTML = allQuestions.map(q => {
+        const typeLbl = Q_TYPE_LABELS[q.questionType || 'multiple_choice'] || q.questionType || 'MCQ';
+        const ans = String(q.correctAnswer || '').trim();
+        const ansDisplay = ans.length > 30 ? ans.slice(0, 30) + '…' : (ans || '—');
+        return `<div class="q-row">
+            <div class="q-row-main">
+                <div class="q-row-text">${esc(q.question)}</div>
+                <div class="q-row-meta">
+                    <span class="q-chip lvl-${esc(q.level)}">${esc(q.level)}</span>
+                    <span class="q-chip" style="background:rgba(124,58,237,0.1);color:#a78bfa;border-color:rgba(124,58,237,0.25);">${esc(typeLbl)}</span>
+                    ${q.topic ? `<span class="q-chip">${esc(q.topic)}</span>` : ''}
+                    ${q.questionType !== 'code_ordering' ? `<span class="q-chip ans">✓ ${esc(ansDisplay)}</span>` : ''}
+                </div>
+            </div>
+            <div class="q-row-actions">
+                <button class="btn btn-secondary" onclick="openQuestionEdit(${q.id})">
+                    <span class="material-symbols-outlined" style="font-size:0.85rem;">edit</span> Edit
+                </button>
+                <button class="btn btn-secondary" style="color:#f87171;border-color:rgba(239,68,68,0.3);" onclick="deleteQuestion(${q.id})">
+                    <span class="material-symbols-outlined" style="font-size:0.85rem;">delete</span>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Question type switching ───────────────────────────────────────────────────
+function selectQType(type, btn) {
+    currentQType = type;
+    document.querySelectorAll('.q-type-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    // show/hide field sections
+    document.getElementById('qFieldsMCQ').style.display         = type === 'multiple_choice' ? '' : 'none';
+    document.getElementById('qFieldsCodeAnswer').style.display  = (type === 'fill_blank' || type === 'output_prediction') ? '' : 'none';
+    document.getElementById('qFieldsOrdering').style.display    = type === 'code_ordering' ? '' : 'none';
+    // adjust labels for fill_blank vs output_prediction
+    if (type === 'fill_blank') {
+        document.getElementById('qCodeSnippetLabel').textContent = 'Code Snippet (use ___ for the blank)';
+        document.getElementById('qAnswerLabel').textContent      = 'Correct Answer * (exact word/value to fill in)';
+        document.getElementById('qCodeSnippet').placeholder      = 'x = ___\nprint(x)';
+        document.getElementById('qAnswerText').placeholder       = 'e.g.  42';
+    } else if (type === 'output_prediction') {
+        document.getElementById('qCodeSnippetLabel').textContent = 'Code Snippet *';
+        document.getElementById('qAnswerLabel').textContent      = 'Correct Output * (exact console output)';
+        document.getElementById('qCodeSnippet').placeholder      = 'x = 5\ny = 3\nprint(x + y)';
+        document.getElementById('qAnswerText').placeholder       = 'e.g.  8';
+    }
+}
+
+// Strip a leading "A) ", "B. ", "C " prefix from a stored option string for editing
+function stripOptionPrefix(opt) {
+    return String(opt || '').replace(/^\s*[A-Da-d][).\s]\s*/, '').trim();
+}
+
+function fillQuestionForm(q) {
+    const type = (q && (q.questionType || q.type)) || 'multiple_choice';
+    currentQType = type;
+
+    document.getElementById('qLanguage').value = (q && q.language) || document.getElementById('qfLanguage').value;
+    document.getElementById('qLevel').value    = (q && q.level)    || 'beginner';
+    document.getElementById('qTopic').value    = (q && q.topic)    || '';
+    document.getElementById('qQuestion').value = (q && q.question) || '';
+    document.getElementById('qHint').value        = (q && q.hint)        || '';
+    document.getElementById('qExplanation').value = (q && q.explanation) || '';
+
+    // type btn
+    const typeBtn = document.querySelector(`.q-type-btn[data-type="${type}"]`);
+    document.querySelectorAll('.q-type-btn').forEach(b => b.classList.remove('active'));
+    if (typeBtn) typeBtn.classList.add('active');
+
+    // MCQ
+    const opts = (q && q.options) || [];
+    ['A','B','C','D'].forEach((L, i) => {
+        document.getElementById('qOpt' + L).value = stripOptionPrefix(opts[i] || '');
+    });
+    const letter = String((q && q.correctAnswer) || '').trim().toUpperCase().charAt(0) || '';
+    document.querySelectorAll('input[name="qCorrect"]').forEach(r => r.checked = false);
+    if (letter) {
+        const radio = document.querySelector(`input[name="qCorrect"][value="${letter}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // Fill / output
+    document.getElementById('qCodeSnippet').value = (q && q.codeSnippet) || '';
+    document.getElementById('qAnswerText').value  = (q && q.correctAnswer) || '';
+
+    // Ordering
+    const lines = (q && q.codeLines) || [];
+    document.getElementById('qCodeLines').value = Array.isArray(lines) ? lines.join('\n') : (lines || '');
+
+    selectQType(type, typeBtn);
+}
+
+function openQuestionCreate() {
+    editingQuestionId = null;
+    document.getElementById('qModalTitle').textContent = 'New Question';
+    fillQuestionForm(null);
+    document.getElementById('questionModal').classList.add('open');
+}
+
+function openQuestionEdit(id) {
+    const q = allQuestions.find(x => x.id === id);
+    if (!q) return;
+    editingQuestionId = id;
+    document.getElementById('qModalTitle').textContent = 'Edit Question';
+    fillQuestionForm(q);
+    document.getElementById('questionModal').classList.add('open');
+}
+
+function closeQuestionModal() {
+    document.getElementById('questionModal').classList.remove('open');
+    document.getElementById('qAiStatus').textContent = '';
+}
+
+// ── AI Generate ───────────────────────────────────────────────────────────────
+async function aiGenerateQuestion() {
+    const topic    = document.getElementById('qTopic').value.trim();
+    const language = document.getElementById('qLanguage').value;
+    const level    = document.getElementById('qLevel').value;
+    const type     = currentQType;
+
+    if (!topic) { showToast('Enter a topic first so the AI knows what to generate', 'error'); document.getElementById('qTopic').focus(); return; }
+
+    const btn    = document.getElementById('qAiBtn');
+    const status = document.getElementById('qAiStatus');
+    btn.disabled = true;
+    status.textContent = '⏳ Generating…';
+
+    // Map frontend type names to what the backend expects
+    const typeMap = { multiple_choice: 'mcq', fill_blank: 'fill_blank', output_prediction: 'output_pred', code_ordering: 'ordering' };
+
+    try {
+        const res  = await fetch(`${API}/questions/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ topic, language, difficulty: level, type: typeMap[type] || 'mcq' })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Generation failed');
+
+        const q = data.question;
+        // Fill the form from AI output
+        document.getElementById('qQuestion').value = q.question_text || '';
+        document.getElementById('qHint').value        = q.hint        || '';
+        document.getElementById('qExplanation').value = q.explanation || '';
+
+        if (type === 'multiple_choice') {
+            const opts = (q.options || []);
+            ['A','B','C','D'].forEach((L, i) => {
+                document.getElementById('qOpt' + L).value = stripOptionPrefix(opts[i] || '');
+            });
+            const letter = String(q.correct_answer || '').trim().toUpperCase().charAt(0);
+            document.querySelectorAll('input[name="qCorrect"]').forEach(r => r.checked = false);
+            const radio = document.querySelector(`input[name="qCorrect"][value="${letter}"]`);
+            if (radio) radio.checked = true;
+        } else if (type === 'fill_blank' || type === 'output_prediction') {
+            document.getElementById('qCodeSnippet').value = q.code_snippet || '';
+            document.getElementById('qAnswerText').value  = q.correct_answer || '';
+        } else if (type === 'code_ordering') {
+            const lines = Array.isArray(q.code_lines) ? q.code_lines : [];
+            document.getElementById('qCodeLines').value = lines.join('\n');
+        }
+
+        status.textContent = '✓ Generated!';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+    } catch (err) {
+        showToast(err.message || 'AI generation failed', 'error');
+        status.textContent = '';
+    } finally { btn.disabled = false; }
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveQuestion() {
+    const question = document.getElementById('qQuestion').value.trim();
+    if (!question) { showToast('Question text is required', 'error'); return; }
+
+    let payload = {
+        language:     document.getElementById('qLanguage').value,
+        level:        document.getElementById('qLevel').value,
+        topic:        document.getElementById('qTopic').value.trim() || 'General',
+        question,
+        questionType: currentQType,
+        hint:         document.getElementById('qHint').value.trim(),
+        explanation:  document.getElementById('qExplanation').value.trim(),
+    };
+
+    if (currentQType === 'multiple_choice') {
+        const letter  = document.querySelector('input[name="qCorrect"]:checked')?.value;
+        const rawOpts = ['A','B','C','D'].map(L => document.getElementById('qOpt' + L).value.trim());
+        if (rawOpts.some(o => !o)) { showToast('All four options are required', 'error'); return; }
+        if (!letter)               { showToast('Select the correct answer', 'error');     return; }
+        payload.options       = ['A','B','C','D'].map((L, i) => `${L}) ${rawOpts[i]}`);
+        payload.correctAnswer = letter;
+
+    } else if (currentQType === 'fill_blank' || currentQType === 'output_prediction') {
+        const answer = document.getElementById('qAnswerText').value.trim();
+        if (!answer) { showToast('Correct answer is required', 'error'); return; }
+        payload.options       = [];
+        payload.correctAnswer = answer;
+        payload.codeSnippet   = document.getElementById('qCodeSnippet').value.trim() || null;
+
+    } else if (currentQType === 'code_ordering') {
+        const lines = document.getElementById('qCodeLines').value.split('\n').map(l => l.trimEnd()).filter(l => l.length > 0);
+        if (lines.length < 2) { showToast('Enter at least 2 code lines', 'error'); return; }
+        payload.options       = [];
+        payload.correctAnswer = '';
+        payload.codeLines     = lines;
+    }
+
+    const btn = document.getElementById('qSaveBtn');
+    btn.disabled = true;
+    try {
+        const url    = editingQuestionId ? `${API}/questions/${editingQuestionId}` : `${API}/questions`;
+        const method = editingQuestionId ? 'PUT' : 'POST';
+        const res    = await fetch(url, {
+            method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Save failed');
+        showToast(editingQuestionId ? 'Question updated!' : 'Question created!', 'success');
+        closeQuestionModal();
+        loadQuestions();
+    } catch (err) {
+        showToast(err.message || 'Save failed', 'error');
+    } finally { btn.disabled = false; }
+}
+
+async function deleteQuestion(id) {
+    if (!confirm('Delete this question? This cannot be undone.')) return;
+    try {
+        const res  = await fetch(`${API}/questions/${id}`, {
+            method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        showToast('Question deleted', 'success');
+        loadQuestions();
+    } catch { showToast('Delete failed', 'error'); }
 }
 
 loadContribs();

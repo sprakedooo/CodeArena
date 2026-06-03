@@ -529,7 +529,7 @@ router.get('/google',
 
 // Google redirects here after user consents
 router.get('/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:8080/pages/login.html?error=oauth_failed' }),
+    passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:3001/pages/login.html?error=oauth_failed' }),
     (req, res) => {
         // req.user is set by passport strategy
         const user = req.user;
@@ -553,7 +553,7 @@ router.get('/google/callback',
         }));
 
         // Redirect to frontend callback page with token + user in URL
-        res.redirect(`http://localhost:8080/pages/oauth-callback.html?token=${token}&user=${userPayload}`);
+        res.redirect(`http://localhost:3001/oauth-callback.html?token=${token}&user=${userPayload}`);
     }
 );
 

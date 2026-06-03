@@ -62,7 +62,7 @@
         { icon: 'home',           label: 'Home',             href: 'dashboard.html',   key: 'dashboard'  },
         { icon: 'menu_book',      label: 'Learn Programming', href: 'learn.html',       key: 'learn'      },
         { icon: 'school',         label: 'My Classrooms',     href: 'classrooms.html',  key: 'classrooms' },
-        { icon: 'sports_esports', label: 'Play',              href: 'lesson_game.html', key: 'play'       },
+        { icon: 'sports_esports', label: 'Assessment',         href: 'lesson_game.html', key: 'play'       },
         { icon: 'terminal',       label: 'Practice',          href: 'playground.html',  key: 'practice'   },
         { icon: 'bar_chart',      label: 'Analytics',         href: 'analytics.html',   key: 'analytics'  },
         { icon: 'person',         label: 'Profile',           href: 'profile.html',     key: 'profile'    },

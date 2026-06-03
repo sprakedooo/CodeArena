@@ -12,6 +12,7 @@ USE codearena;
 -- DROP ALL TABLES (clean slate)
 -- ============================================================================
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS certificates;
 DROP TABLE IF EXISTS ai_feedback_logs;
 DROP TABLE IF EXISTS weaknesses;
 DROP TABLE IF EXISTS submissions;
@@ -122,6 +123,22 @@ CREATE TABLE weaknesses (
     last_detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     resolved         BOOLEAN DEFAULT FALSE,
     UNIQUE KEY uq_user_topic_lang (user_id, topic, language),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- ============================================================================
+-- CERTIFICATES  (per-level mastery, one row per user/language/level)
+-- ============================================================================
+CREATE TABLE certificates (
+    certificate_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id        INT NOT NULL,
+    language_code  VARCHAR(20) NOT NULL,
+    level          ENUM('beginner','intermediate','advanced') NOT NULL,
+    mastery        VARCHAR(20),                 -- Expert / Proficient / Competent label
+    score          INT DEFAULT 0,
+    accuracy       INT DEFAULT 0,
+    issued_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_cert_user_lang_level (user_id, language_code, level),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -347,17 +364,20 @@ CREATE TABLE assignment_submissions (
 -- QUESTIONS  (quiz / practice questions)
 -- ============================================================================
 CREATE TABLE questions (
-    question_id   INT AUTO_INCREMENT PRIMARY KEY,
-    language_code VARCHAR(20) NOT NULL,
-    level         ENUM('beginner','intermediate','advanced') NOT NULL,
-    topic         VARCHAR(100) NOT NULL,
-    question_text TEXT NOT NULL,
-    options       JSON NOT NULL,
-    correct_answer CHAR(1) NOT NULL,
-    hint          TEXT,
-    explanation   TEXT,
-    points_value  INT DEFAULT 10,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    question_id    INT AUTO_INCREMENT PRIMARY KEY,
+    language_code  VARCHAR(20) NOT NULL,
+    level          ENUM('beginner','intermediate','advanced') NOT NULL,
+    topic          VARCHAR(100) NOT NULL,
+    question_text  TEXT NOT NULL,
+    question_type  VARCHAR(30) DEFAULT 'multiple_choice',
+    options        JSON NOT NULL,
+    correct_answer VARCHAR(500) NOT NULL,
+    code_snippet   TEXT DEFAULT NULL,
+    code_lines     JSON DEFAULT NULL,
+    hint           TEXT,
+    explanation    TEXT,
+    points_value   INT DEFAULT 10,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================================
@@ -455,6 +475,7 @@ CREATE INDEX idx_lesson_progress_user ON lesson_progress(user_id);
 CREATE INDEX idx_lesson_progress_lesson ON lesson_progress(lesson_id);
 CREATE INDEX idx_weaknesses_user      ON weaknesses(user_id);
 CREATE INDEX idx_ai_logs_user         ON ai_feedback_logs(user_id);
+CREATE INDEX idx_certificates_user    ON certificates(user_id);
 CREATE INDEX idx_submissions_user     ON submissions(user_id);
 CREATE INDEX idx_questions_lang_level ON questions(language_code, level);
 CREATE INDEX idx_user_answers_user    ON user_answers(user_id);

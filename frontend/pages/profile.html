@@ -681,20 +681,37 @@ function loadAchievements() {
     }).join('');
 }
 
-// ─── Certificates (localStorage) ─────────────────────────────────────────────
-function loadCertificates() {
-    let certs = [];
-    try { certs = JSON.parse(localStorage.getItem('certificates') || '[]'); } catch {}
+// ─── Certificates (database, with localStorage fallback) ─────────────────────
+async function loadCertificates() {
     const list = document.getElementById('certList');
+    let certs = [];
+
+    // Prefer the database so certificates persist across devices
+    try {
+        const res = await fetch(`${API}/certificates/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) {
+            const data = await res.json();
+            certs = (data.certificates || []).map(c => ({
+                lang: c.language, langName: capitalize(c.language || ''),
+                level: c.level, mastery: c.mastery,
+                score: c.score, accuracy: c.accuracy,
+                dateStr: c.issued_at ? new Date(c.issued_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : ''
+            }));
+        }
+    } catch { /* DB unreachable — fall back to local cache below */ }
+
+    // Fallback to the browser cache if the API returned nothing
+    if (!certs.length) {
+        try { certs = JSON.parse(localStorage.getItem('certificates') || '[]').reverse(); } catch {}
+    }
+
     if (!certs.length) {
         list.innerHTML = `<div class="empty-state">
             <span class="material-symbols-outlined">workspace_premium</span>
-            <p>No certificates yet.<br>Complete an Arena game with 60%+ accuracy to earn one!</p>
+            <p>No certificates yet.<br>Complete an Arena game with 75%+ accuracy to earn one!</p>
         </div>`;
         return;
     }
-    // Newest first
-    certs = [...certs].reverse();
     const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅' };
     list.innerHTML = certs.map(c => {
         const icon  = MASTERY_ICONS[c.mastery] || '📜';
