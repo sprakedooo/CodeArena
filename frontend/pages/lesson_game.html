@@ -43,6 +43,15 @@
         .diff-btn .diff-sub  { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.1rem; }
         .diff-btn.active     { border-color: var(--primary); background: rgba(124,58,237,0.1); color: var(--text); }
         .diff-btn.active .diff-name { color: var(--primary); }
+        .diff-btn.locked     { opacity: 0.45; cursor: not-allowed; position: relative; }
+        .diff-btn.locked:hover { border-color: var(--border); background: var(--bg-surface); }
+        .diff-btn .lock-badge {
+            display: none;
+            position: absolute; top: 5px; right: 6px;
+            font-size: 0.65rem; font-weight: 700; color: #94a3b8;
+        }
+        .diff-btn.locked .lock-badge { display: block; }
+        .diff-btn.locked .diff-sub { color: #f59e0b; font-size: 0.6rem; }
 
         /* ── Custom language picker ───────────────────────────────────────── */
         .lang-picker { position: relative; user-select: none; }
@@ -430,7 +439,7 @@
     <div class="setup-screen">
         <div class="setup-header">
             <h1><span class="material-symbols-outlined" style="font-size:1.5rem;vertical-align:middle;color:var(--primary);margin-right:0.35rem;">assignment</span>Technical Assessment</h1>
-            <p>Select a language and difficulty level. 20 questions · Pass threshold: 70%</p>
+            <p>Select a language and difficulty level. Pass each level (≥70%) to unlock the next and earn a <strong style="color:var(--primary)">certificate</strong>. 20 questions per level.</p>
         </div>
         <div class="setup-card">
             <div class="form-group">
@@ -468,14 +477,16 @@
                         <div class="diff-sub">Foundation</div>
                     </button>
                     <button class="diff-btn" data-level="intermediate" onclick="selectDiff(this)">
+                        <span class="material-symbols-outlined lock-badge">lock</span>
                         <span class="diff-icon material-symbols-outlined">bolt</span>
                         <div class="diff-name">Intermediate</div>
-                        <div class="diff-sub">Challenge</div>
+                        <div class="diff-sub" id="diffSubIntermediate">Challenge</div>
                     </button>
                     <button class="diff-btn" data-level="advanced" onclick="selectDiff(this)">
+                        <span class="material-symbols-outlined lock-badge">lock</span>
                         <span class="diff-icon material-symbols-outlined">local_fire_department</span>
                         <div class="diff-name">Advanced</div>
-                        <div class="diff-sub">Expert</div>
+                        <div class="diff-sub" id="diffSubAdvanced">Expert</div>
                     </button>
                 </div>
             </div>
@@ -725,6 +736,7 @@ function pickLang(value) {
     document.querySelectorAll('.lang-option').forEach(o =>
         o.classList.toggle('active', o.dataset.value === value));
     document.getElementById('langPicker').classList.remove('open');
+    updateDiffLocks(value);
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('#langPicker'))
@@ -735,6 +747,7 @@ document.addEventListener('click', e => {
 document.addEventListener('DOMContentLoaded', () => {
     const lang = me.selected_language || me.language || 'python';
     if (LANG_META[lang]) pickLang(lang);
+    else updateDiffLocks('python');
     document.addEventListener('keydown', handleKeyboard);
 });
 
@@ -762,8 +775,70 @@ function handleKeyboard(e) {
 }
 
 function selectDiff(btn) {
+    if (btn.classList.contains('locked')) {
+        const msg = btn.dataset.level === 'intermediate'
+            ? 'Pass the Beginner assessment first to unlock Intermediate.'
+            : 'Pass the Intermediate assessment first to unlock Advanced.';
+        showLockToast(msg);
+        return;
+    }
     document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+}
+
+// ── Assessment lock helpers ───────────────────────────────────────────────────
+function assessKey(lang, level) { return `assessment_passed_${lang}_${level}`; }
+function hasPassed(lang, level) { return localStorage.getItem(assessKey(lang, level)) === 'true'; }
+
+function updateDiffLocks(lang) {
+    const passedBeginner     = hasPassed(lang, 'beginner');
+    const passedIntermediate = hasPassed(lang, 'intermediate');
+
+    const btnInter = document.querySelector('.diff-btn[data-level="intermediate"]');
+    const btnAdv   = document.querySelector('.diff-btn[data-level="advanced"]');
+    const subInter = document.getElementById('diffSubIntermediate');
+    const subAdv   = document.getElementById('diffSubAdvanced');
+
+    // Intermediate
+    if (!passedBeginner) {
+        btnInter.classList.add('locked');
+        if (subInter) subInter.textContent = 'Pass Beginner first';
+        // If it was selected, reset selection to beginner
+        if (btnInter.classList.contains('active')) {
+            btnInter.classList.remove('active');
+            document.querySelector('.diff-btn[data-level="beginner"]').classList.add('active');
+        }
+    } else {
+        btnInter.classList.remove('locked');
+        if (subInter) subInter.textContent = 'Challenge';
+    }
+
+    // Advanced
+    if (!passedIntermediate) {
+        btnAdv.classList.add('locked');
+        if (subAdv) subAdv.textContent = 'Pass Intermediate first';
+        if (btnAdv.classList.contains('active')) {
+            btnAdv.classList.remove('active');
+            document.querySelector('.diff-btn[data-level="beginner"]').classList.add('active');
+        }
+    } else {
+        btnAdv.classList.remove('locked');
+        if (subAdv) subAdv.textContent = 'Expert';
+    }
+}
+
+function showLockToast(msg) {
+    let t = document.getElementById('lockToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'lockToast';
+        t.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid #f59e0b;color:#fbbf24;padding:0.65rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;z-index:9999;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);';
+        document.body.appendChild(t);
+    }
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">lock</span>${msg}`;
+    t.style.opacity = '1';
+    clearTimeout(t._to);
+    t._to = setTimeout(() => { t.style.opacity = '0'; }, 3000);
 }
 
 async function startGame() {
@@ -1303,6 +1378,9 @@ async function endGame() {
     const accuracy = total > 0 ? Math.round(correctCount / total * 100) : 0;
     const xp       = Math.round(score * 0.5);
     const passed   = accuracy >= 70;
+
+    // Persist pass result so difficulty locks update correctly
+    if (passed) localStorage.setItem(assessKey(setupLang, setupLevel), 'true');
 
     // Pass/Fail banner
     const banner = document.getElementById('passBanner');
