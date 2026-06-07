@@ -397,7 +397,7 @@
 <div id="screenSetup" class="screen active">
     <div class="setup-screen">
         <div class="setup-header">
-            <h1>🎮 Assessment Mode</h1>
+            <h1><span class="material-symbols-outlined" style="font-size:1.5rem;vertical-align:middle;color:var(--primary);margin-right:0.35rem;">quiz</span>Assessment Mode</h1>
             <p>20 questions per level with AI-powered hints</p>
         </div>
         <div class="setup-card">
@@ -414,17 +414,17 @@
                 <label>Difficulty</label>
                 <div class="difficulty-grid">
                     <button class="diff-btn active" data-level="beginner" onclick="selectDiff(this)">
-                        <span class="diff-icon">🌱</span>
+                        <span class="diff-icon material-symbols-outlined">eco</span>
                         <div class="diff-name">Beginner</div>
                         <div class="diff-sub">Foundation</div>
                     </button>
                     <button class="diff-btn" data-level="intermediate" onclick="selectDiff(this)">
-                        <span class="diff-icon">⚡</span>
+                        <span class="diff-icon material-symbols-outlined">bolt</span>
                         <div class="diff-name">Intermediate</div>
                         <div class="diff-sub">Challenge</div>
                     </button>
                     <button class="diff-btn" data-level="advanced" onclick="selectDiff(this)">
-                        <span class="diff-icon">🔥</span>
+                        <span class="diff-icon material-symbols-outlined">local_fire_department</span>
                         <div class="diff-name">Advanced</div>
                         <div class="diff-sub">Expert</div>
                     </button>
@@ -486,7 +486,7 @@
             <!-- Quick hint (from question data, shown before answering) -->
             <div id="quickHintArea" style="display:none">
                 <button class="quick-hint-btn" onclick="toggleQuickHint()">
-                    💡 Quick Hint
+                    <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;">lightbulb</span> Quick Hint
                 </button>
                 <div class="quick-hint-box" id="quickHintBox"></div>
             </div>
@@ -560,7 +560,7 @@
 
             <!-- Weakness report -->
             <div class="weakness-report" id="weaknessReport" style="display:none;">
-                <div class="wr-title">📚 Topics to Review</div>
+                <div class="wr-title"><span class="material-symbols-outlined" style="font-size:0.9rem;vertical-align:middle;margin-right:0.3rem;">menu_book</span>Topics to Review</div>
                 <div class="wr-pills" id="wrPills"></div>
             </div>
 
@@ -583,7 +583,7 @@
 </div>
 
 <!-- Combo badge overlay -->
-<div class="combo-badge" id="comboBadge">🔥 COMBO!</div>
+<div class="combo-badge" id="comboBadge"><span class="material-symbols-outlined" style="font-size:1.2rem;vertical-align:middle;">local_fire_department</span> COMBO!</div>
 
 <!-- XP toast -->
 <div class="xp-toast" id="xpToast">+10 XP</div>
@@ -597,8 +597,8 @@
 <div class="cert-overlay" id="certOverlay" style="display:none;" onclick="if(event.target===this)closeCertificate()">
     <div class="cert-modal-wrap">
         <div class="cert-actions">
-            <button onclick="printCertificate()" class="btn btn-secondary" style="font-size:.8rem;">🖨️ Print / Save PDF</button>
-            <button onclick="closeCertificate()" class="btn btn-secondary" style="font-size:.8rem;">✕ Close</button>
+            <button onclick="printCertificate()" class="btn btn-secondary" style="font-size:.8rem;"><span class="material-symbols-outlined" style="font-size:1rem;">print</span> Print / Save PDF</button>
+            <button onclick="closeCertificate()" class="btn btn-secondary" style="font-size:.8rem;"><span class="material-symbols-outlined" style="font-size:1rem;">close</span> Close</button>
         </div>
         <div class="certificate" id="certContent">
             <div class="cert-top-accent"></div>
@@ -849,13 +849,18 @@ function showQuestion() {
     startTimer(q.time_limit || (type === 'code_ordering' ? 60 : 30));
 }
 
+// Strip leading "A) ", "B. ", "C) " etc. from option text for display only
+function stripOptPrefix(text) {
+    return String(text).replace(/^[A-Da-d][).]\s*/, '');
+}
+
 // ── MCQ renderer ─────────────────────────────────────────────────────────────
 function renderMCQ(container, q) {
     const opts = getOptions(q);
     container.innerHTML = opts.map((o, i) =>
         `<button class="q-option" data-value="${esc(String(o))}">
             <span class="opt-letter">${String.fromCharCode(65+i)}.</span>
-            <span class="opt-text">${esc(String(o))}</span>
+            <span class="opt-text">${esc(stripOptPrefix(o))}</span>
             <span class="opt-kb">${i+1}</span>
             <span class="opt-check"></span>
         </button>`
@@ -882,12 +887,12 @@ function selectMCQ(btn, selected) {
         const txt = b.querySelector('.opt-text')?.textContent?.trim();
         if (txt === currentCorrect.trim()) {
             b.classList.add('correct');
-            b.querySelector('.opt-check').textContent = '✓';
+            b.querySelector('.opt-check').innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>';
         }
     });
     if (!isCorrect) {
         btn.classList.add('wrong');
-        btn.querySelector('.opt-check').textContent = '✗';
+        btn.querySelector('.opt-check').innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">cancel</span>';
     }
 
     recordResult(isCorrect, q);
@@ -1066,7 +1071,7 @@ function recordResult(isCorrect, q) {
     }
 
     document.getElementById('hudScore').textContent  = score;
-    document.getElementById('hudStreak').textContent = streak + (streak > 0 ? '🔥' : '');
+    document.getElementById('hudStreak').innerHTML = streak + (streak > 0 ? '<span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;color:#f97316;">local_fire_department</span>' : '');
     document.getElementById('hudCombo').textContent  = `×${multiplier}`;
 
     // Card border flash
@@ -1094,9 +1099,9 @@ function showFeedback(isCorrect, q) {
     fb.className  = `q-feedback ${isCorrect ? 'correct' : 'wrong'}`;
     if (isCorrect) {
         const bonus = streak >= 3 ? ` &nbsp;${streak}-streak ×${multiplier} bonus!` : '';
-        fb.innerHTML = `✓ Correct!${bonus}${explain}`;
+        fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">check_circle</span> Correct!${bonus}${explain}`;
     } else {
-        fb.innerHTML = `✗ Incorrect.${explain}`;
+        fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">cancel</span> Incorrect.${explain}`;
     }
 }
 
@@ -1145,14 +1150,14 @@ function timeUp() {
         const txt = b.querySelector('.opt-text')?.textContent?.trim();
         if (txt === correctText.trim()) {
             b.classList.add('correct');
-            b.querySelector('.opt-check').textContent = '✓';
+            b.querySelector('.opt-check').innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>';
         }
     });
 
     const fb  = document.getElementById('qFeedback');
     fb.className  = 'q-feedback wrong';
     const explain = q.explanation ? `<span class="fb-explanation">${esc(q.explanation)}</span>` : '';
-    fb.innerHTML  = `⏱ Time's up!${correctText ? ` &nbsp;Answer: <strong>${esc(correctText)}</strong>` : ''}${explain}`;
+    fb.innerHTML  = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">timer_off</span> Time's up!${correctText ? ` &nbsp;Answer: <strong>${esc(correctText)}</strong>` : ''}${explain}`;
 
     document.getElementById('quickHintArea').style.display = 'none';
     document.getElementById('nextBtn').style.display = 'block';
@@ -1228,22 +1233,22 @@ async function endGame() {
     document.getElementById('endScore').textContent    = score;
     document.getElementById('endAccuracy').textContent = accuracy + '%';
     document.getElementById('endXP').textContent       = `+${xp} XP`;
-    document.getElementById('endBest').textContent     = bestStreak + (bestStreak > 0 ? '🔥' : '');
+    document.getElementById('endBest').innerHTML = bestStreak + (bestStreak > 0 ? '<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;color:#f97316;">local_fire_department</span>' : '');
 
     if (accuracy >= 90) {
-        document.getElementById('endTrophy').textContent = '🏆';
+        document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#fbbf24;">emoji_events</span>';
         document.getElementById('endTitle').textContent  = 'Excellent!';
         document.getElementById('endSub').textContent    = 'Outstanding performance! You\'re a coding champion!';
     } else if (accuracy >= 70) {
-        document.getElementById('endTrophy').textContent = '🥈';
+        document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#94a3b8;">military_tech</span>';
         document.getElementById('endTitle').textContent  = 'Great Job!';
         document.getElementById('endSub').textContent    = 'Solid work! Review the weak topics to improve.';
     } else if (accuracy >= 50) {
-        document.getElementById('endTrophy').textContent = '💪';
+        document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#a78bfa;">fitness_center</span>';
         document.getElementById('endTitle').textContent  = 'Keep Practicing!';
         document.getElementById('endSub').textContent    = 'Good effort — review the topics below and try again!';
     } else {
-        document.getElementById('endTrophy').textContent = '📚';
+        document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#60a5fa;">menu_book</span>';
         document.getElementById('endTitle').textContent  = 'Study Time!';
         document.getElementById('endSub').textContent    = 'Review the lessons first, then come back and crush it!';
     }
@@ -1285,7 +1290,7 @@ function restartGame() { showScreen('setup'); }
 // ── Combo badge ───────────────────────────────────────────────────────────────
 function showCombo() {
     const el = document.getElementById('comboBadge');
-    el.textContent = `🔥 ${streak}-STREAK! ×${multiplier}`;
+    el.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.2rem;vertical-align:middle;">local_fire_department</span> ${streak}-STREAK! ×${multiplier}`;
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 1100);
 }
@@ -1413,7 +1418,7 @@ function showCertificate(gameData) {
     const mastery = getMasteryLabel(gameData.accuracy) || 'Proficient';
 
     const LANG_NAMES = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' };
-    const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅' };
+    const MASTERY_ICONS = { Expert:'🏅', Proficient:'⭐', Competent:'✅' };
     const studentName = me.fullName || me.full_name || me.name || 'Student';
     const langName    = LANG_NAMES[gameData.lang] || gameData.lang;
     const dateStr     = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
