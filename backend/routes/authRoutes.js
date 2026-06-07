@@ -21,7 +21,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const dbService = require('../services/dbService');
-const { generateToken, authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
+const { generateToken, authMiddleware, requireFaculty, requireSuperAdmin } = require('../middleware/authMiddleware');
 const { generateOTP, sendOTPEmail } = require('../services/emailService');
 
 const SALT_ROUNDS = 10;
@@ -80,6 +80,19 @@ let mockUsers = [
         _rawPassword: 'faculty123',
         fullName: 'Prof. Reyes',
         role: 'faculty',
+        totalPoints: 0,
+        currentLevel: null,
+        badges: [],
+        selectedLanguage: null,
+        createdAt: '2024-01-01'
+    },
+    {
+        id: 999,
+        email: 'superadmin@codearena.edu',
+        password: null,
+        _rawPassword: 'superadmin123',
+        fullName: 'Super Admin',
+        role: 'superadmin',
         totalPoints: 0,
         currentLevel: null,
         badges: [],
@@ -553,9 +566,31 @@ router.get('/google/callback',
         }));
 
         // Redirect to frontend callback page with token + user in URL
-        res.redirect(`http://localhost:3001/oauth-callback.html?token=${token}&user=${userPayload}`);
+        const isNew = user.isNewUser ? '&new=1' : '';
+        res.redirect(`http://localhost:3001/oauth-callback.html?token=${token}&user=${userPayload}${isNew}`);
     }
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /api/auth/set-role  — called after Google OAuth role picker
+// ─────────────────────────────────────────────────────────────────────────────
+router.patch('/set-role', authMiddleware, async (req, res) => {
+    const { role } = req.body;
+    if (!['student', 'faculty'].includes(role)) {
+        return res.status(400).json({ success: false, message: 'Invalid role. Must be student or faculty.' });
+    }
+    const userId = req.user.id;
+    try {
+        const pool = require('../config/database').pool;
+        await pool.query('UPDATE users SET role = ? WHERE user_id = ?', [role, userId]);
+        return res.json({ success: true, role });
+    } catch {
+        // Mock fallback — update in-memory user if present
+        const u = mockUsers.find(u => u.id === userId);
+        if (u) u.role = role;
+        return res.json({ success: true, role, source: 'mock' });
+    }
+});
 
 // Export router and mockUsers (for other routes to access)
 module.exports = router;

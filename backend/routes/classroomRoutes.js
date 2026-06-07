@@ -100,33 +100,37 @@ function classroomBelongsTo(classroomId, facultyId) {
 /**
  * Ensure the requesting user exists as a row in the `users` table.
  * If not (e.g. registered before role-column migration, Google OAuth mock user),
- * insert a minimal placeholder so FK constraints don't fail.
+ * insert a minimal stub so FK constraints don't fail.
  *
- * Uses a guaranteed-unique internal email (_placeholder_<id>@codearena.internal)
- * so the users.email UNIQUE index can never silently swallow the INSERT.
+ * Uses INSERT IGNORE so that any existing unique-key conflict (user_id PK or
+ * email UNIQUE) is silently skipped — no data corruption, no crash.
+ * The real email is always used so the row is human-readable in the UI.
  */
 async function ensureUserInDb(user) {
     if (!dbService.isDbAvailable() || !user || !user.id || user.id === 0) return;
     try {
         const rows = await db.query('SELECT user_id FROM users WHERE user_id = ?', [user.id]);
-        if (rows && rows.length > 0) return; // already in DB — nothing to do
+        if (rows && rows.length > 0) {
+            // Row exists — if it still has a placeholder email, patch it with the real one
+            if (rows[0].email && rows[0].email.endsWith('@codearena.internal') && user.email) {
+                await db.query(
+                    'UPDATE users SET email = ?, full_name = ? WHERE user_id = ?',
+                    [user.email, user.fullName || rows[0].full_name, user.id]
+                ).catch(() => {}); // ignore if email already taken by another row
+            }
+            return;
+        }
 
-        // Use a placeholder email that is guaranteed unique per user_id.
-        // Never use the real email here: if it already belongs to a different
-        // user_id row, ON DUPLICATE KEY fires on the UNIQUE email index and
-        // the INSERT is silently converted to an UPDATE — user_id never lands.
-        const placeholderEmail = `_placeholder_${user.id}@codearena.internal`;
-
-        // Include a locked placeholder password so NOT NULL constraint is satisfied
-        // even before the nullable-password migration is applied.
-        // This account can never be logged into (no valid bcrypt prefix).
-        const lockedPassword = '!LOCKED_PLACEHOLDER';
+        // User not in DB at all — insert with real email using INSERT IGNORE.
+        // If the email already belongs to a different user_id row, the INSERT is
+        // simply skipped (IGNORE) rather than corrupting the other user's data.
+        const email = user.email || `_placeholder_${user.id}@codearena.internal`;
         await db.query(
-            `INSERT INTO users (user_id, email, password, full_name, role)
+            `INSERT IGNORE INTO users (user_id, email, password, full_name, role)
              VALUES (?, ?, ?, ?, ?)`,
-            [user.id, placeholderEmail, lockedPassword, user.fullName || 'User', user.role || 'student']
+            [user.id, email, '!LOCKED_GOOGLE', user.fullName || 'User', user.role || 'student']
         );
-        console.log(`Auto-inserted placeholder for user ${user.id} (${user.email}) to satisfy FK`);
+        console.log(`[ensureUserInDb] Auto-inserted user ${user.id} (${email})`);
     } catch (err) {
         console.warn('ensureUserInDb failed (non-fatal):', err.message);
     }

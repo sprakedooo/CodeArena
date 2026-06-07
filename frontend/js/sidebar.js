@@ -64,7 +64,6 @@
         { icon: 'school',         label: 'My Classrooms',     href: 'classrooms.html',  key: 'classrooms' },
         { icon: 'quiz',            label: 'Assessment',         href: 'lesson_game.html', key: 'play'       },
         { icon: 'terminal',       label: 'Practice',          href: 'playground.html',  key: 'practice'   },
-        { icon: 'bar_chart',      label: 'Analytics',         href: 'analytics.html',   key: 'analytics'  },
         { icon: 'person',         label: 'Profile',           href: 'profile.html',     key: 'profile'    },
     ];
 
@@ -73,6 +72,13 @@
         { icon: 'school',       label: 'My Classrooms',   href: 'classrooms_faculty.html', key: 'classrooms' },
         { icon: 'add_circle',   label: 'Contribute',      href: 'contribute.html',         key: 'contribute' },
         { icon: 'person',       label: 'Profile',         href: 'profile.html',            key: 'profile'    },
+    ];
+
+    const superAdminNav = [
+        { icon: 'admin_panel_settings', label: 'SA Dashboard', href: 'superadmin_dashboard.html',  key: 'sa-dashboard'  },
+        { icon: 'pending_actions',      label: 'Approvals',    href: 'superadmin_approvals.html',   key: 'sa-approvals'  },
+        { icon: 'quiz',                 label: 'Questions',    href: 'superadmin_questions.html',   key: 'sa-questions'  },
+        { icon: 'group',                label: 'Users',        href: 'superadmin_users.html',       key: 'sa-users'      },
     ];
 
     // ── 4. Active page detection ──────────────────────────────────────────────
@@ -89,14 +95,17 @@
             'lesson_game.html':      'play',
             'playground.html':       'practice',
             'leaderboard.html':      'leaderboard',
-            'analytics.html':        'analytics',
             'profile.html':          'profile',
             'faculty_dashboard.html':'dashboard',
             'classrooms_faculty.html':'classrooms',
             'classroom_manage.html': 'classrooms',
-            'contribute.html':        'contribute',
-            'contribution_view.html':'learn',
-            'daily_challenge.html':  'dashboard',
+            'contribute.html':           'contribute',
+            'contribution_view.html':    'learn',
+            'daily_challenge.html':      'dashboard',
+            'superadmin_dashboard.html': 'sa-dashboard',
+            'superadmin_approvals.html': 'sa-approvals',
+            'superadmin_questions.html': 'sa-questions',
+            'superadmin_users.html':     'sa-users',
         };
         return map[file] || 'dashboard';
     }
@@ -120,7 +129,7 @@
         const user      = JSON.parse(localStorage.getItem('user') || '{}');
         const role      = window.SIDEBAR_ROLE || user.role || 'student';
         const active    = detectActivePage();
-        const navItems  = role === 'faculty' ? facultyNav : studentNav;
+        const navItems  = role === 'superadmin' ? superAdminNav : role === 'faculty' ? facultyNav : studentNav;
         const isLight   = savedTheme === 'light';
         const themeIconName = isLight ? 'dark_mode' : 'light_mode';
         const themeLbl      = isLight ? 'Dark Mode' : 'Light Mode';
@@ -155,7 +164,7 @@
         sidebar.id        = 'appSidebar';
         sidebar.innerHTML = `
             <div class="sidebar-logo">
-                <a href="${role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html'}" style="display:block;text-decoration:none;">
+                <a href="${role === 'superadmin' ? 'superadmin_dashboard.html' : role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html'}" style="display:block;text-decoration:none;">
                     <img src="../assets/codearena-logo.png" alt="CodeArena" class="sidebar-logo-img">
                 </a>
             </div>
@@ -166,7 +175,7 @@
         // Topbar
         const name      = user.fullName || user.name || 'User';
         const firstName = name.split(' ')[0];
-        const roleLabel = role === 'faculty' ? 'Faculty' : 'Student';
+        const roleLabel = role === 'superadmin' ? 'Super Admin' : role === 'faculty' ? 'Faculty' : 'Student';
 
         const topbar = document.createElement('header');
         topbar.className = 'topbar';
@@ -251,24 +260,110 @@
             if (chevron) chevron.style.transform = '';
         });
 
-        document.getElementById('topbarLogoutBtn').addEventListener('click', () => {
-            if (!confirm('Are you sure you want to log out?')) return;
-            // Core auth keys
+        // ── Logout confirmation modal ─────────────────────────────────────
+        const logoutModalStyle = document.createElement('style');
+        logoutModalStyle.textContent = `
+            .logout-modal-overlay {
+                position: fixed; inset: 0; z-index: 99999;
+                background: rgba(0,0,0,0.55);
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; pointer-events: none;
+                transition: opacity 0.2s ease;
+            }
+            .logout-modal-overlay.open { opacity: 1; pointer-events: all; }
+            .logout-modal {
+                background: var(--bg-card, #161b22);
+                border: 1px solid var(--border, rgba(255,255,255,0.08));
+                border-radius: 16px; padding: 1.75rem 1.75rem 1.4rem;
+                width: 100%; max-width: 360px;
+                transform: translateY(10px) scale(0.98);
+                transition: transform 0.2s ease;
+                box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+            }
+            .logout-modal-overlay.open .logout-modal { transform: translateY(0) scale(1); }
+            .logout-modal-icon {
+                width: 52px; height: 52px; border-radius: 50%;
+                background: rgba(239,68,68,0.12);
+                display: flex; align-items: center; justify-content: center;
+                margin: 0 auto 1rem;
+            }
+            .logout-modal-icon .material-symbols-outlined {
+                font-size: 1.6rem; color: #f87171;
+            }
+            .logout-modal h3 {
+                text-align: center; font-size: 1rem; font-weight: 700;
+                color: var(--text, #e6edf3); margin: 0 0 0.4rem;
+            }
+            .logout-modal p {
+                text-align: center; font-size: 0.82rem;
+                color: var(--text-muted, rgba(255,255,255,0.45));
+                margin: 0 0 1.4rem; line-height: 1.55;
+            }
+            .logout-modal-btns {
+                display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+            }
+            .logout-modal-cancel {
+                padding: 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+                background: var(--bg-surface, #21262d);
+                border: 1px solid var(--border, rgba(255,255,255,0.08));
+                color: var(--text, #e6edf3); cursor: pointer;
+                transition: background 0.15s;
+                font-family: inherit;
+            }
+            .logout-modal-cancel:hover { background: rgba(255,255,255,0.07); }
+            .logout-modal-confirm {
+                padding: 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+                background: #ef4444; border: none; color: #fff; cursor: pointer;
+                transition: background 0.15s, transform 0.1s;
+                font-family: inherit;
+            }
+            .logout-modal-confirm:hover  { background: #dc2626; }
+            .logout-modal-confirm:active { transform: scale(0.97); }
+        `;
+        document.head.appendChild(logoutModalStyle);
+
+        const logoutOverlay = document.createElement('div');
+        logoutOverlay.className = 'logout-modal-overlay';
+        logoutOverlay.id = 'logoutModalOverlay';
+        logoutOverlay.innerHTML = `
+            <div class="logout-modal">
+                <div class="logout-modal-icon">
+                    <span class="material-symbols-outlined">logout</span>
+                </div>
+                <h3>Sign out?</h3>
+                <p>You'll need to log back in to continue your progress.</p>
+                <div class="logout-modal-btns">
+                    <button class="logout-modal-cancel" id="logoutCancelBtn">Cancel</button>
+                    <button class="logout-modal-confirm" id="logoutConfirmBtn">Sign Out</button>
+                </div>
+            </div>`;
+        document.body.appendChild(logoutOverlay);
+
+        function doLogout() {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             localStorage.removeItem('isLoggedIn');
-            // Game / progress keys that should not bleed to next user
             localStorage.removeItem('arenaStats');
             localStorage.removeItem('earnedAchievements');
             localStorage.removeItem('certificates');
             localStorage.removeItem('lastVisited');
             localStorage.removeItem('dailyChallenge');
             localStorage.removeItem('notifReadAt');
-            // Clear per-language lesson progress and course progress
             Object.keys(localStorage)
                 .filter(k => k.startsWith('completedLessons_') || k.startsWith('course_progress_') || k.startsWith('ch_completed_'))
                 .forEach(k => localStorage.removeItem(k));
             location.href = 'login.html';
+        }
+
+        document.getElementById('topbarLogoutBtn').addEventListener('click', () => {
+            logoutOverlay.classList.add('open');
+        });
+        document.getElementById('logoutCancelBtn').addEventListener('click', () => {
+            logoutOverlay.classList.remove('open');
+        });
+        document.getElementById('logoutConfirmBtn').addEventListener('click', doLogout);
+        logoutOverlay.addEventListener('click', e => {
+            if (e.target === logoutOverlay) logoutOverlay.classList.remove('open');
         });
 
         // Sidebar collapse toggle

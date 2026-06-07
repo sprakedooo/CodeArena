@@ -81,6 +81,8 @@
         }
         .status-badge.published { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
         .status-badge.draft     { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+        .status-badge.pending   { background: rgba(6,182,212,0.15); color: #22d3ee; border: 1px solid rgba(6,182,212,0.25); }
+        .status-badge.rejected  { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
 
         .contrib-card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
         .contrib-card-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0 0 0.35rem; line-height: 1.3; }
@@ -383,12 +385,16 @@
                     <input type="text" id="fTags" placeholder="loops, functions, beginner">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
+                    <label>Save As</label>
                     <select id="fStatus">
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
+                        <option value="draft">Draft (not submitted)</option>
+                        <option value="published">Submit for Review</option>
                     </select>
+                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">
+                        Submitted content requires Super Admin approval before going live.
+                    </div>
                 </div>
+                <div id="rejectionNoteBox" style="display:none;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-size:0.78rem;color:#f87171;"></div>
             </div>
 
             <!-- Blog content -->
@@ -723,7 +729,9 @@ function renderGrid() {
             <div class="contrib-card-cover" id="cover-${c.contribution_id}">
                 ${c.cover_image ? `<img src="${esc(c.cover_image)}" alt="" id="cover-img-${c.contribution_id}">` : `<div class="contrib-card-cover-placeholder" id="cover-img-${c.contribution_id}"><span class="material-symbols-outlined">${c.type === 'blog' ? 'article' : 'school'}</span></div>`}
                 <span class="type-badge ${c.type}">${c.type === 'blog' ? 'Blog Post' : 'Course'}</span>
-                ${c.status === 'draft' ? `<span class="status-badge draft">Draft</span>` : ''}
+                ${c.status === 'draft'     ? `<span class="status-badge draft">Draft</span>`          : ''}
+                ${c.status === 'pending'  ? `<span class="status-badge pending">Pending Review</span>` : ''}
+                ${c.status === 'rejected' ? `<span class="status-badge rejected">Rejected</span>`      : ''}
                 <button class="cover-edit-btn" onclick="triggerCoverUpload(${c.contribution_id})" title="Change cover">
                     <span class="material-symbols-outlined">edit</span>
                 </button>
@@ -784,7 +792,15 @@ async function openEdit(id) {
     document.getElementById('fDescription').value = c.description || '';
     document.getElementById('fLanguage').value    = c.language || 'general';
     document.getElementById('fTags').value        = c.tags || '';
-    document.getElementById('fStatus').value      = c.status || 'published';
+    document.getElementById('fStatus').value = (c.status === 'published' || c.status === 'draft') ? c.status : 'draft';
+    // Show rejection note if applicable
+    const rejNote = document.getElementById('rejectionNoteBox');
+    if (rejNote) {
+        if (c.status === 'rejected' && c.rejection_note) {
+            rejNote.textContent = '⚠ Rejected: ' + c.rejection_note;
+            rejNote.style.display = 'block';
+        } else { rejNote.style.display = 'none'; }
+    }
 
     if (c.type === 'blog') {
         showBlog(); document.getElementById('fContent').value = c.content || '';
@@ -803,7 +819,7 @@ function closeModal() {
 function clearForm() {
     ['fTitle','fDescription','fTags','fContent'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
     document.getElementById('fLanguage').value = 'general';
-    document.getElementById('fStatus').value   = 'published';
+    document.getElementById('fStatus').value   = 'draft';
 }
 
 function selectType(type) {

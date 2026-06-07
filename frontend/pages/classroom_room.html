@@ -497,6 +497,20 @@
             </div>
         </div>
 
+        <!-- Quiz section -->
+        <div class="classwork-section">
+            <div class="classwork-section-header">
+                <h3 class="classwork-section-title">
+                    <span class="material-symbols-outlined">quiz</span>
+                    Quiz
+                    <span class="cw-count" id="quizCount">0</span>
+                </h3>
+            </div>
+            <div id="quizCard">
+                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
+            </div>
+        </div>
+
         <!-- Community Contributions section (same language) -->
         <div class="classwork-section" id="contribSection" style="display:none;">
             <div class="classwork-section-header">
@@ -627,6 +641,7 @@ async function loadClassroomInfo() {
         const name    = cl.name    || 'Classroom';
         const desc    = cl.description || cl.subject || '';
         const lang    = (cl.language || 'python');
+        classroomLang = lang;
         const faculty = cl.faculty_name || cl.facultyName || 'Instructor';
         const count   = cl.student_count || cl.studentCount || 0;
         const lessons = cl.lesson_count  || cl.lessonCount  || 0;
@@ -721,13 +736,14 @@ function renderAnnouncements(anns) {
         const link   = a.link_url || a.linkUrl || '';
         const linkTxt= a.link_title || a.linkTitle || link;
         const aid    = a.announcement_id || a.id;
+        const linkHref = link && !/^https?:\/\//i.test(link) ? 'https://' + link : link;
         return '<div class="announcement-card" id="ann-' + aid + '">' +
             '<div class="ann-header">' +
                 '<div class="ann-avatar">' + init + '</div>' +
                 '<div class="ann-meta"><div class="ann-author">' + esc(author) + '</div><div class="ann-time">' + time + '</div></div>' +
             '</div>' +
             '<div class="ann-body">' + body + '</div>' +
-            (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener" class="ann-link"><span class="material-symbols-outlined">link</span>' + esc(linkTxt) + '</a>' : '') +
+            (link ? '<a href="' + esc(linkHref) + '" target="_blank" rel="noopener" class="ann-link"><span class="material-symbols-outlined">link</span>' + esc(linkTxt) + '</a>' : '') +
             '<div class="ann-comments">' +
                 '<button class="ann-comments-toggle" onclick="toggleComments(' + aid + ', this)">' +
                     '<span class="material-symbols-outlined">chat_bubble_outline</span>' +
@@ -853,8 +869,9 @@ async function postComment(aid) {
 }
 
 // ── Classwork ──────────────────────────────────────────────────────────────────
+let classroomLang = 'python';
 async function loadClasswork() {
-    await Promise.all([loadLessons(), loadAssignments()]);
+    await Promise.all([loadLessons(), loadAssignments(), loadQuizCard()]);
 }
 
 async function loadLessons() {
@@ -1193,6 +1210,64 @@ function showToast(msg, type) {
     document.getElementById('toastIcon').textContent = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
     t.className = 'toast show ' + (type || '');
     setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Quiz card (self-paced) ─────────────────────────────────────────────────────
+async function fetchClassroomQuestions(lang) {
+    // Use the public per-level endpoint (students can't hit the faculty-only /all)
+    const levels = ['beginner', 'intermediate', 'advanced'];
+    const results = await Promise.all(levels.map(lvl =>
+        fetch(`${API}/questions/${lang}/${lvl}`, { headers: getAuthHeaders() })
+            .then(r => r.json()).then(d => d.questions || d || []).catch(() => [])
+    ));
+    return results.flat();
+}
+
+async function loadQuizCard() {
+    const lang = classroomLang || 'python';
+    const card = document.getElementById('quizCard');
+    try {
+        const qs = await fetchClassroomQuestions(lang);
+        document.getElementById('quizCount').textContent = qs.length;
+
+        if (!qs.length) {
+            card.innerHTML = `<div class="lesson-row" style="cursor:default;opacity:.7;">
+                <div class="lesson-row-icon"><span class="material-symbols-outlined">quiz</span></div>
+                <div class="lesson-row-body">
+                    <div class="lesson-row-title">No quiz available yet</div>
+                    <div class="lesson-row-meta">Your instructor hasn't added quiz questions.</div>
+                </div>
+            </div>`;
+            return;
+        }
+
+        const done = localStorage.getItem(`quizScore_${classroomId}`);
+        const scoreBadge = done
+            ? `<span class="done-badge" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25);color:#34d399;">Best: ${done}%</span>`
+            : '';
+        card.innerHTML = `<div class="lesson-row" style="cursor:pointer;" onclick="startQuiz()">
+            <div class="lesson-row-icon"><span class="material-symbols-outlined">quiz</span></div>
+            <div class="lesson-row-body">
+                <div class="lesson-row-title">Classroom Quiz</div>
+                <div class="lesson-row-meta">${qs.length} question${qs.length!==1?'s':''} · ${lang}</div>
+            </div>
+            <div class="lesson-row-actions" style="display:flex;align-items:center;gap:10px;">
+                ${scoreBadge}
+                <button class="btn btn-primary" style="font-size:.8rem;" onclick="event.stopPropagation();startQuiz()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Take Quiz
+                </button>
+            </div>
+        </div>`;
+    } catch {
+        card.innerHTML = `<div class="lesson-row" style="cursor:default;opacity:.7;">
+            <div class="lesson-row-icon"><span class="material-symbols-outlined">error</span></div>
+            <div class="lesson-row-body"><div class="lesson-row-title">Couldn't load quiz</div></div>
+        </div>`;
+    }
+}
+
+function startQuiz() {
+    window.location.href = `classroom_quiz.html?cid=${classroomId}&lang=${classroomLang || 'python'}`;
 }
 </script>
 

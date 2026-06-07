@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users – Super Admin – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .sa-page { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        .page-hdr { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+        .page-hdr h1 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin: 0 0 0.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .page-hdr p  { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+
+        /* ── Search / filter ── */
+        .filter-row { display: flex; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .filter-row input, .filter-row select {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            padding: 0.5rem 0.75rem; font-size: 0.85rem; outline: none;
+        }
+        .filter-row input:focus, .filter-row select:focus { border-color: var(--primary); }
+
+        /* ── Users table ── */
+        .users-table-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
+        .users-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 600px; }
+        .users-table th {
+            background: var(--bg-surface); color: var(--text-muted);
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700;
+            padding: 0.65rem 1rem; text-align: left; border-bottom: 1px solid var(--border);
+        }
+        .users-table td { padding: 0.7rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .users-table tr:last-child td { border-bottom: none; }
+        .users-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .role-pill { display: inline-flex; padding: 2px 8px; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: capitalize; }
+        .role-student    { background: rgba(6,182,212,0.15);  color: #22d3ee; }
+        .role-faculty    { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .role-superadmin { background: linear-gradient(135deg,rgba(124,58,237,0.2),rgba(6,182,212,0.2)); color: #e879f9; }
+
+        .user-count { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .empty-state .material-symbols-outlined { font-size: 2.8rem; display: block; margin-bottom: 0.6rem; opacity: 0.4; }
+        .empty-state p { font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<script>window.SIDEBAR_PAGE = 'sa-users';</script>
+<script src="../js/sidebar.js"></script>
+
+<div class="page-content">
+<div class="sa-page">
+
+    <div class="page-hdr">
+        <div>
+            <h1><span class="material-symbols-outlined" style="color:var(--primary);">group</span> Registered Users</h1>
+            <p>All students, faculty, and admins on the platform.</p>
+        </div>
+        <button class="btn btn-secondary" style="font-size:0.8rem;" onclick="loadUsers()">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">refresh</span> Refresh
+        </button>
+    </div>
+
+    <div class="filter-row">
+        <input type="text" id="userSearch" placeholder="Search name or email…" oninput="filterUsers()" style="flex:1;min-width:200px;">
+        <select id="roleFilter" onchange="filterUsers()">
+            <option value="">All Roles</option>
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+            <option value="superadmin">Super Admin</option>
+        </select>
+    </div>
+
+    <div class="users-table-wrap">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">Loading…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="user-count" id="userCount"></div>
+
+</div>
+</div>
+
+<script>
+const API   = `http://${window.location.hostname}:3000/api`;
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!me.id || me.role !== 'superadmin') location.href = 'login.html';
+
+let allUsers = [];
+function authHeaders() { return { 'Authorization': `Bearer ${token}` }; }
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function loadUsers() {
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">Loading…</td></tr>';
+    try {
+        const res   = await fetch(`${API}/admin/users`, { headers: authHeaders() });
+        const data  = await res.json();
+        allUsers = data.users || [];
+        renderUsers(allUsers);
+    } catch {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Failed to load users.</td></tr>';
+    }
+}
+
+function renderUsers(users) {
+    const tbody = document.getElementById('usersTableBody');
+    if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">No users found.</td></tr>';
+        document.getElementById('userCount').textContent = '';
+        return;
+    }
+    tbody.innerHTML = users.map((u, i) => `
+        <tr>
+            <td style="color:var(--text-muted);font-size:0.75rem;">${i+1}</td>
+            <td style="font-weight:600;color:var(--text);">${esc(u.fullName || u.full_name || '—')}</td>
+            <td style="color:var(--text-secondary);font-size:0.8rem;">${esc(u.email || '—')}</td>
+            <td><span class="role-pill role-${u.role || 'student'}">${u.role || 'student'}</span></td>
+        </tr>
+    `).join('');
+    document.getElementById('userCount').textContent = `Showing ${users.length} user${users.length !== 1 ? 's' : ''}`;
+}
+
+function filterUsers() {
+    const term = document.getElementById('userSearch').value.trim().toLowerCase();
+    const role = document.getElementById('roleFilter').value;
+    let filtered = allUsers;
+    if (term) filtered = filtered.filter(u =>
+        (u.fullName || u.full_name || '').toLowerCase().includes(term) ||
+        (u.email || '').toLowerCase().includes(term)
+    );
+    if (role) filtered = filtered.filter(u => (u.role || 'student') === role);
+    renderUsers(filtered);
+}
+
+loadUsers();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

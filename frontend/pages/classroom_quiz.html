@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .quiz-page { max-width: 720px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        /* Progress bar */
+        .qz-progress-track { height: 8px; background: var(--bg-surface); border-radius: 20px; overflow: hidden; margin-bottom: 20px; }
+        .qz-progress-fill  { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 20px; transition: width .3s ease; }
+
+        /* Intro / End cards */
+        .qz-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 2.2rem; text-align: center;
+        }
+        .qz-card .big-icon { font-size: 3rem; display: block; margin-bottom: .8rem; }
+        .qz-card h1 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin: 0 0 .5rem; }
+        .qz-card p  { font-size: .85rem; color: var(--text-muted); margin: 0 0 1.5rem; }
+        .qz-meta-row { display: flex; gap: .75rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .qz-meta-chip {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: .7rem 1.1rem; min-width: 92px;
+        }
+        .qz-meta-val { font-size: 1.1rem; font-weight: 800; color: var(--text); display: block; }
+        .qz-meta-lbl { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+
+        /* Question */
+        .qz-hud { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .qz-hud-q { font-size: .72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; }
+        .qz-hud-score { font-size: .8rem; font-weight: 700; color: var(--primary); }
+
+        .q-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem;
+        }
+        .q-type-badge { display:inline-block; background: rgba(124,58,237,.12); color:#a78bfa; font-size:.65rem; font-weight:700; padding:2px 9px; border-radius:20px; margin-bottom:.7rem; }
+        .q-text { font-size: 1.05rem; font-weight: 600; color: var(--text); line-height: 1.55; margin-bottom: 1rem; }
+        .q-code {
+            background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: .7rem .9rem; font-family: 'Courier New', monospace; font-size: .82rem;
+            color: #e2e8f0; margin-bottom: 1rem; white-space: pre-wrap;
+        }
+        .q-option {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px;
+            padding: .85rem 1.1rem; margin-bottom: .55rem; cursor: pointer; width: 100%;
+            text-align: left; font-size: .9rem; color: var(--text);
+            transition: border-color .15s, background .15s; font-family: 'Inter',sans-serif;
+        }
+        .q-option:hover:not(:disabled) { border-color: var(--primary); background: rgba(124,58,237,.06); }
+        .q-option:disabled { cursor: default; }
+        .q-option.correct { border-color: #34d399; background: rgba(16,185,129,.12); color: #34d399; }
+        .q-option.wrong   { border-color: #f87171; background: rgba(239,68,68,.12); color: #f87171; }
+        .opt-letter {
+            width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: .78rem; font-weight: 700; color: var(--text-muted);
+        }
+        .fill-wrap { display: flex; gap: .6rem; }
+        .fill-input {
+            flex: 1; background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: .85rem 1.1rem; color: var(--text); font-size: .9rem; outline: none;
+        }
+        .fill-input:focus { border-color: var(--primary); }
+
+        .feedback-bar {
+            display: none; align-items: center; gap: 10px; padding: .8rem 1.1rem;
+            border-radius: 10px; margin-bottom: 1rem; font-size: .85rem; font-weight: 600;
+        }
+        .feedback-bar.show { display: flex; }
+        .feedback-bar.correct { background: rgba(16,185,129,.12); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+        .feedback-bar.wrong   { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+
+        .pass-banner { padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-weight: 800; font-size: 1.05rem; }
+        .pass-banner.pass { background: rgba(16,185,129,.12); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+        .pass-banner.fail { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+    </style>
+</head>
+<body>
+<script>window.SIDEBAR_PAGE = 'classrooms';</script>
+<script src="../js/sidebar.js"></script>
+
+<div class="page-content">
+<div class="quiz-page">
+
+    <!-- ── INTRO ──────────────────────────────────────────────────────────── -->
+    <div id="screenIntro">
+        <div class="qz-card">
+            <span class="big-icon">📝</span>
+            <h1 id="introTitle">Classroom Quiz</h1>
+            <p>Answer each question at your own pace. You'll see your score at the end.</p>
+            <div class="qz-meta-row">
+                <div class="qz-meta-chip"><span class="qz-meta-val" id="introCount">0</span><span class="qz-meta-lbl">Questions</span></div>
+                <div class="qz-meta-chip"><span class="qz-meta-val" id="introLang">—</span><span class="qz-meta-lbl">Language</span></div>
+                <div class="qz-meta-chip"><span class="qz-meta-val">70%</span><span class="qz-meta-lbl">To Pass</span></div>
+            </div>
+            <div style="display:flex;gap:.6rem;justify-content:center;">
+                <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+                <button class="btn btn-primary" id="startBtn" onclick="startQuiz()">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">play_arrow</span> Start Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── QUESTION ───────────────────────────────────────────────────────── -->
+    <div id="screenQuiz" style="display:none;">
+        <div class="qz-progress-track"><div class="qz-progress-fill" id="progFill" style="width:0%"></div></div>
+        <div class="qz-hud">
+            <span class="qz-hud-q" id="hudQ">Question 1 of 1</span>
+            <span class="qz-hud-score" id="hudScore">Score: 0</span>
+        </div>
+        <div class="q-card">
+            <span class="q-type-badge" id="qTypeBadge">MCQ</span>
+            <div class="q-text" id="qText">—</div>
+            <div class="q-code" id="qCode" style="display:none;"></div>
+            <div class="feedback-bar" id="feedbackBar">
+                <span class="material-symbols-outlined"></span>
+                <span id="feedbackText"></span>
+            </div>
+            <div id="qOptions"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" id="nextBtn" style="display:none;" onclick="nextQuestion()">
+                <span id="nextLabel">Next</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── END ────────────────────────────────────────────────────────────── -->
+    <div id="screenEnd" style="display:none;">
+        <div class="qz-card">
+            <div class="pass-banner" id="passBanner">—</div>
+            <div class="qz-meta-row">
+                <div class="qz-meta-chip"><span class="qz-meta-val" id="endPct">0%</span><span class="qz-meta-lbl">Score</span></div>
+                <div class="qz-meta-chip"><span class="qz-meta-val" id="endCorrect">0/0</span><span class="qz-meta-lbl">Correct</span></div>
+            </div>
+            <div style="display:flex;gap:.6rem;justify-content:center;">
+                <button class="btn btn-secondary" onclick="goBack()">← Back to Classroom</button>
+                <button class="btn btn-primary" onclick="retry()">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">refresh</span> Retry
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+const API   = `http://${window.location.hostname}:3000/api`;
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+const params = new URLSearchParams(location.search);
+const classroomId = params.get('cid');
+const lang        = params.get('lang') || 'python';
+
+if (!me.id) location.href = 'login.html';
+
+function getAuthHeaders() { return { 'Content-Type':'application/json', Authorization:`Bearer ${token}` }; }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escJS(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
+function stripPrefix(t) { return String(t).replace(/^[A-Da-d][).]\s*/, ''); }
+
+let questions = [];
+let idx = 0;
+let correctCount = 0;
+let answered = false;
+
+// ── Load questions ─────────────────────────────────────────────────────────────
+async function init() {
+    document.getElementById('introLang').textContent = lang;
+    try {
+        const levels = ['beginner', 'intermediate', 'advanced'];
+        const results = await Promise.all(levels.map(lvl =>
+            fetch(`${API}/questions/${lang}/${lvl}`, { headers: getAuthHeaders() })
+                .then(r => r.json()).then(d => d.questions || d || []).catch(() => [])
+        ));
+        questions = results.flat();
+    } catch { questions = []; }
+
+    document.getElementById('introCount').textContent = questions.length;
+    if (!questions.length) {
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('startBtn').textContent = 'No questions yet';
+    }
+}
+
+// ── Start ──────────────────────────────────────────────────────────────────────
+function startQuiz() {
+    if (!questions.length) return;
+    idx = 0; correctCount = 0;
+    showScreen('quiz');
+    renderQuestion();
+}
+
+function showScreen(name) {
+    document.getElementById('screenIntro').style.display = name === 'intro' ? '' : 'none';
+    document.getElementById('screenQuiz').style.display  = name === 'quiz'  ? '' : 'none';
+    document.getElementById('screenEnd').style.display   = name === 'end'   ? '' : 'none';
+}
+
+// ── Render current question ──────────────────────────────────────────────────────
+function renderQuestion() {
+    answered = false;
+    const q = questions[idx];
+    const total = questions.length;
+
+    document.getElementById('progFill').style.width = `${(idx / total) * 100}%`;
+    document.getElementById('hudQ').textContent = `Question ${idx + 1} of ${total}`;
+    document.getElementById('hudScore').textContent = `Score: ${correctCount}`;
+
+    const typeLabels = { multiple_choice:'Multiple Choice', fill_blank:'Fill in the Blank', output_prediction:'Predict Output', code_ordering:'Code Ordering' };
+    const type = q.questionType || q.question_type || 'multiple_choice';
+    document.getElementById('qTypeBadge').textContent = typeLabels[type] || 'Multiple Choice';
+    document.getElementById('qText').textContent = q.question || q.question_text || q.text || '—';
+
+    const codeEl = document.getElementById('qCode');
+    const code = q.codeSnippet || q.code_snippet || q.code;
+    if (code) { codeEl.textContent = code; codeEl.style.display = 'block'; }
+    else codeEl.style.display = 'none';
+
+    // Reset feedback + next button
+    const fb = document.getElementById('feedbackBar');
+    fb.className = 'feedback-bar';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('nextLabel').textContent = (idx === total - 1) ? 'Finish' : 'Next';
+
+    const optsEl = document.getElementById('qOptions');
+    const opts = Array.isArray(q.options) ? q.options : (Array.isArray(q.choices) ? q.choices : []);
+
+    if (type === 'multiple_choice' && opts.length) {
+        optsEl.innerHTML = opts.map((o, i) => `
+            <button class="q-option" data-i="${i}" onclick="answerMCQ(this, ${i})">
+                <span class="opt-letter">${String.fromCharCode(65 + i)}</span>
+                <span>${esc(stripPrefix(String(o)))}</span>
+            </button>
+        `).join('');
+    } else {
+        optsEl.innerHTML = `
+            <div class="fill-wrap">
+                <input type="text" class="fill-input" id="fillInput"
+                    placeholder="${type === 'output_prediction' ? 'Type the exact output…' : 'Type your answer…'}"
+                    autocomplete="off" spellcheck="false"
+                    onkeydown="if(event.key==='Enter')answerText()">
+                <button class="btn btn-primary" onclick="answerText()" style="padding:0 1.2rem;">Submit</button>
+            </div>`;
+        setTimeout(() => document.getElementById('fillInput')?.focus(), 60);
+    }
+}
+
+// ── Answer matching (letter / full / stripped) ──────────────────────────────────
+function isCorrect(q, selected) {
+    const norm  = v => String(v == null ? '' : v).trim().toLowerCase();
+    const strip = v => norm(v).replace(/^[a-d][).]\s*/, '');
+    const correctRaw = String(q.correctAnswer || q.correct_answer || q.answer || '').trim();
+    const sel = norm(selected);
+    const opts = Array.isArray(q.options) ? q.options : [];
+
+    const acceptable = new Set([norm(correctRaw), strip(correctRaw)]);
+    let cIdx = -1;
+    if (/^[A-D]$/i.test(correctRaw)) cIdx = correctRaw.toUpperCase().charCodeAt(0) - 65;
+    else cIdx = opts.findIndex(o => norm(o) === norm(correctRaw) || strip(o) === norm(correctRaw));
+    if (cIdx >= 0 && opts[cIdx] != null) {
+        acceptable.add(String.fromCharCode(97 + cIdx));
+        acceptable.add(norm(opts[cIdx]));
+        acceptable.add(strip(opts[cIdx]));
+    }
+    return { correct: acceptable.has(sel), correctIdx: cIdx };
+}
+
+function answerMCQ(btn, i) {
+    if (answered) return;
+    answered = true;
+    const q = questions[idx];
+    const letter = String.fromCharCode(65 + i);
+    const { correct, correctIdx } = isCorrect(q, letter);
+
+    document.querySelectorAll('.q-option').forEach((el, j) => {
+        el.disabled = true;
+        if (j === correctIdx) el.classList.add('correct');
+    });
+    if (!correct) btn.classList.add('wrong');
+
+    finishAnswer(correct, q);
+}
+
+function answerText() {
+    if (answered) return;
+    const inp = document.getElementById('fillInput');
+    if (!inp) return;
+    const val = inp.value.trim();
+    if (!val) { inp.focus(); return; }
+    answered = true;
+    const q = questions[idx];
+    const { correct } = isCorrect(q, val);
+    inp.disabled = true;
+    inp.style.borderColor = correct ? '#34d399' : '#f87171';
+    finishAnswer(correct, q);
+}
+
+function finishAnswer(correct, q) {
+    if (correct) correctCount++;
+    document.getElementById('hudScore').textContent = `Score: ${correctCount}`;
+
+    const fb   = document.getElementById('feedbackBar');
+    const icon = fb.querySelector('.material-symbols-outlined');
+    const txt  = document.getElementById('feedbackText');
+    fb.className = `feedback-bar show ${correct ? 'correct' : 'wrong'}`;
+    icon.textContent = correct ? 'check_circle' : 'cancel';
+    if (correct) {
+        txt.textContent = 'Correct!';
+    } else {
+        const ca = q.correctAnswer || q.correct_answer || '';
+        txt.textContent = q.hint ? `Not quite — ${q.hint}` : `Incorrect. Correct answer: ${ca}`;
+    }
+    document.getElementById('nextBtn').style.display = '';
+}
+
+// ── Advance ──────────────────────────────────────────────────────────────────────
+function nextQuestion() {
+    idx++;
+    if (idx >= questions.length) { endQuiz(); return; }
+    renderQuestion();
+}
+
+function endQuiz() {
+    showScreen('end');
+    const total = questions.length;
+    const pct = total ? Math.round((correctCount / total) * 100) : 0;
+    const passed = pct >= 70;
+
+    document.getElementById('progFill').style.width = '100%';
+    document.getElementById('endPct').textContent = `${pct}%`;
+    document.getElementById('endCorrect').textContent = `${correctCount}/${total}`;
+    const banner = document.getElementById('passBanner');
+    banner.className = `pass-banner ${passed ? 'pass' : 'fail'}`;
+    banner.textContent = passed ? '🎉 Passed!' : 'Keep practicing — you didn\'t reach 70%';
+
+    // Save best score for the classroom
+    if (classroomId) {
+        const prev = parseInt(localStorage.getItem(`quizScore_${classroomId}`) || '0');
+        if (pct > prev) localStorage.setItem(`quizScore_${classroomId}`, String(pct));
+    }
+}
+
+function retry()  { showScreen('intro'); }
+function goBack() { location.href = classroomId ? `classroom_room.html?id=${classroomId}` : 'classrooms.html'; }
+
+init();
+showScreen('intro');
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

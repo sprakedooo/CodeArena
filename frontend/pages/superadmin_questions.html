@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Questions – Super Admin – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .sa-page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        .page-hdr { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .page-hdr h1 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin: 0 0 0.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .page-hdr p  { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+
+        /* ── Filter row ── */
+        .q-filter-row { display: flex; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+        .q-filter-row select, .q-filter-row input {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            padding: 0.5rem 0.75rem; font-size: 0.85rem; outline: none;
+        }
+        .q-filter-row select:focus, .q-filter-row input:focus { border-color: var(--primary); }
+
+        /* ── Custom language dropdown ── */
+        .lang-dropdown { position: relative; user-select: none; }
+        .lang-dropdown-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            padding: 0.45rem 0.75rem; font-size: 0.85rem; cursor: pointer;
+            min-width: 148px; transition: border-color 0.15s;
+        }
+        .lang-dropdown-btn:hover, .lang-dropdown.open .lang-dropdown-btn { border-color: var(--primary); }
+        .lang-dropdown-btn img { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+        .lang-dropdown-btn .lang-name { flex: 1; }
+        .lang-dropdown-btn .lang-chevron { font-size: 1rem; color: var(--text-muted); transition: transform 0.15s; }
+        .lang-dropdown.open .lang-chevron { transform: rotate(180deg); }
+        .lang-dropdown-menu {
+            position: absolute; top: calc(100% + 4px); left: 0; z-index: 500;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); min-width: 100%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            display: none; flex-direction: column; overflow: hidden;
+        }
+        .lang-dropdown.open .lang-dropdown-menu { display: flex; }
+        .lang-option {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.55rem 0.85rem; cursor: pointer; font-size: 0.85rem;
+            color: var(--text); transition: background 0.12s;
+        }
+        .lang-option:hover { background: var(--bg-surface); }
+        .lang-option.active { color: var(--primary); font-weight: 600; }
+        .lang-option img { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+
+        /* Same custom dropdown for modal fLang */
+        .modal-lang-dropdown { position: relative; user-select: none; }
+        .modal-lang-dropdown .lang-dropdown-btn { min-width: unset; width: 100%; box-sizing: border-box; }
+        .modal-lang-dropdown .lang-dropdown-menu { top: calc(100% + 4px); }
+
+        /* ── Table ── */
+        .q-table-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .q-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .q-table th {
+            background: var(--bg-surface); color: var(--text-muted);
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700;
+            padding: 0.65rem 1rem; text-align: left; border-bottom: 1px solid var(--border);
+        }
+        .q-table td { padding: 0.7rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); vertical-align: middle; }
+        .q-table tr:last-child td { border-bottom: none; }
+        .q-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .q-text-cell { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .level-pill { display: inline-flex; padding: 2px 8px; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: capitalize; }
+        .level-beginner     { background: rgba(16,185,129,0.15);  color: #34d399; }
+        .level-intermediate { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+        .level-advanced     { background: rgba(239,68,68,0.15);   color: #f87171; }
+
+        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; border-radius: 6px; display: inline-flex; transition: color 0.15s, background 0.15s; }
+        .icon-btn:hover { color: var(--text); background: var(--bg-surface); }
+        .icon-btn.danger:hover { color: #f87171; background: rgba(239,68,68,0.1); }
+        .icon-btn .material-symbols-outlined { font-size: 1.05rem; }
+
+        .q-count { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .2s; padding: 1rem;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 1.5rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(12px); transition: transform .2s;
+        }
+        .modal-overlay.open .modal { transform: none; }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+        .modal-header h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
+        .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; transition: color 0.15s; }
+        .modal-close:hover { color: var(--text); }
+        .modal-close .material-symbols-outlined { font-size: 1.2rem; }
+
+        /* Form fields */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+        .form-grid .full { grid-column: 1 / -1; }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            padding: 0.55rem 0.75rem; font-size: 0.85rem; outline: none;
+            font-family: inherit; width: 100%; box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+        .form-group textarea { resize: vertical; min-height: 72px; }
+
+        .options-group { display: flex; flex-direction: column; gap: 0.45rem; }
+        .option-row { display: flex; align-items: center; gap: 0.5rem; }
+        .option-label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); width: 18px; flex-shrink: 0; }
+        .option-row input { flex: 1; }
+
+        .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+        /* ── Delete confirm ── */
+        .delete-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .2s;
+        }
+        .delete-overlay.open { opacity: 1; pointer-events: all; }
+        .delete-modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 380px; transform: translateY(10px); transition: transform .2s; }
+        .delete-overlay.open .delete-modal { transform: none; }
+        .delete-modal h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0 0 0.5rem; }
+        .delete-modal p  { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1rem; line-height: 1.5; }
+        .delete-modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; }
+    </style>
+</head>
+<body>
+
+<script>window.SIDEBAR_PAGE = 'sa-questions';</script>
+<script src="../js/sidebar.js"></script>
+
+<div class="page-content">
+<div class="sa-page">
+
+    <div class="page-hdr">
+        <div>
+            <h1><span class="material-symbols-outlined" style="color:var(--primary);">quiz</span> Assessment Questions</h1>
+            <p>Full CRUD for the question bank used in formal technical assessments.</p>
+        </div>
+        <button class="btn" onclick="openAddModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">add</span> Add Question
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="q-filter-row">
+        <!-- Custom language picker -->
+        <div class="lang-dropdown" id="filterLangDrop">
+            <div class="lang-dropdown-btn" onclick="toggleLangDrop('filterLangDrop')">
+                <img id="filterLangImg" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python">
+                <span class="lang-name" id="filterLangName">Python</span>
+                <span class="material-symbols-outlined lang-chevron">expand_more</span>
+            </div>
+            <div class="lang-dropdown-menu" id="filterLangMenu"></div>
+        </div>
+        <!-- Hidden input keeps the value for JS -->
+        <input type="hidden" id="qLangFilter" value="python">
+
+        <select id="qLevelFilter" onchange="loadQuestions()">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+        </select>
+        <input type="text" id="qSearch" placeholder="Search questions…" oninput="filterQTable()" style="flex:1;min-width:160px;">
+    </div>
+
+    <!-- Table -->
+    <div class="q-table-wrap">
+        <table class="q-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Question</th>
+                    <th>Type</th>
+                    <th>Topic</th>
+                    <th>Level</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="qTableBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Loading…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="q-count" id="qCount"></div>
+
+</div>
+</div>
+
+<!-- ── Add / Edit Modal ── -->
+<div class="modal-overlay" id="qModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Add Question</h3>
+            <button class="modal-close" onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Language</label>
+                <div class="modal-lang-dropdown lang-dropdown" id="modalLangDrop">
+                    <div class="lang-dropdown-btn" onclick="toggleLangDrop('modalLangDrop')">
+                        <img id="modalLangImg" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python">
+                        <span class="lang-name" id="modalLangName">Python</span>
+                        <span class="material-symbols-outlined lang-chevron">expand_more</span>
+                    </div>
+                    <div class="lang-dropdown-menu" id="modalLangMenu"></div>
+                </div>
+                <input type="hidden" id="fLang" value="python">
+            </div>
+            <div class="form-group">
+                <label>Difficulty</label>
+                <select id="fLevel">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Topic</label>
+                <input type="text" id="fTopic" placeholder="e.g. Variables, Loops…">
+            </div>
+            <div class="form-group">
+                <label>Question Type</label>
+                <select id="fType" onchange="toggleOptionFields()">
+                    <option value="multiple_choice">Multiple Choice (MCQ)</option>
+                    <option value="fill_blank">Fill in the Blank</option>
+                    <option value="output_prediction">Output Prediction</option>
+                    <option value="code_ordering">Code Ordering</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Question Text</label>
+                <textarea id="fQuestion" placeholder="Enter the question…" rows="3"></textarea>
+            </div>
+
+            <!-- MCQ Options (shown for multiple_choice) -->
+            <div class="form-group full" id="optionsSection">
+                <label>Answer Options</label>
+                <div class="options-group">
+                    <div class="option-row"><span class="option-label">A</span><input type="text" id="fOptA" placeholder="Option A"></div>
+                    <div class="option-row"><span class="option-label">B</span><input type="text" id="fOptB" placeholder="Option B"></div>
+                    <div class="option-row"><span class="option-label">C</span><input type="text" id="fOptC" placeholder="Option C"></div>
+                    <div class="option-row"><span class="option-label">D</span><input type="text" id="fOptD" placeholder="Option D"></div>
+                </div>
+            </div>
+
+            <div class="form-group" id="correctAnswerSection">
+                <label>Correct Answer</label>
+                <select id="fCorrect">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+            <div class="form-group" id="correctTextSection" style="display:none;">
+                <label>Correct Answer (text)</label>
+                <input type="text" id="fCorrectText" placeholder="The exact correct answer…">
+            </div>
+
+            <div class="form-group full">
+                <label>Hint <span style="font-weight:400;text-transform:none;">(shown when wrong)</span></label>
+                <input type="text" id="fHint" placeholder="Optional hint…">
+            </div>
+            <div class="form-group full">
+                <label>Explanation <span style="font-weight:400;text-transform:none;">(shown after answer)</span></label>
+                <textarea id="fExplanation" placeholder="Optional explanation…" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" style="font-size:0.83rem;" onclick="closeModal()">Cancel</button>
+            <button class="btn" style="font-size:0.83rem;" id="modalSaveBtn" onclick="saveQuestion()">Save Question</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Delete Confirm ── -->
+<div class="delete-overlay" id="deleteOverlay">
+    <div class="delete-modal">
+        <h3>Delete Question?</h3>
+        <p id="deleteMsg">This question will be permanently removed from the question bank.</p>
+        <div class="delete-modal-footer">
+            <button class="btn btn-secondary" style="font-size:0.82rem;" onclick="closeDelete()">Cancel</button>
+            <button class="btn" style="background:var(--danger);color:#fff;font-size:0.82rem;" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
+    padding:0.65rem 1.2rem;font-size:0.85rem;color:var(--text);
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:transform 0.3s ease;z-index:9999;pointer-events:none;"></div>
+
+<script>
+const API   = `http://${window.location.hostname}:3000/api`;
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+if (!me.id || me.role !== 'superadmin') location.href = 'login.html';
+
+// ── Language definitions ───────────────────────────────────────────────────
+const LANGUAGES = [
+    { value: 'python',     label: 'Python',     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg' },
+    { value: 'javascript', label: 'JavaScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg' },
+    { value: 'java',       label: 'Java',       icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg' },
+    { value: 'cpp',        label: 'C++',        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg' },
+];
+
+// Build dropdown menus and wire up both dropdowns
+function buildLangDropdowns() {
+    buildLangMenu('filterLangDrop', 'filterLangMenu', 'filterLangImg', 'filterLangName', 'qLangFilter', (val) => loadQuestions());
+    buildLangMenu('modalLangDrop',  'modalLangMenu',  'modalLangImg',  'modalLangName',  'fLang',       null);
+}
+
+function buildLangMenu(dropId, menuId, imgId, nameId, hiddenId, onChange) {
+    const menu = document.getElementById(menuId);
+    menu.innerHTML = LANGUAGES.map(l => `
+        <div class="lang-option${l.value === document.getElementById(hiddenId).value ? ' active' : ''}"
+             data-value="${l.value}" onclick="selectLang('${dropId}','${menuId}','${imgId}','${nameId}','${hiddenId}','${l.value}','${l.label}','${l.icon}')">
+            <img src="${l.icon}" alt="${l.label}">
+            <span>${l.label}</span>
+        </div>
+    `).join('');
+}
+
+function selectLang(dropId, menuId, imgId, nameId, hiddenId, value, label, icon) {
+    document.getElementById(hiddenId).value = value;
+    document.getElementById(imgId).src = icon;
+    document.getElementById(imgId).alt = label;
+    document.getElementById(nameId).textContent = label;
+    // Update active class
+    document.querySelectorAll(`#${menuId} .lang-option`).forEach(o => {
+        o.classList.toggle('active', o.dataset.value === value);
+    });
+    closeLangDrop(dropId);
+    if (dropId === 'filterLangDrop') loadQuestions();
+}
+
+function toggleLangDrop(dropId) {
+    const drop = document.getElementById(dropId);
+    const isOpen = drop.classList.contains('open');
+    // Close all open dropdowns first
+    document.querySelectorAll('.lang-dropdown.open').forEach(d => d.classList.remove('open'));
+    if (!isOpen) drop.classList.add('open');
+}
+function closeLangDrop(dropId) {
+    document.getElementById(dropId)?.classList.remove('open');
+}
+
+// Close on outside click
+document.addEventListener('click', e => {
+    if (!e.target.closest('.lang-dropdown')) {
+        document.querySelectorAll('.lang-dropdown.open').forEach(d => d.classList.remove('open'));
+    }
+});
+
+let allQuestions = [];
+let editingId    = null;   // null = new, number = edit mode
+let deleteId     = null;
+
+function authHeaders(json = false) {
+    const h = { 'Authorization': `Bearer ${token}` };
+    if (json) h['Content-Type'] = 'application/json';
+    return h;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Load & render ─────────────────────────────────────────────────────────────
+async function loadQuestions() {
+    const lang  = document.getElementById('qLangFilter').value;
+    const level = document.getElementById('qLevelFilter').value;
+    const tbody = document.getElementById('qTableBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Loading…</td></tr>';
+    try {
+        const res  = await fetch(`${API}/questions?language=${lang}&level=${level}`, { headers: authHeaders() });
+        const data = await res.json();
+        allQuestions = data.questions || data || [];
+        renderQTable(allQuestions);
+    } catch {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Failed to load questions.</td></tr>';
+    }
+}
+
+const typeLabels = { multiple_choice: 'MCQ', fill_blank: 'Fill Blank', output_prediction: 'Output', code_ordering: 'Code Order' };
+
+function renderQTable(qs) {
+    const tbody = document.getElementById('qTableBody');
+    const level = document.getElementById('qLevelFilter').value;
+    if (!qs.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No questions found.</td></tr>';
+        document.getElementById('qCount').textContent = '';
+        return;
+    }
+    tbody.innerHTML = qs.map((q, i) => `
+        <tr>
+            <td style="color:var(--text-muted);font-size:0.75rem;">${i+1}</td>
+            <td class="q-text-cell" title="${esc(q.question||q.question_text||q.text||'')}">${esc(q.question||q.question_text||q.text||'—')}</td>
+            <td style="font-size:0.72rem;color:var(--text-secondary);">${typeLabels[q.questionType||q.question_type] || 'MCQ'}</td>
+            <td style="font-size:0.78rem;color:var(--text-secondary);">${esc(q.topic||q.category||'—')}</td>
+            <td><span class="level-pill level-${q.difficulty||q.level||level}">${q.difficulty||q.level||level}</span></td>
+            <td style="text-align:center;white-space:nowrap;">
+                <button class="icon-btn" onclick="openEditModal(${i})" title="Edit">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="icon-btn danger" onclick="openDelete(${q.id||q.question_id},'${esc(q.question||q.text||'').slice(0,60)}')" title="Delete">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    document.getElementById('qCount').textContent = `Showing ${qs.length} question${qs.length !== 1 ? 's' : ''}`;
+}
+
+function filterQTable() {
+    const term = document.getElementById('qSearch').value.trim().toLowerCase();
+    if (!term) { renderQTable(allQuestions); return; }
+    renderQTable(allQuestions.filter(q =>
+        (q.question||q.text||'').toLowerCase().includes(term) ||
+        (q.topic||q.category||'').toLowerCase().includes(term)
+    ));
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function toggleOptionFields() {
+    const type = document.getElementById('fType').value;
+    const isMCQ = type === 'multiple_choice';
+    document.getElementById('optionsSection').style.display   = isMCQ ? '' : 'none';
+    document.getElementById('correctAnswerSection').style.display = isMCQ ? '' : 'none';
+    document.getElementById('correctTextSection').style.display  = isMCQ ? 'none' : '';
+}
+
+function syncModalLang(val) {
+    const l = LANGUAGES.find(x => x.value === val) || LANGUAGES[0];
+    document.getElementById('fLang').value       = l.value;
+    document.getElementById('modalLangImg').src  = l.icon;
+    document.getElementById('modalLangImg').alt  = l.label;
+    document.getElementById('modalLangName').textContent = l.label;
+    document.querySelectorAll('#modalLangMenu .lang-option').forEach(o => {
+        o.classList.toggle('active', o.dataset.value === l.value);
+    });
+}
+
+function openAddModal() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'Add Question';
+    document.getElementById('modalSaveBtn').textContent = 'Add Question';
+    // Pre-fill language/level from current filters
+    syncModalLang(document.getElementById('qLangFilter').value);
+    document.getElementById('fLevel').value = document.getElementById('qLevelFilter').value;
+    document.getElementById('fTopic').value = '';
+    document.getElementById('fType').value  = 'multiple_choice';
+    document.getElementById('fQuestion').value = '';
+    document.getElementById('fOptA').value = '';
+    document.getElementById('fOptB').value = '';
+    document.getElementById('fOptC').value = '';
+    document.getElementById('fOptD').value = '';
+    document.getElementById('fCorrect').value = 'A';
+    document.getElementById('fCorrectText').value = '';
+    document.getElementById('fHint').value = '';
+    document.getElementById('fExplanation').value = '';
+    toggleOptionFields();
+    document.getElementById('qModal').classList.add('open');
+}
+
+function openEditModal(idx) {
+    const q = allQuestions[idx];
+    if (!q) return;
+    editingId = q.id || q.question_id;
+    document.getElementById('modalTitle').textContent = 'Edit Question';
+    document.getElementById('modalSaveBtn').textContent = 'Save Changes';
+
+    syncModalLang(q.language || document.getElementById('qLangFilter').value);
+    document.getElementById('fLevel').value = q.level || q.difficulty || document.getElementById('qLevelFilter').value;
+    document.getElementById('fTopic').value = q.topic || q.category || '';
+    const qType = q.questionType || q.question_type || 'multiple_choice';
+    document.getElementById('fType').value  = qType;
+    document.getElementById('fQuestion').value = q.question || q.question_text || q.text || '';
+
+    // Parse options array
+    const opts = q.options || [];
+    const getOpt = (letter) => {
+        const found = opts.find(o => typeof o === 'string' && o.startsWith(letter + ')'));
+        return found ? found.slice(2).trim() : '';
+    };
+    document.getElementById('fOptA').value = getOpt('A');
+    document.getElementById('fOptB').value = getOpt('B');
+    document.getElementById('fOptC').value = getOpt('C');
+    document.getElementById('fOptD').value = getOpt('D');
+
+    const ca = q.correctAnswer || q.correct_answer || q.answer || 'A';
+    if (qType === 'multiple_choice') {
+        document.getElementById('fCorrect').value = ca;
+    } else {
+        document.getElementById('fCorrectText').value = ca;
+    }
+    document.getElementById('fHint').value = q.hint || '';
+    document.getElementById('fExplanation').value = q.explanation || '';
+    toggleOptionFields();
+    document.getElementById('qModal').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('qModal').classList.remove('open');
+    editingId = null;
+}
+
+// ── Save (create or update) ───────────────────────────────────────────────────
+async function saveQuestion() {
+    const lang  = document.getElementById('fLang').value;
+    const level = document.getElementById('fLevel').value;
+    const topic = document.getElementById('fTopic').value.trim();
+    const type  = document.getElementById('fType').value;
+    const questionText = document.getElementById('fQuestion').value.trim();
+    const hint  = document.getElementById('fHint').value.trim();
+    const expl  = document.getElementById('fExplanation').value.trim();
+
+    if (!questionText) { showToast('Question text is required.', 'error'); return; }
+
+    let options, correctAnswer;
+    if (type === 'multiple_choice') {
+        const a = document.getElementById('fOptA').value.trim();
+        const b = document.getElementById('fOptB').value.trim();
+        const c = document.getElementById('fOptC').value.trim();
+        const d = document.getElementById('fOptD').value.trim();
+        if (!a || !b || !c || !d) { showToast('All 4 options are required for MCQ.', 'error'); return; }
+        options = [`A) ${a}`, `B) ${b}`, `C) ${c}`, `D) ${d}`];
+        correctAnswer = document.getElementById('fCorrect').value;
+    } else {
+        options = [];
+        correctAnswer = document.getElementById('fCorrectText').value.trim();
+        if (!correctAnswer) { showToast('Correct answer is required.', 'error'); return; }
+    }
+
+    const payload = { language: lang, level, topic: topic || 'General', questionType: type, question: questionText, options, correctAnswer, hint, explanation: expl };
+
+    const btn = document.getElementById('modalSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+        const isEdit = editingId !== null;
+        const url    = isEdit ? `${API}/questions/${editingId}` : `${API}/questions`;
+        const method = isEdit ? 'PUT' : 'POST';
+        const res    = await fetch(url, { method, headers: authHeaders(true), body: JSON.stringify(payload) });
+        const data   = await res.json();
+
+        if (data.success) {
+            showToast(isEdit ? '✓ Question updated!' : '✓ Question added!', 'success');
+            closeModal();
+            loadQuestions();
+        } else {
+            showToast('Error: ' + (data.message || 'Unknown error'), 'error');
+        }
+    } catch { showToast('Network error.', 'error'); }
+    finally { btn.disabled = false; btn.textContent = editingId !== null ? 'Save Changes' : 'Add Question'; }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+function openDelete(id, preview) {
+    deleteId = id;
+    document.getElementById('deleteMsg').textContent = `"${preview}${preview.length >= 60 ? '…' : ''}" will be permanently removed.`;
+    document.getElementById('deleteOverlay').classList.add('open');
+}
+function closeDelete() { deleteId = null; document.getElementById('deleteOverlay').classList.remove('open'); }
+
+async function confirmDelete() {
+    if (!deleteId) return;
+    try {
+        const res  = await fetch(`${API}/questions/${deleteId}`, { method: 'DELETE', headers: authHeaders() });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Question deleted.', 'info');
+            closeDelete();
+            loadQuestions();
+        } else { showToast('Error: ' + (data.message || 'Could not delete'), 'error'); }
+    } catch { showToast('Network error.', 'error'); }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--border)';
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; }, 3200);
+}
+
+// Close modals on overlay click
+document.getElementById('qModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDelete(); });
+
+buildLangDropdowns();
+loadQuestions();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

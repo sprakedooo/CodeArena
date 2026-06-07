@@ -44,6 +44,36 @@
         .diff-btn.active     { border-color: var(--primary); background: rgba(124,58,237,0.1); color: var(--text); }
         .diff-btn.active .diff-name { color: var(--primary); }
 
+        /* ── Custom language picker ───────────────────────────────────────── */
+        .lang-picker { position: relative; user-select: none; }
+        .lang-picker-selected {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.65rem 0.9rem;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .lang-picker-selected:hover { border-color: var(--primary); }
+        .lang-picker-selected .lp-icon { width: 22px; height: 22px; object-fit: contain; }
+        .lang-picker-selected .lp-label { flex: 1; color: var(--text); font-size: 0.9rem; }
+        .lang-picker-selected .lp-arrow { color: var(--text-muted); font-size: 1.1rem; transition: transform 0.2s; }
+        .lang-picker.open .lp-arrow { transform: rotate(180deg); }
+        .lang-picker-dropdown {
+            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); overflow: hidden;
+            z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+        .lang-picker.open .lang-picker-dropdown { display: block; }
+        .lang-option {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.6rem 0.9rem; cursor: pointer;
+            color: var(--text); font-size: 0.9rem; transition: background 0.12s;
+        }
+        .lang-option:hover { background: var(--bg-card); }
+        .lang-option.active { background: rgba(124,58,237,0.12); color: var(--primary); }
+        .lang-option img { width: 20px; height: 20px; object-fit: contain; }
+
         /* ── Game container ───────────────────────────────────────────────── */
         .game-wrap { max-width: 720px; margin: 0 auto; }
         .screen    { display: none; }
@@ -51,23 +81,25 @@
         .screen.fade-in { animation: fadeSlide 0.25s ease; }
         @keyframes fadeSlide { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
-        /* HUD bar */
+        /* ── Formal Assessment HUD ─────────────────────────────────────── */
         .hud {
-            display: grid; grid-template-columns: repeat(5, 1fr);
+            display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 0.5rem; margin-bottom: 1rem;
         }
         .hud-chip {
             background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); padding: 0.55rem 0.4rem; text-align: center;
+            border-radius: var(--radius-sm); padding: 0.65rem 0.5rem; text-align: center;
         }
-        .hud-val { font-size: 0.95rem; font-weight: 800; color: var(--text); }
-        .hud-lbl { font-size: 0.56rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.1rem; }
-        .hud-timer .hud-val { color: #f87171; font-family: 'Press Start 2P',monospace; font-size: 0.72rem; }
-        .hud-timer.urgent .hud-val { animation: pulse 0.5s ease infinite alternate; }
-        .hud-score .hud-val  { color: #fbbf24; }
-        .hud-streak .hud-val { color: #f97316; }
-        .hud-combo .hud-val  { color: var(--secondary); }
+        .hud-val { font-size: 1rem; font-weight: 800; color: var(--text); }
+        .hud-lbl { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 0.15rem; }
+        .hud-timer .hud-val { color: var(--text); font-family: 'Press Start 2P',monospace; font-size: 0.72rem; }
+        .hud-timer.urgent .hud-val { color: #f87171; animation: pulse 0.5s ease infinite alternate; }
+        .hud-correct .hud-val { color: #34d399; }
         @keyframes pulse { to { transform: scale(1.12); } }
+
+        /* Hide gamification chips that are now removed */
+        .hud-streak, .hud-combo { display: none; }
+        .hud-score .hud-val { color: var(--text); }
 
         /* Combo badge */
         .combo-badge {
@@ -397,18 +429,35 @@
 <div id="screenSetup" class="screen active">
     <div class="setup-screen">
         <div class="setup-header">
-            <h1><span class="material-symbols-outlined" style="font-size:1.5rem;vertical-align:middle;color:var(--primary);margin-right:0.35rem;">quiz</span>Assessment Mode</h1>
-            <p>20 questions per level with AI-powered hints</p>
+            <h1><span class="material-symbols-outlined" style="font-size:1.5rem;vertical-align:middle;color:var(--primary);margin-right:0.35rem;">assignment</span>Technical Assessment</h1>
+            <p>Select a language and difficulty level. 20 questions · Pass threshold: 70%</p>
         </div>
         <div class="setup-card">
             <div class="form-group">
                 <label>Language</label>
-                <select id="setupLang">
-                    <option value="python">🐍 Python</option>
-                    <option value="javascript">⚡ JavaScript</option>
-                    <option value="java">☕ Java</option>
-                    <option value="cpp">⚙️ C++</option>
-                </select>
+                <!-- hidden input keeps JS-compat; custom picker handles visual -->
+                <input type="hidden" id="setupLang" value="python">
+                <div class="lang-picker" id="langPicker">
+                    <div class="lang-picker-selected" onclick="toggleLangPicker()">
+                        <img class="lp-icon" id="lpIcon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="">
+                        <span class="lp-label" id="lpLabel">Python</span>
+                        <span class="material-symbols-outlined lp-arrow">expand_more</span>
+                    </div>
+                    <div class="lang-picker-dropdown">
+                        <div class="lang-option active" data-value="python" onclick="pickLang('python')">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python">Python
+                        </div>
+                        <div class="lang-option" data-value="javascript" onclick="pickLang('javascript')">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript">JavaScript
+                        </div>
+                        <div class="lang-option" data-value="java" onclick="pickLang('java')">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java">Java
+                        </div>
+                        <div class="lang-option" data-value="cpp" onclick="pickLang('cpp')">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="C++">C++
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Difficulty</label>
@@ -446,29 +495,25 @@
             <div class="q-progress-fill" id="progressFill" style="width:0%"></div>
         </div>
 
-        <!-- HUD -->
+        <!-- HUD — Formal Assessment: Question / Timer / Correct -->
         <div class="hud">
-            <div class="hud-chip hud-score">
-                <div class="hud-val" id="hudScore">0</div>
-                <div class="hud-lbl">Score</div>
-            </div>
-            <div class="hud-chip hud-streak">
-                <div class="hud-val" id="hudStreak">0🔥</div>
-                <div class="hud-lbl">Streak</div>
-            </div>
-            <div class="hud-chip hud-combo">
-                <div class="hud-val" id="hudCombo">×1</div>
-                <div class="hud-lbl">Multiplier</div>
+            <div class="hud-chip">
+                <div class="hud-val" id="hudQ">1/20</div>
+                <div class="hud-lbl">Question</div>
             </div>
             <div class="hud-chip hud-timer" id="hudTimerChip">
                 <div class="hud-val" id="hudTimer">30</div>
-                <div class="hud-lbl">Seconds</div>
+                <div class="hud-lbl">Seconds Left</div>
             </div>
-            <div class="hud-chip">
-                <div class="hud-val" id="hudQ">1/10</div>
-                <div class="hud-lbl">Question</div>
+            <div class="hud-chip hud-correct">
+                <div class="hud-val" id="hudCorrect">0</div>
+                <div class="hud-lbl">Correct</div>
             </div>
         </div>
+        <!-- Hidden legacy IDs so JS doesn't error -->
+        <span id="hudScore"   style="display:none">0</span>
+        <span id="hudStreak"  style="display:none">0</span>
+        <span id="hudCombo"   style="display:none">×1</span>
 
         <!-- Question card -->
         <div class="q-card" id="qCard">
@@ -539,22 +584,25 @@
             <div class="end-title" id="endTitle">Session Complete!</div>
             <div class="end-sub" id="endSub">Here's how you did</div>
 
+            <!-- Pass/Fail Banner -->
+            <div id="passBanner" style="margin:0.5rem auto 1rem;padding:0.55rem 1.6rem;border-radius:30px;font-size:0.95rem;font-weight:700;letter-spacing:0.5px;display:inline-block;"></div>
+
             <div class="end-stats">
                 <div class="end-stat">
-                    <div class="end-stat-val gold" id="endScore">0</div>
+                    <div class="end-stat-val" id="endAccuracy">0%</div>
                     <div class="end-stat-lbl">Score</div>
                 </div>
                 <div class="end-stat">
-                    <div class="end-stat-val" id="endAccuracy">0%</div>
-                    <div class="end-stat-lbl">Accuracy</div>
+                    <div class="end-stat-val gold" id="endScore">0/0</div>
+                    <div class="end-stat-lbl">Correct</div>
                 </div>
                 <div class="end-stat">
-                    <div class="end-stat-val green" id="endXP">+0 XP</div>
-                    <div class="end-stat-lbl">Earned</div>
+                    <div class="end-stat-val" id="endXP">—</div>
+                    <div class="end-stat-lbl">Difficulty</div>
                 </div>
                 <div class="end-stat">
-                    <div class="end-stat-val" id="endBest">0🔥</div>
-                    <div class="end-stat-lbl">Best Streak</div>
+                    <div class="end-stat-val" id="endBest">—</div>
+                    <div class="end-stat-lbl">Language</div>
                 </div>
             </div>
 
@@ -656,11 +704,37 @@ let setupLevel = 'beginner';
 const QUESTIONS_PER_LEVEL = 20;
 let setupCount = QUESTIONS_PER_LEVEL;
 
+// ── Language picker helpers ───────────────────────────────────────────────────
+const LANG_META = {
+    python:     { label: 'Python',     icon: 'python/python-original.svg'         },
+    javascript: { label: 'JavaScript', icon: 'javascript/javascript-original.svg' },
+    java:       { label: 'Java',       icon: 'java/java-original.svg'              },
+    cpp:        { label: 'C++',        icon: 'cplusplus/cplusplus-original.svg'    },
+};
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/';
+
+function toggleLangPicker() {
+    document.getElementById('langPicker').classList.toggle('open');
+}
+function pickLang(value) {
+    const meta = LANG_META[value]; if (!meta) return;
+    document.getElementById('setupLang').value = value;
+    document.getElementById('lpIcon').src      = DEVICON + meta.icon;
+    document.getElementById('lpIcon').alt      = meta.label;
+    document.getElementById('lpLabel').textContent = meta.label;
+    document.querySelectorAll('.lang-option').forEach(o =>
+        o.classList.toggle('active', o.dataset.value === value));
+    document.getElementById('langPicker').classList.remove('open');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('#langPicker'))
+        document.getElementById('langPicker')?.classList.remove('open');
+});
+
 // ── Setup ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const lang = me.selected_language || me.language || 'python';
-    const sel  = document.getElementById('setupLang');
-    if ([...sel.options].some(o => o.value === lang)) sel.value = lang;
+    if (LANG_META[lang]) pickLang(lang);
     document.addEventListener('keydown', handleKeyboard);
 });
 
@@ -1062,17 +1136,17 @@ function recordResult(isCorrect, q) {
     if (isCorrect) {
         streak++; correctCount++;
         bestStreak = Math.max(bestStreak, streak);
-        if (streak >= 3) { multiplier = Math.min(4, 1 + Math.floor(streak / 3)); showCombo(); }
-        const pts = 10 * multiplier;
+        multiplier = 1; // No multiplier in formal assessment
+        const pts = 10;
         score += pts;
-        showXpToast(`+${pts} XP`);
     } else {
         streak = 0; multiplier = 1;
     }
 
-    document.getElementById('hudScore').textContent  = score;
-    document.getElementById('hudStreak').innerHTML = streak + (streak > 0 ? '<span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;color:#f97316;">local_fire_department</span>' : '');
-    document.getElementById('hudCombo').textContent  = `×${multiplier}`;
+    document.getElementById('hudScore').textContent   = score;
+    document.getElementById('hudStreak').textContent  = streak;
+    document.getElementById('hudCombo').textContent   = `×${multiplier}`;
+    document.getElementById('hudCorrect').textContent = correctCount;
 
     // Card border flash
     const card = document.getElementById('qCard');
@@ -1098,8 +1172,7 @@ function showFeedback(isCorrect, q) {
     const explain = q.explanation ? `<span class="fb-explanation">${esc(q.explanation)}</span>` : '';
     fb.className  = `q-feedback ${isCorrect ? 'correct' : 'wrong'}`;
     if (isCorrect) {
-        const bonus = streak >= 3 ? ` &nbsp;${streak}-streak ×${multiplier} bonus!` : '';
-        fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">check_circle</span> Correct!${bonus}${explain}`;
+        fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">check_circle</span> Correct.${explain}`;
     } else {
         fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">cancel</span> Incorrect.${explain}`;
     }
@@ -1229,28 +1302,43 @@ async function endGame() {
     const total    = questions.length;
     const accuracy = total > 0 ? Math.round(correctCount / total * 100) : 0;
     const xp       = Math.round(score * 0.5);
+    const passed   = accuracy >= 70;
 
-    document.getElementById('endScore').textContent    = score;
+    // Pass/Fail banner
+    const banner = document.getElementById('passBanner');
+    if (passed) {
+        banner.style.background = 'rgba(16,185,129,0.15)';
+        banner.style.border     = '1px solid rgba(16,185,129,0.4)';
+        banner.style.color      = '#34d399';
+        banner.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">check_circle</span> PASSED';
+    } else {
+        banner.style.background = 'rgba(239,68,68,0.12)';
+        banner.style.border     = '1px solid rgba(239,68,68,0.35)';
+        banner.style.color      = '#f87171';
+        banner.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px;">cancel</span> NOT PASSED';
+    }
+
+    document.getElementById('endScore').textContent    = `${correctCount}/${total}`;
     document.getElementById('endAccuracy').textContent = accuracy + '%';
-    document.getElementById('endXP').textContent       = `+${xp} XP`;
-    document.getElementById('endBest').innerHTML = bestStreak + (bestStreak > 0 ? '<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;color:#f97316;">local_fire_department</span>' : '');
+    document.getElementById('endXP').textContent       = setupLevel.charAt(0).toUpperCase() + setupLevel.slice(1);
+    document.getElementById('endBest').textContent     = setupLang.toUpperCase();
 
     if (accuracy >= 90) {
         document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#fbbf24;">emoji_events</span>';
-        document.getElementById('endTitle').textContent  = 'Excellent!';
-        document.getElementById('endSub').textContent    = 'Outstanding performance! You\'re a coding champion!';
+        document.getElementById('endTitle').textContent  = 'Excellent Result';
+        document.getElementById('endSub').textContent    = 'Outstanding performance — top of the class!';
     } else if (accuracy >= 70) {
         document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#94a3b8;">military_tech</span>';
-        document.getElementById('endTitle').textContent  = 'Great Job!';
-        document.getElementById('endSub').textContent    = 'Solid work! Review the weak topics to improve.';
+        document.getElementById('endTitle').textContent  = 'Assessment Passed';
+        document.getElementById('endSub').textContent    = 'You met the passing threshold. Review weak areas to improve.';
     } else if (accuracy >= 50) {
         document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#a78bfa;">fitness_center</span>';
-        document.getElementById('endTitle').textContent  = 'Keep Practicing!';
-        document.getElementById('endSub').textContent    = 'Good effort — review the topics below and try again!';
+        document.getElementById('endTitle').textContent  = 'Below Passing Score';
+        document.getElementById('endSub').textContent    = 'You need 70% or higher to pass. Please review the topics below.';
     } else {
         document.getElementById('endTrophy').innerHTML = '<span class="material-symbols-outlined" style="font-size:3.5rem;color:#60a5fa;">menu_book</span>';
-        document.getElementById('endTitle').textContent  = 'Study Time!';
-        document.getElementById('endSub').textContent    = 'Review the lessons first, then come back and crush it!';
+        document.getElementById('endTitle').textContent  = 'Needs Improvement';
+        document.getElementById('endSub').textContent    = 'Study the lesson material and retake the assessment.';
     }
 
     // Weakness report

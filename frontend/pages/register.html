@@ -403,6 +403,10 @@
 <script>
     const API = `http://${window.location.hostname}:3000/api`;
 
+    // ── Pre-select role from URL param ──────────────────────────────────────
+    const urlRole = new URLSearchParams(window.location.search).get('role');
+    if (urlRole) document.getElementById('role').value = urlRole;
+
     // ── Password strength meter ──────────────────────────────────────────────
     const pwdInput      = document.getElementById('password');
     const strengthBar   = document.getElementById('strengthBar');
@@ -469,7 +473,8 @@
                 localStorage.setItem('isLoggedIn', 'true');
                 alertBox.innerHTML = '<div class="alert alert-success">Account created! Redirecting…</div>';
                 setTimeout(() => {
-                    window.location.href = data.user.role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html';
+                    window.location.href = data.user.role === 'superadmin' ? 'superadmin_dashboard.html'
+                        : data.user.role === 'faculty' ? 'faculty_dashboard.html' : 'dashboard.html';
                 }, 1200);
             } else {
                 alertBox.innerHTML = `<div class="alert alert-error">${data.message}</div>`;

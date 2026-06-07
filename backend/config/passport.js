@@ -52,8 +52,10 @@ async function findOrCreateGoogleUser(profile) {
                 }
             }
 
+            let isNewUser = false;
             if (!user) {
-                // Create brand new user
+                // Create brand new user — role will be chosen by user on frontend
+                isNewUser = true;
                 const result = await db.query(
                     `INSERT INTO users (email, full_name, google_id, avatar, role, total_points, current_level, selected_language, created_at)
                      VALUES (?, ?, ?, ?, 'student', 0, 'beginner', NULL, NOW())`,
@@ -71,6 +73,7 @@ async function findOrCreateGoogleUser(profile) {
                 currentLevel:     user.current_level || 'beginner',
                 selectedLanguage: user.selected_language || null,
                 avatar:           user.avatar || avatar,
+                isNewUser,
             };
         } catch (err) {
             console.error('Google OAuth DB error:', err.message);
@@ -91,7 +94,7 @@ async function findOrCreateGoogleUser(profile) {
         return existing;
     }
 
-    // Create new mock user
+    // Create new mock user — role to be chosen by user
     const newUser = {
         id:               _nextMockId++,
         email,
@@ -102,6 +105,7 @@ async function findOrCreateGoogleUser(profile) {
         selectedLanguage: null,
         avatar,
         googleId,
+        isNewUser:        true,
         createdAt:        new Date().toISOString(),
     };
     mockGoogleUsers[googleId] = newUser;

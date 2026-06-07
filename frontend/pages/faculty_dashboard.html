@@ -253,6 +253,16 @@
 </head>
 <body>
 
+<!-- ── Role guard ──────────────────────────────────────────────────────────── -->
+<script>
+    (function () {
+        const u = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!u.id)                { location.replace('login.html');             return; }
+        if (u.role === 'superadmin') { location.replace('superadmin_dashboard.html'); return; }
+        if (u.role === 'student')    { location.replace('dashboard.html');            return; }
+    })();
+</script>
+
 <!-- ── Welcome Banner ──────────────────────────────────────────────────────── -->
 <div class="welcome-banner">
     <h1 id="welcomeMsg">Welcome, Professor! 🎓</h1>

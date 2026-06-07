@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .sa-page { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        .sa-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+        .sa-header-left h1 { font-size: 1.4rem; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.2rem; }
+        .sa-header-left p  { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+        .sa-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: linear-gradient(135deg,#7c3aed,#06b6d4);
+            color: #fff; font-size: 0.72rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px;
+        }
+
+        /* ── Stat strip ── */
+        .stat-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; margin-bottom: 2rem; }
+        @media (max-width: 720px) { .stat-strip { grid-template-columns: repeat(2,1fr); } }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.1rem 1.15rem;
+            display: flex; align-items: center; gap: 0.85rem;
+        }
+        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-icon .material-symbols-outlined { font-size: 1.3rem; }
+        .stat-val { font-size: 1.55rem; font-weight: 800; color: var(--text); line-height: 1; }
+        .stat-lbl { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 0.2rem; }
+        .ic-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .ic-amber  { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+        .ic-green  { background: rgba(16,185,129,0.15);  color: #34d399; }
+        .ic-red    { background: rgba(239,68,68,0.15);   color: #f87171; }
+
+        /* ── Quick-action cards ── */
+        .section-title { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 0.85rem; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+        @media (max-width: 700px) { .quick-grid { grid-template-columns: 1fr; } }
+        .quick-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.35rem 1.25rem;
+            text-decoration: none; color: var(--text);
+            display: flex; flex-direction: column; gap: 0.6rem;
+            transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+        }
+        .quick-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.15); }
+        .quick-card-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .quick-card-icon .material-symbols-outlined { font-size: 1.5rem; }
+        .quick-card-title { font-size: 0.95rem; font-weight: 700; }
+        .quick-card-desc  { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+        .quick-card-arrow { font-size: 0.75rem; color: var(--primary); font-weight: 600; display: flex; align-items: center; gap: 3px; margin-top: auto; padding-top: 0.4rem; }
+        .quick-card-arrow .material-symbols-outlined { font-size: 0.9rem; }
+
+        /* Pending badge on approvals card */
+        .pending-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(251,191,36,0.15); color: #fbbf24;
+            font-size: 0.68rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 20px;
+            width: fit-content;
+        }
+    </style>
+</head>
+<body>
+
+<script>window.SIDEBAR_PAGE = 'sa-dashboard';</script>
+<script src="../js/sidebar.js"></script>
+
+<div class="page-content">
+<div class="sa-page">
+
+    <!-- Header -->
+    <div class="sa-header">
+        <div class="sa-header-left">
+            <h1>
+                <span class="material-symbols-outlined" style="color:var(--primary);">admin_panel_settings</span>
+                Super Admin Dashboard
+                <span class="sa-badge"><span class="material-symbols-outlined" style="font-size:0.75rem;">verified</span> Super Admin</span>
+            </h1>
+            <p>Full system control — manage contributions, assessments, and users.</p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-strip">
+        <div class="stat-card">
+            <div class="stat-icon ic-amber"><span class="material-symbols-outlined">pending_actions</span></div>
+            <div><div class="stat-val" id="statPending">—</div><div class="stat-lbl">Pending Review</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon ic-green"><span class="material-symbols-outlined">check_circle</span></div>
+            <div><div class="stat-val" id="statPublished">—</div><div class="stat-lbl">Published</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon ic-purple"><span class="material-symbols-outlined">group</span></div>
+            <div><div class="stat-val" id="statUsers">—</div><div class="stat-lbl">Total Users</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon ic-red"><span class="material-symbols-outlined">quiz</span></div>
+            <div><div class="stat-val" id="statQuestions">—</div><div class="stat-lbl">Assessment Qs</div></div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-title">Quick Actions</div>
+    <div class="quick-grid">
+        <a href="superadmin_approvals.html" class="quick-card">
+            <div class="quick-card-icon ic-amber"><span class="material-symbols-outlined">pending_actions</span></div>
+            <div class="quick-card-title">Approvals</div>
+            <div id="pendingChip"></div>
+            <div class="quick-card-desc">Review and approve faculty-submitted blogs and courses before they go live to students.</div>
+            <div class="quick-card-arrow"><span class="material-symbols-outlined">arrow_forward</span> Review submissions</div>
+        </a>
+        <a href="superadmin_questions.html" class="quick-card">
+            <div class="quick-card-icon ic-red"><span class="material-symbols-outlined">quiz</span></div>
+            <div class="quick-card-title">Assessment Questions</div>
+            <div class="quick-card-desc">Browse and manage the question bank used in formal technical assessments across all languages.</div>
+            <div class="quick-card-arrow"><span class="material-symbols-outlined">arrow_forward</span> Manage questions</div>
+        </a>
+        <a href="superadmin_users.html" class="quick-card">
+            <div class="quick-card-icon ic-purple"><span class="material-symbols-outlined">group</span></div>
+            <div class="quick-card-title">Users</div>
+            <div class="quick-card-desc">View all registered students, faculty, and admins on the platform.</div>
+            <div class="quick-card-arrow"><span class="material-symbols-outlined">arrow_forward</span> View all users</div>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script>
+const API  = `http://${window.location.hostname}:3000/api`;
+const me   = JSON.parse(localStorage.getItem('user') || '{}');
+const token = localStorage.getItem('token');
+
+if (!me.id || me.role !== 'superadmin') {
+    location.href = 'login.html';
+}
+
+function authHeaders() { return { 'Authorization': `Bearer ${token}` }; }
+
+async function loadStats() {
+    try {
+        const res  = await fetch(`${API}/admin/stats`, { headers: authHeaders() });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const pending   = data.contributions.pending   || 0;
+        const published = data.contributions.published || 0;
+        const total     = data.users.total || 0;
+
+        document.getElementById('statPending').textContent   = pending;
+        document.getElementById('statPublished').textContent = published;
+        document.getElementById('statUsers').textContent     = total;
+
+        if (pending > 0) {
+            document.getElementById('pendingChip').innerHTML =
+                `<span class="pending-chip"><span class="material-symbols-outlined" style="font-size:0.75rem;">schedule</span>${pending} pending</span>`;
+        }
+    } catch (e) { console.error('loadStats:', e); }
+}
+
+async function loadQuestionCount() {
+    try {
+        const res  = await fetch(`${API}/questions?language=python&level=beginner`, { headers: authHeaders() });
+        const data = await res.json();
+        const qs   = data.questions || data || [];
+        document.getElementById('statQuestions').textContent = qs.length ? qs.length + '+' : '—';
+    } catch { /* non-critical */ }
+}
+
+loadStats();
+loadQuestionCount();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

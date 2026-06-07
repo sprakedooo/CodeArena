@@ -684,10 +684,27 @@ function getRecentList() {
     catch { return []; }
 }
 
-function renderRecentlyOpened() {
-    const list = getRecentList();
+async function renderRecentlyOpened() {
     const section = document.getElementById('recentSection');
     const row = document.getElementById('recentRow');
+    let list = getRecentList();
+    if (!list.length) { section.style.display = 'none'; return; }
+
+    // Validate against live data — remove entries for deleted classrooms
+    try {
+        const res  = await fetch(`${API}/classrooms/mine`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const liveIds = new Set((data.classrooms || data || []).map(c => String(c.classroom_id || c.id)));
+        const pruned  = list.filter(r => liveIds.has(String(r.id)));
+        if (pruned.length !== list.length) {
+            // Some classrooms were deleted — update localStorage
+            localStorage.setItem(RECENT_KEY, JSON.stringify(pruned));
+            list = pruned;
+        }
+    } catch {
+        // API unreachable — render stale list as-is rather than hiding
+    }
+
     if (!list.length) { section.style.display = 'none'; return; }
     section.style.display = '';
     row.innerHTML = list.map(r => {

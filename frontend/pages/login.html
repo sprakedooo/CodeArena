@@ -260,7 +260,9 @@
                     if (data.token) localStorage.setItem('token', data.token);
                     btn.textContent = 'Success!';
                     setTimeout(() => {
-                        if (data.user.role === 'faculty') {
+                        if (data.user.role === 'superadmin') {
+                            window.location.href = 'superadmin_dashboard.html';
+                        } else if (data.user.role === 'faculty') {
                             window.location.href = 'faculty_dashboard.html';
                         } else {
                             window.location.href = 'dashboard.html';

@@ -14,7 +14,7 @@
 
 const express = require('express');
 const router  = express.Router();
-const { authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
+const { authMiddleware, requireFaculty, requireSuperAdmin } = require('../middleware/authMiddleware');
 const { pool } = require('../config/database');
 
 // ── In-memory mock (used when DB is unavailable) ──────────────────────────────
@@ -36,12 +36,21 @@ async function ensureTable() {
                 language          VARCHAR(30) DEFAULT 'general',
                 tags              VARCHAR(500) DEFAULT '',
                 cover_image       TEXT,
-                status            ENUM('published','draft') DEFAULT 'published',
+                status            ENUM('pending','published','draft','rejected') DEFAULT 'pending',
+                rejection_note    TEXT,
                 view_count        INT DEFAULT 0,
                 created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
+        // Add rejection_note column if missing from older schema
+        try {
+            await pool.query("ALTER TABLE contributions ADD COLUMN rejection_note TEXT AFTER status");
+        } catch { /* already exists */ }
+        // Widen status enum to include pending/rejected
+        try {
+            await pool.query("ALTER TABLE contributions MODIFY COLUMN status ENUM('pending','published','draft','rejected') DEFAULT 'pending'");
+        } catch { /* already wide enough */ }
         // Drop FK constraint if it exists (left over from an earlier schema run)
         try {
             await pool.query('ALTER TABLE contributions DROP FOREIGN KEY contributions_ibfk_1');
@@ -57,16 +66,20 @@ ensureTable();
 // ── GET /api/contributions ─────────────────────────────────────────────────────
 router.get('/', authMiddleware, async (req, res) => {
     const { type, language, search } = req.query;
+    // Superadmin and faculty see all statuses; students only see published
+    const role = req.user?.role;
+    const statusFilter = (role === 'superadmin' || role === 'faculty') ? null : 'published';
     try {
         let q = `
             SELECT c.contribution_id, c.type, c.title, c.description,
                    c.language, c.tags, c.cover_image, c.status,
-                   c.view_count, c.created_at, c.updated_at,
+                   c.rejection_note, c.view_count, c.created_at, c.updated_at,
                    COALESCE(u.full_name, 'Faculty') AS author_name,
                    u.avatar AS author_avatar
             FROM contributions c
             LEFT JOIN users u ON u.user_id = c.faculty_id
-            WHERE c.status = 'published'`;
+            WHERE 1=1`;
+        if (statusFilter) q += ` AND c.status = '${statusFilter}'`;
         const params = [];
         if (type && type !== 'all') { q += ' AND c.type = ?'; params.push(type); }
         if (language && language !== 'all') { q += ' AND c.language = ?'; params.push(language); }
@@ -78,7 +91,9 @@ router.get('/', authMiddleware, async (req, res) => {
         const [rows] = await pool.query(q, params);
         return res.json({ success: true, contributions: rows });
     } catch {
-        let list = mockContributions.filter(c => c.status === 'published');
+        let list = statusFilter
+            ? mockContributions.filter(c => c.status === statusFilter)
+            : mockContributions;
         if (type && type !== 'all') list = list.filter(c => c.type === type);
         return res.json({ success: true, contributions: list, source: 'mock' });
     }
@@ -97,6 +112,28 @@ router.get('/mine', authMiddleware, requireFaculty, async (req, res) => {
     } catch {
         const mine = mockContributions.filter(c => c.faculty_id === req.user.id);
         return res.json({ success: true, contributions: mine, source: 'mock' });
+    }
+});
+
+// ── GET /api/contributions/pending ───────────────────────────────────────────
+// Super admin only — returns all pending contributions
+// MUST be before /:id to avoid "pending" being treated as an id param
+router.get('/pending', authMiddleware, requireSuperAdmin, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT c.contribution_id, c.type, c.title, c.description, c.language,
+                    c.tags, c.cover_image, c.status, c.created_at, c.updated_at,
+                    COALESCE(u.full_name, 'Faculty') AS author_name,
+                    u.email AS author_email
+             FROM contributions c
+             LEFT JOIN users u ON u.user_id = c.faculty_id
+             WHERE c.status = 'pending'
+             ORDER BY c.created_at ASC`
+        );
+        return res.json({ success: true, contributions: rows });
+    } catch {
+        const pending = mockContributions.filter(c => c.status === 'pending');
+        return res.json({ success: true, contributions: pending, source: 'mock' });
     }
 });
 
@@ -131,26 +168,66 @@ router.post('/', authMiddleware, requireFaculty, async (req, res) => {
     const { type, title, description, content, language, tags, cover_image, status } = req.body;
     if (!title || !type) return res.status(400).json({ error: 'title and type are required' });
 
+    // Faculty submissions always go to 'pending' unless it's a draft; superadmin can publish directly
+    const resolvedStatus = status === 'draft' ? 'draft'
+        : req.user.role === 'superadmin' ? (status || 'published')
+        : 'pending';
+
     try {
         const [result] = await pool.query(
             `INSERT INTO contributions
              (faculty_id, type, title, description, content, language, tags, cover_image, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [req.user.id, type, title, description || '', content || '',
-             language || 'general', tags || '', cover_image || '', status || 'published']
+             language || 'general', tags || '', cover_image || '', resolvedStatus]
         );
-        return res.json({ success: true, contribution_id: result.insertId });
+        return res.json({ success: true, contribution_id: result.insertId, status: resolvedStatus });
     } catch {
         const newC = {
             contribution_id: mockNextId++, faculty_id: req.user.id,
             type, title, description: description || '', content: content || '',
             language: language || 'general', tags: tags || '', cover_image: cover_image || '',
-            status: status || 'published', view_count: 0,
+            status: resolvedStatus, view_count: 0,
             author_name: req.user.fullName || 'Faculty',
             created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
         mockContributions.push(newC);
-        return res.json({ success: true, contribution_id: newC.contribution_id, source: 'mock' });
+        return res.json({ success: true, contribution_id: newC.contribution_id, status: resolvedStatus, source: 'mock' });
+    }
+});
+
+// ── PATCH /api/contributions/:id/approve ─────────────────────────────────────
+router.patch('/:id/approve', authMiddleware, requireSuperAdmin, async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        await pool.query(
+            "UPDATE contributions SET status='published', rejection_note=NULL, updated_at=NOW() WHERE contribution_id=?",
+            [id]
+        );
+        return res.json({ success: true, message: 'Contribution approved and published.' });
+    } catch {
+        const c = mockContributions.find(c => c.contribution_id === id);
+        if (!c) return res.status(404).json({ error: 'Not found' });
+        c.status = 'published'; c.rejection_note = null;
+        return res.json({ success: true, message: 'Contribution approved.', source: 'mock' });
+    }
+});
+
+// ── PATCH /api/contributions/:id/reject ──────────────────────────────────────
+router.patch('/:id/reject', authMiddleware, requireSuperAdmin, async (req, res) => {
+    const id   = parseInt(req.params.id);
+    const note = req.body.note || '';
+    try {
+        await pool.query(
+            "UPDATE contributions SET status='rejected', rejection_note=?, updated_at=NOW() WHERE contribution_id=?",
+            [note, id]
+        );
+        return res.json({ success: true, message: 'Contribution rejected.' });
+    } catch {
+        const c = mockContributions.find(c => c.contribution_id === id);
+        if (!c) return res.status(404).json({ error: 'Not found' });
+        c.status = 'rejected'; c.rejection_note = note;
+        return res.json({ success: true, message: 'Contribution rejected.', source: 'mock' });
     }
 });
 

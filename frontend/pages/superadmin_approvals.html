@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals – Super Admin – CodeArena</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .sa-page { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        .page-hdr { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+        .page-hdr h1 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin: 0 0 0.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .page-hdr p  { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+
+        /* ── Pending list ── */
+        .pending-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .pending-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 1rem 1.1rem; display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap;
+            transition: border-color 0.15s;
+        }
+        .pending-card:hover { border-color: rgba(124,58,237,0.35); }
+        .pending-cover {
+            width: 72px; height: 54px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg,#1e1040,#12203a);
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .pending-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .pending-cover .material-symbols-outlined { font-size: 1.6rem; opacity: 0.3; color: var(--primary); }
+        .pending-meta { flex: 1; min-width: 200px; }
+        .pending-meta-title { font-size: 0.92rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+        .pending-meta-sub { font-size: 0.77rem; color: var(--text-muted); display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .pending-meta-sub span { display: flex; align-items: center; gap: 3px; }
+        .pending-meta-sub .material-symbols-outlined { font-size: 0.85rem; }
+        .type-pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .type-blog   { background: rgba(6,182,212,0.15); color: #22d3ee; }
+        .type-course { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .pending-actions { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+        .btn-approve {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(16,185,129,0.15); color: #34d399;
+            border: 1px solid rgba(16,185,129,0.3); border-radius: 7px;
+            padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+        }
+        .btn-approve:hover { background: rgba(16,185,129,0.25); }
+        .btn-reject {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(239,68,68,0.1); color: #f87171;
+            border: 1px solid rgba(239,68,68,0.3); border-radius: 7px;
+            padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+        }
+        .btn-reject:hover { background: rgba(239,68,68,0.2); }
+        .btn-preview {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--bg-surface); color: var(--text-secondary);
+            border: 1px solid var(--border); border-radius: 7px;
+            padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; text-decoration: none;
+        }
+        .btn-preview:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── Empty state ── */
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .empty-state .material-symbols-outlined { font-size: 2.8rem; display: block; margin-bottom: 0.6rem; opacity: 0.4; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; width: 100%; max-width: 460px;
+            transform: translateY(10px); transition: transform .2s;
+        }
+        .modal-overlay.open .modal { transform: none; }
+        .modal h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0 0 1rem; }
+        .modal textarea {
+            width: 100%; box-sizing: border-box;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text);
+            padding: 0.65rem 0.85rem; font-size: 0.85rem; resize: vertical;
+            min-height: 80px; outline: none; font-family: 'Inter',sans-serif;
+        }
+        .modal textarea:focus { border-color: var(--primary); }
+        .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<script>window.SIDEBAR_PAGE = 'sa-approvals';</script>
+<script src="../js/sidebar.js"></script>
+
+<div class="page-content">
+<div class="sa-page">
+
+    <div class="page-hdr">
+        <div>
+            <h1><span class="material-symbols-outlined" style="color:var(--primary);">pending_actions</span> Content Approvals</h1>
+            <p>Review faculty-submitted blogs and courses before they go live to students.</p>
+        </div>
+        <button class="btn btn-secondary" style="font-size:0.8rem;" onclick="loadPending()">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">refresh</span> Refresh
+        </button>
+    </div>
+
+    <div id="pendingList" class="pending-list">
+        <div class="empty-state"><span class="material-symbols-outlined">hourglass_empty</span><p>Loading…</p></div>
+    </div>
+
+</div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-overlay" id="rejectModal">
+    <div class="modal">
+        <h3>Reject Contribution</h3>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.75rem;">
+            Optionally provide a reason so the faculty member knows how to improve their submission.
+        </p>
+        <textarea id="rejectNote" placeholder="Reason for rejection (optional)…"></textarea>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" style="font-size:0.82rem;" onclick="closeRejectModal()">Cancel</button>
+            <button class="btn" style="background:var(--danger);color:#fff;font-size:0.82rem;" onclick="confirmReject()">Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
+    padding:0.65rem 1.2rem;font-size:0.85rem;color:var(--text);
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:transform 0.3s ease;z-index:9999;pointer-events:none;"></div>
+
+<script>
+const API   = `http://${window.location.hostname}:3000/api`;
+const token = localStorage.getItem('token');
+const me    = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!me.id || me.role !== 'superadmin') location.href = 'login.html';
+
+let rejectTargetId = null;
+function authHeaders() { return { 'Authorization': `Bearer ${token}` }; }
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(dt) {
+    if (!dt) return '—';
+    return new Date(dt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+async function loadPending() {
+    const list = document.getElementById('pendingList');
+    list.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">hourglass_empty</span><p>Loading…</p></div>';
+    try {
+        const res  = await fetch(`${API}/contributions/pending`, { headers: authHeaders() });
+        const data = await res.json();
+        const items = data.contributions || [];
+
+        if (!items.length) {
+            list.innerHTML = `<div class="empty-state">
+                <span class="material-symbols-outlined">check_circle</span>
+                <p>No pending contributions — you're all caught up!</p>
+            </div>`;
+            return;
+        }
+
+        list.innerHTML = items.map(c => `
+            <div class="pending-card" id="card-${c.contribution_id}">
+                <div class="pending-cover">
+                    ${c.cover_image
+                        ? `<img src="${esc(c.cover_image)}" alt="cover">`
+                        : `<span class="material-symbols-outlined">${c.type === 'course' ? 'school' : 'article'}</span>`}
+                </div>
+                <div class="pending-meta">
+                    <div class="pending-meta-title">${esc(c.title)}</div>
+                    <div class="pending-meta-sub">
+                        <span class="type-pill type-${c.type}">${c.type}</span>
+                        <span><span class="material-symbols-outlined">person</span>${esc(c.author_name || 'Faculty')}</span>
+                        <span><span class="material-symbols-outlined">language</span>${esc(c.language || 'general')}</span>
+                        <span><span class="material-symbols-outlined">schedule</span>${fmtDate(c.created_at)}</span>
+                    </div>
+                    ${c.description ? `<div style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.35rem;line-height:1.5;">${esc(c.description.slice(0,140))}${c.description.length>140?'…':''}</div>` : ''}
+                </div>
+                <div class="pending-actions">
+                    <a href="contribution_view.html?id=${c.contribution_id}" target="_blank" class="btn-preview">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;">open_in_new</span> Preview
+                    </a>
+                    <button class="btn-approve" onclick="approve(${c.contribution_id})">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;">check_circle</span> Approve
+                    </button>
+                    <button class="btn-reject" onclick="openRejectModal(${c.contribution_id})">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;">cancel</span> Reject
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    } catch {
+        list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">error</span><p>Failed to load contributions.</p></div>`;
+    }
+}
+
+async function approve(id) {
+    const btn = document.querySelector(`#card-${id} .btn-approve`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Approving…'; }
+    try {
+        const res  = await fetch(`${API}/contributions/${id}/approve`, { method: 'PATCH', headers: authHeaders() });
+        const data = await res.json();
+        if (data.success) {
+            showToast('✓ Approved and published!', 'success');
+            document.getElementById(`card-${id}`)?.remove();
+            if (!document.querySelector('.pending-card')) {
+                document.getElementById('pendingList').innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">check_circle</span><p>No pending contributions — you're all caught up!</p></div>`;
+            }
+        } else {
+            showToast('Error: ' + data.message, 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:0.9rem;">check_circle</span> Approve'; }
+        }
+    } catch { showToast('Network error.', 'error'); }
+}
+
+function openRejectModal(id) { rejectTargetId = id; document.getElementById('rejectModal').classList.add('open'); }
+function closeRejectModal()  { rejectTargetId = null; document.getElementById('rejectModal').classList.remove('open'); document.getElementById('rejectNote').value = ''; }
+
+async function confirmReject() {
+    if (!rejectTargetId) return;
+    const note = document.getElementById('rejectNote').value.trim();
+    try {
+        const res  = await fetch(`${API}/contributions/${rejectTargetId}/reject`, {
+            method: 'PATCH',
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ note })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Contribution rejected.', 'info');
+            document.getElementById(`card-${rejectTargetId}`)?.remove();
+            if (!document.querySelector('.pending-card')) {
+                document.getElementById('pendingList').innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">check_circle</span><p>No pending contributions — you're all caught up!</p></div>`;
+            }
+        } else { showToast('Error: ' + data.message, 'error'); }
+    } catch { showToast('Network error.', 'error'); }
+    closeRejectModal();
+}
+
+function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--border)';
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; }, 3200);
+}
+
+document.getElementById('rejectModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeRejectModal(); });
+
+loadPending();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

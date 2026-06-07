@@ -39,7 +39,7 @@ const passport = require('passport');
 const dbService = require('./services/dbService');
 
 // Import authentication middleware
-const { authMiddleware } = require('./middleware/authMiddleware');
+const { authMiddleware, requireSuperAdmin } = require('./middleware/authMiddleware');
 
 // Import route handlers for each feature
 const authRoutes = require('./routes/authRoutes');           // Login/Register
@@ -61,6 +61,7 @@ const aiRoutes             = require('./routes/aiRoutes');             // Phase 
 const learningPathRoutes   = require('./routes/learningPathRoutes');   // Phase 1 Learning Paths
 const contributionRoutes   = require('./routes/contributionRoutes');   // Faculty contributions (blogs & courses)
 const certificateRoutes    = require('./routes/certificateRoutes');    // Per-level mastery certificates
+const sessionRoutes        = require('./routes/sessionRoutes');         // Live classroom quiz sessions
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2: INITIALIZE EXPRESS APPLICATION
@@ -163,11 +164,93 @@ app.use('/api/contributions', contributionRoutes);
 // Certificates: /api/certificates (per-level mastery, JWT required)
 app.use('/api/certificates', authMiddleware, certificateRoutes);
 
+// Live Classroom Sessions: /api/sessions
+app.use('/api/sessions', sessionRoutes);
+
 // ─────────────────────────────────────────────────────────────────────────────
-// INLINE HELPERS  (must be declared before use)
+// INLINE HELPERS  (declared here for use in routes below)
 // ─────────────────────────────────────────────────────────────────────────────
-const { authMiddleware: _auth } = require('./middleware/authMiddleware');
 const { pool: _pool } = require('./config/database');
+const { mockUsers: _mockUsers } = require('./routes/authRoutes');
+const _auth = authMiddleware; // alias for convenience in routes below
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPER ADMIN STATS  GET /api/admin/stats
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/admin/stats', authMiddleware, requireSuperAdmin, async (req, res) => {
+    try {
+        // Contribution counts
+        const [cRows] = await _pool.query(
+            `SELECT status, COUNT(*) AS cnt FROM contributions GROUP BY status`
+        );
+        const contribMap = {};
+        cRows.forEach(r => { contribMap[r.status] = Number(r.cnt); });
+
+        // User counts by role
+        const [uRows] = await _pool.query(
+            `SELECT role, COUNT(*) AS cnt FROM users GROUP BY role`
+        );
+        const userMap = {};
+        uRows.forEach(r => { userMap[r.role] = Number(r.cnt); });
+        let totalUsers = Object.values(userMap).reduce((a, b) => a + b, 0);
+        // Fall back to mock count if DB users table is empty
+        if (totalUsers === 0) totalUsers = (_mockUsers || []).length;
+
+        return res.json({
+            success: true,
+            source: 'db',
+            contributions: {
+                pending:   contribMap['pending']   || 0,
+                published: contribMap['published'] || 0,
+                draft:     contribMap['draft']     || 0,
+                rejected:  contribMap['rejected']  || 0,
+            },
+            users: { total: totalUsers, byRole: userMap },
+        });
+    } catch {
+        // DB unavailable — fall back to mock counts
+        const total = (_mockUsers || []).length;
+        return res.json({
+            success: true,
+            source: 'mock',
+            contributions: { pending: 0, published: 0, draft: 0, rejected: 0 },
+            users: { total, byRole: {} },
+        });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPER ADMIN USERS LIST  GET /api/admin/users
+// Returns ALL users (students + faculty + superadmin) from DB or mock
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/admin/users', authMiddleware, requireSuperAdmin, async (req, res) => {
+    try {
+        const [rows] = await _pool.query(
+            `SELECT user_id AS id, full_name AS fullName, email, role,
+                    total_xp AS totalPoints, selected_language AS selectedLanguage,
+                    streak, created_at AS createdAt
+             FROM users ORDER BY created_at DESC LIMIT 200`
+        );
+        // If DB has no rows yet, fall back to mock data
+        if (rows.length === 0) {
+            const safeUsers = (_mockUsers || []).map(u => ({
+                id: u.id, fullName: u.fullName, email: u.email, role: u.role || 'student',
+                totalPoints: u.totalPoints || 0,
+                selectedLanguage: u.selectedLanguage || null,
+            }));
+            return res.json({ success: true, users: safeUsers, source: 'mock' });
+        }
+        return res.json({ success: true, users: rows, source: 'db' });
+    } catch {
+        // DB unavailable — fallback to mock users
+        const safeUsers = (_mockUsers || []).map(u => ({
+            id: u.id, fullName: u.fullName, email: u.email, role: u.role || 'student',
+            totalPoints: u.totalPoints || 0,
+            selectedLanguage: u.selectedLanguage || null,
+        }));
+        return res.json({ success: true, users: safeUsers, source: 'mock' });
+    }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STUDENT ANALYTICS  GET /api/analytics/me

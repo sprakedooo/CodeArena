@@ -182,10 +182,20 @@ async function ensureUserInDb(user) {
     if (!dbService.isDbAvailable() || !user?.id || user.id === 0) return;
     try {
         const rows = await db.query('SELECT user_id FROM users WHERE user_id = ?', [user.id]);
-        if (rows?.length) return;
+        if (rows?.length) {
+            // Patch stale placeholder email with real one if available
+            if (rows[0].email && rows[0].email.endsWith('@codearena.internal') && user.email) {
+                await db.query(
+                    'UPDATE users SET email = ?, full_name = ? WHERE user_id = ?',
+                    [user.email, user.fullName || rows[0].full_name, user.id]
+                ).catch(() => {});
+            }
+            return;
+        }
+        const email = user.email || `_placeholder_${user.id}@codearena.internal`;
         await db.query(
-            'INSERT INTO users (user_id, email, password, full_name, role) VALUES (?, ?, ?, ?, ?)',
-            [user.id, `_placeholder_${user.id}@codearena.internal`, '!LOCKED', user.fullName || 'User', user.role || 'student']
+            'INSERT IGNORE INTO users (user_id, email, password, full_name, role) VALUES (?, ?, ?, ?, ?)',
+            [user.id, email, '!LOCKED_GOOGLE', user.fullName || 'User', user.role || 'student']
         );
     } catch {}
 }

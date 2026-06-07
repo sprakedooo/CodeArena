@@ -73,7 +73,7 @@ function generateToken(user) {
  * Must be used AFTER authMiddleware (requires req.user to be set).
  */
 function requireFaculty(req, res, next) {
-    if (!req.user || req.user.role !== 'faculty') {
+    if (!req.user || (req.user.role !== 'faculty' && req.user.role !== 'superadmin')) {
         return res.status(403).json({
             success: false,
             message: 'Access denied. Faculty only.'
@@ -82,4 +82,18 @@ function requireFaculty(req, res, next) {
     next();
 }
 
-module.exports = { authMiddleware, requireFaculty, generateToken };
+/**
+ * Middleware to restrict access to super admin only.
+ * Must be used AFTER authMiddleware (requires req.user to be set).
+ */
+function requireSuperAdmin(req, res, next) {
+    if (!req.user || req.user.role !== 'superadmin') {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Super Admin only.'
+        });
+    }
+    next();
+}
+
+module.exports = { authMiddleware, requireFaculty, requireSuperAdmin, generateToken };

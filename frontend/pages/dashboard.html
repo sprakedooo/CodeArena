@@ -38,77 +38,6 @@
             margin: 1.6rem 0 0.8rem;
         }
 
-        /* ── Stat strip ─────────────────────────────────────────────────── */
-        .stat-strip {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.85rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-chip {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem 1.15rem;
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-        }
-
-        .stat-chip-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .stat-chip-icon .material-symbols-outlined {
-            font-size: 1.25rem;
-        }
-
-        .stat-chip-info {
-            min-width: 0;
-        }
-
-        .stat-chip-val {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: var(--text);
-            line-height: 1.1;
-        }
-
-        .stat-chip-lbl {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-top: 0.15rem;
-        }
-
-        .chip-xp {
-            background: rgba(251, 191, 36, 0.15);
-            color: #fbbf24;
-        }
-
-        .chip-streak {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-        }
-
-        .chip-done {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-        }
-
-        .chip-path {
-            background: rgba(124, 58, 237, 0.15);
-            color: #a78bfa;
-        }
 
         /* ── Quick Access ───────────────────────────────────────────────── */
         .qc-purple {
@@ -571,14 +500,21 @@
         }
 
         @media (max-width: 640px) {
-            .stat-strip {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
 </head>
 
 <body>
+
+    <!-- ── Role guard: superadmin/faculty should not land here ───────────────── -->
+    <script>
+        (function () {
+            const u = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!u.id) { location.replace('login.html'); return; }
+            if (u.role === 'superadmin') { location.replace('superadmin_dashboard.html'); return; }
+            if (u.role === 'faculty')    { location.replace('faculty_dashboard.html');    return; }
+        })();
+    </script>
 
     <!-- ── Welcome Banner ─────────────────────────────────────────────────────── -->
     <div class="welcome-banner">
@@ -598,36 +534,6 @@
         })();
     </script>
 
-    <!-- ── Stat Strip ──────────────────────────────────────────────────────────── -->
-    <div class="stat-strip">
-        <div class="stat-chip">
-            <div class="stat-chip-icon chip-streak">
-                <span class="material-symbols-outlined">local_fire_department</span>
-            </div>
-            <div class="stat-chip-info">
-                <div class="stat-chip-val" id="statStreak">—</div>
-                <div class="stat-chip-lbl">Day Streak</div>
-            </div>
-        </div>
-        <div class="stat-chip">
-            <div class="stat-chip-icon chip-done">
-                <span class="material-symbols-outlined">check_circle</span>
-            </div>
-            <div class="stat-chip-info">
-                <div class="stat-chip-val" id="statLessons">—</div>
-                <div class="stat-chip-lbl">Lessons Done</div>
-            </div>
-        </div>
-        <div class="stat-chip">
-            <div class="stat-chip-icon chip-path">
-                <span class="material-symbols-outlined">route</span>
-            </div>
-            <div class="stat-chip-info">
-                <div class="stat-chip-val" id="statPaths">—</div>
-                <div class="stat-chip-lbl">Paths Active</div>
-            </div>
-        </div>
-    </div>
 
     <!-- ── Quick Access ────────────────────────────────────────────────────────── -->
     <p class="section-title">Quick Access</p>
@@ -868,10 +774,6 @@
 
             } catch (err) {
                 console.error('loadProgress failed:', err);
-                // Show default values
-                document.getElementById('statStreak').textContent = '0 🔥';
-                document.getElementById('statLessons').textContent = '0';
-                document.getElementById('statPaths').textContent = '0';
                 document.getElementById('welcomeSub').textContent = 'Start your first lesson to begin tracking your progress.';
 
                 buildPathList([]);
@@ -881,16 +783,6 @@
         }
 
         function populateStats(data, streak) {
-            // Streak: prefer API value, fall back to localStorage user object
-            const cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const resolvedStreak = streak || data.user?.streak || cachedUser.streak || 0;
-            document.getElementById('statStreak').textContent = resolvedStreak + ' 🔥';
-            document.getElementById('statLessons').textContent = data.completedLessons || 0;
-
-            // Calculate active paths (from language data)
-            const activePaths = data.paths ? data.paths.filter(p => p.completed_count > 0).length : 1;
-            document.getElementById('statPaths').textContent = activePaths;
-
             const total = data.completedLessons || 0;
             document.getElementById('welcomeSub').textContent =
                 total > 0
