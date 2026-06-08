@@ -960,6 +960,36 @@
     </div>
 </div>
 
+<!-- ══ NEW QUIZ INSTANCE MODAL ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="newQuizModal" onclick="if(event.target===this)closeNewQuizModal()">
+    <div class="modal-box" style="max-width:440px;width:95vw;padding:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span class="material-symbols-outlined" style="font-size:1.3rem;color:var(--primary);">quiz</span>
+                <h3 style="margin:0;font-size:1rem;font-weight:700;">New Quiz</h3>
+            </div>
+            <button onclick="closeNewQuizModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.3rem;line-height:1;">×</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+                <label class="form-label">Quiz Title</label>
+                <input type="text" id="newQuizTitle" class="form-input" placeholder='e.g. "Week 1 Quiz"'
+                    onkeydown="if(event.key==='Enter')submitNewQuiz()">
+            </div>
+            <div>
+                <label class="form-label">Description <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+                <input type="text" id="newQuizDesc" class="form-input" placeholder="Short description for students">
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">
+            <button class="btn btn-secondary" onclick="closeNewQuizModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitNewQuiz()">
+                <span class="material-symbols-outlined" style="font-size:.95rem;">add</span>Create Quiz
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- ══ QUIZ QUESTION DELETE CONFIRM ═════════════════════════════════════ -->
 <div class="modal-overlay" id="quizQDeleteModal" onclick="if(event.target===this)document.getElementById('quizQDeleteModal').classList.remove('open')">
     <div class="modal-box" style="max-width:400px;width:95vw;padding:28px;text-align:center;">
@@ -1082,37 +1112,72 @@
     function loadQuizQuestions() { return loadQuizInstances(); }
 
     // ── Create new instance ───────────────────────────────────────────────────
-    async function createQuizInstance() {
-        const title = prompt('Quiz title (e.g. "Week 1 Quiz"):');
-        if (!title || !title.trim()) return;
-        try {
-            const res  = await fetch(`${API}/quiz/${classroomId}/instances`, {
-                method: 'POST', headers: getAuthHeaders(),
-                body: JSON.stringify({ title: title.trim() })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Failed to create');
-            showToast('Quiz created!');
-            await loadQuizInstances();
-            selectInstance(data.instance.id); // open it immediately
-        } catch (e) { showToast(e.message, 'error'); }
+    function createQuizInstance() {
+        _renameIid = null;
+        document.getElementById('newQuizTitle').value = '';
+        document.getElementById('newQuizDesc').value  = '';
+        document.getElementById('newQuizTitle').style.borderColor = '';
+        document.querySelector('#newQuizModal h3').textContent      = 'New Quiz';
+        document.querySelector('#newQuizModal .btn-primary').innerHTML =
+            '<span class="material-symbols-outlined" style="font-size:.95rem;">add</span>Create Quiz';
+        document.getElementById('newQuizModal').classList.add('open');
+        setTimeout(() => document.getElementById('newQuizTitle').focus(), 60);
     }
-
+    function closeNewQuizModal() {
+        _renameIid = null;
+        document.getElementById('newQuizModal').classList.remove('open');
+    }
     // ── Rename instance ───────────────────────────────────────────────────────
-    async function renameInstance(iid, currentTitle) {
-        const title = prompt('Rename quiz:', currentTitle);
-        if (!title || !title.trim() || title.trim() === currentTitle) return;
-        try {
-            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${iid}`, {
-                method: 'PUT', headers: getAuthHeaders(),
-                body: JSON.stringify({ title: title.trim() })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Failed to rename');
-            if (activeIid === iid) document.getElementById('panelTitle').textContent = title.trim();
-            showToast('Renamed!');
-            await loadQuizInstances();
-        } catch (e) { showToast(e.message, 'error'); }
+    let _renameIid = null;
+    function renameInstance(iid, currentTitle) {
+        _renameIid = iid;
+        document.getElementById('newQuizTitle').value = currentTitle;
+        document.getElementById('newQuizDesc').value  = '';
+        // Swap modal heading + button label for rename mode
+        document.querySelector('#newQuizModal h3').textContent      = 'Rename Quiz';
+        document.querySelector('#newQuizModal .btn-primary').innerHTML =
+            '<span class="material-symbols-outlined" style="font-size:.95rem;">edit</span>Rename';
+        document.getElementById('newQuizModal').classList.add('open');
+        setTimeout(() => { const t = document.getElementById('newQuizTitle'); t.focus(); t.select(); }, 60);
+    }
+    async function submitNewQuiz() {
+        const title = document.getElementById('newQuizTitle').value.trim();
+        if (!title) {
+            document.getElementById('newQuizTitle').focus();
+            document.getElementById('newQuizTitle').style.borderColor = 'var(--danger)';
+            return;
+        }
+        document.getElementById('newQuizTitle').style.borderColor = '';
+        const isRename = _renameIid !== null;
+        const iid = _renameIid;
+        closeNewQuizModal();
+
+        if (isRename) {
+            try {
+                const res  = await fetch(`${API}/quiz/${classroomId}/instances/${iid}`, {
+                    method: 'PUT', headers: getAuthHeaders(),
+                    body: JSON.stringify({ title })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to rename');
+                if (activeIid === iid) document.getElementById('panelTitle').textContent = title;
+                showToast('Renamed!');
+                await loadQuizInstances();
+            } catch (e) { showToast(e.message, 'error'); }
+        } else {
+            const desc = document.getElementById('newQuizDesc').value.trim();
+            try {
+                const res  = await fetch(`${API}/quiz/${classroomId}/instances`, {
+                    method: 'POST', headers: getAuthHeaders(),
+                    body: JSON.stringify({ title, description: desc || undefined })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to create');
+                showToast('Quiz created!');
+                await loadQuizInstances();
+                selectInstance(data.instance.id);
+            } catch (e) { showToast(e.message, 'error'); }
+        }
     }
 
     // ── Delete instance ───────────────────────────────────────────────────────
@@ -1260,11 +1325,9 @@
             </div>`;
             return;
         }
-        const lvlColor  = { beginner:'#10b981', intermediate:'#fbbf24', advanced:'#ef4444' };
         const typeLabel = { multiple_choice:'MCQ', fill_blank:'Fill Blank', output_prediction:'Output', code_ordering:'Code Order' };
         el.innerHTML = quizQAll.map((q, i) => {
             const id   = q.question_id || q.id || i;
-            const lvl  = q.level || q.difficulty || 'beginner';
             const type = q.questionType || q.question_type || 'multiple_choice';
             const text = escHtml(q.question || q.question_text || q.text || '—');
             return `<div class="assignment-row" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
@@ -1272,7 +1335,6 @@
                     <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${text}</div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;">
                         <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(124,58,237,.12);color:#a78bfa;">${typeLabel[type]||type}</span>
-                        <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.2);color:${lvlColor[lvl]||'#6b7280'};">${lvl}</span>
                     </div>
                 </div>
                 <div style="display:flex;gap:6px;flex-shrink:0;">

@@ -256,11 +256,8 @@ router.get('/:cid/instances/:iid', authMiddleware, (req, res) => {
     const inst = instances.get(req.params.iid);
     if (!inst || String(inst.classroomId) !== String(req.params.cid))
         return res.status(404).json({ success: false, message: 'Quiz not found.' });
-    const isStaff = req.user.role === 'faculty' || req.user.role === 'superadmin';
-    const questions = isStaff
-        ? inst.questions
-        : inst.questions.map(({ correctAnswer, correct_answer, answer, ...rest }) => rest);
-    return res.json({ success: true, instance: { ...inst, questions, status: instanceStatus(inst) } });
+    // Send full questions including correctAnswer — needed for client-side checking
+    return res.json({ success: true, instance: { ...inst, questions: inst.questions, status: instanceStatus(inst) } });
 });
 
 // ── PUT /:cid/instances/:iid — faculty: rename instance ──────────────────────
