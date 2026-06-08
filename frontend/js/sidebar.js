@@ -207,11 +207,12 @@
                         ${icon('expand_more', 'topbar-chevron')}
                     </div>
                     <div class="topbar-dropdown" id="topbarDropdown">
+                        ${role !== 'superadmin' ? `
                         <a class="topbar-dropdown-item" href="profile.html">
                             ${icon('person')}
                             <span>Profile</span>
                         </a>
-                        <div class="topbar-dropdown-divider"></div>
+                        <div class="topbar-dropdown-divider"></div>` : ''}
                         <button class="topbar-dropdown-item topbar-dropdown-logout" id="topbarLogoutBtn">
                             ${icon('logout')}
                             <span>Logout</span>
