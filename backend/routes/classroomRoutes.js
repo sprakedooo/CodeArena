@@ -399,11 +399,13 @@ router.get('/:id/students', async (req, res) => {
         try {
             const rows = await db.query(
                 `SELECT u.user_id AS id, u.full_name AS fullName, u.email,
-                        u.total_xp AS totalXp, u.selected_language AS selectedLanguage,
+                        COALESCE(u.total_xp, 0) AS totalXp,
+                        u.selected_language AS selectedLanguage,
                         e.enrolled_at AS enrolledAt,
                         COALESCE(p.current_level, 'beginner') AS currentLevel,
                         COALESCE(p.accuracy_percent, 0) AS accuracy,
-                        COALESCE(p.questions_answered, 0) AS questionsAnswered
+                        COALESCE(p.questions_answered, 0) AS questionsAnswered,
+                        COALESCE(p.consecutive_correct, 0) AS streak
                  FROM classroom_enrollments e
                  JOIN users u ON u.user_id = e.student_id
                  LEFT JOIN progress p ON p.user_id = u.user_id
@@ -421,12 +423,20 @@ router.get('/:id/students', async (req, res) => {
         .filter(e => e.classroomId === classroomId && e.status === 'active')
         .map(e => {
             const cached = mockUserCache[e.studentId] || {};
+            // Pull mock progress from dbService if available
+            const mockProgress = dbService.getMockProgress ? dbService.getMockProgress(e.studentId) : null;
             return {
-                id:        e.studentId,
-                fullName:  e.fullName  || cached.fullName || 'Student',
-                email:     e.email     || cached.email    || '—',
-                status:    e.status,
-                enrolledAt: e.enrolledAt
+                id:               e.studentId,
+                fullName:         e.fullName  || cached.fullName || 'Student',
+                email:            e.email     || cached.email    || '—',
+                status:           e.status,
+                enrolledAt:       e.enrolledAt,
+                currentLevel:     mockProgress?.currentLevel     || cached.currentLevel     || 'beginner',
+                accuracy:         mockProgress?.accuracyPercent  || cached.accuracy         || 0,
+                questionsAnswered: mockProgress?.questionsAnswered || cached.questionsAnswered || 0,
+                streak:           mockProgress?.consecutiveCorrect || cached.streak          || 0,
+                totalXp:          cached.totalXp || 0,
+                selectedLanguage: cached.selectedLanguage || 'python',
             };
         });
     res.json({ success: true, students, source: 'mock' });

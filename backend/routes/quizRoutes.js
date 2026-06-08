@@ -219,6 +219,26 @@ let mockQuizzes = [
 ];
 
 // ── GET /my-results-all/list  (MUST be before /:cid routes) ──────────────────
+// ── GET /:cid/student-summary — faculty: per-student aggregate across all instances ──
+router.get('/:cid/student-summary', authMiddleware, requireFaculty, (req, res) => {
+    const cid   = String(req.params.cid);
+    const insts = getInstancesForClassroom(cid);
+    // Build a map: userId → { quizzesTaken, bestAccuracy, passed }
+    const summary = {};
+    for (const inst of insts) {
+        for (const r of resultsForInstance(inst.id)) {
+            if (!summary[r.userId]) {
+                summary[r.userId] = { userId: r.userId, userName: r.userName, quizzesTaken: 0, bestAccuracy: 0, passCount: 0 };
+            }
+            summary[r.userId].quizzesTaken++;
+            summary[r.userId].bestAccuracy = Math.max(summary[r.userId].bestAccuracy, r.bestAccuracy || 0);
+            if (r.bestPassed) summary[r.userId].passCount++;
+        }
+    }
+    return res.json({ success: true, summary });
+});
+
+
 router.get('/my-results-all/list', authMiddleware, (req, res) => {
     const uid = String(req.user.id);
     const out = [];

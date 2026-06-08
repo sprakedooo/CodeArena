@@ -307,38 +307,107 @@
         /* ══ PEOPLE ══════════════════════════════════════════════════════ */
         .people-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
         .people-header h2 { font-size:.95rem; font-weight:700; color:var(--text); margin:0; display:flex; align-items:center; gap:8px; }
-        .people-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+        .people-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:14px; }
+
+        /* ── Student card ──────────────────────────────────────────────── */
         .people-card {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
-            padding:18px 20px; transition:border-color .15s;
+            background:var(--bg-card); border:1px solid var(--border); border-radius:14px;
+            overflow:hidden; transition:border-color .15s, box-shadow .15s;
+            display:flex; flex-direction:column;
         }
-        .people-card:hover { border-color:rgba(124,58,237,.3); }
-        .people-card-top { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-        .people-avatar {
-            width:44px; height:44px; border-radius:50%;
-            background:linear-gradient(135deg,var(--primary),var(--secondary));
+        .people-card:hover { border-color:rgba(124,58,237,.4); box-shadow:0 4px 24px rgba(124,58,237,.08); }
+
+        /* Top banner strip — colored by level */
+        .pc-banner {
+            height:5px; width:100%;
+        }
+        .pc-banner.beginner     { background:linear-gradient(90deg,#10b981,#34d399); }
+        .pc-banner.intermediate { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+        .pc-banner.advanced     { background:linear-gradient(90deg,#ef4444,#f87171); }
+
+        .pc-body { padding:16px 18px 14px; flex:1; display:flex; flex-direction:column; gap:12px; }
+
+        /* Header row */
+        .pc-head { display:flex; align-items:flex-start; gap:12px; }
+        .pc-avatar {
+            width:46px; height:46px; border-radius:50%; flex-shrink:0;
             display:flex; align-items:center; justify-content:center;
-            font-size:.8rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Inter',sans-serif;
+            font-size:.85rem; font-weight:700; color:#fff; font-family:'Inter',sans-serif;
         }
-        .people-info { flex:1; min-width:0; }
-        .people-name { font-size:.9rem; font-weight:600; color:var(--text); }
-        .people-email { font-size:.75rem; color:var(--text-muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .people-remove-btn {
+        .pc-avatar.beginner     { background:linear-gradient(135deg,#059669,#10b981); }
+        .pc-avatar.intermediate { background:linear-gradient(135deg,#d97706,#f59e0b); }
+        .pc-avatar.advanced     { background:linear-gradient(135deg,#dc2626,#ef4444); }
+        .pc-info { flex:1; min-width:0; }
+        .pc-name  { font-size:.92rem; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .pc-email { font-size:.72rem; color:var(--text-muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .pc-remove-btn {
             background:none; border:none; cursor:pointer; color:var(--text-muted);
             padding:4px; border-radius:6px; display:flex; flex-shrink:0; transition:color .15s;
         }
-        .people-remove-btn:hover { color:var(--danger); }
-        .people-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
-        .people-stat {
-            background:var(--bg-surface); border:1px solid var(--border); border-radius:8px;
-            padding:8px 10px; text-align:center;
+        .pc-remove-btn:hover { color:var(--danger); }
+
+        /* Level + XP row */
+        .pc-level-row { display:flex; align-items:center; gap:8px; }
+        .pc-level-badge {
+            font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+            padding:2px 9px; border-radius:20px;
         }
-        .people-stat-val { font-size:.88rem; font-weight:700; color:var(--text); display:block; }
-        .people-stat-label { font-size:.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; margin-top:1px; display:block; }
-        .xp-bar-wrap { margin-top:6px; }
-        .xp-bar-label { display:flex; justify-content:space-between; font-size:.72rem; color:var(--text-muted); margin-bottom:4px; }
-        .xp-bar-track { height:5px; background:var(--bg-surface); border-radius:3px; overflow:hidden; }
-        .xp-bar-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--secondary)); border-radius:3px; transition:width .4s; }
+        .pc-level-badge.beginner     { background:rgba(16,185,129,.12); color:#10b981; border:1px solid rgba(16,185,129,.25); }
+        .pc-level-badge.intermediate { background:rgba(245,158,11,.12);  color:#f59e0b; border:1px solid rgba(245,158,11,.25); }
+        .pc-level-badge.advanced     { background:rgba(239,68,68,.12);   color:#ef4444; border:1px solid rgba(239,68,68,.25); }
+        .pc-xp-badge {
+            font-size:.62rem; font-weight:700; color:#fbbf24;
+            background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.2);
+            padding:2px 9px; border-radius:20px;
+        }
+        .pc-lang-badge {
+            font-size:.62rem; font-weight:700; color:var(--secondary);
+            background:rgba(6,182,212,.07); border:1px solid rgba(6,182,212,.2);
+            padding:2px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:.4px;
+        }
+
+        /* Accuracy bar */
+        .pc-acc-wrap { }
+        .pc-acc-labels { display:flex; justify-content:space-between; font-size:.7rem; color:var(--text-muted); margin-bottom:5px; }
+        .pc-acc-track { height:6px; background:var(--bg-surface); border-radius:4px; overflow:hidden; }
+        .pc-acc-fill { height:100%; border-radius:4px; transition:width .5s ease; }
+        .pc-acc-fill.good { background:linear-gradient(90deg,#10b981,#34d399); }
+        .pc-acc-fill.mid  { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+        .pc-acc-fill.low  { background:linear-gradient(90deg,#ef4444,#f87171); }
+
+        /* Stats row */
+        .pc-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+        .pc-stat {
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:8px; padding:7px 8px; text-align:center;
+        }
+        .pc-stat-val   { font-size:.85rem; font-weight:700; color:var(--text); display:block; }
+        .pc-stat-label { font-size:.6rem;  color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; margin-top:1px; display:block; }
+
+        /* Quiz mini row */
+        .pc-quiz-row {
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:8px; padding:8px 10px;
+            display:flex; align-items:center; gap:8px; font-size:.78rem;
+        }
+        .pc-quiz-row .material-symbols-outlined { font-size:.95rem; color:var(--primary); flex-shrink:0; }
+
+        /* Action buttons */
+        .pc-actions { display:flex; gap:6px; margin-top:auto; }
+        .pc-btn {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+            padding:7px 10px; border-radius:8px; font-size:.75rem; font-weight:600;
+            cursor:pointer; border:1px solid; transition:background .15s, border-color .15s;
+        }
+        .pc-btn-primary {
+            background:rgba(124,58,237,.1); border-color:rgba(124,58,237,.3); color:var(--primary);
+        }
+        .pc-btn-primary:hover { background:rgba(124,58,237,.18); }
+        .pc-btn-cyan {
+            background:rgba(6,182,212,.07); border-color:rgba(6,182,212,.3); color:var(--secondary);
+        }
+        .pc-btn-cyan:hover { background:rgba(6,182,212,.14); }
+
         .level-badge-sm { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-top:8px; }
         .level-badge-sm.beginner     { background:rgba(16,185,129,.12); color:var(--success);  border:1px solid rgba(16,185,129,.22); }
         .level-badge-sm.intermediate { background:rgba(245,158,11,.12);  color:var(--warning);  border:1px solid rgba(245,158,11,.22); }
@@ -1660,57 +1729,126 @@
     // ── Students / People ─────────────────────────────────────────────────────
     async function loadStudents() {
         try {
-            const res  = await fetch(`${API}/classrooms/${classroomId}/students`, {headers:getAuthHeaders()});
-            const data = await res.json();
-            const students = data.success ? (data.students||[]) : [];
-            const count = students.length;
-            document.getElementById('studentsCount').textContent = count;
-            document.getElementById('statStudents').textContent  = count;
+            const [studRes, quizRes] = await Promise.all([
+                fetch(`${API}/classrooms/${classroomId}/students`, {headers:getAuthHeaders()}),
+                fetch(`${API}/quiz/${classroomId}/student-summary`, {headers:getAuthHeaders()}).catch(()=>null),
+            ]);
+            const studData  = await studRes.json();
+            const quizData  = quizRes ? await quizRes.json().catch(()=>({})) : {};
+            const students  = studData.success ? (studData.students||[]) : [];
+            const quizMap   = quizData.summary || {};   // { userId: { quizzesTaken, bestAccuracy, passCount } }
+            const count     = students.length;
+            document.getElementById('studentsCount').textContent   = count;
+            document.getElementById('statStudents').textContent    = count;
             document.getElementById('sidebarStudents').textContent = count;
-            renderPeople(students);
+            renderPeople(students, quizMap);
         } catch(err) {
             document.getElementById('peopleGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load students.</div>`;
         }
     }
 
-    function renderPeople(students) {
+    function renderPeople(students, quizMap = {}) {
         const grid = document.getElementById('peopleGrid');
         if (!students.length) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="empty-state-icon">👥</span><div class="empty-state-title">No students yet</div><div class="empty-state-sub">Share the enrollment key to get started</div></div>`;
             return;
         }
-        const levelOrder = {beginner:0,intermediate:1,advanced:2};
         grid.innerHTML = students.map(s => {
+            const sid   = s.id || s.student_id || s.user_id;
             const name  = s.fullName || s.full_name || 'Student';
             const level = (s.currentLevel || s.current_level || 'beginner').toLowerCase();
             const acc   = Math.round(s.accuracy || s.accuracy_percent || 0);
             const qs    = s.questionsAnswered || s.questions_answered || 0;
-            return `<div class="people-card">
-                <div class="people-card-top">
-                    <div class="people-avatar">${initials(name)}</div>
-                    <div class="people-info">
-                        <div class="people-name">${escHtml(name)}</div>
-                        <div class="people-email">${escHtml(safeEmail(s.email))}</div>
+            const xp    = s.totalXp || s.total_xp || 0;
+            const streak = s.streak || s.consecutiveCorrect || s.consecutive_correct || 0;
+            const lang  = (s.selectedLanguage || s.selected_language || 'python').toUpperCase();
+            const joined = s.enrolledAt || s.enrolled_at;
+            const quiz  = quizMap[String(sid)] || null;
+
+            // Accuracy bar color
+            const accClass = acc >= 70 ? 'good' : acc >= 45 ? 'mid' : 'low';
+            const accColor = acc >= 70 ? '#10b981' : acc >= 45 ? '#f59e0b' : '#ef4444';
+
+            // Quiz row
+            const quizRow = quiz
+                ? `<div class="pc-quiz-row">
+                    <span class="material-symbols-outlined">quiz</span>
+                    <div style="flex:1;min-width:0;">
+                        <span style="font-weight:600;color:var(--text);">${quiz.quizzesTaken} quiz${quiz.quizzesTaken!==1?'zes':''} taken</span>
+                        <span style="color:var(--text-muted);"> &nbsp;·&nbsp; Best: </span>
+                        <span style="font-weight:700;color:${quiz.bestAccuracy>=70?'#34d399':'#f87171'};">${quiz.bestAccuracy}%</span>
+                        ${quiz.passCount > 0 ? `<span style="font-size:.62rem;background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:1px 7px;margin-left:5px;">${quiz.passCount} passed</span>` : ''}
                     </div>
-                    <button class="people-remove-btn" onclick="removeStudent(${s.id||s.student_id||s.user_id},'${escHtml(name)}')" title="Remove student">
-                        <span class="material-symbols-outlined" style="font-size:1.05rem;">person_remove</span>
-                    </button>
+                  </div>`
+                : `<div class="pc-quiz-row" style="color:var(--text-muted);">
+                    <span class="material-symbols-outlined" style="color:var(--text-muted);">quiz</span>
+                    No quiz attempts yet
+                   </div>`;
+
+            return `<div class="people-card">
+                <div class="pc-banner ${level}"></div>
+                <div class="pc-body">
+                    <!-- Header -->
+                    <div class="pc-head">
+                        <div class="pc-avatar ${level}">${initials(name)}</div>
+                        <div class="pc-info">
+                            <div class="pc-name">${escHtml(name)}</div>
+                            <div class="pc-email">${escHtml(safeEmail(s.email))}</div>
+                        </div>
+                        <button class="pc-remove-btn" onclick="removeStudent(${sid},'${escHtml(name)}')" title="Remove student">
+                            <span class="material-symbols-outlined" style="font-size:1rem;">person_remove</span>
+                        </button>
+                    </div>
+
+                    <!-- Badges -->
+                    <div class="pc-level-row">
+                        <span class="pc-level-badge ${level}">${level}</span>
+                        <span class="pc-xp-badge">⚡ ${xp} XP</span>
+                        <span class="pc-lang-badge">${lang}</span>
+                        ${streak > 0 ? `<span style="font-size:.62rem;font-weight:700;color:#f97316;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);padding:2px 8px;border-radius:20px;">🔥 ${streak} streak</span>` : ''}
+                    </div>
+
+                    <!-- Accuracy bar -->
+                    <div class="pc-acc-wrap">
+                        <div class="pc-acc-labels">
+                            <span>Accuracy</span>
+                            <span style="font-weight:700;color:${accColor};">${acc}%</span>
+                        </div>
+                        <div class="pc-acc-track">
+                            <div class="pc-acc-fill ${accClass}" style="width:${acc}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="pc-stats">
+                        <div class="pc-stat">
+                            <span class="pc-stat-val">${qs}</span>
+                            <span class="pc-stat-label">Answered</span>
+                        </div>
+                        <div class="pc-stat">
+                            <span class="pc-stat-val" style="color:#f59e0b;">${streak}</span>
+                            <span class="pc-stat-label">Streak</span>
+                        </div>
+                        <div class="pc-stat">
+                            <span class="pc-stat-val" style="font-size:.75rem;">${joined ? new Date(joined).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</span>
+                            <span class="pc-stat-label">Joined</span>
+                        </div>
+                    </div>
+
+                    <!-- Quiz performance -->
+                    ${quizRow}
+
+                    <!-- Actions -->
+                    <div class="pc-actions">
+                        <button class="pc-btn pc-btn-primary" onclick="getStudentAIInsight('${sid}','${escHtml(name)}',${acc},${qs},'${level}')">
+                            <span style="font-size:.85rem;">✦</span> AI Insight
+                        </button>
+                        <button class="pc-btn pc-btn-cyan" onclick="viewStudentProfile('${sid}','${escHtml(name)}','${escHtml(s.email||'')}',${acc},${qs},'${level}')">
+                            <span class="material-symbols-outlined" style="font-size:.85rem;">person</span> Profile
+                        </button>
+                    </div>
+                    <div class="ai-insight-panel" id="ai-insight-${sid}"></div>
                 </div>
-                <div class="people-stats">
-                    <div class="people-stat"><span class="people-stat-val">${acc}%</span><span class="people-stat-label">Accuracy</span></div>
-                    <div class="people-stat"><span class="people-stat-val">${qs}</span><span class="people-stat-label">Answered</span></div>
-                    <div class="people-stat"><span class="people-stat-val">${relativeTime(s.enrolledAt||s.enrolled_at)}</span><span class="people-stat-label">Joined</span></div>
-                </div>
-                <span class="level-badge-sm ${level}">${level}</span>
-                <div style="display:flex;gap:8px;margin-top:12px;">
-                    <button class="ai-insight-btn" style="margin-top:0;flex:1;" onclick="getStudentAIInsight('${s.id||s.student_id||s.user_id}','${escHtml(name)}',${acc},${qs},'${level}')">
-                        <span class="ai-btn-icon">✦</span> AI Insight
-                    </button>
-                    <button class="ai-insight-btn" style="margin-top:0;flex:1;background:rgba(6,182,212,.07);border-color:rgba(6,182,212,.3);color:var(--secondary);" onclick="viewStudentProfile('${s.id||s.student_id||s.user_id}','${escHtml(name)}','${escHtml(s.email||'')}',${acc},${qs},'${level}')">
-                        <span class="material-symbols-outlined" style="font-size:.9rem;">person</span> Profile
-                    </button>
-                </div>
-                <div class="ai-insight-panel" id="ai-insight-${s.id||s.student_id||s.user_id}"></div>
             </div>`;
         }).join('');
     }
