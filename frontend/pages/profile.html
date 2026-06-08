@@ -104,11 +104,6 @@
         .xp-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--primary),var(--secondary)); transition:width 0.6s ease; }
         .xp-bar-lbl { font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem; }
 
-        /* ── Path progress ────────────────────────────────────────────────── */
-        .path-row { margin-bottom:0.85rem; }
-        .path-row-top { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.3rem; }
-        .path-bar { height:8px; background:var(--bg-surface); border-radius:4px; overflow:hidden; }
-        .path-bar-fill { height:100%; border-radius:4px; }
 
         /* ── Weakness pills ───────────────────────────────────────────────── */
         .weakness-list { display:flex; flex-wrap:wrap; gap:0.5rem; }
@@ -318,11 +313,6 @@
 <!-- ══════════ STUDENT TABS ══════════════════════════════════════════════════ -->
 
 <div id="tab-progress" class="tab-panel">
-<p class="section-title">Learning Paths</p>
-    <div id="pathProgress">
-        <div class="skeleton-line" style="width:100%;"></div>
-        <div class="skeleton-line" style="width:80%;"></div>
-    </div>
     <p class="section-title">Topics Needing Practice</p>
     <div class="weakness-list" id="weaknessList">
         <div class="skeleton-line" style="width:100px;height:28px;border-radius:20px;"></div>
@@ -510,7 +500,6 @@ let   me    = JSON.parse(localStorage.getItem('user') || '{}');
 if (!me.id) location.href = 'login.html';
 
 const isFaculty = me.role === 'faculty';
-const PATH_COLORS = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ef4444'];
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -705,34 +694,12 @@ async function loadProgress() {
         document.getElementById('psLessons').textContent = data.completedLessons || 0;
 
         
-        buildPathProgress(data.paths || []);
         buildWeaknesses(data.weaknesses || []);
     } catch {
-        buildPathProgress([]);
         buildWeaknesses([]);
     }
 }
 
-function buildPathProgress(paths) {
-    const c = document.getElementById('pathProgress');
-    if (!paths.length) {
-        c.innerHTML = `<div class="empty-state">
-            <span class="material-symbols-outlined">route</span>
-            No paths started yet. <a href="learn.html" style="color:var(--primary);">Explore paths →</a></div>`;
-        return;
-    }
-    c.innerHTML = paths.map((p, i) => {
-        const color = PATH_COLORS[i % PATH_COLORS.length];
-        const pct   = p.progress_pct || 0;
-        return `<div class="path-row">
-            <div class="path-row-top">
-                <span style="font-weight:600;">${esc(p.title)}</span>
-                <span style="color:var(--text-muted);">${pct}%</span>
-            </div>
-            <div class="path-bar"><div class="path-bar-fill" style="width:${pct}%;background:${color};"></div></div>
-        </div>`;
-    }).join('');
-}
 
 function buildWeaknesses(weaknesses) {
     const c = document.getElementById('weaknessList');

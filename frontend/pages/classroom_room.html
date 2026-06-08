@@ -610,21 +610,6 @@
         <p class="section-title">My Stats</p>
         <div class="progress-grid">
             <div class="progress-stat-card">
-                <span class="progress-stat-icon">🎯</span>
-                <span class="progress-stat-val" id="statAccuracy">0%</span>
-                <span class="progress-stat-lbl">Accuracy</span>
-            </div>
-            <div class="progress-stat-card">
-                <span class="progress-stat-icon">❓</span>
-                <span class="progress-stat-val" id="statAnswered">0</span>
-                <span class="progress-stat-lbl">Questions</span>
-            </div>
-            <div class="progress-stat-card">
-                <span class="progress-stat-icon">🔥</span>
-                <span class="progress-stat-val" id="statStreak">0</span>
-                <span class="progress-stat-lbl">Best Streak</span>
-            </div>
-            <div class="progress-stat-card">
                 <span class="progress-stat-icon">📚</span>
                 <span class="progress-stat-val" id="statLessons">0</span>
                 <span class="progress-stat-lbl">Lessons Done</span>
@@ -1038,9 +1023,6 @@ async function loadMyProgress() {
         const langAcc  = Math.round(langProg.accuracy || overall.accuracy || 0);
         const langQs   = langProg.questionsAnswered || qs;
 
-        document.getElementById('statAccuracy').textContent = langAcc + '%';
-        document.getElementById('statAnswered').textContent = langQs;
-        document.getElementById('statStreak').textContent   = streak;
         document.getElementById('accuracyTxt').textContent  = langAcc + '%';
         document.getElementById('accuracyBar').style.width  = langAcc + '%';
 
@@ -1097,16 +1079,10 @@ async function loadAIFeedback() {
     body.innerHTML = '<div class="ai-feedback-loading"><div class="mini-spin"></div>Generating your personalised feedback…</div>';
 
     try {
-        const acc     = document.getElementById('statAccuracy').textContent || '0%';
-        const qs      = document.getElementById('statAnswered').textContent || '0';
         const lessons = document.getElementById('statLessons').textContent  || '0';
-        const streak  = document.getElementById('statStreak').textContent   || '0';
 
         const prompt = 'I am a student in a programming classroom. Here is my current performance:\n' +
-            '- Accuracy: ' + acc + '\n' +
-            '- Questions answered: ' + qs + '\n' +
-            '- Lessons completed: ' + lessons + '\n' +
-            '- Best streak: ' + streak + '\n\n' +
+            '- Lessons completed: ' + lessons + '\n\n' +
             'Give me a brief (3-4 sentences) personalised assessment: what I\'m doing well, where I need improvement, and one specific actionable tip. Be encouraging but honest.';
 
         const res  = await fetch(API + '/ai/ask', {
