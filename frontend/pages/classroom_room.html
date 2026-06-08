@@ -933,20 +933,50 @@ function updateProgressSidebar(done, total) {
 
 // ── Progress ───────────────────────────────────────────────────────────────────
 async function loadMyProgress() {
+    const uid  = me.id;
+    const lang = classroomLang || 'python';
     try {
-        const res  = await fetch(API + '/classrooms/' + classroomId + '/feedback', { headers: getAuthHeaders() });
-        const data = await res.json();
-        const s    = data.student || data;
-        if (!s) return;
+        // Fetch overall + language-specific in parallel
+        const [overallRes, langRes] = await Promise.all([
+            fetch(`${API}/progress/${uid}`,       { headers: getAuthHeaders() }),
+            fetch(`${API}/progress/${uid}/${lang}`, { headers: getAuthHeaders() }),
+        ]);
+        const overallData = await overallRes.json();
+        const langData    = await langRes.json();
 
-        const acc = Math.round(s.accuracy || s.accuracy_percent || 0);
-        const qs  = s.questionsAnswered || s.questions_answered || 0;
+        // Overall accuracy + total questions
+        const overall = overallData.overall || {};
+        const acc     = Math.round(overall.accuracy || 0);
+        const qs      = overall.totalQuestions || 0;
 
-        document.getElementById('statAccuracy').textContent = acc + '%';
-        document.getElementById('statAnswered').textContent = qs;
-        document.getElementById('accuracyTxt').textContent  = acc + '%';
-        document.getElementById('accuracyBar').style.width  = acc + '%';
-    } catch {}
+        // Language-specific streak + level
+        const langProg = langData.progress || {};
+        const streak   = langProg.consecutiveCorrect || 0;
+        const level    = langProg.level || (overallData.byLanguage?.[lang]?.level) || 'beginner';
+
+        // Per-language accuracy (more relevant than global if classroom has a language)
+        const langAcc  = Math.round(langProg.accuracy || overall.accuracy || 0);
+        const langQs   = langProg.questionsAnswered || qs;
+
+        document.getElementById('statAccuracy').textContent = langAcc + '%';
+        document.getElementById('statAnswered').textContent = langQs;
+        document.getElementById('statStreak').textContent   = streak;
+        document.getElementById('accuracyTxt').textContent  = langAcc + '%';
+        document.getElementById('accuracyBar').style.width  = langAcc + '%';
+
+        // Color the accuracy bar based on value
+        const bar = document.getElementById('accuracyBar');
+        if (bar) bar.style.background = langAcc >= 70
+            ? 'linear-gradient(90deg,#10b981,#34d399)'
+            : langAcc >= 45
+                ? 'linear-gradient(90deg,#f59e0b,#fbbf24)'
+                : 'linear-gradient(90deg,#ef4444,#f87171)';
+
+        // Update level badge if present
+        const lvlEl = document.getElementById('statLevel');
+        if (lvlEl) lvlEl.textContent = level;
+
+    } catch (e) { console.error('loadMyProgress error:', e); }
 }
 
 // ── Leaderboard ────────────────────────────────────────────────────────────────

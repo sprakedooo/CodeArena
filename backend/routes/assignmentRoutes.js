@@ -141,6 +141,22 @@ async function executeCode(language, code, stdinData) {
 }
 
 /**
+ * Normalize output for comparison:
+ * - Unify CRLF / CR → LF  (handles Windows textarea input)
+ * - Trim trailing spaces per line
+ * - Strip leading/trailing blank lines
+ */
+function normalizeOutput(s) {
+    return String(s == null ? '' : s)
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g,   '\n')
+        .split('\n')
+        .map(line => line.trimEnd())
+        .join('\n')
+        .trim();
+}
+
+/**
  * Judge code against an array of test cases.
  * Returns { results, passed, total, totalMs }
  */
@@ -151,8 +167,8 @@ async function judgeCode(language, code, testCases) {
 
     for (const tc of testCases) {
         const res = await executeCode(language, code, tc.input);
-        const actual   = (res.output || '').trim();
-        const expected = (String(tc.expected_output || tc.expectedOutput || '')).trim();
+        const actual   = normalizeOutput(res.output || '');
+        const expected = normalizeOutput(tc.expected_output || tc.expectedOutput || '');
         const ok = actual === expected;
         if (ok) passed++;
         totalMs += res.timeMs || 0;

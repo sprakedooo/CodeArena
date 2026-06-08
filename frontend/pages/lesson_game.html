@@ -715,6 +715,35 @@ let setupLevel = 'beginner';
 const QUESTIONS_PER_LEVEL = 20;
 let setupCount = QUESTIONS_PER_LEVEL;
 
+// ── Session persistence ────────────────────────────────────────────────────────
+const SAVE_KEY = 'assessment_session';
+
+function saveSession() {
+    if (!questions.length) return;
+    sessionStorage.setItem(SAVE_KEY, JSON.stringify({
+        questions, qIndex, score, streak, bestStreak, multiplier,
+        correctCount, sessionResults, setupLang, setupLevel,
+        savedAt: Date.now()
+    }));
+}
+
+function clearSession() {
+    sessionStorage.removeItem(SAVE_KEY);
+}
+
+function loadSession() {
+    try {
+        const raw = sessionStorage.getItem(SAVE_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        // Discard sessions older than 2 hours
+        if (!s || Date.now() - s.savedAt > 2 * 60 * 60 * 1000) { clearSession(); return null; }
+        // Only resume if there are questions left to answer
+        if (!s.questions?.length || s.qIndex >= s.questions.length) { clearSession(); return null; }
+        return s;
+    } catch { clearSession(); return null; }
+}
+
 // ── Language picker helpers ───────────────────────────────────────────────────
 const LANG_META = {
     python:     { label: 'Python',     icon: 'python/python-original.svg'         },
@@ -749,7 +778,78 @@ document.addEventListener('DOMContentLoaded', () => {
     if (LANG_META[lang]) pickLang(lang);
     else updateDiffLocks('python');
     document.addEventListener('keydown', handleKeyboard);
+
+    // Check for an in-progress session
+    const saved = loadSession();
+    if (saved) {
+        showResumePrompt(saved);
+    }
 });
+
+function showResumePrompt(saved) {
+    // Build a small banner above the setup card
+    const remaining = saved.questions.length - saved.qIndex;
+    const pct = saved.questions.length > 0
+        ? Math.round(saved.qIndex / saved.questions.length * 100) : 0;
+    const banner = document.createElement('div');
+    banner.id = 'resumeBanner';
+    banner.style.cssText = `
+        background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.35);
+        border-radius:12px;padding:14px 18px;margin-bottom:18px;
+        display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    `;
+    banner.innerHTML = `
+        <div>
+            <div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:3px;">
+                <span class="material-symbols-outlined" style="font-size:.95rem;vertical-align:middle;margin-right:4px;">history</span>
+                In-Progress Assessment Found
+            </div>
+            <div style="font-size:.75rem;color:var(--text-muted);">
+                ${saved.setupLang.toUpperCase()} · ${saved.setupLevel} · Question ${saved.qIndex + 1}/${saved.questions.length}
+                (${remaining} remaining · ${saved.correctCount} correct so far)
+            </div>
+            <div style="margin-top:6px;height:4px;background:var(--bg-surface);border-radius:3px;overflow:hidden;width:200px;max-width:100%;">
+                <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:3px;"></div>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+            <button onclick="resumeSession()" class="btn btn-primary" style="font-size:.8rem;padding:7px 14px;">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Resume
+            </button>
+            <button onclick="discardSession()" class="btn btn-secondary" style="font-size:.8rem;padding:7px 14px;">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">delete</span>Discard
+            </button>
+        </div>
+    `;
+    // Insert before the setup card
+    const setupCard = document.querySelector('.setup-card');
+    if (setupCard) setupCard.parentNode.insertBefore(banner, setupCard);
+}
+
+function resumeSession() {
+    const saved = loadSession();
+    if (!saved) return;
+    // Restore state
+    questions      = saved.questions;
+    qIndex         = saved.qIndex;
+    score          = saved.score;
+    streak         = saved.streak;
+    bestStreak     = saved.bestStreak;
+    multiplier     = saved.multiplier;
+    correctCount   = saved.correctCount;
+    sessionResults = saved.sessionResults;
+    setupLang      = saved.setupLang;
+    setupLevel     = saved.setupLevel;
+    // Remove banner
+    document.getElementById('resumeBanner')?.remove();
+    showScreen('game');
+    showQuestion();
+}
+
+function discardSession() {
+    clearSession();
+    document.getElementById('resumeBanner')?.remove();
+}
 
 function handleKeyboard(e) {
     if (document.querySelector('.screen.active')?.id !== 'screenGame') return;
@@ -879,6 +979,7 @@ async function loadQuestions() {
 
         qIndex = 0; score = 0; streak = 0; bestStreak = 0;
         multiplier = 1; correctCount = 0; sessionResults = [];
+        saveSession();   // save initial state so resume is available immediately
         showQuestion();
     } catch (err) {
         console.error('loadQuestions:', err);
@@ -1316,6 +1417,7 @@ function timeUp() {
 
 function nextQuestion() {
     qIndex++;
+    saveSession();   // persist after every question advance
     showQuestion();
 }
 
@@ -1372,6 +1474,7 @@ async function requestHint(level) {
 // ── End game ──────────────────────────────────────────────────────────────────
 async function endGame() {
     clearInterval(timer);
+    clearSession();   // completed — no resume needed
     showScreen('end');
 
     const total    = questions.length;
@@ -1451,7 +1554,7 @@ async function endGame() {
 }
 
 function quitGame()    { endGame(); }
-function restartGame() { showScreen('setup'); }
+function restartGame() { clearSession(); showScreen('setup'); }
 
 // ── Combo badge ───────────────────────────────────────────────────────────────
 function showCombo() {
