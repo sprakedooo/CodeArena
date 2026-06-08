@@ -305,6 +305,15 @@
     </div>
 </div>
 
+<!-- Quiz results tab -->
+<div id="tab-quizzes" class="tab-panel">
+    <p class="section-title">Classroom Quiz Results</p>
+    <div id="quizResultsProfile">
+        <div class="skeleton-line" style="height:60px;border-radius:10px;margin-bottom:.6rem;"></div>
+        <div class="skeleton-line" style="height:60px;border-radius:10px;"></div>
+    </div>
+</div>
+
 <!-- ══════════ FACULTY TABS ══════════════════════════════════════════════════ -->
 
 <div id="tab-overview" class="tab-panel">
@@ -466,10 +475,46 @@ function buildTabs() {
             <button class="tab-btn active" onclick="switchTab('progress',this)">Progress</button>
             <button class="tab-btn" onclick="switchTab('badges',this)">Achievements</button>
             <button class="tab-btn" onclick="switchTab('certificates',this)">🏅 Certificates</button>
+            <button class="tab-btn" onclick="switchTab('quizzes',this);loadQuizResultsProfile()">📊 Quizzes</button>
             <button class="tab-btn" onclick="switchTab('settings',this)">Settings</button>`;
         document.getElementById('tab-progress').classList.add('active');
         // Hide faculty tabs
         document.getElementById('tab-overview').remove();
+    }
+}
+
+let quizResultsLoaded = false;
+async function loadQuizResultsProfile() {
+    if (quizResultsLoaded) return;
+    quizResultsLoaded = true;
+    const el = document.getElementById('quizResultsProfile');
+    try {
+        const res  = await fetch(`${API}/quiz/my-results-all/list`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const results = data.results || [];
+        if (!results.length) {
+            el.innerHTML = `<div style="text-align:center;padding:2rem 0;color:var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;">quiz</span>
+                You haven't taken any classroom quizzes yet.
+            </div>`;
+            return;
+        }
+        el.innerHTML = results.map(r => `
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+                <div style="width:46px;height:46px;border-radius:10px;background:${r.bestPassed?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="color:${r.bestPassed?'#34d399':'#f87171'};">${r.bestPassed?'check_circle':'cancel'}</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:.88rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.classroomName || 'Classroom Quiz')}</div>
+                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">${new Date(r.completedAt).toLocaleDateString()} · ${r.attempts} attempt${r.attempts!==1?'s':''}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <div style="font-size:1.2rem;font-weight:800;color:${r.bestAccuracy>=70?'#34d399':'#f87171'};">${r.bestAccuracy}%</div>
+                    <div style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;display:inline-block;margin-top:2px;background:${r.bestPassed?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)'};color:${r.bestPassed?'#34d399':'#f87171'};">${r.bestPassed?'PASSED':'FAILED'}</div>
+                </div>
+            </div>`).join('');
+    } catch {
+        el.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem;">Could not load quiz results.</p>';
     }
 }
 

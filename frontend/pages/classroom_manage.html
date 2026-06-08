@@ -650,23 +650,80 @@
             </div>
         </div>
 
-        <!-- Quizzes section -->
+        <!-- Quizzes section — instance-based -->
         <div class="classwork-section">
             <div class="classwork-section-header">
                 <h2 class="classwork-section-title">
                     <span class="material-symbols-outlined">quiz</span>
-                    Quiz Questions
-                    <span class="cw-count" id="quizQCount">0</span>
+                    Quizzes
+                    <span class="cw-count" id="quizInstCount">0</span>
                 </h2>
-                <button class="btn btn-primary" style="font-size:.8rem;" onclick="openQuizQModal()">
-                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Add Question
+                <button class="btn btn-primary" style="font-size:.8rem;" onclick="createQuizInstance()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>New Quiz
                 </button>
             </div>
             <p style="font-size:.78rem;color:var(--text-muted);margin:-6px 0 14px;">
-                Build your quiz here. Students take it as a self-paced quiz from their classroom page.
+                Each quiz is a separate instance — past quizzes and their results are preserved.
             </p>
-            <div id="quizQList">
-                <div class="loading-text">Loading quiz questions…</div>
+
+            <!-- Instance list -->
+            <div id="quizInstanceList"><div class="loading-text">Loading quizzes…</div></div>
+
+            <!-- Per-instance editor panel (shown when an instance is selected) -->
+            <div id="quizInstancePanel" style="display:none;margin-top:16px;background:var(--bg-surface);border:1px solid var(--primary);border-radius:12px;padding:16px;">
+                <!-- Panel header -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                    <div>
+                        <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:3px;">Managing</div>
+                        <div style="font-size:.95rem;font-weight:700;color:var(--text);" id="panelTitle">—</div>
+                    </div>
+                    <button onclick="closeInstancePanel()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <!-- Schedule -->
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:10px;">
+                        <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">schedule</span> Schedule &amp; Deadline
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:flex-end;">
+                        <div>
+                            <label style="font-size:.65rem;color:var(--text-muted);display:block;margin-bottom:3px;">Available From</label>
+                            <input type="datetime-local" id="quizStartAt" class="form-input" style="font-size:.8rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:.65rem;color:var(--text-muted);display:block;margin-bottom:3px;">Deadline</label>
+                            <input type="datetime-local" id="quizDeadline" class="form-input" style="font-size:.8rem;">
+                        </div>
+                        <button class="btn btn-secondary" style="font-size:.78rem;white-space:nowrap;" onclick="saveQuizSchedule()">
+                            <span class="material-symbols-outlined" style="font-size:.85rem;">save</span>Save
+                        </button>
+                    </div>
+                    <p style="font-size:.7rem;color:var(--text-muted);margin:7px 0 0;" id="scheduleStatusText">No schedule set — quiz is always available.</p>
+                </div>
+
+                <!-- Questions sub-header -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;">
+                        Questions <span id="quizQCount" style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:1px 7px;font-size:.7rem;color:var(--text);">0</span>
+                    </span>
+                    <button class="btn btn-primary" style="font-size:.75rem;" onclick="openQuizQModal()">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;">add</span>Add Question
+                    </button>
+                </div>
+                <div id="quizQList"><div class="loading-text">No questions yet.</div></div>
+
+                <!-- Results sub-header -->
+                <div style="margin-top:16px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                        <span style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;">Student Results</span>
+                        <button onclick="loadQuizResults()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);" title="Refresh">
+                            <span class="material-symbols-outlined" style="font-size:.85rem;">refresh</span>
+                        </button>
+                    </div>
+                    <div id="quizResultsList"><p style="font-size:.78rem;color:var(--text-muted);">No results yet.</p></div>
+                </div>
             </div>
         </div>
 
@@ -954,43 +1011,263 @@
         document.body.appendChild(t); setTimeout(()=>t.remove(),2400);
     }
 
-    // ── Quiz Questions CRUD ───────────────────────────────────────────────────
-    let quizQAll = []; // local cache
+    // ── Quiz Instance management ──────────────────────────────────────────────
+    let quizQAll   = [];    // questions cache for the active instance
+    let activeIid  = null;  // currently open instance ID
 
-    async function loadQuizQuestions() {
-        const lang  = classroomData?.language || 'python';
-        const el    = document.getElementById('quizQList');
-        el.innerHTML = '<div class="loading-text">Loading quiz questions…</div>';
+    // Convert ISO string → datetime-local value
+    function toLocalInput(iso) {
+        if (!iso) return '';
         try {
-            // /all returns every question for this language across all levels,
-            // from the same store (DB or memory) that Add/Edit/Delete write to.
-            const res  = await fetch(`${API}/questions/all?language=${lang}`, { headers: getAuthHeaders() });
+            const d = new Date(iso);
+            const p = n => String(n).padStart(2,'0');
+            return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+        } catch { return ''; }
+    }
+
+    // Status chip HTML
+    function statusChip(status) {
+        const cfg = {
+            open:      { color:'#34d399', bg:'rgba(16,185,129,.12)', label:'Open'      },
+            scheduled: { color:'#fbbf24', bg:'rgba(251,191,36,.12)',  label:'Scheduled' },
+            closed:    { color:'#94a3b8', bg:'rgba(148,163,184,.12)', label:'Closed'   },
+        };
+        const c = cfg[status] || cfg.closed;
+        return `<span style="font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;background:${c.bg};color:${c.color};">${c.label}</span>`;
+    }
+
+    // ── Load & render instance list ───────────────────────────────────────────
+    async function loadQuizInstances() {
+        const el = document.getElementById('quizInstanceList');
+        el.innerHTML = '<div class="loading-text">Loading quizzes…</div>';
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances`, { headers: getAuthHeaders() });
             const data = await res.json();
-            quizQAll   = data.questions || data || [];
-            renderQuizQuestions();
+            const insts = data.instances || [];
+            document.getElementById('quizInstCount').textContent = insts.length;
+            if (!insts.length) {
+                el.innerHTML = `<div class="stream-empty" style="padding:28px 0;">
+                    <span class="material-symbols-outlined">quiz</span>
+                    <p>No quizzes yet. Click <strong>New Quiz</strong> to create one.</p>
+                </div>`;
+                return;
+            }
+            el.innerHTML = insts.map(inst => `
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:${activeIid===inst.id?'var(--bg-surface)':'var(--bg-card)'};border:1px solid ${activeIid===inst.id?'var(--primary)':'var(--border)'};border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onclick="selectInstance('${inst.id}')">
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+                            <span style="font-size:.9rem;font-weight:700;color:var(--text);">${escHtml(inst.title)}</span>
+                            ${statusChip(inst.status)}
+                        </div>
+                        <div style="font-size:.72rem;color:var(--text-muted);">
+                            ${inst.questionCount} question${inst.questionCount!==1?'s':''} &nbsp;·&nbsp;
+                            ${inst.resultCount} result${inst.resultCount!==1?'s':''} &nbsp;·&nbsp;
+                            Created ${new Date(inst.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-shrink:0;">
+                        <button onclick="event.stopPropagation();renameInstance('${inst.id}','${inst.title.replace(/'/g,'')}')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 8px;cursor:pointer;color:var(--text-muted);" title="Rename">
+                            <span class="material-symbols-outlined" style="font-size:.9rem;">edit</span>
+                        </button>
+                        <button onclick="event.stopPropagation();confirmDeleteInstance('${inst.id}','${inst.title.replace(/'/g,'')}')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 8px;cursor:pointer;color:var(--danger);" title="Delete quiz">
+                            <span class="material-symbols-outlined" style="font-size:.9rem;">delete</span>
+                        </button>
+                    </div>
+                </div>`).join('');
         } catch {
-            el.innerHTML = '<div class="stream-empty" style="padding:24px 0;"><span class="material-symbols-outlined">error</span><p>Failed to load questions.</p></div>';
+            el.innerHTML = '<div class="stream-empty" style="padding:24px 0;"><span class="material-symbols-outlined">error</span><p>Failed to load quizzes.</p></div>';
+        }
+    }
+    // alias used in page-init call
+    function loadQuizQuestions() { return loadQuizInstances(); }
+
+    // ── Create new instance ───────────────────────────────────────────────────
+    async function createQuizInstance() {
+        const title = prompt('Quiz title (e.g. "Week 1 Quiz"):');
+        if (!title || !title.trim()) return;
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances`, {
+                method: 'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({ title: title.trim() })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to create');
+            showToast('Quiz created!');
+            await loadQuizInstances();
+            selectInstance(data.instance.id); // open it immediately
+        } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // ── Rename instance ───────────────────────────────────────────────────────
+    async function renameInstance(iid, currentTitle) {
+        const title = prompt('Rename quiz:', currentTitle);
+        if (!title || !title.trim() || title.trim() === currentTitle) return;
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${iid}`, {
+                method: 'PUT', headers: getAuthHeaders(),
+                body: JSON.stringify({ title: title.trim() })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to rename');
+            if (activeIid === iid) document.getElementById('panelTitle').textContent = title.trim();
+            showToast('Renamed!');
+            await loadQuizInstances();
+        } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // ── Delete instance ───────────────────────────────────────────────────────
+    function confirmDeleteInstance(iid, title) {
+        if (!confirm(`Delete quiz "${title}" and all its results? This cannot be undone.`)) return;
+        deleteInstance(iid);
+    }
+    async function deleteInstance(iid) {
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${iid}`, { method:'DELETE', headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to delete');
+            showToast('Quiz deleted.');
+            if (activeIid === iid) closeInstancePanel();
+            await loadQuizInstances();
+        } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // ── Open instance editor panel ────────────────────────────────────────────
+    async function selectInstance(iid) {
+        activeIid = iid;
+        document.getElementById('quizInstancePanel').style.display = '';
+        document.getElementById('panelTitle').textContent = 'Loading…';
+        quizQAll = [];
+        renderQuizQuestions();
+        document.getElementById('quizResultsList').innerHTML = '<div class="loading-text">Loading…</div>';
+        // Highlight selected row
+        await loadQuizInstances(); // re-render list with highlight
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${iid}`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Not found');
+            const inst = data.instance;
+            document.getElementById('panelTitle').textContent = inst.title;
+            // Populate schedule
+            document.getElementById('quizStartAt').value  = toLocalInput(inst.schedule?.startAt);
+            document.getElementById('quizDeadline').value = toLocalInput(inst.schedule?.deadline);
+            updateScheduleStatus(inst.schedule || {});
+            quizQAll = inst.questions || [];
+            renderQuizQuestions();
+        } catch (e) { showToast(e.message, 'error'); }
+        await loadQuizResults();
+        // Scroll to panel
+        document.getElementById('quizInstancePanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
+    function closeInstancePanel() {
+        activeIid = null;
+        document.getElementById('quizInstancePanel').style.display = 'none';
+        loadQuizInstances(); // refresh list to remove highlight
+    }
+
+    // ── Schedule ──────────────────────────────────────────────────────────────
+    function updateScheduleStatus(sched) {
+        const el = document.getElementById('scheduleStatusText');
+        if (!el) return;
+        if (sched.startAt && sched.deadline) {
+            el.textContent = `Open: ${new Date(sched.startAt).toLocaleString()} → Deadline: ${new Date(sched.deadline).toLocaleString()}`;
+        } else if (sched.startAt) {
+            el.textContent = `Opens: ${new Date(sched.startAt).toLocaleString()} (no deadline)`;
+        } else if (sched.deadline) {
+            el.textContent = `Deadline: ${new Date(sched.deadline).toLocaleString()} (open now)`;
+        } else {
+            el.textContent = 'No schedule set — quiz is always available.';
         }
     }
 
+    async function saveQuizSchedule() {
+        if (!activeIid) return;
+        const startVal    = document.getElementById('quizStartAt').value;
+        const deadVal     = document.getElementById('quizDeadline').value;
+        const startISO    = startVal  ? new Date(startVal).toISOString()  : null;
+        const deadlineISO = deadVal   ? new Date(deadVal).toISOString()   : null;
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${activeIid}/schedule`, {
+                method: 'PATCH', headers: getAuthHeaders(),
+                body: JSON.stringify({ startAt: startISO, deadline: deadlineISO })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to save');
+            updateScheduleStatus(data.schedule || {});
+            showToast('Schedule saved!');
+            await loadQuizInstances(); // refresh status chip
+        } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // ── Results ───────────────────────────────────────────────────────────────
+    async function loadQuizResults() {
+        if (!activeIid) return;
+        const el = document.getElementById('quizResultsList');
+        try {
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${activeIid}/results`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            renderQuizResults(data.results || []);
+        } catch {
+            el.innerHTML = '<p style="font-size:.78rem;color:var(--text-muted);">Could not load results.</p>';
+        }
+    }
+
+    function renderQuizResults(results) {
+        const el = document.getElementById('quizResultsList');
+        if (!results.length) {
+            el.innerHTML = '<p style="font-size:.78rem;color:var(--text-muted);padding:4px 0;">No students have taken this quiz yet.</p>';
+            return;
+        }
+        el.innerHTML = `<div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+                <thead>
+                    <tr style="border-bottom:2px solid var(--border);">
+                        <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;">Student</th>
+                        <th style="text-align:center;padding:8px;color:var(--text-muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;">Score</th>
+                        <th style="text-align:center;padding:8px;color:var(--text-muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;">Best</th>
+                        <th style="text-align:center;padding:8px;color:var(--text-muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;">Result</th>
+                        <th style="text-align:center;padding:8px;color:var(--text-muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;">Attempts</th>
+                        <th style="text-align:right;padding:8px 10px;color:var(--text-muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;">Last Taken</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${results.map(r => `
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <td style="padding:9px 10px;font-weight:600;">${escHtml(r.userName)}</td>
+                            <td style="text-align:center;padding:9px 8px;font-weight:700;color:${r.accuracy>=70?'#34d399':'#f87171'};">${r.accuracy}%</td>
+                            <td style="text-align:center;padding:9px 8px;font-weight:700;color:${r.bestAccuracy>=70?'#34d399':'#94a3b8'};">${r.bestAccuracy}%</td>
+                            <td style="text-align:center;padding:9px 8px;">
+                                <span style="font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:20px;background:${r.bestPassed?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)'};color:${r.bestPassed?'#34d399':'#f87171'};">
+                                    ${r.bestPassed?'PASSED':'FAILED'}
+                                </span>
+                            </td>
+                            <td style="text-align:center;padding:9px 8px;color:var(--text-muted);">${r.attempts}</td>
+                            <td style="text-align:right;padding:9px 10px;color:var(--text-muted);">${new Date(r.completedAt).toLocaleDateString()}</td>
+                        </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>`;
+    }
+
+    // ── Questions CRUD ────────────────────────────────────────────────────────
     function renderQuizQuestions() {
         const el = document.getElementById('quizQList');
         document.getElementById('quizQCount').textContent = quizQAll.length;
         if (!quizQAll.length) {
             el.innerHTML = `<div class="stream-empty" style="padding:28px 0;">
                 <span class="material-symbols-outlined">quiz</span>
-                <p>No questions yet for <strong>${escHtml(classroomData?.language||'this language')}</strong>. Click <strong>Add Question</strong> to create one.</p>
+                <p>No questions yet. Click <strong>Add Question</strong> to create one.</p>
             </div>`;
             return;
         }
-        const lvlColor = { beginner:'#10b981', intermediate:'#fbbf24', advanced:'#ef4444' };
+        const lvlColor  = { beginner:'#10b981', intermediate:'#fbbf24', advanced:'#ef4444' };
         const typeLabel = { multiple_choice:'MCQ', fill_blank:'Fill Blank', output_prediction:'Output', code_ordering:'Code Order' };
         el.innerHTML = quizQAll.map((q, i) => {
             const id   = q.question_id || q.id || i;
             const lvl  = q.level || q.difficulty || 'beginner';
             const type = q.questionType || q.question_type || 'multiple_choice';
             const text = escHtml(q.question || q.question_text || q.text || '—');
-            return `<div class="assignment-row" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
+            return `<div class="assignment-row" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${text}</div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -999,10 +1276,10 @@
                     </div>
                 </div>
                 <div style="display:flex;gap:6px;flex-shrink:0;">
-                    <button onclick="editQuizQ(${id})" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;transition:border-color .15s;" title="Edit">
+                    <button onclick="editQuizQ(${id})" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;" title="Edit">
                         <span class="material-symbols-outlined" style="font-size:.95rem;">edit</span>
                     </button>
-                    <button onclick="confirmDeleteQuizQ(${id},'${text.replace(/'/g,'')}')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--danger);display:flex;align-items:center;transition:border-color .15s;" title="Delete">
+                    <button onclick="confirmDeleteQuizQ(${id},'${text.replace(/'/g,'')}')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;color:var(--danger);display:flex;align-items:center;" title="Delete">
                         <span class="material-symbols-outlined" style="font-size:.95rem;">delete</span>
                     </button>
                 </div>
@@ -1011,27 +1288,22 @@
     }
 
     function openQuizQModal(q = null) {
+        if (!activeIid) { showToast('Select a quiz instance first.', 'error'); return; }
         document.getElementById('quizQModalTitle').textContent = q ? 'Edit Question' : 'Add Question';
         document.getElementById('quizQEditId').value = q ? (q.question_id || q.id || '') : '';
         document.getElementById('qqText').value   = q?.question || q?.question_text || '';
         const type = q?.questionType || q?.question_type || 'multiple_choice';
         document.getElementById('qqType').value   = type;
         document.getElementById('qqLevel').value  = q?.level || q?.difficulty || 'beginner';
-
-        // Options are stored as an array: ['A) text', 'B) text', ...]
         const opts = Array.isArray(q?.options) ? q.options : [];
-        const getOpt = (letter) => {
-            const found = opts.find(o => typeof o === 'string' && o.startsWith(letter + ')'));
-            return found ? found.slice(2).trim() : '';
-        };
+        const getOpt = letter => { const f = opts.find(o => typeof o==='string'&&o.startsWith(letter+')')); return f?f.slice(2).trim():''; };
         document.getElementById('qqOptA').value = getOpt('A');
         document.getElementById('qqOptB').value = getOpt('B');
         document.getElementById('qqOptC').value = getOpt('C');
         document.getElementById('qqOptD').value = getOpt('D');
-
         const ca = q?.correctAnswer || q?.correct_answer || q?.answer || '';
         if (type === 'multiple_choice') {
-            document.getElementById('qqAnswerLetter').value = (/^[A-D]$/i.test(ca) ? ca.toUpperCase() : 'A');
+            document.getElementById('qqAnswerLetter').value = (/^[A-D]$/i.test(ca)?ca.toUpperCase():'A');
         } else {
             document.getElementById('qqAnswerText').value = ca;
         }
@@ -1044,9 +1316,9 @@
 
     function toggleQuizQOptions() {
         const isMCQ = document.getElementById('qqType').value === 'multiple_choice';
-        document.getElementById('qqOptionsWrap').style.display    = isMCQ ? '' : 'none';
-        document.getElementById('qqAnswerLetterWrap').style.display = isMCQ ? '' : 'none';
-        document.getElementById('qqAnswerTextWrap').style.display   = isMCQ ? 'none' : '';
+        document.getElementById('qqOptionsWrap').style.display      = isMCQ ? '' : 'none';
+        document.getElementById('qqAnswerLetterWrap').style.display  = isMCQ ? '' : 'none';
+        document.getElementById('qqAnswerTextWrap').style.display    = isMCQ ? 'none' : '';
     }
 
     function editQuizQ(id) {
@@ -1061,60 +1333,53 @@
     }
 
     async function saveQuizQ() {
-        const lang  = classroomData?.language || 'python';
-        const editId = document.getElementById('quizQEditId').value;
-        const text  = document.getElementById('qqText').value.trim();
-        const type  = document.getElementById('qqType').value;
-        const level = document.getElementById('qqLevel').value;
+        if (!activeIid) { showToast('No quiz selected.', 'error'); return; }
+        const lang    = classroomData?.language || 'python';
+        const editId  = document.getElementById('quizQEditId').value;
+        const text    = document.getElementById('qqText').value.trim();
+        const type    = document.getElementById('qqType').value;
+        const level   = document.getElementById('qqLevel').value;
         if (!text) { showToast('Question text is required.', 'error'); return; }
 
-        let options = [];
-        let correctAnswer = '';
+        let options = [], correctAnswer = '';
         if (type === 'multiple_choice') {
             const a = document.getElementById('qqOptA').value.trim();
             const b = document.getElementById('qqOptB').value.trim();
             const c = document.getElementById('qqOptC').value.trim();
             const d = document.getElementById('qqOptD').value.trim();
-            if (!a || !b || !c || !d) { showToast('All 4 options are required for multiple choice.', 'error'); return; }
-            // Canonical array format used across the whole system
+            if (!a||!b||!c||!d) { showToast('All 4 options are required for multiple choice.', 'error'); return; }
             options = [`A) ${a}`, `B) ${b}`, `C) ${c}`, `D) ${d}`];
             correctAnswer = document.getElementById('qqAnswerLetter').value;
         } else {
             correctAnswer = document.getElementById('qqAnswerText').value.trim();
-            if (!correctAnswer) { showToast('Correct answer text is required.', 'error'); return; }
+            if (!correctAnswer) { showToast('Correct answer is required.', 'error'); return; }
         }
 
-        const payload = {
-            question: text,
-            questionType: type,
-            level,
-            language: lang,
-            topic: 'Quiz',
-            correctAnswer,
-            options,
-            hint: document.getElementById('qqHint').value.trim() || '',
-        };
+        const payload = { question: text, questionType: type, level, language: lang, topic: 'Quiz', correctAnswer, options, hint: document.getElementById('qqHint').value.trim()||'' };
 
         try {
-            const url    = editId ? `${API}/questions/${editId}` : `${API}/questions`;
+            const url    = editId
+                ? `${API}/quiz/${classroomId}/instances/${activeIid}/questions/${editId}`
+                : `${API}/quiz/${classroomId}/instances/${activeIid}/questions`;
             const method = editId ? 'PUT' : 'POST';
             const res    = await fetch(url, { method, headers: getAuthHeaders(), body: JSON.stringify(payload) });
             const data   = await res.json();
             if (!res.ok) throw new Error(data.message || 'Failed to save');
             closeQuizQModal();
             showToast(editId ? 'Question updated!' : 'Question added!');
-            await loadQuizQuestions();
+            await selectInstance(activeIid);
         } catch (e) { showToast(e.message, 'error'); }
     }
 
     async function deleteQuizQ(id) {
         document.getElementById('quizQDeleteModal').classList.remove('open');
+        if (!activeIid) return;
         try {
-            const res  = await fetch(`${API}/questions/${id}`, { method:'DELETE', headers: getAuthHeaders() });
+            const res  = await fetch(`${API}/quiz/${classroomId}/instances/${activeIid}/questions/${id}`, { method:'DELETE', headers: getAuthHeaders() });
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || 'Failed to delete');
             showToast('Question deleted.');
-            await loadQuizQuestions();
+            await selectInstance(activeIid);
         } catch (e) { showToast(e.message, 'error'); }
     }
 

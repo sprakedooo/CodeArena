@@ -1212,62 +1212,126 @@ function showToast(msg, type) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ── Quiz card (self-paced) ─────────────────────────────────────────────────────
-async function fetchClassroomQuestions(lang) {
-    // Use the public per-level endpoint (students can't hit the faculty-only /all)
-    const levels = ['beginner', 'intermediate', 'advanced'];
-    const results = await Promise.all(levels.map(lvl =>
-        fetch(`${API}/questions/${lang}/${lvl}`, { headers: getAuthHeaders() })
-            .then(r => r.json()).then(d => d.questions || d || []).catch(() => [])
-    ));
-    return results.flat();
-}
-
+// ── Quiz instances (classroom-exclusive, one card per instance) ────────────────
 async function loadQuizCard() {
-    const lang = classroomLang || 'python';
     const card = document.getElementById('quizCard');
     try {
-        const qs = await fetchClassroomQuestions(lang);
-        document.getElementById('quizCount').textContent = qs.length;
+        const res  = await fetch(`${API}/quiz/${classroomId}/instances`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        const insts = data.instances || [];
 
-        if (!qs.length) {
+        document.getElementById('quizCount').textContent = insts.length;
+
+        if (!insts.length) {
             card.innerHTML = `<div class="lesson-row" style="cursor:default;opacity:.7;">
                 <div class="lesson-row-icon"><span class="material-symbols-outlined">quiz</span></div>
                 <div class="lesson-row-body">
-                    <div class="lesson-row-title">No quiz available yet</div>
-                    <div class="lesson-row-meta">Your instructor hasn't added quiz questions.</div>
+                    <div class="lesson-row-title">No quizzes yet</div>
+                    <div class="lesson-row-meta">Your instructor hasn't created any quizzes.</div>
                 </div>
             </div>`;
             return;
         }
 
-        const done = localStorage.getItem(`quizScore_${classroomId}`);
-        const scoreBadge = done
-            ? `<span class="done-badge" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25);color:#34d399;">Best: ${done}%</span>`
-            : '';
-        card.innerHTML = `<div class="lesson-row" style="cursor:pointer;" onclick="startQuiz()">
-            <div class="lesson-row-icon"><span class="material-symbols-outlined">quiz</span></div>
-            <div class="lesson-row-body">
-                <div class="lesson-row-title">Classroom Quiz</div>
-                <div class="lesson-row-meta">${qs.length} question${qs.length!==1?'s':''} · ${lang}</div>
-            </div>
-            <div class="lesson-row-actions" style="display:flex;align-items:center;gap:10px;">
-                ${scoreBadge}
-                <button class="btn btn-primary" style="font-size:.8rem;" onclick="event.stopPropagation();startQuiz()">
-                    <span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>Take Quiz
-                </button>
-            </div>
-        </div>`;
+        // Render each instance with its own status + Take Quiz button
+        const rows = await Promise.all(insts.map(inst => renderInstCard(inst)));
+        card.innerHTML = rows.join('');
     } catch {
         card.innerHTML = `<div class="lesson-row" style="cursor:default;opacity:.7;">
             <div class="lesson-row-icon"><span class="material-symbols-outlined">error</span></div>
-            <div class="lesson-row-body"><div class="lesson-row-title">Couldn't load quiz</div></div>
+            <div class="lesson-row-body"><div class="lesson-row-title">Couldn't load quizzes</div></div>
         </div>`;
     }
 }
 
-function startQuiz() {
-    window.location.href = `classroom_quiz.html?cid=${classroomId}&lang=${classroomLang || 'python'}`;
+async function renderInstCard(inst) {
+    const now      = Date.now();
+    const sched    = inst.schedule || {};
+    const startAt  = sched.startAt  ? new Date(sched.startAt).getTime()  : null;
+    const deadline = sched.deadline ? new Date(sched.deadline).getTime() : null;
+    const iid      = inst.id;
+    const title    = inst.title || 'Quiz';
+    const qCount   = inst.questionCount || 0;
+
+    if (!qCount) {
+        return `<div class="lesson-row" style="cursor:default;opacity:.6;margin-bottom:8px;">
+            <div class="lesson-row-icon"><span class="material-symbols-outlined" style="color:#6b7280;">quiz</span></div>
+            <div class="lesson-row-body">
+                <div class="lesson-row-title">${esc(title)}</div>
+                <div class="lesson-row-meta">No questions yet</div>
+            </div>
+        </div>`;
+    }
+
+    if (startAt && now < startAt) {
+        return `<div class="lesson-row" style="cursor:default;margin-bottom:8px;">
+            <div class="lesson-row-icon"><span class="material-symbols-outlined" style="color:#f59e0b;">schedule</span></div>
+            <div class="lesson-row-body">
+                <div class="lesson-row-title">${esc(title)}</div>
+                <div class="lesson-row-meta">Opens ${new Date(sched.startAt).toLocaleString()} · ${qCount} question${qCount!==1?'s':''}</div>
+            </div>
+            <div class="lesson-row-actions">
+                <button class="btn btn-secondary" disabled style="font-size:.8rem;opacity:.5;cursor:not-allowed;">Not yet open</button>
+            </div>
+        </div>`;
+    }
+
+    if (deadline && now > deadline) {
+        // Fetch the student's score for closed quiz
+        let prevResult = null;
+        try {
+            const rr = await fetch(`${API}/quiz/${classroomId}/instances/${iid}/my-result`, { headers: getAuthHeaders() });
+            const rd = await rr.json();
+            prevResult = rd.result || null;
+        } catch {}
+        const scoreBadge = prevResult
+            ? `<span class="done-badge" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25);color:${prevResult.bestPassed?'#34d399':'#f87171'};">Best: ${prevResult.bestAccuracy}%</span>`
+            : '';
+        return `<div class="lesson-row" style="cursor:default;margin-bottom:8px;">
+            <div class="lesson-row-icon"><span class="material-symbols-outlined" style="color:#94a3b8;">lock_clock</span></div>
+            <div class="lesson-row-body">
+                <div class="lesson-row-title">${esc(title)}</div>
+                <div class="lesson-row-meta">Closed · deadline was ${new Date(sched.deadline).toLocaleString()}</div>
+            </div>
+            <div class="lesson-row-actions" style="display:flex;align-items:center;gap:10px;">
+                ${scoreBadge}
+                <button class="btn btn-secondary" disabled style="font-size:.8rem;opacity:.5;cursor:not-allowed;">Closed</button>
+            </div>
+        </div>`;
+    }
+
+    // Open quiz — fetch previous result
+    let prevResult = null;
+    try {
+        const rr = await fetch(`${API}/quiz/${classroomId}/instances/${iid}/my-result`, { headers: getAuthHeaders() });
+        const rd = await rr.json();
+        prevResult = rd.result || null;
+    } catch {}
+
+    const scoreBadge = prevResult
+        ? `<span class="done-badge" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25);color:${prevResult.bestPassed?'#34d399':'#f87171'};">Best: ${prevResult.bestAccuracy}%</span>`
+        : '';
+    const deadlineTxt = deadline
+        ? `<span style="color:#f59e0b;font-size:.72rem;"> · Deadline: ${new Date(sched.deadline).toLocaleDateString()}</span>`
+        : '';
+
+    return `<div class="lesson-row" style="cursor:pointer;margin-bottom:8px;" onclick="startQuiz('${iid}')">
+        <div class="lesson-row-icon"><span class="material-symbols-outlined" style="color:#7c3aed;">quiz</span></div>
+        <div class="lesson-row-body">
+            <div class="lesson-row-title">${esc(title)}</div>
+            <div class="lesson-row-meta">${qCount} question${qCount!==1?'s':''}${deadlineTxt}</div>
+        </div>
+        <div class="lesson-row-actions" style="display:flex;align-items:center;gap:10px;">
+            ${scoreBadge}
+            <button class="btn btn-primary" style="font-size:.8rem;" onclick="event.stopPropagation();startQuiz('${iid}')">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">play_arrow</span>${prevResult ? 'Retry' : 'Take Quiz'}
+            </button>
+        </div>
+    </div>`;
+}
+
+function startQuiz(iid) {
+    window.location.href = `classroom_quiz.html?cid=${classroomId}&iid=${iid}`;
 }
 </script>
 

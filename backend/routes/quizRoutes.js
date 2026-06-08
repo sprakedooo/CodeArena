@@ -1,38 +1,80 @@
 /**
- * ============================================================================
- * QUIZ ROUTES (quizRoutes.js)
- * ============================================================================
+ * quizRoutes.js  — Classroom quiz instances
  *
- * PURPOSE:
- * Handles quiz operations - retrieval, submission, and automatic scoring.
- * Integrates with AI service to provide intelligent hints based on performance.
+ * Each classroom can have many quiz instances (Week 1 Quiz, Midterm, etc.).
+ * Creating a new quiz never erases old ones — each is stored independently.
+ * Data is in-memory (no DB required).
  *
- * ENDPOINTS:
- * GET  /api/quizzes              - Get all quizzes
- * GET  /api/quizzes/:id          - Get specific quiz with questions
- * POST /api/quizzes/submit       - Submit quiz answers and get score
- * POST /api/quizzes              - Create new quiz (Faculty only)
- *
- * NOTE FOR PANELISTS:
- * This module demonstrates the integration point for AI-powered hints.
- * The AI service is currently mocked but shows the intended functionality.
- * ============================================================================
+ * Endpoints  (all at /api/quiz/…):
+ *   GET    /my-results-all/list                     — student: all results ever
+ *   GET    /:cid/instances                           — list instances for classroom
+ *   POST   /:cid/instances                           — faculty: create instance
+ *   GET    /:cid/instances/:iid                      — get instance (q's + schedule)
+ *   PUT    /:cid/instances/:iid                      — faculty: rename instance
+ *   DELETE /:cid/instances/:iid                      — faculty: delete instance
+ *   POST   /:cid/instances/:iid/questions            — add question
+ *   PUT    /:cid/instances/:iid/questions/:qid       — edit question
+ *   DELETE /:cid/instances/:iid/questions/:qid       — delete question
+ *   PATCH  /:cid/instances/:iid/schedule             — set start/deadline
+ *   POST   /:cid/instances/:iid/submit               — student: submit result
+ *   GET    /:cid/instances/:iid/results              — faculty: all student results
+ *   GET    /:cid/instances/:iid/my-result            — student: own best result
  */
 
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
+const { authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
 
-// Import AI service for generating hints
-const aiService = require('../services/aiService');
+// ── In-memory stores ──────────────────────────────────────────────────────────
+// Map<instanceId, QuizInstance>
+const instances = new Map();
+// Map<`${instanceId}_${userId}`, QuizResult>
+const results   = new Map();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MOCK DATA: Sample quizzes with questions
-// ─────────────────────────────────────────────────────────────────────────────
+let nextInstId = 1000;   // instance IDs
+let nextQId    = 10000;  // question IDs (globally unique to avoid collisions)
 
-/**
- * Quiz data structure with multiple-choice questions.
- * Each quiz is linked to a lesson for sequential learning.
- */
+function makeInstance(cid, title, facultyId) {
+    const iid = String(nextInstId++);
+    const inst = {
+        id:          iid,
+        classroomId: String(cid),
+        title:       title || `Quiz ${new Date().toLocaleDateString()}`,
+        questions:   [],
+        schedule:    { startAt: null, deadline: null },
+        createdAt:   new Date().toISOString(),
+        createdBy:   facultyId,
+    };
+    instances.set(iid, inst);
+    return inst;
+}
+
+function getInstancesForClassroom(cid) {
+    const out = [];
+    for (const inst of instances.values()) {
+        if (String(inst.classroomId) === String(cid)) out.push(inst);
+    }
+    return out.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+function instanceStatus(inst) {
+    const now      = Date.now();
+    const startAt  = inst.schedule.startAt  ? new Date(inst.schedule.startAt).getTime()  : null;
+    const deadline = inst.schedule.deadline ? new Date(inst.schedule.deadline).getTime() : null;
+    if (startAt && now < startAt)  return 'scheduled';
+    if (deadline && now > deadline) return 'closed';
+    return 'open';
+}
+
+function resultsForInstance(iid) {
+    const out = [];
+    for (const r of results.values()) {
+        if (String(r.instanceId) === String(iid)) out.push(r);
+    }
+    return out.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+}
+
+// ── DEPRECATED mock data (kept to avoid parse errors, replaced below) ─────
 let mockQuizzes = [
     {
         id: 1,
@@ -176,222 +218,164 @@ let mockQuizzes = [
     }
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get All Quizzes
-// GET /api/quizzes
-// ─────────────────────────────────────────────────────────────────────────────
+// ── GET /my-results-all/list  (MUST be before /:cid routes) ──────────────────
+router.get('/my-results-all/list', authMiddleware, (req, res) => {
+    const uid = String(req.user.id);
+    const out = [];
+    for (const r of results.values()) {
+        if (String(r.userId) === uid) out.push(r);
+    }
+    out.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+    return res.json({ success: true, results: out });
+});
 
-/**
- * Returns all available quizzes (without correct answers).
- * Used to display quiz list for students to choose from.
- */
-router.get('/', (req, res) => {
-    // Map quizzes to summary format (hide questions and answers)
-    const quizSummaries = mockQuizzes.map(quiz => ({
-        id: quiz.id,
-        title: quiz.title,
-        lessonId: quiz.lessonId,
-        description: quiz.description,
-        questionCount: quiz.questions.length
+// ── GET /:cid/instances — list all quiz instances ─────────────────────────────
+router.get('/:cid/instances', authMiddleware, (req, res) => {
+    const cid  = String(req.params.cid);
+    const insts = getInstancesForClassroom(cid).map(inst => ({
+        id:          inst.id,
+        title:       inst.title,
+        questionCount: inst.questions.length,
+        schedule:    inst.schedule,
+        status:      instanceStatus(inst),
+        createdAt:   inst.createdAt,
+        resultCount: resultsForInstance(inst.id).length,
     }));
-
-    res.json({
-        success: true,
-        count: quizSummaries.length,
-        quizzes: quizSummaries
-    });
+    return res.json({ success: true, instances: insts });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Get Quiz by ID (For Taking Quiz)
-// GET /api/quizzes/:id
-// ─────────────────────────────────────────────────────────────────────────────
+// ── POST /:cid/instances — faculty: create new instance ──────────────────────
+router.post('/:cid/instances', authMiddleware, requireFaculty, (req, res) => {
+    const cid  = String(req.params.cid);
+    const inst = makeInstance(cid, req.body.title, req.user.id);
+    return res.json({ success: true, instance: { ...inst, status: 'open' } });
+});
 
-/**
- * Returns quiz with questions but WITHOUT correct answers.
- * This is what students see when taking a quiz.
- */
-router.get('/:id', (req, res) => {
-    const quizId = parseInt(req.params.id);
+// ── GET /:cid/instances/:iid — get full instance ──────────────────────────────
+router.get('/:cid/instances/:iid', authMiddleware, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    const isStaff = req.user.role === 'faculty' || req.user.role === 'superadmin';
+    const questions = isStaff
+        ? inst.questions
+        : inst.questions.map(({ correctAnswer, correct_answer, answer, ...rest }) => rest);
+    return res.json({ success: true, instance: { ...inst, questions, status: instanceStatus(inst) } });
+});
 
-    // Find the quiz
-    const quiz = mockQuizzes.find(q => q.id === quizId);
+// ── PUT /:cid/instances/:iid — faculty: rename instance ──────────────────────
+router.put('/:cid/instances/:iid', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    if (req.body.title) inst.title = req.body.title;
+    return res.json({ success: true, instance: inst });
+});
 
-    if (!quiz) {
-        return res.status(404).json({
-            success: false,
-            message: 'Quiz not found'
-        });
+// ── DELETE /:cid/instances/:iid — faculty: delete instance ───────────────────
+router.delete('/:cid/instances/:iid', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    instances.delete(req.params.iid);
+    // Remove associated results
+    for (const key of results.keys()) {
+        if (key.startsWith(`${req.params.iid}_`)) results.delete(key);
     }
+    return res.json({ success: true });
+});
 
-    // Remove correct answers from questions before sending
-    const quizForStudent = {
-        id: quiz.id,
-        title: quiz.title,
-        lessonId: quiz.lessonId,
-        description: quiz.description,
-        questions: quiz.questions.map(q => ({
-            id: q.id,
-            question: q.question,
-            options: q.options
-            // NOTE: correctAnswer is NOT included
-        }))
+// ── POST /:cid/instances/:iid/questions — add question ───────────────────────
+router.post('/:cid/instances/:iid/questions', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    const q = { ...req.body, id: nextQId++, instance_id: req.params.iid };
+    inst.questions.push(q);
+    return res.json({ success: true, question: q });
+});
+
+// ── PUT /:cid/instances/:iid/questions/:qid — edit question ──────────────────
+router.put('/:cid/instances/:iid/questions/:qid', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    const qid = parseInt(req.params.qid, 10);
+    const i   = inst.questions.findIndex(q => q.id === qid);
+    if (i === -1) return res.status(404).json({ success: false, message: 'Question not found.' });
+    inst.questions[i] = { ...inst.questions[i], ...req.body, id: qid, instance_id: req.params.iid };
+    return res.json({ success: true, question: inst.questions[i] });
+});
+
+// ── DELETE /:cid/instances/:iid/questions/:qid — delete question ─────────────
+router.delete('/:cid/instances/:iid/questions/:qid', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    const qid    = parseInt(req.params.qid, 10);
+    const before = inst.questions.length;
+    inst.questions = inst.questions.filter(q => q.id !== qid);
+    if (inst.questions.length === before)
+        return res.status(404).json({ success: false, message: 'Question not found.' });
+    return res.json({ success: true });
+});
+
+// ── PATCH /:cid/instances/:iid/schedule — set start/deadline ─────────────────
+router.patch('/:cid/instances/:iid/schedule', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    const { startAt, deadline } = req.body;
+    inst.schedule.startAt  = startAt  || null;
+    inst.schedule.deadline = deadline || null;
+    return res.json({ success: true, schedule: inst.schedule, status: instanceStatus(inst) });
+});
+
+// ── POST /:cid/instances/:iid/submit — student: submit result ────────────────
+router.post('/:cid/instances/:iid/submit', authMiddleware, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+
+    const uid  = String(req.user.id);
+    const { correct, total, accuracy, passed } = req.body;
+    const key  = `${req.params.iid}_${uid}`;
+    const prev = results.get(key);
+    const attempts     = (prev?.attempts || 0) + 1;
+    const bestAccuracy = Math.max(Number(accuracy) || 0, prev?.bestAccuracy || 0);
+
+    const result = {
+        userId:        uid,
+        userName:      req.user.fullName || req.user.name || 'Student',
+        instanceId:    req.params.iid,
+        instanceTitle: inst.title,
+        classroomId:   String(req.params.cid),
+        correct:       Number(correct)  || 0,
+        total:         Number(total)    || 0,
+        accuracy:      Number(accuracy) || 0,
+        bestAccuracy,
+        passed:        !!passed,
+        bestPassed:    bestAccuracy >= 70,
+        attempts,
+        completedAt:   new Date().toISOString(),
     };
-
-    res.json({
-        success: true,
-        quiz: quizForStudent
-    });
+    results.set(key, result);
+    return res.json({ success: true, result });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Submit Quiz Answers
-// POST /api/quizzes/submit
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Processes quiz submission, calculates score, and returns AI-powered hints.
- *
- * Request Body Expected:
- * {
- *   "quizId": 1,
- *   "studentId": 1,
- *   "answers": [
- *     { "questionId": 1, "answer": "B" },
- *     { "questionId": 2, "answer": "C" }
- *   ]
- * }
- *
- * THIS IS WHERE AI INTEGRATION HAPPENS:
- * Based on the score, the AI service generates appropriate hints
- * to help the student improve.
- */
-router.post('/submit', (req, res) => {
-    const { quizId, studentId, answers } = req.body;
-
-    // VALIDATION: Check required fields
-    if (!quizId || !studentId || !answers) {
-        return res.status(400).json({
-            success: false,
-            message: 'Required: quizId, studentId, and answers array'
-        });
-    }
-
-    // FIND: The quiz being submitted
-    const quiz = mockQuizzes.find(q => q.id === quizId);
-
-    if (!quiz) {
-        return res.status(404).json({
-            success: false,
-            message: 'Quiz not found'
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // SCORING: Calculate quiz results
-    // ─────────────────────────────────────────────────────────────────────────
-
-    let correctCount = 0;
-    const totalQuestions = quiz.questions.length;
-    const detailedResults = [];
-
-    // Check each answer
-    quiz.questions.forEach(question => {
-        const studentAnswer = answers.find(a => a.questionId === question.id);
-        const isCorrect = studentAnswer && studentAnswer.answer === question.correctAnswer;
-
-        if (isCorrect) {
-            correctCount++;
-        }
-
-        detailedResults.push({
-            questionId: question.id,
-            question: question.question,
-            studentAnswer: studentAnswer ? studentAnswer.answer : 'No answer',
-            correctAnswer: question.correctAnswer,
-            isCorrect: isCorrect
-        });
-    });
-
-    // Calculate percentage score
-    const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // AI INTEGRATION: Get hints based on performance
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * This is where the AI service provides personalized feedback.
-     * The hint is generated based on the student's score percentage.
-     */
-    const aiHint = aiService.generateHint(scorePercentage, quiz.title);
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // RESPONSE: Return complete quiz result
-    // ─────────────────────────────────────────────────────────────────────────
-
-    res.json({
-        success: true,
-        result: {
-            quizId: quizId,
-            quizTitle: quiz.title,
-            studentId: studentId,
-            score: {
-                correct: correctCount,
-                total: totalQuestions,
-                percentage: scorePercentage
-            },
-            passed: scorePercentage >= 60,  // 60% passing grade
-            detailedResults: detailedResults,
-            // AI-POWERED HINT
-            aiHint: aiHint,
-            submittedAt: new Date().toISOString()
-        }
-    });
+// ── GET /:cid/instances/:iid/results — faculty: all student results ───────────
+router.get('/:cid/instances/:iid/results', authMiddleware, requireFaculty, (req, res) => {
+    const inst = instances.get(req.params.iid);
+    if (!inst || String(inst.classroomId) !== String(req.params.cid))
+        return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    return res.json({ success: true, results: resultsForInstance(req.params.iid) });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTE: Create New Quiz (Faculty Only)
-// POST /api/quizzes
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Creates a new quiz with questions.
- * Only Faculty members should have access to this endpoint.
- */
-router.post('/', (req, res) => {
-    const { title, lessonId, description, questions, facultyId } = req.body;
-
-    // VALIDATION
-    if (!title || !description || !questions || questions.length === 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Required: title, description, and questions array'
-        });
-    }
-
-    // CREATE: New quiz object
-    const newQuiz = {
-        id: mockQuizzes.length + 1,
-        title: title,
-        lessonId: lessonId || null,
-        description: description,
-        questions: questions,
-        createdBy: facultyId || 2,
-        createdAt: new Date().toISOString().split('T')[0]
-    };
-
-    mockQuizzes.push(newQuiz);
-
-    res.status(201).json({
-        success: true,
-        message: 'Quiz created successfully',
-        quiz: {
-            id: newQuiz.id,
-            title: newQuiz.title,
-            questionCount: newQuiz.questions.length
-        }
-    });
+// ── GET /:cid/instances/:iid/my-result — student: own best result ─────────────
+router.get('/:cid/instances/:iid/my-result', authMiddleware, (req, res) => {
+    const uid    = String(req.user.id);
+    const result = results.get(`${req.params.iid}_${uid}`) || null;
+    return res.json({ success: true, result });
 });
 
 module.exports = router;

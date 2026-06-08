@@ -100,6 +100,15 @@
                 <div class="qz-meta-chip"><span class="qz-meta-val" id="introLang">—</span><span class="qz-meta-lbl">Language</span></div>
                 <div class="qz-meta-chip"><span class="qz-meta-val">70%</span><span class="qz-meta-lbl">To Pass</span></div>
             </div>
+            <!-- Previous result chip (hidden until loaded) -->
+            <div id="prevResult" style="display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;padding:.65rem 1rem;margin-bottom:1rem;text-align:left;display:none;">
+                <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Your Previous Attempt</div>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <span style="font-size:1.1rem;font-weight:800;" id="prevScore">—</span>
+                    <span id="prevStatus" style="font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;"></span>
+                    <span id="prevAttempts" style="font-size:.72rem;color:var(--text-muted);"></span>
+                </div>
+            </div>
             <div style="display:flex;gap:.6rem;justify-content:center;">
                 <button class="btn btn-secondary" onclick="goBack()">← Back</button>
                 <button class="btn btn-primary" id="startBtn" onclick="startQuiz()">
@@ -159,10 +168,15 @@ const API   = `http://${window.location.hostname}:3000/api`;
 const token = localStorage.getItem('token');
 const me    = JSON.parse(localStorage.getItem('user') || '{}');
 const params = new URLSearchParams(location.search);
-const classroomId = params.get('cid');
-const lang        = params.get('lang') || 'python';
+const classroomId  = params.get('cid');
+const instanceId   = params.get('iid');
+const lang         = params.get('lang') || 'python';
 
 if (!me.id) location.href = 'login.html';
+if (!classroomId || !instanceId) {
+    alert('Invalid quiz link — missing classroom or quiz ID.');
+    location.href = 'classrooms.html';
+}
 
 function getAuthHeaders() { return { 'Content-Type':'application/json', Authorization:`Bearer ${token}` }; }
 function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -174,23 +188,62 @@ let idx = 0;
 let correctCount = 0;
 let answered = false;
 
-// ── Load questions ─────────────────────────────────────────────────────────────
+// ── Load questions + check schedule + load previous result ─────────────────────
 async function init() {
     document.getElementById('introLang').textContent = lang;
     try {
-        const levels = ['beginner', 'intermediate', 'advanced'];
-        const results = await Promise.all(levels.map(lvl =>
-            fetch(`${API}/questions/${lang}/${lvl}`, { headers: getAuthHeaders() })
-                .then(r => r.json()).then(d => d.questions || d || []).catch(() => [])
-        ));
-        questions = results.flat();
-    } catch { questions = []; }
+        const res  = await fetch(`${API}/quiz/${classroomId}/instances/${instanceId}`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Quiz not found');
+        const inst = data.instance;
+
+        // Show quiz title
+        if (inst.title) {
+            const titleEl = document.getElementById('introTitle');
+            if (titleEl) titleEl.textContent = inst.title;
+        }
+
+        questions = inst.questions || [];
+
+        // Enforce schedule window
+        const sched    = inst.schedule || {};
+        const now      = Date.now();
+        const startAt  = sched.startAt  ? new Date(sched.startAt).getTime()  : null;
+        const deadline = sched.deadline ? new Date(sched.deadline).getTime() : null;
+
+        if (startAt && now < startAt) {
+            document.getElementById('startBtn').disabled    = true;
+            document.getElementById('startBtn').textContent = `Opens ${new Date(sched.startAt).toLocaleString()}`;
+        } else if (deadline && now > deadline) {
+            document.getElementById('startBtn').disabled    = true;
+            document.getElementById('startBtn').textContent = 'Quiz closed';
+        }
+    } catch (e) { questions = []; console.error(e); }
 
     document.getElementById('introCount').textContent = questions.length;
-    if (!questions.length) {
-        document.getElementById('startBtn').disabled = true;
+    if (!questions.length && !document.getElementById('startBtn').disabled) {
+        document.getElementById('startBtn').disabled    = true;
         document.getElementById('startBtn').textContent = 'No questions yet';
     }
+
+    // Load previous result
+    try {
+        const rr = await fetch(`${API}/quiz/${classroomId}/instances/${instanceId}/my-result`, { headers: getAuthHeaders() });
+        const rd = await rr.json();
+        if (rd.result) {
+            const r   = rd.result;
+            const el  = document.getElementById('prevResult');
+            const col = r.bestPassed ? '#34d399' : '#f87171';
+            el.style.display = '';
+            document.getElementById('prevScore').textContent       = `${r.bestAccuracy}%`;
+            document.getElementById('prevScore').style.color       = col;
+            const st = document.getElementById('prevStatus');
+            st.textContent      = r.bestPassed ? 'Passed' : 'Not passed';
+            st.style.background = r.bestPassed ? 'rgba(16,185,129,.12)' : 'rgba(239,68,68,.12)';
+            st.style.color      = col;
+            document.getElementById('prevAttempts').textContent = `${r.attempts} attempt${r.attempts !== 1 ? 's' : ''}`;
+        }
+    } catch {}
 }
 
 // ── Start ──────────────────────────────────────────────────────────────────────
@@ -344,10 +397,18 @@ function endQuiz() {
     banner.className = `pass-banner ${passed ? 'pass' : 'fail'}`;
     banner.textContent = passed ? '🎉 Passed!' : 'Keep practicing — you didn\'t reach 70%';
 
-    // Save best score for the classroom
-    if (classroomId) {
-        const prev = parseInt(localStorage.getItem(`quizScore_${classroomId}`) || '0');
-        if (pct > prev) localStorage.setItem(`quizScore_${classroomId}`, String(pct));
+    // Submit result to backend (non-blocking)
+    if (classroomId && instanceId) {
+        fetch(`${API}/quiz/${classroomId}/instances/${instanceId}/submit`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                correct:  correctCount,
+                total:    questions.length,
+                accuracy: pct,
+                passed,
+            })
+        }).catch(() => {});
     }
 }
 
