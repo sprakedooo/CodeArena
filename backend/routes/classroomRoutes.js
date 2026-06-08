@@ -29,10 +29,39 @@
 const express = require('express');
 const router  = express.Router();
 const bcrypt  = require('bcrypt');
+const path    = require('path');
+const fs      = require('fs');
+const multer  = require('multer');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const dbService = require('../services/dbService');
 const db = require('../config/database');
 const openaiService = require('../services/openaiService');
+
+// ─── File upload config ───────────────────────────────────────────────────────
+const UPLOAD_DIR = path.join(__dirname, '../../uploads/lesson-files');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+    filename:    (req, file, cb) => {
+        const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+        cb(null, `${Date.now()}_${safe}`);
+    }
+});
+const upload = multer({
+    storage,
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+    fileFilter: (req, file, cb) => {
+        // Allow common document, image, and code file types
+        const allowed = /pdf|doc|docx|ppt|pptx|xls|xlsx|txt|md|png|jpg|jpeg|gif|svg|zip|py|js|java|cpp|c|html|css/i;
+        const ext = path.extname(file.originalname).slice(1);
+        if (allowed.test(ext)) cb(null, true);
+        else cb(new Error('File type not allowed'));
+    }
+});
+
+// In-memory file store (fallback)
+let mockLessonFiles = [];
 
 // All classroom routes require auth
 router.use(authMiddleware);
@@ -524,6 +553,38 @@ router.get('/:id/lessons', async (req, res) => {
     res.json({ success: true, lessons, source: 'mock' });
 });
 
+// GET /api/classrooms/:id/lessons/:lid — single lesson
+router.get('/:id/lessons/:lid', async (req, res) => {
+    const classroomId = parseInt(req.params.id);
+    const lessonId    = parseInt(req.params.lid);
+    const userId      = req.user.id;
+    const isFaculty   = req.user.role === 'faculty' || req.user.role === 'superadmin';
+
+    if (dbService.isDbAvailable()) {
+        try {
+            if (!isFaculty) {
+                const enrollment = await db.query(
+                    `SELECT 1 FROM classroom_enrollments WHERE classroom_id = ? AND student_id = ? AND status = 'active'`,
+                    [classroomId, userId]
+                );
+                if (!enrollment.length) return res.status(403).json({ success: false, message: 'Not enrolled' });
+            }
+            const rows = await db.query(
+                'SELECT * FROM classroom_lessons WHERE lesson_id = ? AND classroom_id = ?',
+                [lessonId, classroomId]
+            );
+            if (!rows.length) return res.status(404).json({ success: false, message: 'Lesson not found' });
+            return res.json({ success: true, lesson: rows[0] });
+        } catch (err) { console.error(err); }
+    }
+
+    if (!isFaculty && !isEnrolled(classroomId, userId))
+        return res.status(403).json({ success: false, message: 'Not enrolled' });
+    const lesson = mockClLessons.find(l => l.id === lessonId && l.classroomId === classroomId);
+    if (!lesson) return res.status(404).json({ success: false, message: 'Lesson not found' });
+    res.json({ success: true, lesson });
+});
+
 // PUT /api/classrooms/:id/lessons/:lid
 router.put('/:id/lessons/:lid', async (req, res) => {
     if (!requireFacultyRole(req, res)) return;
@@ -561,6 +622,103 @@ router.delete('/:id/lessons/:lid', async (req, res) => {
 
     mockClLessons = mockClLessons.filter(l => !(l.id === lessonId && l.classroomId === classroomId));
     res.json({ success: true, message: 'Lesson deleted', source: 'mock' });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// LESSON FILE ATTACHMENTS
+// ═════════════════════════════════════════════════════════════════════════════
+
+// GET /api/classrooms/:id/lessons/:lid/files — list attached files
+router.get('/:id/lessons/:lid/files', async (req, res) => {
+    const classroomId = parseInt(req.params.id);
+    const lessonId    = parseInt(req.params.lid);
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query(
+                'SELECT * FROM lesson_files WHERE lesson_id = ? AND classroom_id = ? ORDER BY uploaded_at DESC',
+                [lessonId, classroomId]
+            );
+            return res.json({ success: true, files: rows });
+        } catch (err) { console.error(err); }
+    }
+    const files = mockLessonFiles.filter(f => f.lessonId === lessonId && f.classroomId === classroomId);
+    res.json({ success: true, files, source: 'mock' });
+});
+
+// POST /api/classrooms/:id/lessons/:lid/files — upload file (faculty only)
+router.post('/:id/lessons/:lid/files', (req, res, next) => {
+    if (!requireFacultyRole(req, res)) return;
+    next();
+}, upload.single('file'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    const classroomId   = parseInt(req.params.id);
+    const lessonId      = parseInt(req.params.lid);
+    const { filename, originalname, size } = req.file;
+    const ext = path.extname(originalname).slice(1).toLowerCase();
+
+    if (dbService.isDbAvailable()) {
+        try {
+            await db.query(
+                'INSERT INTO lesson_files (lesson_id, classroom_id, filename, original_name, file_size, file_type) VALUES (?,?,?,?,?,?)',
+                [lessonId, classroomId, filename, originalname, size, ext]
+            );
+            const [row] = await db.query('SELECT * FROM lesson_files WHERE lesson_id=? ORDER BY uploaded_at DESC LIMIT 1', [lessonId]);
+            return res.json({ success: true, file: row });
+        } catch (err) { console.error(err); }
+    }
+    const newFile = { id: Date.now(), lessonId, classroomId, filename, originalName: originalname, fileSize: size, fileType: ext, uploadedAt: new Date().toISOString() };
+    mockLessonFiles.push(newFile);
+    res.json({ success: true, file: newFile, source: 'mock' });
+});
+
+// DELETE /api/classrooms/:id/lessons/:lid/files/:fid — delete file (faculty only)
+router.delete('/:id/lessons/:lid/files/:fid', async (req, res) => {
+    if (!requireFacultyRole(req, res)) return;
+    const lessonId = parseInt(req.params.lid);
+    const fileId   = parseInt(req.params.fid);
+
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query('SELECT filename FROM lesson_files WHERE id = ? AND lesson_id = ?', [fileId, lessonId]);
+            if (rows.length) {
+                const fp = path.join(UPLOAD_DIR, rows[0].filename);
+                if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                await db.query('DELETE FROM lesson_files WHERE id = ?', [fileId]);
+            }
+            return res.json({ success: true });
+        } catch (err) { console.error(err); }
+    }
+    const f = mockLessonFiles.find(f => f.id === fileId);
+    if (f) {
+        const fp = path.join(UPLOAD_DIR, f.filename);
+        if (fs.existsSync(fp)) fs.unlinkSync(fp);
+    }
+    mockLessonFiles = mockLessonFiles.filter(f => f.id !== fileId);
+    res.json({ success: true, source: 'mock' });
+});
+
+// GET /api/classrooms/:id/lessons/:lid/files/:fid/download — serve file
+router.get('/:id/lessons/:lid/files/:fid/download', async (req, res) => {
+    const lessonId = parseInt(req.params.lid);
+    const fileId   = parseInt(req.params.fid);
+    let filename, originalName;
+
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query('SELECT * FROM lesson_files WHERE id = ? AND lesson_id = ?', [fileId, lessonId]);
+            if (!rows.length) return res.status(404).json({ success: false, message: 'File not found' });
+            filename     = rows[0].filename;
+            originalName = rows[0].original_name;
+        } catch (err) { console.error(err); }
+    } else {
+        const f = mockLessonFiles.find(f => f.id === fileId && f.lessonId === lessonId);
+        if (!f) return res.status(404).json({ success: false, message: 'File not found' });
+        filename     = f.filename;
+        originalName = f.originalName;
+    }
+    const fp = path.join(UPLOAD_DIR, filename);
+    if (!fs.existsSync(fp)) return res.status(404).json({ success: false, message: 'File missing on disk' });
+    res.download(fp, originalName);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════

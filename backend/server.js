@@ -81,6 +81,9 @@ app.use(cors());
 // Parse JSON request bodies — 10 MB limit to support base64 image uploads
 app.use(express.json({ limit: '10mb' }));
 
+// Serve uploaded lesson files
+app.use('/uploads', require('express').static(require('path').join(__dirname, '../uploads')));
+
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

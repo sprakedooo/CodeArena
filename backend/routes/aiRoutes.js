@@ -476,4 +476,43 @@ router.post('/track-session', authMiddleware, async (req, res) => {
     }
 });
 
+// ── POST /api/ai/lesson-chat ──────────────────────────────────────────────────
+// Answers student questions about a specific lesson using context + rule-based AI
+router.post('/lesson-chat', authMiddleware, async (req, res) => {
+    const { question, context, lessonId } = req.body;
+    if (!question || !question.trim()) return res.status(400).json({ error: 'question is required.' });
+
+    try {
+        // Try OpenAI if available
+        if (typeof globalAssistant === 'function') {
+            const systemPrompt = `You are a helpful programming tutor inside a classroom lesson viewer.
+Answer the student's question based on the lesson content provided.
+Be concise, friendly, and educational. Use short code examples if helpful.
+Lesson content excerpt: ${(context || '').slice(0, 800)}`;
+            const answer = await globalAssistant(question, [], systemPrompt);
+            return res.json({ success: true, answer });
+        }
+    } catch (err) {
+        // Fall through to rule-based
+    }
+
+    // Rule-based fallback
+    const q = question.toLowerCase();
+    let answer = '';
+    if (q.includes('what is') || q.includes('define') || q.includes('meaning')) {
+        answer = `Great question! Based on this lesson, "${question}" refers to a key concept covered in the material above. Re-read the relevant section and try applying it in the Playground.`;
+    } else if (q.includes('example') || q.includes('show me') || q.includes('how do')) {
+        answer = `To see an example, look at the code blocks in the lesson. You can also open the Playground and experiment with the code directly!`;
+    } else if (q.includes('why') || q.includes('reason')) {
+        answer = `Understanding the "why" is important! This concept is used because it makes code more readable, efficient, or reusable. The lesson explains the rationale — try re-reading the explanation section.`;
+    } else if (q.includes('difference') || q.includes('vs') || q.includes('compare')) {
+        answer = `Good comparison question! The key difference lies in how each is used in context. Review both concepts in the lesson side by side to spot the distinctions.`;
+    } else if (q.includes('error') || q.includes('wrong') || q.includes('fix') || q.includes('bug')) {
+        answer = `For debugging help, check that your syntax matches the examples in the lesson. Common issues include missing colons, wrong indentation, or mismatched brackets. Try running your code in the Playground!`;
+    } else {
+        answer = `That's a thoughtful question about this lesson! The material covers this topic — try reviewing the relevant section carefully. You can also practice in the Playground to reinforce your understanding.`;
+    }
+    return res.json({ success: true, answer });
+});
+
 module.exports = router;

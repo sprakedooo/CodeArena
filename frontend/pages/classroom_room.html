@@ -297,6 +297,86 @@
         .score-badge.submitted { background:rgba(16,185,129,.15); color:#10b981; }
         .score-badge.pending { background:rgba(251,191,36,.15); color:#fbbf24; }
 
+        /* ══ LESSON VIEWER — Blog/Course style ═══════════════════════════ */
+        /* Overlay sits inside .room-page area, sidebar stays visible      */
+        .lv-overlay { display:none; position:absolute; inset:0; background:#0d1117; z-index:50; overflow-y:auto; padding-bottom:80px; }
+        .lv-overlay.open { display:block; }
+
+        /* Back bar */
+        .lv-topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 0 24px; }
+        .lv-back-btn { display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--primary); cursor:pointer; font-size:.88rem; font-weight:600; padding:0; transition:opacity .15s; }
+        .lv-back-btn:hover { opacity:.7; }
+        .lv-back-btn .material-symbols-outlined { font-size:1.1rem; }
+        .lv-done-btn { display:flex; align-items:center; gap:6px; background:var(--primary); color:#fff; border:none; cursor:pointer; font-size:.82rem; font-weight:600; padding:9px 18px; border-radius:8px; transition:opacity .15s; }
+        .lv-done-btn:hover { opacity:.85; }
+        .lv-done-btn.is-done { background:var(--success); cursor:default; opacity:.9; }
+
+        /* Blog layout: article + narrow sidebar */
+        .lv-page { display:flex; gap:36px; align-items:flex-start; }
+        .lv-main { flex:1; min-width:0; }
+        .lv-sidebar { width:260px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; position:sticky; top:16px; }
+
+        /* Article header */
+        .lv-header-card { margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+        .lv-lang-chip { display:inline-flex; font-size:.68rem; font-weight:700; text-transform:uppercase; padding:3px 10px; background:rgba(124,58,237,.15); color:var(--primary); border-radius:20px; border:1px solid rgba(124,58,237,.25); letter-spacing:.05em; margin-bottom:12px; }
+        .lv-title { font-size:1.7rem; font-weight:800; color:var(--text); line-height:1.25; margin:0 0 10px; }
+        .lv-header-meta { font-size:.78rem; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .lv-dot { color:var(--border); }
+
+        /* Article body */
+        .lv-content-card { font-size:.93rem; line-height:1.8; color:var(--text); }
+        .lv-content-card h1 { font-size:1.45rem; font-weight:800; color:var(--text); margin:2rem 0 .7rem; }
+        .lv-content-card h2 { font-size:1.2rem; font-weight:700; color:var(--text); margin:1.7rem 0 .6rem; }
+        .lv-content-card h3 { font-size:1.03rem; font-weight:700; color:var(--text); margin:1.4rem 0 .5rem; }
+        .lv-content-card p { margin:.8rem 0; }
+        .lv-content-card ul, .lv-content-card ol { padding-left:1.5rem; margin:.6rem 0; }
+        .lv-content-card li { margin:.4rem 0; }
+        .lv-content-card code { background:var(--bg-surface); border:1px solid var(--border); border-radius:4px; padding:1px 7px; font-family:'Courier New',monospace; font-size:.85em; color:#e2e8f0; }
+        .lv-content-card pre { background:#0a0e14; border:1px solid var(--border); border-radius:10px; padding:20px 22px; overflow-x:auto; margin:1.4rem 0; }
+        .lv-content-card pre code { background:none; border:none; padding:0; font-size:.87rem; color:#e2e8f0; white-space:pre; line-height:1.7; }
+        .lv-content-card .code-block { background:#0a0e14; border:1px solid var(--border); border-radius:10px; padding:20px 22px; overflow-x:auto; margin:1.4rem 0; }
+        .lv-content-card .code-block pre { background:none; border:none; padding:0; margin:0; }
+        .lv-content-card .code-block code { background:none; border:none; padding:0; font-size:.87rem; color:#e2e8f0; white-space:pre; font-family:'Courier New',monospace; line-height:1.7; }
+        .lv-content-card .info-box { background:rgba(6,182,212,.07); border-left:3px solid #06b6d4; border-radius:0 8px 8px 0; padding:12px 16px; margin:1.2rem 0; font-size:.87rem; }
+        .lv-content-card .info-box.tip { background:rgba(251,191,36,.07); border-color:#fbbf24; }
+        .lv-content-card hr { border:none; border-top:1px solid var(--border); margin:2rem 0; }
+        .lv-content-card strong { color:var(--text); font-weight:700; }
+        .lv-content-card a { color:var(--primary); text-decoration:underline; }
+        .lv-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 20px; color:var(--text-muted); gap:12px; }
+        .lv-loading-icon { font-size:2rem; animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* Sidebar cards */
+        .lv-sidebar-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+        .lv-sidebar-card-title { display:flex; align-items:center; gap:7px; font-size:.82rem; font-weight:700; color:var(--text); margin-bottom:12px; }
+        .lv-detail-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); }
+        .lv-detail-row:last-child { border-bottom:none; }
+        .lv-detail-icon { font-size:.95rem; color:var(--text-muted); flex-shrink:0; }
+
+        /* AI chat */
+        .lv-ai-chat { max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:7px; margin-bottom:10px; }
+        .lv-ai-msg { font-size:.77rem; padding:7px 10px; border-radius:8px; line-height:1.5; }
+        .lv-ai-msg.user { background:rgba(124,58,237,.15); color:var(--text); align-self:flex-end; border-radius:8px 8px 2px 8px; max-width:90%; }
+        .lv-ai-msg.ai { background:var(--bg-surface); color:var(--text); border:1px solid var(--border); border-radius:2px 8px 8px 8px; }
+        .lv-ai-input-row { display:flex; gap:7px; }
+        .lv-ai-input { flex:1; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:7px 10px; color:var(--text); font-size:.78rem; outline:none; }
+        .lv-ai-input:focus { border-color:var(--primary); }
+        .lv-ai-send { background:var(--primary); border:none; border-radius:8px; color:#fff; width:32px; height:32px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .lv-ai-send .material-symbols-outlined { font-size:.88rem; }
+
+        /* File attachments */
+        .lv-upload-label { display:flex; align-items:center; gap:8px; padding:9px 12px; border:1.5px dashed var(--border); border-radius:8px; cursor:pointer; font-size:.77rem; color:var(--text-muted); transition:all .15s; }
+        .lv-upload-label:hover { border-color:var(--primary); color:var(--primary); }
+        .lv-file-row { display:flex; align-items:center; gap:8px; padding:7px 9px; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; font-size:.76rem; }
+        .lv-file-icon { font-size:.95rem; color:var(--primary); flex-shrink:0; }
+        .lv-file-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
+        .lv-file-size { font-size:.68rem; color:var(--text-muted); flex-shrink:0; }
+        .lv-file-actions { display:flex; gap:3px; flex-shrink:0; }
+        .lv-file-btn { background:none; border:none; cursor:pointer; color:var(--text-muted); padding:2px; border-radius:4px; display:flex; align-items:center; }
+        .lv-file-btn:hover { color:var(--primary); }
+        .lv-file-btn .material-symbols-outlined { font-size:.88rem; }
+        @media(max-width:860px) { .lv-page { flex-direction:column; } .lv-sidebar { width:100%; position:static; } }
+
         /* ══ SANDBOX OVERLAY ══════════════════════════════════════════════ */
         .sandbox-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; display:none; align-items:flex-end; }
         .sandbox-overlay.open { display:flex; }
@@ -364,7 +444,7 @@
 </head>
 <body>
 
-<main class="room-page">
+<main class="room-page" style="position:relative;">
 
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
@@ -912,7 +992,7 @@ function renderLessons(lessons) {
             '<div class="lesson-row-actions">' +
                 (isDone ? '<span class="done-badge"><span class="material-symbols-outlined" style="font-size:.85rem;">check</span>Done</span>' :
                     '<button class="btn btn-secondary" style="font-size:.75rem;" onclick="markDone(' + lid + ')"><span class="material-symbols-outlined" style="font-size:.9rem;">check</span>Mark Done</button>') +
-                '<a href="lesson_view.html?id=' + lid + '" class="btn btn-primary" style="font-size:.75rem;"><span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>Open</a>' +
+                '<button class="btn btn-primary" style="font-size:.75rem;" onclick="openLesson(' + lid + ')"><span class="material-symbols-outlined" style="font-size:.9rem;">menu_book</span>Open</button>' +
             '</div>' +
         '</div>';
     }).join('');
@@ -1149,6 +1229,244 @@ function closeSandboxOnBg(e) {
     if (e.target === document.getElementById('sandboxOverlay')) closeSandbox();
 }
 
+// ── Lesson viewer drawer ───────────────────────────────────────────────────────
+let _currentLessonId = null;
+
+async function openLesson(lid) {
+    _currentLessonId = lid;
+    // Reset UI
+    document.getElementById('lvTitle').textContent   = 'Loading…';
+    document.getElementById('lvPostedBy').textContent = '—';
+    document.getElementById('lvPostedDate').textContent = '—';
+    document.getElementById('lvLang').textContent    = '';
+    document.getElementById('lvDetailLang').textContent = '—';
+    document.getElementById('lvDetailDate').textContent = '—';
+    document.getElementById('lvDetailBy').textContent   = '—';
+    document.getElementById('lvBody').innerHTML      = '<div class="lv-loading"><span class="material-symbols-outlined lv-loading-icon">hourglass_top</span><p>Loading lesson…</p></div>';
+    document.getElementById('lvAiChat').innerHTML    = '';
+    document.getElementById('lvAiInput').value       = '';
+    // Move inside <main> so position:absolute fills the content area
+    const overlay = document.getElementById('lessonOverlay');
+    const mainEl  = document.querySelector('main.room-page');
+    if (mainEl) mainEl.appendChild(overlay);
+    overlay.classList.add('open');
+    overlay.scrollTop = 0;
+
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/lessons/${lid}`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to load');
+        const l = data.lesson;
+
+        const dateStr = l.created_at
+            ? new Date(l.created_at).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' })
+            : '—';
+        const langLabel = l.language ? l.language.charAt(0).toUpperCase() + l.language.slice(1) : '';
+
+        document.getElementById('lvTitle').textContent      = l.title || 'Lesson';
+        document.getElementById('lvLang').textContent       = langLabel;
+        document.getElementById('lvPostedBy').textContent   = 'Posted by Teacher';
+        document.getElementById('lvPostedDate').textContent = dateStr;
+        document.getElementById('lvDetailLang').textContent = langLabel || '—';
+        document.getElementById('lvDetailDate').textContent = dateStr;
+        document.getElementById('lvDetailBy').textContent   = 'Teacher';
+
+        // Render content — content may be HTML or plain text
+        document.getElementById('lvBody').innerHTML = renderLessonContent(l.content || '');
+
+        // Load file attachments
+        loadLessonFiles(lid);
+
+        // Done button state
+        _updateLvDoneBtn();
+    } catch (e) {
+        document.getElementById('lvBody').innerHTML =
+            `<div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:12px;">error</span>
+                <p>${esc(e.message)}</p>
+             </div>`;
+    }
+}
+
+function _updateLvDoneBtn() {
+    const isDone  = getDoneLessons().includes(_currentLessonId);
+    const doneBtn = document.getElementById('lvDoneBtn');
+    if (isDone) {
+        doneBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>Done';
+        doneBtn.classList.add('is-done');
+        doneBtn.disabled = true;
+    } else {
+        doneBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>Mark as done';
+        doneBtn.classList.remove('is-done');
+        doneBtn.disabled = false;
+    }
+}
+
+function closeLesson() {
+    document.getElementById('lessonOverlay').classList.remove('open');
+    _currentLessonId = null;
+}
+
+function markCurrentLessonDone() {
+    if (!_currentLessonId) return;
+    markLessonDone(_currentLessonId);
+    loadLessons();
+    _updateLvDoneBtn();
+    showToast('Lesson marked as done!', 'success');
+}
+
+function renderLessonContent(raw) {
+    if (!raw) return '<p style="color:var(--text-muted);">No content yet.</p>';
+    // If content looks like HTML (has tags), render directly
+    if (/<[a-z][\s\S]*>/i.test(raw)) {
+        return raw;
+    }
+    // Plain text / markdown fallback
+    let s = raw
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm,  '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm,   '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+        .replace(/^[-*] (.+)$/gm,  '<li>$1</li>')
+        .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, '<ul>$&</ul>')
+        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+        .replace(/^---$/gm, '<hr>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+    return `<p>${s}</p>`;
+}
+
+// AI Assistant for lesson
+let _lvAiContext = '';
+async function sendLessonAI() {
+    const input = document.getElementById('lvAiInput');
+    const q = input.value.trim();
+    if (!q) return;
+    input.value = '';
+    const chat = document.getElementById('lvAiChat');
+
+    // Add user bubble
+    chat.innerHTML += `<div class="lv-ai-msg user">${esc(q)}</div>`;
+    chat.innerHTML += `<div class="lv-ai-msg ai" id="lvAiTyping">Thinking…</div>`;
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+        // Get lesson content for context if not cached
+        if (!_lvAiContext) {
+            _lvAiContext = document.getElementById('lvBody').innerText.slice(0, 1500);
+        }
+        const res  = await fetch(`${API}/ai/lesson-chat`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ question: q, context: _lvAiContext, lessonId: _currentLessonId })
+        });
+        const data = await res.json();
+        document.getElementById('lvAiTyping').textContent = data.answer || data.message || 'No response.';
+    } catch {
+        document.getElementById('lvAiTyping').textContent = 'Could not reach AI. Try again.';
+    }
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// ── Lesson file attachments ────────────────────────────────────────────────
+function fileIcon(ext) {
+    const map = { pdf:'picture_as_pdf', doc:'description', docx:'description', ppt:'slideshow', pptx:'slideshow',
+                  xls:'table_chart', xlsx:'table_chart', txt:'article', md:'article',
+                  png:'image', jpg:'image', jpeg:'image', gif:'image', svg:'image',
+                  zip:'folder_zip', py:'code', js:'code', java:'code', cpp:'code', c:'code', html:'code', css:'code' };
+    return map[ext] || 'attach_file';
+}
+function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+}
+
+async function loadLessonFiles(lid) {
+    const isFaculty = me && (me.role === 'faculty' || me.role === 'superadmin');
+    document.getElementById('lvUploadArea').style.display = isFaculty ? 'block' : 'none';
+
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/lessons/${lid}/files`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        renderLessonFiles(data.files || [], isFaculty);
+    } catch {
+        renderLessonFiles([], isFaculty);
+    }
+}
+
+function renderLessonFiles(files, isFaculty) {
+    const list = document.getElementById('lvFileList');
+    if (!files.length) {
+        list.innerHTML = '<div style="font-size:.78rem;color:var(--text-muted);">No attachments yet.</div>';
+        return;
+    }
+    list.innerHTML = files.map(f => {
+        const ext  = (f.file_type || f.fileType || '').toLowerCase();
+        const name = f.original_name || f.originalName || f.filename;
+        const size = formatBytes(f.file_size || f.fileSize || 0);
+        const dlUrl = `${API}/classrooms/${classroomId}/lessons/${_currentLessonId}/files/${f.id}/download`;
+        return `<div class="lv-file-row">
+            <span class="material-symbols-outlined lv-file-icon">${fileIcon(ext)}</span>
+            <span class="lv-file-name" title="${esc(name)}">${esc(name)}</span>
+            <span class="lv-file-size">${size}</span>
+            <div class="lv-file-actions">
+                <a href="${dlUrl}" target="_blank" class="lv-file-btn" title="Download">
+                    <span class="material-symbols-outlined">download</span>
+                </a>
+                ${isFaculty ? `<button class="lv-file-btn" title="Delete" onclick="deleteLessonFile(${f.id})">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function uploadLessonFile(input) {
+    if (!input.files.length) return;
+    const file = input.files[0];
+    const label = document.getElementById('lvUploadText');
+    label.textContent = 'Uploading…';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const res = await fetch(`${API}/classrooms/${classroomId}/lessons/${_currentLessonId}/files`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('File attached!', 'success');
+            loadLessonFiles(_currentLessonId);
+        } else {
+            showToast(data.message || 'Upload failed', 'error');
+        }
+    } catch {
+        showToast('Upload failed — check connection', 'error');
+    }
+    label.textContent = 'Click to attach a file';
+    input.value = '';
+}
+
+async function deleteLessonFile(fid) {
+    if (!confirm('Remove this attachment?')) return;
+    try {
+        const res  = await fetch(`${API}/classrooms/${classroomId}/lessons/${_currentLessonId}/files/${fid}`, {
+            method: 'DELETE', headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (data.success) { showToast('Attachment removed', 'success'); loadLessonFiles(_currentLessonId); }
+        else showToast('Delete failed', 'error');
+    } catch { showToast('Delete failed', 'error'); }
+}
+
 async function runCode() {
     if (!_sbAssignId) return;
     const code = document.getElementById('sbEditor').value.trim();
@@ -1364,6 +1682,100 @@ function startQuiz(iid) {
     window.location.href = `classroom_quiz.html?cid=${classroomId}&iid=${iid}`;
 }
 </script>
+
+<!-- ══ LESSON VIEWER — Blog/Course style (inside .room-page) ════════════════ -->
+<div class="lv-overlay" id="lessonOverlay">
+    <div class="lv-topbar">
+        <button class="lv-back-btn" onclick="closeLesson()">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back to Classwork
+        </button>
+        <button class="lv-done-btn" id="lvDoneBtn" onclick="markCurrentLessonDone()">
+            <span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>
+            Mark as done
+        </button>
+    </div>
+
+    <div class="lv-page">
+        <!-- Left: article content -->
+        <div class="lv-main">
+            <div class="lv-header-card">
+                <span class="lv-lang-chip" id="lvLang"></span>
+                <h1 class="lv-title" id="lvTitle">Loading…</h1>
+                <div class="lv-header-meta">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">person</span>
+                    <span id="lvPostedBy">—</span>
+                    <span class="lv-dot">·</span>
+                    <span class="material-symbols-outlined" style="font-size:.9rem;">calendar_today</span>
+                    <span id="lvPostedDate">—</span>
+                </div>
+            </div>
+            <div class="lv-content-card" id="lvBody">
+                <div class="lv-loading">
+                    <span class="material-symbols-outlined lv-loading-icon">hourglass_top</span>
+                    <p>Loading…</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: narrow sidebar -->
+        <div class="lv-sidebar">
+            <!-- AI Assistant -->
+            <div class="lv-sidebar-card">
+                <div class="lv-sidebar-card-title">
+                    <span class="material-symbols-outlined" style="color:var(--primary);font-size:1rem;">auto_awesome</span>
+                    AI Assistant
+                </div>
+                <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 10px;">Ask anything about this lesson.</p>
+                <div class="lv-ai-chat" id="lvAiChat"></div>
+                <div class="lv-ai-input-row">
+                    <input type="text" id="lvAiInput" class="lv-ai-input" placeholder="Ask a question…" onkeydown="if(event.key==='Enter')sendLessonAI()">
+                    <button class="lv-ai-send" onclick="sendLessonAI()">
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="lv-sidebar-card">
+                <div class="lv-sidebar-card-title">
+                    <span class="material-symbols-outlined" style="color:var(--text-muted);font-size:1rem;">info</span>
+                    Details
+                </div>
+                <div class="lv-detail-row">
+                    <span class="material-symbols-outlined lv-detail-icon">translate</span>
+                    <div><div style="font-size:.68rem;color:var(--text-muted);">Language</div><div style="font-size:.82rem;" id="lvDetailLang">—</div></div>
+                </div>
+                <div class="lv-detail-row">
+                    <span class="material-symbols-outlined lv-detail-icon">calendar_today</span>
+                    <div><div style="font-size:.68rem;color:var(--text-muted);">Posted</div><div style="font-size:.82rem;" id="lvDetailDate">—</div></div>
+                </div>
+                <div class="lv-detail-row">
+                    <span class="material-symbols-outlined lv-detail-icon">person</span>
+                    <div><div style="font-size:.68rem;color:var(--text-muted);">Posted by</div><div style="font-size:.82rem;" id="lvDetailBy">—</div></div>
+                </div>
+            </div>
+
+            <!-- Attachments -->
+            <div class="lv-sidebar-card" id="lvAttachmentsCard">
+                <div class="lv-sidebar-card-title">
+                    <span class="material-symbols-outlined" style="color:var(--text-muted);font-size:1rem;">attach_file</span>
+                    Attachments
+                </div>
+                <div id="lvFileList" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">
+                    <div style="font-size:.75rem;color:var(--text-muted);">No attachments yet.</div>
+                </div>
+                <div id="lvUploadArea" style="display:none;">
+                    <label class="lv-upload-label">
+                        <span class="material-symbols-outlined" style="font-size:1rem;">upload_file</span>
+                        <span id="lvUploadText">Attach a file</span>
+                        <input type="file" id="lvFileInput" style="display:none;" onchange="uploadLessonFile(this)">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ══ ASSIGNMENT SANDBOX ════════════════════════════════════════════════════ -->
 <div class="sandbox-overlay" id="sandboxOverlay" onclick="closeSandboxOnBg(event)">

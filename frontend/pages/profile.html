@@ -211,6 +211,52 @@
         .cert-mastery-chip.proficient { background:rgba(16,185,129,.1); color:#34d399; border-color:rgba(16,185,129,.25); }
         .cert-mastery-chip.competent  { background:rgba(6,182,212,.1);  color:#22d3ee; border-color:rgba(6,182,212,.25); }
 
+        /* ── Certificate View Modal ────────────────────────────────────────── */
+        .cert-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.82);
+            z-index: 2000; display: none; align-items: center; justify-content: center;
+            padding: 1rem; backdrop-filter: blur(6px);
+        }
+        .cert-overlay.open { display: flex; }
+        .cert-modal-wrap { width: 100%; max-width: 660px; }
+        .cert-actions {
+            display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.65rem;
+        }
+        .certificate {
+            background: #fff; border-radius: 14px; padding: 2.75rem 3.25rem;
+            text-align: center; color: #1a1a2e; position: relative;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+        }
+        .cert-top-accent, .cert-bot-accent {
+            position: absolute; left: 14px; right: 14px; height: 4px; border-radius: 2px;
+            background: linear-gradient(90deg,#7c3aed,#06b6d4,#10b981);
+        }
+        .cert-top-accent { top: 14px; }
+        .cert-bot-accent { bottom: 14px; }
+        .cert-logo-row { margin-bottom: 0.4rem; }
+        .cert-logo-row img { height: 54px; }
+        .cert-headline { font-family:'Press Start 2P',monospace; font-size:.6rem; color:#7c3aed; letter-spacing:2px; margin:.6rem 0 .4rem; }
+        .cert-subtitle { font-size:.82rem; color:#6b7280; margin-bottom:.4rem; }
+        .cert-student-name { font-size:1.85rem; font-weight:800; color:#111827; font-style:italic; border-bottom:2px solid #e5e7eb; padding-bottom:.45rem; margin:.6rem 2.5rem .8rem; }
+        .cert-body-text { font-size:.88rem; color:#4b5563; margin:.6rem 0 .25rem; }
+        .cert-course-name { font-size:1.25rem; font-weight:800; color:#7c3aed; margin:.2rem 0 .8rem; }
+        .cert-mastery-pill { display:inline-block; background:linear-gradient(135deg,#7c3aed,#06b6d4); color:#fff; padding:.4rem 1.4rem; border-radius:30px; font-size:.88rem; font-weight:700; margin-bottom:1.4rem; }
+        .cert-stats-row { display:flex; justify-content:center; gap:2.5rem; margin-bottom:1.2rem; }
+        .cert-stat-val { font-size:1.3rem; font-weight:800; color:#111827; display:block; }
+        .cert-stat-lbl { font-size:.68rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; }
+        .cert-issued { font-size:.78rem; color:#9ca3af; margin-bottom:1.4rem; }
+        .cert-footer-row { display:flex; justify-content:center; }
+        .cert-sig-line { font-size:.95rem; font-weight:700; color:#1a1a2e; border-top:1px solid #e5e7eb; padding-top:.4rem; }
+        .cert-sig-sub { font-size:.7rem; color:#9ca3af; }
+
+        @media print {
+            .cert-actions { display: none !important; }
+            .cert-overlay { background: none; position: static; padding: 0; backdrop-filter: none; display: block !important; }
+            .cert-modal-wrap { max-width: 100%; }
+            .certificate { box-shadow: none; border: 2px solid #7c3aed; }
+            body > *:not(.cert-overlay) { display: none !important; }
+        }
+
         /* ── Misc ─────────────────────────────────────────────────────────── */
         .empty-state { text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; }
         .empty-state .material-symbols-outlined { font-size:2rem; display:block; margin-bottom:0.5rem; opacity:0.35; }
@@ -408,6 +454,43 @@
             <span class="material-symbols-outlined" style="font-size:1rem;">logout</span>
             Logout
         </button>
+    </div>
+</div>
+
+<!-- ── Certificate View Modal ─────────────────────────────────────────────── -->
+<div class="cert-overlay" id="certViewOverlay" onclick="if(event.target===this)closeCertView()">
+    <div class="cert-modal-wrap">
+        <div class="cert-actions">
+            <button onclick="printCertView()" class="btn btn-secondary" style="font-size:.8rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">download</span> Download PDF
+            </button>
+            <button onclick="closeCertView()" class="btn btn-secondary" style="font-size:.8rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">close</span> Close
+            </button>
+        </div>
+        <div class="certificate" id="certViewContent">
+            <div class="cert-top-accent"></div>
+            <div class="cert-logo-row"><img src="../assets/codearena-logo.png" alt="CodeArena"></div>
+            <div class="cert-headline">Certificate of Achievement</div>
+            <div class="cert-subtitle">This is to certify that</div>
+            <div class="cert-student-name" id="cvName">—</div>
+            <div class="cert-body-text">has successfully demonstrated <strong id="cvMastery">—</strong> mastery in</div>
+            <div class="cert-course-name" id="cvCourse">—</div>
+            <div class="cert-mastery-pill" id="cvPill">—</div>
+            <div class="cert-stats-row">
+                <div><span class="cert-stat-val" id="cvScore">—</span><span class="cert-stat-lbl">Score</span></div>
+                <div><span class="cert-stat-val" id="cvAccuracy">—</span><span class="cert-stat-lbl">Accuracy</span></div>
+                <div><span class="cert-stat-val" id="cvLevel">—</span><span class="cert-stat-lbl">Difficulty</span></div>
+            </div>
+            <div class="cert-issued" id="cvDate">Issued on —</div>
+            <div class="cert-footer-row">
+                <div>
+                    <div class="cert-sig-line">CodeArena AI System</div>
+                    <div class="cert-sig-sub">Adaptive Learning Platform</div>
+                </div>
+            </div>
+            <div class="cert-bot-accent"></div>
+        </div>
     </div>
 </div>
 
@@ -727,6 +810,8 @@ function loadAchievements() {
 }
 
 // ─── Certificates (database, with localStorage fallback) ─────────────────────
+let _certStore = [];  // module-level so viewCert(i) can access them
+
 async function loadCertificates() {
     const list = document.getElementById('certList');
     let certs = [];
@@ -750,17 +835,20 @@ async function loadCertificates() {
         try { certs = JSON.parse(localStorage.getItem('certificates') || '[]').reverse(); } catch {}
     }
 
+    _certStore = certs;   // keep for viewCert(i)
+
     if (!certs.length) {
         list.innerHTML = `<div class="empty-state">
             <span class="material-symbols-outlined">workspace_premium</span>
-            <p>No certificates yet.<br>Complete an Arena game with 75%+ accuracy to earn one!</p>
+            <p>No certificates yet.<br>Complete an Assessment with 75%+ accuracy to earn one!</p>
         </div>`;
         return;
     }
     const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅' };
-    list.innerHTML = certs.map(c => {
+    list.innerHTML = certs.map((c, i) => {
         const icon  = MASTERY_ICONS[c.mastery] || '📜';
         const chip  = (c.mastery||'').toLowerCase();
+        const dataAttr = encodeURIComponent(JSON.stringify(c));
         return `<div class="cert-card">
             <div class="cert-card-icon">${icon}</div>
             <div class="cert-card-body">
@@ -771,11 +859,85 @@ async function loadCertificates() {
                     <span>${c.dateStr||''}</span>
                 </div>
             </div>
+            <button onclick="viewCert(${i})" class="btn btn-primary"
+                style="font-size:.75rem;flex-shrink:0;padding:.4rem .85rem;gap:.3rem;">
+                <span class="material-symbols-outlined" style="font-size:.95rem;">workspace_premium</span>
+                View
+            </button>
         </div>`;
     }).join('');
 }
 
 function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+// ─── Certificate View Modal ───────────────────────────────────────────────────
+const LANG_NAMES_CERT = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' };
+const MASTERY_ICONS_CERT = { Expert:'🏅', Proficient:'⭐', Competent:'✅' };
+
+function viewCert(idx) {
+    const c = _certStore[idx];
+    if (!c) return;
+
+    const studentName = me.fullName || me.full_name || me.name || 'Student';
+    const langName    = c.langName || LANG_NAMES_CERT[c.lang] || capitalize(c.lang || '');
+    const levelCap    = capitalize(c.level || '');
+    const mastery     = c.mastery || 'Proficient';
+    const mastIcon    = MASTERY_ICONS_CERT[mastery] || '📜';
+    const dateStr     = c.dateStr || (c.earnedAt ? new Date(c.earnedAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '');
+
+    document.getElementById('cvName').textContent    = studentName;
+    document.getElementById('cvMastery').textContent = mastery;
+    document.getElementById('cvCourse').textContent  = `${langName} Programming — ${levelCap}`;
+    document.getElementById('cvPill').textContent    = `${mastIcon} ${mastery} Level`;
+    document.getElementById('cvScore').textContent   = c.score ?? '—';
+    document.getElementById('cvAccuracy').textContent = (c.accuracy != null ? c.accuracy + '%' : '—');
+    document.getElementById('cvLevel').textContent   = levelCap;
+    document.getElementById('cvDate').textContent    = dateStr ? 'Issued on ' + dateStr : '';
+
+    document.getElementById('certViewOverlay').classList.add('open');
+}
+
+function closeCertView() {
+    document.getElementById('certViewOverlay').classList.remove('open');
+}
+
+function printCertView() {
+    const cert = document.getElementById('certViewContent');
+    if (!cert) return;
+    const html = cert.outerHTML;
+    const win = window.open('', '_blank', 'width=780,height=700');
+    win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>CodeArena Certificate</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; display: flex; justify-content: center; align-items: flex-start; padding: 2rem; font-family: 'Inter', sans-serif; }
+  .certificate { background:#fff; border-radius:14px; padding:2.75rem 3.25rem; text-align:center; color:#1a1a2e; position:relative; border:2px solid #7c3aed; max-width:660px; width:100%; }
+  .cert-top-accent,.cert-bot-accent { position:absolute; left:14px; right:14px; height:4px; border-radius:2px; background:linear-gradient(90deg,#7c3aed,#06b6d4,#10b981); }
+  .cert-top-accent { top:14px; } .cert-bot-accent { bottom:14px; }
+  .cert-logo-row { margin-bottom:.4rem; } .cert-logo-row img { height:54px; }
+  .cert-headline { font-family:'Press Start 2P',monospace; font-size:.6rem; color:#7c3aed; letter-spacing:2px; margin:.6rem 0 .4rem; }
+  .cert-subtitle { font-size:.82rem; color:#6b7280; margin-bottom:.4rem; }
+  .cert-student-name { font-size:1.85rem; font-weight:800; color:#111827; font-style:italic; border-bottom:2px solid #e5e7eb; padding-bottom:.45rem; margin:.6rem 2.5rem .8rem; }
+  .cert-body-text { font-size:.88rem; color:#4b5563; margin:.6rem 0 .25rem; }
+  .cert-course-name { font-size:1.25rem; font-weight:800; color:#7c3aed; margin:.2rem 0 .8rem; }
+  .cert-mastery-pill { display:inline-block; background:linear-gradient(135deg,#7c3aed,#06b6d4); color:#fff; padding:.4rem 1.4rem; border-radius:30px; font-size:.88rem; font-weight:700; margin-bottom:1.4rem; }
+  .cert-stats-row { display:flex; justify-content:center; gap:2.5rem; margin-bottom:1.2rem; }
+  .cert-stat-val { font-size:1.3rem; font-weight:800; color:#111827; display:block; }
+  .cert-stat-lbl { font-size:.68rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; }
+  .cert-issued { font-size:.78rem; color:#9ca3af; margin-bottom:1.4rem; }
+  .cert-footer-row { display:flex; justify-content:center; }
+  .cert-sig-line { font-size:.95rem; font-weight:700; color:#1a1a2e; border-top:1px solid #e5e7eb; padding-top:.4rem; }
+  .cert-sig-sub { font-size:.7rem; color:#9ca3af; }
+  @media print { body { padding:0; } .certificate { border-radius:0; } }
+</style>
+</head><body>${html}</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 600);
+}
 
 // ─── Faculty: Overview ────────────────────────────────────────────────────────
 async function loadFacultyOverview() {

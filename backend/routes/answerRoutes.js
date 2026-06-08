@@ -94,13 +94,17 @@ router.post('/check', async (req, res) => {
 
     // Try to get question from database first, then fallback to mock
     let question = null;
+    // Handle db_ prefixed IDs (questions merged from DB in the question list endpoint)
+    const isDbQuestion = typeof questionId === 'string' && questionId.startsWith('db_');
+    const numericId = isDbQuestion ? parseInt(questionId.replace('db_', ''), 10) : questionId;
+
     if (dbService.isDbAvailable()) {
-        question = await dbService.getQuestionById(questionId);
+        question = await dbService.getQuestionById(numericId);
     }
 
-    // Fallback to mock data
-    if (!question) {
-        question = questionBank.find(q => q.id === questionId);
+    // Fallback to mock data (only for non-DB questions)
+    if (!question && !isDbQuestion) {
+        question = questionBank.find(q => q.id === questionId || q.id === numericId);
     }
 
     if (!question) {

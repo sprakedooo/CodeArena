@@ -1339,57 +1339,44 @@ router.get('/next/:userId', (req, res) => {
 router.get('/:language/:level', async (req, res) => {
     const { language, level } = req.params;
     const { type } = req.query; // Optional: filter by questionType
+    const lang = language.toLowerCase();
+    const lvl  = level.toLowerCase();
 
-    // Try database first (only for multiple_choice or mixed, since DB may lack typed questions)
-    let questionsForStudent = null;
-    if (dbService.isDbAvailable() && (!type || type === 'mixed' || type === 'multiple_choice')) {
-        const dbQuestions = await dbService.getQuestions(language.toLowerCase(), level.toLowerCase());
+    // Always start with hardcoded bank (reliable base)
+    let bankQuestions = questionBank
+        .filter(q => q.language === lang && q.level === lvl)
+        .map(q => ({
+            id: q.id, question: q.question, options: q.options || [],
+            topic: q.topic, level: q.level, correctAnswer: q.correctAnswer,
+            hint: q.hint, explanation: q.explanation,
+            questionType: q.questionType || 'multiple_choice',
+            codeSnippet: q.codeSnippet || null, codeLines: q.codeLines || null,
+            correctOrder: q.correctOrder || null, source: 'bank'
+        }));
+
+    // Merge DB questions on top (superadmin/faculty-created questions)
+    if (dbService.isDbAvailable()) {
+        const dbQuestions = await dbService.getQuestions(lang, lvl);
         if (dbQuestions && dbQuestions.length > 0) {
-            let mapped = dbQuestions.map(q => ({
-                id: q.id,
-                question: q.question,
-                options: q.options || [],
-                topic: q.topic,
-                level: q.level,
-                correctAnswer: q.correctAnswer,
-                hint: q.hint,
-                explanation: q.explanation,
-                questionType: q.questionType || 'multiple_choice'
+            const dbMapped = dbQuestions.map(q => ({
+                id: `db_${q.id}`, question: q.question, options: q.options || [],
+                topic: q.topic, level: q.level, correctAnswer: q.correctAnswer,
+                hint: q.hint, explanation: q.explanation,
+                questionType: q.questionType || 'multiple_choice',
+                codeSnippet: q.codeSnippet || null, codeLines: q.codeLines || null,
+                correctOrder: null, source: 'db'
             }));
-            if (type && type !== 'mixed') {
-                mapped = mapped.filter(q => q.questionType === type);
-            }
-            if (mapped.length > 0) questionsForStudent = mapped;
+            bankQuestions = [...dbMapped, ...bankQuestions];
         }
     }
 
-    // Fallback to mock data (always used for non-multiple_choice types)
-    if (!questionsForStudent) {
-        let filteredQuestions = questionBank.filter(
-            q => q.language === language.toLowerCase() && q.level === level.toLowerCase()
+    let questionsForStudent = bankQuestions;
+
+    // Filter by question type if specified
+    if (type && type !== 'mixed') {
+        questionsForStudent = questionsForStudent.filter(
+            q => (q.questionType || 'multiple_choice') === type
         );
-
-        // Filter by question type if specified
-        if (type && type !== 'mixed') {
-            filteredQuestions = filteredQuestions.filter(
-                q => (q.questionType || 'multiple_choice') === type
-            );
-        }
-
-        questionsForStudent = filteredQuestions.map(q => ({
-            id: q.id,
-            question: q.question,
-            options: q.options || [],
-            topic: q.topic,
-            level: q.level,
-            correctAnswer: q.correctAnswer,
-            hint: q.hint,
-            explanation: q.explanation,
-            questionType: q.questionType || 'multiple_choice',
-            codeSnippet: q.codeSnippet || null,
-            codeLines: q.codeLines || null,
-            correctOrder: q.correctOrder || null
-        }));
     }
 
     res.json({

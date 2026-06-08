@@ -28,6 +28,7 @@ DROP TABLE IF EXISTS announcements;
 DROP TABLE IF EXISTS classroom_answers;
 DROP TABLE IF EXISTS classroom_sessions;
 DROP TABLE IF EXISTS classroom_questions;
+DROP TABLE IF EXISTS lesson_files;
 DROP TABLE IF EXISTS classroom_lessons;
 DROP TABLE IF EXISTS classroom_enrollments;
 DROP TABLE IF EXISTS classrooms;
@@ -203,6 +204,22 @@ CREATE TABLE classroom_lessons (
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (classroom_id) REFERENCES classrooms(classroom_id) ON DELETE CASCADE,
     FOREIGN KEY (faculty_id)   REFERENCES users(user_id)           ON DELETE CASCADE
+);
+
+-- ============================================================================
+-- LESSON FILE ATTACHMENTS
+-- ============================================================================
+CREATE TABLE lesson_files (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    lesson_id     INT NOT NULL,
+    classroom_id  INT NOT NULL,
+    filename      VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    file_size     INT DEFAULT 0,
+    file_type     VARCHAR(50),
+    uploaded_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (lesson_id)    REFERENCES classroom_lessons(lesson_id)  ON DELETE CASCADE,
+    FOREIGN KEY (classroom_id) REFERENCES classrooms(classroom_id)      ON DELETE CASCADE
 );
 
 -- ============================================================================

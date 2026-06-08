@@ -23,16 +23,43 @@
 
 const express = require('express');
 const router  = express.Router();
+const fs      = require('fs');
+const path    = require('path');
 const { authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
 
-// ── In-memory stores ──────────────────────────────────────────────────────────
-// Map<instanceId, QuizInstance>
-const instances = new Map();
-// Map<`${instanceId}_${userId}`, QuizResult>
-const results   = new Map();
+// ── Persistent JSON store ─────────────────────────────────────────────────────
+const DATA_DIR  = path.join(__dirname, '../../data');
+const INST_FILE = path.join(DATA_DIR, 'quiz_instances.json');
+const RES_FILE  = path.join(DATA_DIR, 'quiz_results.json');
 
-let nextInstId = 1000;   // instance IDs
-let nextQId    = 10000;  // question IDs (globally unique to avoid collisions)
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+function loadFile(file, defaultVal) {
+    try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+    catch { return defaultVal; }
+}
+function saveFile(file, data) {
+    try { fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8'); } catch {}
+}
+
+// ── In-memory stores (loaded from disk on startup) ────────────────────────────
+// Map<instanceId, QuizInstance>
+const instances = new Map(Object.entries(loadFile(INST_FILE, {})));
+// Map<`${instanceId}_${userId}`, QuizResult>
+const results   = new Map(Object.entries(loadFile(RES_FILE, {})));
+
+function persistInstances() { saveFile(INST_FILE, Object.fromEntries(instances)); }
+function persistResults()   { saveFile(RES_FILE,  Object.fromEntries(results));   }
+
+// Determine highest used IDs so we don't collide after reload
+let nextInstId = 1000;
+let nextQId    = 10000;
+for (const inst of instances.values()) {
+    const n = parseInt(inst.id); if (!isNaN(n) && n >= nextInstId) nextInstId = n + 1;
+    for (const q of (inst.questions || [])) {
+        const m = parseInt(q.id || q.question_id); if (!isNaN(m) && m >= nextQId) nextQId = m + 1;
+    }
+}
 
 function makeInstance(cid, title, facultyId) {
     const iid = String(nextInstId++);
@@ -46,6 +73,7 @@ function makeInstance(cid, title, facultyId) {
         createdBy:   facultyId,
     };
     instances.set(iid, inst);
+    persistInstances();
     return inst;
 }
 
@@ -286,6 +314,7 @@ router.put('/:cid/instances/:iid', authMiddleware, requireFaculty, (req, res) =>
     if (!inst || String(inst.classroomId) !== String(req.params.cid))
         return res.status(404).json({ success: false, message: 'Quiz not found.' });
     if (req.body.title) inst.title = req.body.title;
+    persistInstances();
     return res.json({ success: true, instance: inst });
 });
 
@@ -299,6 +328,8 @@ router.delete('/:cid/instances/:iid', authMiddleware, requireFaculty, (req, res)
     for (const key of results.keys()) {
         if (key.startsWith(`${req.params.iid}_`)) results.delete(key);
     }
+    persistInstances();
+    persistResults();
     return res.json({ success: true });
 });
 
@@ -309,6 +340,7 @@ router.post('/:cid/instances/:iid/questions', authMiddleware, requireFaculty, (r
         return res.status(404).json({ success: false, message: 'Quiz not found.' });
     const q = { ...req.body, id: nextQId++, instance_id: req.params.iid };
     inst.questions.push(q);
+    persistInstances();
     return res.json({ success: true, question: q });
 });
 
@@ -321,6 +353,7 @@ router.put('/:cid/instances/:iid/questions/:qid', authMiddleware, requireFaculty
     const i   = inst.questions.findIndex(q => q.id === qid);
     if (i === -1) return res.status(404).json({ success: false, message: 'Question not found.' });
     inst.questions[i] = { ...inst.questions[i], ...req.body, id: qid, instance_id: req.params.iid };
+    persistInstances();
     return res.json({ success: true, question: inst.questions[i] });
 });
 
@@ -334,6 +367,7 @@ router.delete('/:cid/instances/:iid/questions/:qid', authMiddleware, requireFacu
     inst.questions = inst.questions.filter(q => q.id !== qid);
     if (inst.questions.length === before)
         return res.status(404).json({ success: false, message: 'Question not found.' });
+    persistInstances();
     return res.json({ success: true });
 });
 
@@ -345,6 +379,7 @@ router.patch('/:cid/instances/:iid/schedule', authMiddleware, requireFaculty, (r
     const { startAt, deadline } = req.body;
     inst.schedule.startAt  = startAt  || null;
     inst.schedule.deadline = deadline || null;
+    persistInstances();
     return res.json({ success: true, schedule: inst.schedule, status: instanceStatus(inst) });
 });
 
@@ -377,6 +412,7 @@ router.post('/:cid/instances/:iid/submit', authMiddleware, (req, res) => {
         completedAt:   new Date().toISOString(),
     };
     results.set(key, result);
+    persistResults();
     return res.json({ success: true, result });
 });
 
