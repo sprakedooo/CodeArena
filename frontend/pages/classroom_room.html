@@ -1767,7 +1767,8 @@ function startQuiz(iid) {
 // ══ CURRICULUM ════════════════════════════════════════════════════════════════
 
 let _curriculum = null;       // full curriculum object from API
-let _currProgress = {};       // userId_unitId → { evalPassed, evalScore, contentCompleted }
+let _currProgress = {};       // unitId → { evalPassed, evalScore, contentCompleted, unlocked }
+let _levelStatus = {};        // levelId → { unlocked, prevLevelName }
 let _uvUnit = null;           // currently open unit
 let _uvLevel = null;          // currently open level object
 let _uvTopics = [];           // topics + ['eval'] sentinel
@@ -1782,11 +1783,13 @@ async function loadCurriculum() {
         <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
         Loading curriculum…</div>`;
     try {
-        const res = await fetch(API + `/curriculum/${classroomId}/student`, { headers: getAuthHeaders() });
+        const lang = encodeURIComponent(classroomLang || 'python');
+        const res = await fetch(API + `/curriculum/${classroomId}/student?language=${lang}`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error('no curriculum');
         const data = await res.json();
         _curriculum = data.curriculum;
         _currProgress = data.progress || {};
+        _levelStatus  = data.levelStatus || {};
         renderCurriculumView();
     } catch {
         view.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
@@ -1811,12 +1814,28 @@ function renderCurriculumView() {
         const units = [...(lvl.units || [])].sort((a, b) => a.order - b.order);
         const levelColors = { beginner: '#10b981', intermediate: '#fbbf24', advanced: '#f87171' };
         const col = levelColors[lvl.name?.toLowerCase()] || 'var(--primary)';
+        const lstat = _levelStatus[lvl.id] || { unlocked: true };
+        const levelLocked = lstat.unlocked === false;
 
-        html += `<div class="curr-level-section" style="margin-bottom:2rem;">
+        html += `<div class="curr-level-section" style="margin-bottom:2rem;${levelLocked ? 'opacity:.75;' : ''}">
             <div class="curr-level-header" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
                 <span style="width:10px;height:10px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>
                 <span style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${col};">${esc(lvl.name)}</span>
+                ${levelLocked ? `<span class="material-symbols-outlined" style="font-size:1rem;color:var(--text-muted);margin-left:auto;">lock</span>` : ''}
             </div>`;
+
+        // Locked-level banner with a clear unlock path
+        if (levelLocked) {
+            const prevName = lstat.prevLevelName || 'the previous level';
+            html += `<div style="display:flex;align-items:flex-start;gap:10px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+                <span class="material-symbols-outlined" style="color:#a78bfa;font-size:1.2rem;">lock</span>
+                <div style="font-size:.8rem;color:var(--text-secondary);line-height:1.5;">
+                    <strong style="color:var(--text);">${esc(lvl.name)} is locked.</strong><br>
+                    Complete every <strong>${esc(prevName)}</strong> unit here, or pass the <strong>${esc(prevName)}</strong>
+                    Technical Assessment in <strong>${esc((classroomLang||'this language'))}</strong>, to unlock it.
+                </div>
+            </div>`;
+        }
 
         if (units.length === 0) {
             html += `<div style="font-size:.8rem;color:var(--text-muted);padding:.5rem 1rem;">No units in this level yet.</div>`;

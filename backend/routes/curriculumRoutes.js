@@ -44,6 +44,7 @@ const router  = express.Router();
 const fs      = require('fs');
 const path    = require('path');
 const { authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
+const masteryService = require('../services/masteryService');
 
 // ── Persistent JSON store ─────────────────────────────────────────────────────
 const DATA_DIR  = path.join(__dirname, '../../data');
@@ -102,31 +103,64 @@ function allUnits(cid) {
     return out;
 }
 
-/** Build per-unit progress for a student in a classroom */
-function buildStudentProgress(userId, cid) {
+/**
+ * Determine which curriculum LEVELS are unlocked for a student.
+ * A level unlocks when EITHER:
+ *   - the previous curriculum level is fully completed in this classroom, OR
+ *   - the student mastered the previous standard level cross-system
+ *     (i.e. passed it in the Technical Assessment for this language).
+ * Returns { [levelId]: { unlocked, prevLevelName } }.
+ */
+function buildLevelStatus(userId, cid, language) {
+    const uid  = String(userId);
+    const curr = getCurr(cid);
+    const lang = language || curr.language || '';
+    const levels = [...(curr.levels || [])].sort((a, b) => a.order - b.order);
+    const status = {};
+
+    levels.forEach((lvl, i) => {
+        if (i === 0) { status[lvl.id] = { unlocked: true, prevLevelName: null }; return; }
+
+        const prev = levels[i - 1];
+        const prevUnits = prev.units || [];
+        // Previous curriculum level fully completed in THIS classroom ([].every === true)
+        const prevDone = prevUnits.every(u => progress[`${uid}_${u.id}`]?.evalPassed);
+        // Cross-system: previous standard level mastered (e.g. Technical Assessment pass)
+        const crossMastered = masteryService.isLevelUnlocked(uid, lang, lvl.name);
+
+        status[lvl.id] = { unlocked: prevDone || crossMastered, prevLevelName: prev.name };
+    });
+    return status;
+}
+
+/** Build per-unit progress for a student in a classroom (with level + unit gating). */
+function buildStudentProgress(userId, cid, language) {
     const uid = String(userId);
     const result = {};
     const units = allUnits(cid);
+    const levelStatus = buildLevelStatus(userId, cid, language);
 
     for (let i = 0; i < units.length; i++) {
         const unit = units[i];
         const key  = `${uid}_${unit.id}`;
         const p    = progress[key] || {};
 
-        // Unit is unlocked if: it's the first unit of its level, OR the previous unit (same level) passed eval
+        const levelUnlocked = levelStatus[unit.levelId]?.unlocked !== false;
+
+        // Within an unlocked level: first unit open, others unlock after the previous unit's eval
         const levelUnits = units.filter(u => u.levelId === unit.levelId).sort((a,b) => a.order - b.order);
         const posInLevel = levelUnits.findIndex(u => u.id === unit.id);
-        let unlocked = false;
+        let unitUnlocked;
         if (posInLevel === 0) {
-            unlocked = true; // first unit of level is always open
+            unitUnlocked = true;
         } else {
             const prevUnit = levelUnits[posInLevel - 1];
-            const prevKey  = `${uid}_${prevUnit.id}`;
-            unlocked = !!(progress[prevKey]?.evalPassed);
+            unitUnlocked = !!(progress[`${uid}_${prevUnit.id}`]?.evalPassed);
         }
 
         result[unit.id] = {
-            unlocked,
+            unlocked:         levelUnlocked && unitUnlocked,
+            levelUnlocked,
             contentCompleted: p.contentCompleted || false,
             completedTopics:  Array.isArray(p.completedTopics) ? p.completedTopics : [],
             evalPassed:       p.evalPassed       || false,
@@ -158,7 +192,11 @@ router.get('/:cid', authMiddleware, (req, res) => {
 router.get('/:cid/student', authMiddleware, (req, res) => {
     const cid  = req.params.cid;
     const curr = getCurr(cid);
-    const prog = buildStudentProgress(req.user.id, cid);
+    const language = (req.query.language || curr.language || '').toLowerCase();
+    // Remember the classroom language for server-side level gating
+    if (language && curr.language !== language) { curr.language = language; persistCurriculum(); }
+    const prog        = buildStudentProgress(req.user.id, cid, language);
+    const levelStatus = buildLevelStatus(req.user.id, cid, language);
     // Strip correct answers from eval questions for students
     const safe = JSON.parse(JSON.stringify(curr));
     for (const lvl of safe.levels) {
@@ -170,7 +208,7 @@ router.get('/:cid/student', authMiddleware, (req, res) => {
             }));
         }
     }
-    res.json({ success: true, curriculum: safe, progress: prog });
+    res.json({ success: true, curriculum: safe, progress: prog, levelStatus });
 });
 
 // ── POST /:cid/levels — create level ─────────────────────────────────────────
@@ -424,6 +462,18 @@ router.post('/:cid/units/:uid/submit-eval', authMiddleware, (req, res) => {
     }
     persistProgress();
 
+    // Server-authoritative cross-system mastery: if this pass completes the whole level,
+    // record mastery so the next level unlocks in BOTH the classroom and the Technical Assessment.
+    if (passed) {
+        const curr  = getCurr(cid);
+        const level = found.level;
+        const lvlUnits = level.units || [];
+        const levelDone = lvlUnits.length > 0 && lvlUnits.every(u => progress[`${userId}_${u.id}`]?.evalPassed);
+        if (levelDone && curr.language) {
+            masteryService.recordMastery(userId, curr.language, level.name, 'classroom');
+        }
+    }
+
     res.json({ success: true, score, correct, total, passed, results, passScore: unit.passScore || 70 });
 });
 
@@ -474,6 +524,13 @@ router.post('/:cid/issue-level-cert', authMiddleware, (req, res) => {
     if (existing >= 0) { certs[existing] = certData; }
     else               { certs.push(certData); }
     persistCerts();
+
+    // Remember the classroom language on the curriculum so level-gating works server-side
+    if (language && language !== 'general') { curr.language = String(language).toLowerCase(); persistCurriculum(); }
+
+    // Completing every unit of this level grants cross-system mastery
+    // → unlocks the next level in the Technical Assessment for the same language.
+    masteryService.recordMastery(userId, language, levelName, 'classroom');
 
     res.json({ success: true, certificate: certData });
 });

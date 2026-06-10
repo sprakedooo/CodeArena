@@ -64,6 +64,7 @@ const certificateRoutes    = require('./routes/certificateRoutes');    // Per-le
 const sessionRoutes        = require('./routes/sessionRoutes');         // Live classroom quiz sessions
 const quizRoutes           = require('./routes/quizRoutes');             // Classroom-exclusive quizzes
 const curriculumRoutes     = require('./routes/curriculumRoutes');       // SoloLearn-style curriculum
+const masteryRoutes        = require('./routes/masteryRoutes');          // Cross-system level mastery
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2: INITIALIZE EXPRESS APPLICATION
@@ -177,6 +178,9 @@ app.use('/api/quiz', quizRoutes);
 
 // SoloLearn-style Curriculum: /api/curriculum
 app.use('/api/curriculum', curriculumRoutes);
+
+// Cross-system level mastery: /api/mastery
+app.use('/api/mastery', masteryRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INLINE HELPERS  (declared here for use in routes below)

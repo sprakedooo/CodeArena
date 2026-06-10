@@ -766,6 +766,7 @@ function pickLang(value) {
         o.classList.toggle('active', o.dataset.value === value));
     document.getElementById('langPicker').classList.remove('open');
     updateDiffLocks(value);
+    loadServerMastery(value);   // refresh locks with cross-system (classroom) mastery
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('#langPicker'))
@@ -776,7 +777,7 @@ document.addEventListener('click', e => {
 document.addEventListener('DOMContentLoaded', () => {
     const lang = me.selected_language || me.language || 'python';
     if (LANG_META[lang]) pickLang(lang);
-    else updateDiffLocks('python');
+    else { updateDiffLocks('python'); loadServerMastery('python'); }
     document.addEventListener('keydown', handleKeyboard);
 
     // Check for an in-progress session
@@ -888,7 +889,33 @@ function selectDiff(btn) {
 
 // ── Assessment lock helpers ───────────────────────────────────────────────────
 function assessKey(lang, level) { return `assessment_passed_${lang}_${level}`; }
-function hasPassed(lang, level) { return localStorage.getItem(assessKey(lang, level)) === 'true'; }
+
+// Cross-system mastery fetched from the server (classroom level completions, etc.)
+// Map: language → Set of mastered levels
+const _serverMastery = {};
+
+function hasPassed(lang, level) {
+    if (localStorage.getItem(assessKey(lang, level)) === 'true') return true;
+    // Also honour mastery earned in classrooms (e.g. completing the beginner curriculum)
+    return !!(_serverMastery[lang] && _serverMastery[lang].has(level));
+}
+
+// Fetch cross-system mastery for a language, then refresh the difficulty locks
+async function loadServerMastery(lang) {
+    if (!me.id) return;
+    try {
+        const res  = await fetch(`${API}/mastery/${me.id}/${encodeURIComponent(lang)}`, {
+            headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.success) {
+            _serverMastery[lang] = new Set(data.mastered || []);
+            // Mirror into localStorage so the rest of the page stays consistent
+            (data.mastered || []).forEach(lv => localStorage.setItem(assessKey(lang, lv), 'true'));
+            updateDiffLocks(lang);
+        }
+    } catch { /* offline — fall back to localStorage only */ }
+}
 
 function updateDiffLocks(lang) {
     const passedBeginner     = hasPassed(lang, 'beginner');
@@ -1483,7 +1510,16 @@ async function endGame() {
     const passed   = accuracy >= 70;
 
     // Persist pass result so difficulty locks update correctly
-    if (passed) localStorage.setItem(assessKey(setupLang, setupLevel), 'true');
+    if (passed) {
+        localStorage.setItem(assessKey(setupLang, setupLevel), 'true');
+        // Record cross-system mastery (≥70%) → unlocks the next level in classrooms too.
+        // Decoupled from the certificate (which needs ≥75%).
+        fetch(`${API}/mastery`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ language: setupLang, level: setupLevel, source: 'assessment' })
+        }).catch(() => { /* offline — localStorage still gates the assessment locally */ });
+    }
 
     // Pass/Fail banner
     const banner = document.getElementById('passBanner');

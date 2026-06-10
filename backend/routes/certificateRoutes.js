@@ -14,6 +14,7 @@
 const express = require('express');
 const router  = express.Router();
 const { pool } = require('../config/database');
+const masteryService = require('../services/masteryService');
 
 // ── In-memory mock (used when DB is unavailable) ──────────────────────────────
 let mockCertificates = [];
@@ -78,6 +79,10 @@ router.post('/', async (req, res) => {
             message: 'Required: language and a valid level (beginner/intermediate/advanced)'
         });
     }
+
+    // Passing a Technical Assessment level grants cross-system mastery
+    // → unlocks the next level in classrooms of the same language.
+    masteryService.recordMastery(userId, language, level, 'assessment');
 
     try {
         // Upsert — keep the best score/accuracy if a certificate already exists.
