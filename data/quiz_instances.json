@@ -1,0 +1,49 @@
+{
+  "1000": {
+    "id": "1000",
+    "classroomId": "1",
+    "title": "qqqwfqfqw",
+    "questions": [
+      {
+        "question": "fwefweewf",
+        "questionType": "multiple_choice",
+        "level": "beginner",
+        "language": "python",
+        "topic": "Quiz",
+        "correctAnswer": "A",
+        "options": [
+          "A) fwefwef",
+          "B) wfwef",
+          "C) wefwef",
+          "D) wefwef"
+        ],
+        "hint": "",
+        "id": 10000,
+        "instance_id": "1000"
+      },
+      {
+        "question": "fwefwef",
+        "questionType": "multiple_choice",
+        "level": "beginner",
+        "language": "python",
+        "topic": "Quiz",
+        "correctAnswer": "A",
+        "options": [
+          "A) wefwefwe",
+          "B) fwfwefwef",
+          "C) wefw",
+          "D) fwefwefw"
+        ],
+        "hint": "",
+        "id": 10001,
+        "instance_id": "1000"
+      }
+    ],
+    "schedule": {
+      "startAt": "2026-06-09T23:45:00.000Z",
+      "deadline": "2026-06-10T02:45:00.000Z"
+    },
+    "createdAt": "2026-06-09T23:45:20.970Z",
+    "createdBy": 5
+  }
+}

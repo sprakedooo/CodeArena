@@ -74,7 +74,7 @@
         .contrib-card-meta .material-symbols-outlined { font-size: 0.78rem; }
 
         /* Stat strip */
-        .stat-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
+        .stat-strip { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
         .stat-chip {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 1rem 1.15rem;
@@ -289,15 +289,6 @@
             <div class="stat-chip-lbl">Total Students</div>
         </div>
     </div>
-    <div class="stat-chip">
-        <div class="stat-chip-icon chip-green">
-            <span class="material-symbols-outlined">sports_esports</span>
-        </div>
-        <div>
-            <div class="stat-chip-val" id="statSessions">—</div>
-            <div class="stat-chip-lbl">Sessions Run</div>
-        </div>
-    </div>
 </div>
 
 <!-- ── Quick Actions ───────────────────────────────────────────────────────── -->
@@ -448,8 +439,6 @@ function updateStats(classrooms) {
     document.getElementById('statClassrooms').textContent = classrooms.length;
     const total = classrooms.reduce((s, c) => s + (c.student_count || c.studentCount || 0), 0);
     document.getElementById('statStudents').textContent   = total;
-    const sessions = classrooms.reduce((s, c) => s + (c.session_count || c.sessionCount || 0), 0);
-    document.getElementById('statSessions').textContent   = sessions || '—';
 }
 
 function renderClassrooms(classrooms) {

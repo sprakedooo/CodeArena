@@ -533,6 +533,22 @@
         .tc-row { background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
         .tc-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
         .tc-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        /* Topic content toolbar */
+        .tc-btn { display:inline-flex; align-items:center; gap:4px; background:var(--bg-surface); border:1px solid var(--border); color:var(--text-secondary);
+                  border-radius:6px; padding:5px 9px; font-size:.74rem; font-weight:600; cursor:pointer; transition:.12s; line-height:1; }
+        .tc-btn:hover { background:var(--primary); border-color:var(--primary); color:#fff; }
+        .tc-btn .material-symbols-outlined { font-size:1rem; }
+        .tc-btn-accent { background:rgba(124,58,237,.12); border-color:rgba(124,58,237,.35); color:#a78bfa; }
+        .tc-btn-accent:hover { background:var(--primary); color:#fff; }
+        /* Rendered lesson content (preview + student view) */
+        .tc-preview-body pre, .uv-topic-content pre { background:#0d1117; border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+                  font-family:'Fira Code','Consolas',monospace; font-size:.82rem; color:#e2e8f0; overflow-x:auto; margin:10px 0; white-space:pre; }
+        .tc-preview-body code, .uv-topic-content code { background:rgba(124,58,237,.12); color:#a78bfa; padding:1px 6px; border-radius:4px;
+                  font-family:'Fira Code','Consolas',monospace; font-size:.85em; }
+        .tc-preview-body pre code, .uv-topic-content pre code { background:none; color:inherit; padding:0; }
+        .tc-preview-body h3, .uv-topic-content h3 { font-size:1.05rem; margin:14px 0 8px; color:var(--text); }
+        .tc-preview-body ul, .uv-topic-content ul { padding-left:1.3rem; margin:8px 0; }
+        .tc-preview-body p, .uv-topic-content p { margin:8px 0; }
     </style>
 </head>
 <body>
@@ -593,6 +609,9 @@
     <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('stream',this)">
             <span class="material-symbols-outlined">campaign</span>Stream
+        </button>
+        <button class="tab-btn" onclick="switchTab('curriculum',this);loadCurriculumTab()">
+            <span class="material-symbols-outlined">menu_book</span>Lessons
         </button>
         <button class="tab-btn" onclick="switchTab('classwork',this)">
             <span class="material-symbols-outlined">assignment</span>Classwork
@@ -672,23 +691,6 @@
 
     <!-- ── CLASSWORK ──────────────────────────────────────────────────── -->
     <div class="tab-panel" id="tab-classwork">
-
-        <!-- Lessons section -->
-        <div class="classwork-section">
-            <div class="classwork-section-header">
-                <h2 class="classwork-section-title">
-                    <span class="material-symbols-outlined">menu_book</span>
-                    Lessons
-                    <span class="cw-count" id="lessonsCount">0</span>
-                </h2>
-                <button class="btn btn-primary" style="font-size:.8rem;" onclick="openModal('lesson')">
-                    <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Add Lesson
-                </button>
-            </div>
-            <div class="lesson-list" id="lessonsGrid">
-                <div class="loading-text">Loading lessons…</div>
-            </div>
-        </div>
 
         <!-- Community Contributions (same language as classroom) -->
         <div class="classwork-section" id="contribSection" style="display:none;">
@@ -857,6 +859,259 @@
             <div id="spCertList">
                 <div class="sp-empty">Loading certificates…</div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ CURRICULUM TAB ════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-curriculum">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+            <h2 style="font-size:1rem;font-weight:700;color:var(--text);margin:0;">Lessons Builder</h2>
+            <p style="font-size:.76rem;color:var(--text-muted);margin:4px 0 0;">Organize lessons into Beginner / Intermediate / Advanced levels. Students unlock the next unit after passing each evaluation.</p>
+        </div>
+        <button class="btn btn-primary" style="font-size:.82rem;" onclick="openAddLevelModal()">
+            <span class="material-symbols-outlined" style="font-size:.95rem;">add</span>Add Level
+        </button>
+    </div>
+    <div id="curriculumBuilder">
+        <div style="text-align:center;padding:3rem 0;color:var(--text-muted);font-size:.85rem;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
+            Loading curriculum…
+        </div>
+    </div>
+</div>
+
+<!-- ── Add Level Modal ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="addLevelModal" onclick="if(event.target===this)closeAddLevelModal()">
+    <div class="modal-box" style="max-width:420px;padding:28px;">
+        <h3 style="margin:0 0 18px;font-size:.95rem;">Add Level</h3>
+        <div class="form-group">
+            <label class="form-label">Level Name</label>
+            <select id="levelNameSel" class="form-input">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="custom">Custom…</option>
+            </select>
+        </div>
+        <div class="form-group" id="levelCustomGroup" style="display:none;">
+            <label class="form-label">Custom Name</label>
+            <input type="text" id="levelCustomName" class="form-input" placeholder="e.g. Module 1">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+            <button class="btn btn-outline" onclick="closeAddLevelModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAddLevel()">Create Level</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Add / Edit Unit Modal ────────────────────────────────────────────── -->
+<div class="modal-overlay" id="unitModal" onclick="if(event.target===this)closeUnitModal()">
+    <div class="modal-box" style="max-width:460px;padding:28px;">
+        <h3 id="unitModalTitle" style="margin:0 0 18px;font-size:.95rem;">Add Unit</h3>
+        <input type="hidden" id="unitModalLevelId">
+        <input type="hidden" id="unitModalUnitId">
+        <div class="form-group">
+            <label class="form-label">Unit Title</label>
+            <input type="text" id="unitTitle" class="form-input" placeholder="e.g. Variables & Data Types">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Pass Score (%)</label>
+            <input type="number" id="unitPassScore" class="form-input" value="70" min="1" max="100">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+            <button class="btn btn-outline" onclick="closeUnitModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitUnit()">Save Unit</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Topic Editor Modal ───────────────────────────────────────────────── -->
+<div class="modal-overlay" id="topicModal" onclick="if(event.target===this)closeTopicModal()">
+    <div class="modal-box" style="max-width:760px;padding:28px;max-height:92vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:10px;">
+            <h3 id="topicModalTitle" style="margin:0;font-size:.95rem;">Add Topic</h3>
+            <button class="btn btn-outline" onclick="toggleTopicAIPanel()" style="font-size:.75rem;display:flex;align-items:center;gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:.95rem;">auto_awesome</span>Generate with AI
+            </button>
+        </div>
+        <input type="hidden" id="topicModalUnitId">
+        <input type="hidden" id="topicModalTopicId">
+
+        <!-- AI Lesson Generator (difficulty auto-derived from the unit's level) -->
+        <div id="topicAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
+            <div style="font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:.35rem;">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">auto_awesome</span>AI Lesson Generator
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:12px;">
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="topicAITopic" placeholder="e.g. For Loops" style="font-size:.82rem;"></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="topicAILang" style="font-size:.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+            </div>
+            <button class="btn btn-primary" id="topicAIGenBtn" onclick="generateAITopic()" style="font-size:.8rem;">⚡ Generate Lesson</button>
+            <span id="topicAIStatus" style="font-size:.78rem;color:var(--text-muted);margin-left:12px;"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Topic Title</label>
+            <input type="text" id="topicTitle" class="form-input" placeholder="e.g. Data Types">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Content <span style="color:var(--text-muted);font-weight:400;">(rich formatting)</span></label>
+
+            <!-- Formatting toolbar -->
+            <div class="tc-toolbar" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:var(--bg-card);border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;">
+                <button type="button" class="tc-btn" title="Heading"     onclick="tcWrap('<h3>','</h3>')"><span class="material-symbols-outlined">title</span></button>
+                <button type="button" class="tc-btn" title="Paragraph"   onclick="tcWrap('<p>','</p>')">¶</button>
+                <button type="button" class="tc-btn" title="Bold"        onclick="tcWrap('<strong>','</strong>')"><span class="material-symbols-outlined">format_bold</span></button>
+                <button type="button" class="tc-btn" title="Italic"      onclick="tcWrap('<em>','</em>')"><span class="material-symbols-outlined">format_italic</span></button>
+                <button type="button" class="tc-btn" title="Bullet list" onclick="tcInsert('<ul>\n  <li>Item</li>\n</ul>')"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+                <button type="button" class="tc-btn" title="Inline code" onclick="tcWrap('<code>','</code>')"><span class="material-symbols-outlined">code</span></button>
+                <span style="width:1px;background:var(--border);margin:2px 4px;"></span>
+                <button type="button" class="tc-btn tc-btn-accent" title="Insert code block" onclick="openCodeInserter()">
+                    <span class="material-symbols-outlined">data_object</span> Insert Code
+                </button>
+                <span style="flex:1;"></span>
+                <button type="button" class="tc-btn" title="Toggle preview" onclick="toggleTopicPreview()">
+                    <span class="material-symbols-outlined" id="tcPreviewIcon">visibility</span> <span id="tcPreviewLabel">Preview</span>
+                </button>
+            </div>
+
+            <textarea id="topicContent" class="form-input" rows="12" style="border-radius:0 0 8px 8px;font-family:'Fira Code','Consolas',monospace;font-size:.82rem;line-height:1.6;"
+                placeholder="Write lesson content here. Use the toolbar to format text and insert code blocks — no need to escape HTML yourself."></textarea>
+
+            <!-- Live preview -->
+            <div id="topicPreview" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:8px;padding:16px 18px;background:var(--bg-surface);">
+                <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Preview</div>
+                <div id="topicPreviewBody" class="tc-preview-body" style="font-size:.88rem;line-height:1.7;color:var(--text-secondary);"></div>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+            <button class="btn btn-outline" onclick="closeTopicModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitTopic()">Save Topic</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Code Snippet Inserter Modal ──────────────────────────────────────── -->
+<div class="modal-overlay" id="codeInserterModal" onclick="if(event.target===this)closeCodeInserter()">
+    <div class="modal-box" style="max-width:640px;padding:28px;max-height:90vh;overflow-y:auto;">
+        <h3 style="margin:0 0 6px;font-size:.95rem;display:flex;align-items:center;gap:8px;">
+            <span class="material-symbols-outlined" style="color:var(--primary);">data_object</span> Insert Code Block
+        </h3>
+        <p style="font-size:.78rem;color:var(--text-muted);margin:0 0 16px;">Paste your code below — it will be safely escaped and inserted with syntax styling. No manual HTML needed.</p>
+        <div class="form-group">
+            <label class="form-label">Language</label>
+            <select id="codeInsertLang" class="form-input" onchange="updateCodePreview()">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+                <option value="html">HTML</option>
+                <option value="text">Plain text</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Code</label>
+            <textarea id="codeInsertInput" class="form-input" rows="10" spellcheck="false"
+                style="font-family:'Fira Code','Consolas',monospace;font-size:.82rem;line-height:1.55;"
+                placeholder="print('Hello, world!')"
+                oninput="updateCodePreview()"
+                onkeydown="if(event.key==='Tab'){event.preventDefault();const s=this.selectionStart;this.value=this.value.substring(0,s)+'    '+this.value.substring(this.selectionEnd);this.selectionStart=this.selectionEnd=s+4;}"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Preview</label>
+            <pre id="codeInsertPreview" style="margin:0;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'Fira Code','Consolas',monospace;font-size:.8rem;color:#e2e8f0;overflow-x:auto;min-height:48px;white-space:pre;"></pre>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-outline" onclick="closeCodeInserter()">Cancel</button>
+            <button class="btn btn-primary" onclick="insertCodeBlock()">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">add</span>Insert into Lesson
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Eval Question Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="evalQModal" onclick="if(event.target===this)closeEvalQModal()">
+    <div class="modal-box" style="max-width:600px;padding:28px;max-height:90vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:10px;">
+            <h3 id="evalQModalTitle" style="margin:0;font-size:.95rem;">Add Evaluation Question</h3>
+            <button class="btn btn-outline" onclick="toggleEvalQAIPanel()" style="font-size:.75rem;display:flex;align-items:center;gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:.95rem;">auto_awesome</span>Generate with AI
+            </button>
+        </div>
+        <input type="hidden" id="evalQUnitId">
+        <input type="hidden" id="evalQId">
+
+        <!-- AI Question Generator (difficulty auto-derived from the unit's level) -->
+        <div id="evalQAIPanel" style="display:none;background:var(--bg-surface);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:18px;">
+            <div style="font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:.35rem;">
+                <span class="material-symbols-outlined" style="font-size:.9rem;">auto_awesome</span>AI Question Generator
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:12px;">
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Topic *</label><input type="text" class="form-input" id="evalQAITopic" placeholder="e.g. List slicing" style="font-size:.82rem;"></div>
+                <div><label style="font-size:.72rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Language</label><select class="form-input" id="evalQAILang" style="font-size:.82rem;"><option value="python">Python</option><option value="javascript">JavaScript</option><option value="java">Java</option><option value="cpp">C++</option></select></div>
+            </div>
+            <p style="font-size:.7rem;color:var(--text-muted);margin:0 0 10px;">Uses the <strong>Question Type</strong> selected below. The level's difficulty is applied automatically.</p>
+            <button class="btn btn-primary" id="evalQAIGenBtn" onclick="generateAIEvalQ()" style="font-size:.8rem;">⚡ Generate Question</button>
+            <span id="evalQAIStatus" style="font-size:.78rem;color:var(--text-muted);margin-left:12px;"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Question Type</label>
+            <select id="evalQType" class="form-input" onchange="toggleEvalQFields()">
+                <option value="multiple_choice">Multiple Choice</option>
+                <option value="fill_blank">Fill in the Blank</option>
+                <option value="output_prediction">Output Prediction</option>
+                <option value="code_ordering">Code Ordering</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Question Text</label>
+            <textarea id="evalQText" class="form-input" rows="3" placeholder="Enter the question…"></textarea>
+        </div>
+        <div id="evalQCodeSnippetGroup" class="form-group" style="display:none;">
+            <label class="form-label">Code Snippet (shown above question)</label>
+            <textarea id="evalQCodeSnippet" class="form-input" rows="4" style="font-family:monospace;font-size:.82rem;" placeholder="def greet(name):&#10;    print('Hello', name)"></textarea>
+        </div>
+        <!-- Multiple-choice options (A / B / C / D) -->
+        <div id="evalQMCGroup">
+            <div class="form-group">
+                <label class="form-label">Options (A / B / C / D)</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <input type="text" id="evalQOptA" class="form-input" placeholder="A — …">
+                    <input type="text" id="evalQOptB" class="form-input" placeholder="B — …">
+                    <input type="text" id="evalQOptC" class="form-input" placeholder="C — …">
+                    <input type="text" id="evalQOptD" class="form-input" placeholder="D — …">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Correct Answer *</label>
+                <select id="evalQCorrect" class="form-input">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+        </div>
+        <!-- Fill-in-the-blank single answer -->
+        <div id="evalQFillGroup" class="form-group" style="display:none;">
+            <label class="form-label">Correct Answer *</label>
+            <input type="text" id="evalQFillAnswer" class="form-input" placeholder="Exact word/value that fills the blank…">
+        </div>
+        <div id="evalQCodeLinesGroup" class="form-group" style="display:none;">
+            <label class="form-label">Code Lines (one per line, in correct order)</label>
+            <textarea id="evalQCodeLines" class="form-input" rows="6" style="font-family:monospace;font-size:.82rem;" placeholder="x = 10&#10;y = 20&#10;print(x + y)"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Hint (optional)</label>
+            <input type="text" id="evalQHint" class="form-input" placeholder="Hint shown if wrong…">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+            <button class="btn btn-outline" onclick="closeEvalQModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitEvalQ()">Save Question</button>
         </div>
     </div>
 </div>
@@ -1084,6 +1339,7 @@
 
     function getAuthHeaders() { return { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` }; }
     function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function esc(s) { return escHtml(s); }
     function safeEmail(e) { return (e && e.endsWith('@codearena.internal')) ? '—' : (e || '—'); }
     function relativeTime(iso) {
         if (!iso) return '—';
@@ -1757,13 +2013,18 @@
             const sid   = s.id || s.student_id || s.user_id;
             const name  = s.fullName || s.full_name || 'Student';
             const level = (s.currentLevel || s.current_level || 'beginner').toLowerCase();
-            const acc   = Math.round(s.accuracy || s.accuracy_percent || 0);
-            const qs    = s.questionsAnswered || s.questions_answered || 0;
             const xp    = s.totalXp || s.total_xp || 0;
-            const streak = s.streak || s.consecutiveCorrect || s.consecutive_correct || 0;
             const lang  = (s.selectedLanguage || s.selected_language || 'python').toUpperCase();
             const joined = s.enrolledAt || s.enrolled_at;
             const quiz  = quizMap[String(sid)] || null;
+
+            // Prefer real classroom-quiz activity; fall back to the student profile stats
+            const acc     = quiz ? Math.round(quiz.overallAccuracy || 0)
+                                 : Math.round(s.accuracy || s.accuracy_percent || 0);
+            const qs      = quiz ? (quiz.answered || 0)
+                                 : (s.questionsAnswered || s.questions_answered || 0);
+            const correct = quiz ? (quiz.correct || 0)
+                                 : Math.round(((s.accuracy || 0) / 100) * (s.questionsAnswered || 0));
 
             // Accuracy bar color
             const accClass = acc >= 70 ? 'good' : acc >= 45 ? 'mid' : 'low';
@@ -1805,7 +2066,7 @@
                         <span class="pc-level-badge ${level}">${level}</span>
                         <span class="pc-xp-badge">⚡ ${xp} XP</span>
                         <span class="pc-lang-badge">${lang}</span>
-                        ${streak > 0 ? `<span style="font-size:.62rem;font-weight:700;color:#f97316;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);padding:2px 8px;border-radius:20px;">🔥 ${streak} streak</span>` : ''}
+                        ${quiz && quiz.passCount > 0 ? `<span style="font-size:.62rem;font-weight:700;color:#f97316;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);padding:2px 8px;border-radius:20px;">🏆 ${quiz.passCount} passed</span>` : ''}
                     </div>
 
                     <!-- Accuracy bar -->
@@ -1826,8 +2087,8 @@
                             <span class="pc-stat-label">Answered</span>
                         </div>
                         <div class="pc-stat">
-                            <span class="pc-stat-val" style="color:#f59e0b;">${streak}</span>
-                            <span class="pc-stat-label">Streak</span>
+                            <span class="pc-stat-val" style="color:#10b981;">${correct}</span>
+                            <span class="pc-stat-label">Correct</span>
                         </div>
                         <div class="pc-stat">
                             <span class="pc-stat-val" style="font-size:.75rem;">${joined ? new Date(joined).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</span>
@@ -2008,15 +2269,14 @@
             const res  = await fetch(`${API}/classrooms/${classroomId}/lessons`, {headers:getAuthHeaders()});
             const data = await res.json();
             lessonsList = data.success ? (data.lessons||[]) : [];
-            document.getElementById('lessonsCount').textContent = lessonsList.length;
-            document.getElementById('statLessons').textContent  = lessonsList.length;
-            document.getElementById('sidebarLessons').textContent = lessonsList.length;
+            const cEl = document.getElementById('lessonsCount'); if (cEl) cEl.textContent = lessonsList.length;
             renderLessons();
-        } catch { document.getElementById('lessonsGrid').innerHTML = `<div class="empty-state">Failed to load lessons.</div>`; }
+        } catch { const g = document.getElementById('lessonsGrid'); if (g) g.innerHTML = `<div class="empty-state">Failed to load lessons.</div>`; }
     }
 
     function renderLessons() {
         const el = document.getElementById('lessonsGrid');
+        if (!el) return;
         if (!lessonsList.length) {
             el.innerHTML = `<div class="empty-state"><span class="empty-state-icon">📖</span><div class="empty-state-title">No lessons yet</div><div class="empty-state-sub">Add lessons for students to study</div></div>`;
             return;
@@ -2283,6 +2543,599 @@
     loadStudents();
     loadLessons();
     loadAssignments();
+
+    // ── Curriculum ─────────────────────────────────────────────────────────────
+    let _curriculum = null;
+    let _curriculumLoaded = false;
+
+    async function loadCurriculumTab() {
+        if (_curriculumLoaded) { renderCurriculum(); return; }
+        _curriculumLoaded = true;
+        try {
+            const res  = await fetch(`${API}/curriculum/${classroomId}`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            _curriculum = data.curriculum || { levels: [] };
+        } catch {
+            _curriculum = { levels: [] };
+        }
+        renderCurriculum();
+    }
+
+    function renderCurriculum() {
+        const container = document.getElementById('curriculumBuilder');
+        if (!_curriculum) return;
+        const levels = [...(_curriculum.levels || [])].sort((a,b) => a.order - b.order);
+        // Update hero/sidebar lesson counts = total units across all levels
+        const totalUnits = levels.reduce((s, l) => s + (l.units?.length || 0), 0);
+        const sEl = document.getElementById('statLessons');    if (sEl) sEl.textContent = totalUnits;
+        const sbEl = document.getElementById('sidebarLessons'); if (sbEl) sbEl.textContent = totalUnits;
+        if (!levels.length) {
+            container.innerHTML = `<div style="text-align:center;padding:3rem 0;color:var(--text-muted);font-size:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
+                No levels yet. Click <strong>Add Level</strong> to get started.
+            </div>`;
+            return;
+        }
+        container.innerHTML = levels.map(lvl => `
+            <div class="cw-section" style="margin-bottom:28px;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+                <div style="background:var(--bg-card);padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);">
+                    <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.2rem;">layers</span>
+                    <strong style="flex:1;font-size:.92rem;">${esc(lvl.name)}</strong>
+                    <span style="font-size:.72rem;color:var(--text-muted);">${lvl.units.length} unit${lvl.units!==1?'s':''}</span>
+                    <button class="btn btn-secondary" style="font-size:.75rem;padding:.3rem .7rem;" onclick="openUnitModal('${lvl.id}')">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;">add</span>Add Unit
+                    </button>
+                    <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem;border-color:var(--danger);color:var(--danger);" onclick="deleteLevel('${lvl.id}')">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;">delete</span>
+                    </button>
+                </div>
+                <div style="padding:16px 18px;">
+                    ${renderUnits(lvl)}
+                </div>
+            </div>`).join('');
+    }
+
+    function renderUnits(lvl) {
+        const units = [...(lvl.units || [])].sort((a,b) => a.order - b.order);
+        if (!units.length) return `<p style="font-size:.8rem;color:var(--text-muted);text-align:center;padding:12px 0;">No units yet. Click "Add Unit" above.</p>`;
+        return units.map((unit, i) => `
+            <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
+                <div style="background:var(--bg-surface);padding:12px 16px;display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);width:20px;text-align:center;">${i+1}</span>
+                    <span class="material-symbols-outlined" style="font-size:1rem;color:var(--secondary);">menu_book</span>
+                    <strong style="flex:1;font-size:.88rem;">${esc(unit.title)}</strong>
+                    <span style="font-size:.7rem;color:var(--text-muted);">Pass: ${unit.passScore||70}% · ${unit.topics.length} topic${unit.topics.length!==1?'s':''} · ${unit.evalQuestions.length} question${unit.evalQuestions.length!==1?'s':''}</span>
+                    <button class="btn btn-secondary" style="font-size:.72rem;padding:.25rem .6rem;" onclick="openTopicModal('${unit.id}')">+ Topic</button>
+                    <button class="btn btn-secondary" style="font-size:.72rem;padding:.25rem .6rem;" onclick="openEvalQModal('${unit.id}')">+ Question</button>
+                    <button class="btn btn-secondary" style="font-size:.72rem;padding:.25rem .6rem;" onclick="openUnitModal('${lvl.id}','${unit.id}','${esc(unit.title)}',${unit.passScore||70})">Edit</button>
+                    <button class="btn btn-outline" style="font-size:.72rem;padding:.25rem .6rem;border-color:var(--danger);color:var(--danger);" onclick="deleteUnit('${unit.id}')">Del</button>
+                </div>
+                ${renderTopicsAndQuestions(unit)}
+            </div>`).join('');
+    }
+
+    function renderTopicsAndQuestions(unit) {
+        let html = '';
+        if (unit.topics.length) {
+            html += `<div style="padding:10px 16px 0;"><p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin:0 0 6px;">Topics</p>`;
+            html += unit.topics.map(t => `
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+                    <span class="material-symbols-outlined" style="font-size:.9rem;color:#06b6d4;">article</span>
+                    <span style="flex:1;font-size:.83rem;">${esc(t.title)}</span>
+                    <button class="btn btn-secondary" style="font-size:.7rem;padding:.2rem .55rem;" onclick="openTopicModal('${unit.id}','${t.id}',\`${esc(t.title)}\`,\`${esc(t.content||'').replace(/`/g,'\\`')}\`)">Edit</button>
+                    <button class="btn btn-outline" style="font-size:.7rem;padding:.2rem .55rem;border-color:var(--danger);color:var(--danger);" onclick="deleteTopic('${unit.id}','${t.id}')">✕</button>
+                </div>`).join('');
+            html += '</div>';
+        }
+        if (unit.evalQuestions.length) {
+            html += `<div style="padding:10px 16px 12px;"><p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin:0 0 6px;">Evaluation Questions</p>`;
+            html += unit.evalQuestions.map((q, qi) => `
+                <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+                    <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);min-width:20px;padding-top:2px;">Q${qi+1}</span>
+                    <span style="flex:1;font-size:.82rem;">${esc(q.question)} <em style="color:var(--text-muted);font-size:.72rem;">[${q.questionType||'MC'}]</em></span>
+                    <button class="btn btn-secondary" style="font-size:.7rem;padding:.2rem .55rem;" onclick="openEvalQModal('${unit.id}','${q.id}')">Edit</button>
+                    <button class="btn btn-outline" style="font-size:.7rem;padding:.2rem .55rem;border-color:var(--danger);color:var(--danger);" onclick="deleteEvalQ('${unit.id}','${q.id}')">✕</button>
+                </div>`).join('');
+            html += '</div>';
+        }
+        return html || '';
+    }
+
+    // ── Level CRUD ────────────────────────────────────────────────────────────
+    function openAddLevelModal() { document.getElementById('addLevelModal').classList.add('open'); }
+    function closeAddLevelModal() { document.getElementById('addLevelModal').classList.remove('open'); }
+
+    document.getElementById('levelNameSel').addEventListener('change', function() {
+        document.getElementById('levelCustomGroup').style.display = this.value === 'custom' ? '' : 'none';
+    });
+
+    async function submitAddLevel() {
+        const sel    = document.getElementById('levelNameSel').value;
+        const name   = sel === 'custom' ? document.getElementById('levelCustomName').value.trim() : sel;
+        if (!name) return;
+        const res  = await fetch(`${API}/curriculum/${classroomId}/levels`, {
+            method:'POST', headers: getAuthHeaders(),
+            body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (!data.success) { showToast(data.message || 'Failed', 'error'); return; }
+        _curriculum.levels.push(data.level);
+        closeAddLevelModal();
+        showToast('Level created!');
+        renderCurriculum();
+    }
+
+    async function deleteLevel(lid) {
+        if (!confirm('Delete this level and all its units?')) return;
+        const res = await fetch(`${API}/curriculum/${classroomId}/levels/${lid}`, { method:'DELETE', headers: getAuthHeaders() });
+        if ((await res.json()).success) {
+            _curriculum.levels = _curriculum.levels.filter(l => l.id !== lid);
+            renderCurriculum(); showToast('Level deleted.');
+        }
+    }
+
+    // ── Unit CRUD ─────────────────────────────────────────────────────────────
+    function openUnitModal(levelId, unitId='', title='', passScore=70) {
+        document.getElementById('unitModalLevelId').value = levelId;
+        document.getElementById('unitModalUnitId').value  = unitId;
+        document.getElementById('unitTitle').value        = title;
+        document.getElementById('unitPassScore').value    = passScore;
+        document.getElementById('unitModalTitle').textContent = unitId ? 'Edit Unit' : 'Add Unit';
+        document.getElementById('unitModal').classList.add('open');
+    }
+    function closeUnitModal() { document.getElementById('unitModal').classList.remove('open'); }
+
+    async function submitUnit() {
+        const lid   = document.getElementById('unitModalLevelId').value;
+        const uid   = document.getElementById('unitModalUnitId').value;
+        const title = document.getElementById('unitTitle').value.trim();
+        const score = parseInt(document.getElementById('unitPassScore').value) || 70;
+        if (!title) return;
+        if (uid) {
+            // Edit
+            const res  = await fetch(`${API}/curriculum/${classroomId}/units/${uid}`, {
+                method:'PUT', headers: getAuthHeaders(),
+                body: JSON.stringify({ title, passScore: score })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const unit = findUnitLocal(uid);
+                if (unit) { unit.title = title; unit.passScore = score; }
+                showToast('Unit updated.');
+            }
+        } else {
+            // Create
+            const res  = await fetch(`${API}/curriculum/${classroomId}/levels/${lid}/units`, {
+                method:'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({ title, passScore: score })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const lvl = _curriculum.levels.find(l => l.id === lid);
+                if (lvl) lvl.units.push(data.unit);
+                showToast('Unit added.');
+            }
+        }
+        closeUnitModal();
+        renderCurriculum();
+    }
+
+    async function deleteUnit(uid) {
+        if (!confirm('Delete this unit and all its topics/questions?')) return;
+        const res = await fetch(`${API}/curriculum/${classroomId}/units/${uid}`, { method:'DELETE', headers: getAuthHeaders() });
+        if ((await res.json()).success) {
+            for (const lvl of _curriculum.levels) lvl.units = lvl.units.filter(u => u.id !== uid);
+            renderCurriculum(); showToast('Unit deleted.');
+        }
+    }
+
+    // ── Topic CRUD ────────────────────────────────────────────────────────────
+    function openTopicModal(unitId, topicId='', title='', content='') {
+        document.getElementById('topicModalUnitId').value  = unitId;
+        document.getElementById('topicModalTopicId').value = topicId;
+        document.getElementById('topicTitle').value        = title;
+        document.getElementById('topicContent').value      = content;
+        document.getElementById('topicModalTitle').textContent = topicId ? 'Edit Topic' : 'Add Topic';
+        // Reset preview to edit mode
+        document.getElementById('topicPreview').style.display = 'none';
+        document.getElementById('topicContent').style.display = '';
+        document.getElementById('tcPreviewLabel').textContent = 'Preview';
+        document.getElementById('tcPreviewIcon').textContent  = 'visibility';
+        // Reset AI panel
+        document.getElementById('topicAIPanel').style.display = 'none';
+        document.getElementById('topicAITopic').value = title || '';
+        document.getElementById('topicAILang').value  = (classroomData?.language || 'python');
+        document.getElementById('topicAIStatus').textContent = '';
+        document.getElementById('topicModal').classList.add('open');
+    }
+    function closeTopicModal() { document.getElementById('topicModal').classList.remove('open'); }
+
+    // ── AI: derive a difficulty from the unit's level ─────────────────────────
+    function levelDifficultyForUnit(unitId) {
+        for (const lvl of (_curriculum?.levels || [])) {
+            if ((lvl.units || []).some(u => u.id === unitId)) {
+                const n = (lvl.name || '').toLowerCase();
+                if (n.includes('begin'))  return 'beginner';
+                if (n.includes('inter'))  return 'intermediate';
+                if (n.includes('adv'))     return 'advanced';
+                return 'beginner';
+            }
+        }
+        return 'beginner';
+    }
+
+    // ── AI: Topic / lesson generation ─────────────────────────────────────────
+    function toggleTopicAIPanel() {
+        const p = document.getElementById('topicAIPanel');
+        const show = p.style.display === 'none';
+        p.style.display = show ? '' : 'none';
+        if (show) document.getElementById('topicAITopic').focus();
+    }
+    async function generateAITopic() {
+        const topic = document.getElementById('topicAITopic').value.trim();
+        const language = document.getElementById('topicAILang').value;
+        const unitId = document.getElementById('topicModalUnitId').value;
+        if (!topic) { showToast('Enter a topic to generate.', 'error'); return; }
+        const btn = document.getElementById('topicAIGenBtn');
+        const status = document.getElementById('topicAIStatus');
+        btn.disabled = true; btn.textContent = '⏳ Generating…'; status.textContent = 'Contacting AI…';
+        try {
+            const difficulty = levelDifficultyForUnit(unitId);
+            const res = await fetch(`${API}/lessons/generate`, {
+                method:'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({ topic, language, difficulty })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Generation failed');
+            const lesson = data.lesson || {};
+            if (lesson.title)   document.getElementById('topicTitle').value   = lesson.title;
+            if (lesson.content) document.getElementById('topicContent').value = lesson.content;
+            document.getElementById('topicAIPanel').style.display = 'none';
+            status.textContent = '';
+            showToast('✨ Lesson generated! Review and save.');
+        } catch (e) {
+            status.textContent = '';
+            showToast('AI generation failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = '⚡ Generate Lesson';
+        }
+    }
+
+    // ── Topic content editor helpers ──────────────────────────────────────────
+    function escCode(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    // Insert text at the cursor position in the content textarea
+    function tcInsert(text) {
+        const ta = document.getElementById('topicContent');
+        const s = ta.selectionStart, e = ta.selectionEnd;
+        ta.value = ta.value.substring(0, s) + text + ta.value.substring(e);
+        ta.focus();
+        const pos = s + text.length;
+        ta.selectionStart = ta.selectionEnd = pos;
+        if (document.getElementById('topicPreview').style.display !== 'none') renderTopicPreview();
+    }
+    // Wrap selected text with before/after tags (or insert empty tags)
+    function tcWrap(before, after) {
+        const ta = document.getElementById('topicContent');
+        const s = ta.selectionStart, e = ta.selectionEnd;
+        const sel = ta.value.substring(s, e) || 'text';
+        const text = before + sel + after;
+        ta.value = ta.value.substring(0, s) + text + ta.value.substring(e);
+        ta.focus();
+        ta.selectionStart = s + before.length;
+        ta.selectionEnd   = s + before.length + sel.length;
+        if (document.getElementById('topicPreview').style.display !== 'none') renderTopicPreview();
+    }
+    function toggleTopicPreview() {
+        const pv = document.getElementById('topicPreview');
+        const ta = document.getElementById('topicContent');
+        const showing = pv.style.display !== 'none';
+        if (showing) {
+            pv.style.display = 'none'; ta.style.display = '';
+            document.getElementById('tcPreviewLabel').textContent = 'Preview';
+            document.getElementById('tcPreviewIcon').textContent  = 'visibility';
+        } else {
+            renderTopicPreview();
+            pv.style.display = ''; ta.style.display = 'none';
+            document.getElementById('tcPreviewLabel').textContent = 'Edit';
+            document.getElementById('tcPreviewIcon').textContent  = 'edit';
+        }
+    }
+    function renderTopicPreview() {
+        document.getElementById('topicPreviewBody').innerHTML =
+            document.getElementById('topicContent').value || '<em style="opacity:.5;">Nothing yet…</em>';
+    }
+
+    // ── Code snippet inserter ─────────────────────────────────────────────────
+    function openCodeInserter() {
+        document.getElementById('codeInsertInput').value = '';
+        updateCodePreview();
+        document.getElementById('codeInserterModal').classList.add('open');
+        setTimeout(() => document.getElementById('codeInsertInput').focus(), 50);
+    }
+    function closeCodeInserter() { document.getElementById('codeInserterModal').classList.remove('open'); }
+    function updateCodePreview() {
+        const code = document.getElementById('codeInsertInput').value;
+        document.getElementById('codeInsertPreview').innerHTML = escCode(code) || '<span style="opacity:.4;">Preview…</span>';
+    }
+    function insertCodeBlock() {
+        const code = document.getElementById('codeInsertInput').value;
+        const lang = document.getElementById('codeInsertLang').value;
+        if (!code.trim()) { closeCodeInserter(); return; }
+        const html = `\n<pre data-lang="${lang}"><code>${escCode(code)}</code></pre>\n`;
+        tcInsert(html);
+        closeCodeInserter();
+        showToast('Code block inserted.');
+    }
+
+    async function submitTopic() {
+        const uid     = document.getElementById('topicModalUnitId').value;
+        const tid     = document.getElementById('topicModalTopicId').value;
+        const title   = document.getElementById('topicTitle').value.trim();
+        const content = document.getElementById('topicContent').value;
+        if (!title) return;
+        if (tid) {
+            const res  = await fetch(`${API}/curriculum/${classroomId}/units/${uid}/topics/${tid}`, {
+                method:'PUT', headers: getAuthHeaders(), body: JSON.stringify({ title, content })
+            });
+            if ((await res.json()).success) {
+                const unit = findUnitLocal(uid);
+                if (unit) { const t = unit.topics.find(x => x.id === tid); if (t) { t.title = title; t.content = content; } }
+                showToast('Topic updated.');
+            }
+        } else {
+            const res  = await fetch(`${API}/curriculum/${classroomId}/units/${uid}/topics`, {
+                method:'POST', headers: getAuthHeaders(), body: JSON.stringify({ title, content })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const unit = findUnitLocal(uid);
+                if (unit) unit.topics.push(data.topic);
+                showToast('Topic added.');
+            }
+        }
+        closeTopicModal();
+        renderCurriculum();
+    }
+
+    async function deleteTopic(uid, tid) {
+        if (!confirm('Delete this topic?')) return;
+        await fetch(`${API}/curriculum/${classroomId}/units/${uid}/topics/${tid}`, { method:'DELETE', headers: getAuthHeaders() });
+        const unit = findUnitLocal(uid);
+        if (unit) unit.topics = unit.topics.filter(t => t.id !== tid);
+        renderCurriculum(); showToast('Topic deleted.');
+    }
+
+    // ── Eval Question CRUD ────────────────────────────────────────────────────
+    function toggleEvalQFields() {
+        const type = document.getElementById('evalQType').value;
+        const show = (id, on) => { document.getElementById(id).style.display = on ? '' : 'none'; };
+        show('evalQCodeSnippetGroup', type === 'output_prediction');
+        show('evalQMCGroup',          type === 'multiple_choice' || type === 'output_prediction');
+        show('evalQFillGroup',        type === 'fill_blank');
+        show('evalQCodeLinesGroup',   type === 'code_ordering');
+    }
+
+    // Clear all eval option/answer fields
+    function clearEvalQFields() {
+        ['evalQOptA','evalQOptB','evalQOptC','evalQOptD'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('evalQCorrect').value    = 'A';
+        document.getElementById('evalQFillAnswer').value = '';
+        document.getElementById('evalQCodeSnippet').value = '';
+        document.getElementById('evalQCodeLines').value   = '';
+    }
+    // Strip a leading "A)" / "A." label from a stored option so it sits cleanly in its field
+    function stripOptLabel(o) {
+        return String(o == null ? '' : o).replace(/^\s*\(?[A-Za-z][)．。:：.\-]\s*/, '').trim() || String(o || '');
+    }
+
+    function openEvalQModal(unitId, qid='') {
+        document.getElementById('evalQUnitId').value = unitId;
+        document.getElementById('evalQId').value     = qid;
+        clearEvalQFields();
+        if (qid) {
+            const unit = findUnitLocal(unitId);
+            const q    = unit?.evalQuestions.find(x => x.id === qid);
+            if (q) {
+                const type = q.questionType || 'multiple_choice';
+                document.getElementById('evalQType').value = type;
+                document.getElementById('evalQText').value = q.question;
+                document.getElementById('evalQHint').value = q.hint || '';
+                document.getElementById('evalQCodeSnippet').value = q.codeSnippet || '';
+
+                if (type === 'code_ordering') {
+                    document.getElementById('evalQCodeLines').value = (q.codeLines || []).join('\n');
+                } else if (type === 'fill_blank') {
+                    document.getElementById('evalQFillAnswer').value = q.correctAnswer || '';
+                } else {
+                    // multiple_choice / output_prediction — fill A/B/C/D fields + correct dropdown
+                    const opts = q.options || [];
+                    const ids = ['evalQOptA','evalQOptB','evalQOptC','evalQOptD'];
+                    ids.forEach((id, i) => { document.getElementById(id).value = opts[i] != null ? stripOptLabel(opts[i]) : ''; });
+                    // Determine correct letter
+                    let letter = String(q.correctAnswer || 'A').trim().toUpperCase();
+                    if (!/^[A-D]$/.test(letter)) {
+                        // correctAnswer stored as full text — match it to an option
+                        const idx = opts.findIndex(o => stripOptLabel(o).toLowerCase() === stripOptLabel(q.correctAnswer).toLowerCase());
+                        letter = idx >= 0 ? String.fromCharCode(65 + idx) : 'A';
+                    }
+                    document.getElementById('evalQCorrect').value = letter;
+                }
+                document.getElementById('evalQModalTitle').textContent = 'Edit Question';
+            }
+        } else {
+            document.getElementById('evalQType').value = 'multiple_choice';
+            document.getElementById('evalQText').value = '';
+            document.getElementById('evalQHint').value = '';
+            document.getElementById('evalQModalTitle').textContent = 'Add Evaluation Question';
+        }
+        toggleEvalQFields();
+        // Reset AI panel
+        document.getElementById('evalQAIPanel').style.display = 'none';
+        document.getElementById('evalQAITopic').value = '';
+        document.getElementById('evalQAILang').value  = (classroomData?.language || 'python');
+        document.getElementById('evalQAIStatus').textContent = '';
+        document.getElementById('evalQModal').classList.add('open');
+    }
+    function closeEvalQModal() { document.getElementById('evalQModal').classList.remove('open'); }
+
+    // ── AI: Eval question generation ──────────────────────────────────────────
+    function toggleEvalQAIPanel() {
+        const p = document.getElementById('evalQAIPanel');
+        const show = p.style.display === 'none';
+        p.style.display = show ? '' : 'none';
+        if (show) document.getElementById('evalQAITopic').focus();
+    }
+    async function generateAIEvalQ() {
+        const topic = document.getElementById('evalQAITopic').value.trim();
+        const language = document.getElementById('evalQAILang').value;
+        const type = document.getElementById('evalQType').value;   // reuse the selected question type
+        const unitId = document.getElementById('evalQUnitId').value;
+        if (!topic) { showToast('Enter a topic to generate.', 'error'); return; }
+        const btn = document.getElementById('evalQAIGenBtn');
+        const status = document.getElementById('evalQAIStatus');
+        btn.disabled = true; btn.textContent = '⏳ Generating…'; status.textContent = 'Contacting AI…';
+        try {
+            const difficulty = levelDifficultyForUnit(unitId);
+            const res = await fetch(`${API}/questions/generate`, {
+                method:'POST', headers: getAuthHeaders(),
+                body: JSON.stringify({ topic, language, difficulty, type })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Generation failed');
+            applyAIQuestion(data.question || {});
+            document.getElementById('evalQAIPanel').style.display = 'none';
+            status.textContent = '';
+            showToast('✨ Question generated! Review and save.');
+        } catch (e) {
+            status.textContent = '';
+            showToast('AI generation failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = '⚡ Generate Question';
+        }
+    }
+    // Map the AI question payload into the eval-question form fields
+    function applyAIQuestion(q) {
+        // Normalise the AI type back to our form's questionType values
+        const typeMap = { mcq:'multiple_choice', multiple_choice:'multiple_choice',
+                          fill_blank:'fill_blank', output_pred:'output_prediction',
+                          output_prediction:'output_prediction', ordering:'code_ordering',
+                          code_ordering:'code_ordering' };
+        const formType = typeMap[q.type] || document.getElementById('evalQType').value;
+        document.getElementById('evalQType').value = formType;
+        toggleEvalQFields();
+        clearEvalQFields();
+
+        document.getElementById('evalQText').value = q.question_text || q.question || '';
+        document.getElementById('evalQHint').value = q.hint || '';
+        document.getElementById('evalQCodeSnippet').value = q.code_snippet || '';
+
+        if (formType === 'code_ordering') {
+            const lines = Array.isArray(q.code_lines) ? q.code_lines : [];
+            document.getElementById('evalQCodeLines').value = lines.join('\n');
+        } else if (formType === 'fill_blank') {
+            document.getElementById('evalQFillAnswer').value = q.correct_answer || '';
+        } else {
+            // multiple_choice / output_prediction — fill A/B/C/D + correct dropdown
+            const ids  = ['evalQOptA','evalQOptB','evalQOptC','evalQOptD'];
+            const opts = Array.isArray(q.options) ? q.options : [];
+            const correct = String(q.correct_answer || '').trim();
+            let correctLetter = 'A';
+            if (opts.length) {
+                ids.forEach((id, i) => { document.getElementById(id).value = opts[i] != null ? stripOptLabel(opts[i]) : ''; });
+                if (/^[A-D]$/i.test(correct)) {
+                    correctLetter = correct.toUpperCase();
+                } else {
+                    const idx = opts.findIndex(o => stripOptLabel(o).toLowerCase() === correct.toLowerCase());
+                    correctLetter = idx >= 0 ? String.fromCharCode(65 + idx) : 'A';
+                }
+            } else if (correct) {
+                // output_prediction with no AI options — seed the answer into A; faculty adds distractors
+                document.getElementById('evalQOptA').value = correct;
+                correctLetter = 'A';
+            }
+            document.getElementById('evalQCorrect').value = correctLetter;
+        }
+    }
+
+    async function submitEvalQ() {
+        const uid  = document.getElementById('evalQUnitId').value;
+        const qid  = document.getElementById('evalQId').value;
+        const type = document.getElementById('evalQType').value;
+        const text = document.getElementById('evalQText').value.trim();
+        if (!text) return;
+        const hint        = document.getElementById('evalQHint').value.trim();
+        const codeSnippet = (type === 'output_prediction')
+            ? (document.getElementById('evalQCodeSnippet').value.trim() || null) : null;
+        let options = [], correctAnswer = '', codeLines = null;
+
+        if (type === 'code_ordering') {
+            codeLines = document.getElementById('evalQCodeLines').value.split('\n').map(l => l.trim()).filter(Boolean);
+            if (codeLines.length < 2) { showToast('Add at least 2 code lines.', 'error'); return; }
+            correctAnswer = codeLines.join('|||');
+
+        } else if (type === 'fill_blank') {
+            correctAnswer = document.getElementById('evalQFillAnswer').value.trim();
+            if (!correctAnswer) { showToast('Enter the correct answer.', 'error'); return; }
+
+        } else {
+            // multiple_choice / output_prediction — read A/B/C/D fields + correct dropdown
+            const ids  = ['evalQOptA','evalQOptB','evalQOptC','evalQOptD'];
+            const vals = ids.map(id => document.getElementById(id).value.trim());
+            const letter = document.getElementById('evalQCorrect').value;   // A/B/C/D
+            const correctIdx = letter.charCodeAt(0) - 65;
+            if (!vals[correctIdx]) { showToast(`The correct option (${letter}) is empty.`, 'error'); return; }
+            // Drop blank options, keep order, recompute the correct letter
+            let newCorrectIdx = 0;
+            vals.forEach((v, i) => { if (v) { if (i === correctIdx) newCorrectIdx = options.length; options.push(v); } });
+            if (options.length < 2) { showToast('Provide at least 2 options.', 'error'); return; }
+            correctAnswer = String.fromCharCode(65 + newCorrectIdx);
+        }
+
+        const payload = { question: text, questionType: type, options, correctAnswer, hint, codeSnippet, codeLines };
+
+        let data;
+        if (qid) {
+            const res = await fetch(`${API}/curriculum/${classroomId}/units/${uid}/questions/${qid}`, {
+                method:'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload)
+            });
+            data = await res.json();
+            if (data.success) {
+                const unit = findUnitLocal(uid);
+                if (unit) { const i = unit.evalQuestions.findIndex(x => x.id === qid); if (i !== -1) unit.evalQuestions[i] = data.question; }
+                showToast('Question updated.');
+            }
+        } else {
+            const res = await fetch(`${API}/curriculum/${classroomId}/units/${uid}/questions`, {
+                method:'POST', headers: getAuthHeaders(), body: JSON.stringify(payload)
+            });
+            data = await res.json();
+            if (data.success) {
+                const unit = findUnitLocal(uid);
+                if (unit) unit.evalQuestions.push(data.question);
+                showToast('Question added.');
+            }
+        }
+        closeEvalQModal();
+        renderCurriculum();
+    }
+
+    async function deleteEvalQ(uid, qid) {
+        if (!confirm('Delete this question?')) return;
+        await fetch(`${API}/curriculum/${classroomId}/units/${uid}/questions/${qid}`, { method:'DELETE', headers: getAuthHeaders() });
+        const unit = findUnitLocal(uid);
+        if (unit) unit.evalQuestions = unit.evalQuestions.filter(q => q.id !== qid);
+        renderCurriculum(); showToast('Question deleted.');
+    }
+
+    function findUnitLocal(uid) {
+        for (const lvl of (_curriculum?.levels || [])) {
+            const u = lvl.units.find(x => x.id === uid);
+            if (u) return u;
+        }
+        return null;
+    }
 </script>
 
 <script src="../js/sidebar.js"></script>

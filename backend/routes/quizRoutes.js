@@ -256,12 +256,22 @@ router.get('/:cid/student-summary', authMiddleware, requireFaculty, (req, res) =
     for (const inst of insts) {
         for (const r of resultsForInstance(inst.id)) {
             if (!summary[r.userId]) {
-                summary[r.userId] = { userId: r.userId, userName: r.userName, quizzesTaken: 0, bestAccuracy: 0, passCount: 0 };
+                summary[r.userId] = { userId: r.userId, userName: r.userName, quizzesTaken: 0,
+                                      bestAccuracy: 0, passCount: 0, answered: 0, correct: 0 };
             }
-            summary[r.userId].quizzesTaken++;
-            summary[r.userId].bestAccuracy = Math.max(summary[r.userId].bestAccuracy, r.bestAccuracy || 0);
-            if (r.bestPassed) summary[r.userId].passCount++;
+            const s = summary[r.userId];
+            s.quizzesTaken++;
+            s.bestAccuracy = Math.max(s.bestAccuracy, r.bestAccuracy || 0);
+            if (r.bestPassed) s.passCount++;
+            // Aggregate real answered/correct totals across all quiz attempts
+            s.answered += Number(r.total)   || 0;
+            s.correct  += Number(r.correct) || 0;
         }
+    }
+    // Derive overall accuracy from real totals
+    for (const uid in summary) {
+        const s = summary[uid];
+        s.overallAccuracy = s.answered ? Math.round((s.correct / s.answered) * 100) : 0;
     }
     return res.json({ success: true, summary });
 });

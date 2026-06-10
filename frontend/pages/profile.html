@@ -319,19 +319,6 @@
     </div>
 </div>
 
-<div id="tab-badges" class="tab-panel">
-    <p class="section-title">Arena Achievements</p>
-    <div class="badge-grid" id="achievementGrid">
-        <div class="skeleton-line" style="width:150px;height:54px;border-radius:10px;"></div>
-        <div class="skeleton-line" style="width:150px;height:54px;border-radius:10px;"></div>
-    </div>
-    <p class="section-title" style="margin-top:1.4rem;">System Badges</p>
-    <div class="badge-grid" id="badgeGrid">
-        <div class="skeleton-line" style="width:130px;height:54px;border-radius:10px;"></div>
-        <div class="skeleton-line" style="width:130px;height:54px;border-radius:10px;"></div>
-        <div class="skeleton-line" style="width:130px;height:54px;border-radius:10px;"></div>
-    </div>
-</div>
 
 <!-- Certificates tab -->
 <div id="tab-certificates" class="tab-panel">
@@ -511,8 +498,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadFacultyOverview();
     } else {
         loadProgress();
-        loadBadges();
-        loadAchievements();
         loadCertificates();
     }
 
@@ -539,13 +524,11 @@ function buildTabs() {
         document.getElementById('tab-overview').classList.add('active');
         // Hide student tabs
         document.getElementById('tab-progress').remove();
-        document.getElementById('tab-badges').remove();
         // Hide language picker for faculty
         document.getElementById('langGroup').style.display = 'none';
     } else {
         nav.innerHTML = `
             <button class="tab-btn active" onclick="switchTab('progress',this)">Progress</button>
-            <button class="tab-btn" onclick="switchTab('badges',this)">Achievements</button>
             <button class="tab-btn" onclick="switchTab('certificates',this)">🏅 Certificates</button>
             <button class="tab-btn" onclick="switchTab('quizzes',this);loadQuizResultsProfile()">📊 Quizzes</button>
             <button class="tab-btn" onclick="switchTab('settings',this)">Settings</button>`;
@@ -691,7 +674,13 @@ async function loadProgress() {
         const u    = data.user || {};
 
         document.getElementById('psStreak').textContent  = (u.streak || 0) + '🔥';
-        document.getElementById('psLessons').textContent = data.completedLessons || 0;
+
+        // Count completed lessons from localStorage (classroom lessons are stored here)
+        const localLessons = ['python','javascript','java','cpp'].reduce((sum, lang) => {
+            try { return sum + (JSON.parse(localStorage.getItem(`completedLessons_${lang}`) || '[]').length); }
+            catch { return sum; }
+        }, 0);
+        document.getElementById('psLessons').textContent = Math.max(data.completedLessons || 0, localLessons);
 
         
         buildWeaknesses(data.weaknesses || []);
@@ -716,65 +705,6 @@ function buildWeaknesses(weaknesses) {
         </span>`).join('');
 }
 
-async function loadBadges() {
-    const allBadges = [
-        { id:'first_login',   icon:'🎮', name:'First Login',   desc:'Welcome to CodeArena!' },
-        { id:'fast_learner',  icon:'⚡', name:'Fast Learner',  desc:'Complete 5 lessons' },
-        { id:'perfect_score', icon:'🎯', name:'Perfect Score', desc:'Score 100% on a quiz' },
-        { id:'streak_7',      icon:'🔥', name:'7-Day Streak',  desc:'Login 7 days in a row' },
-        { id:'xp_500',        icon:'💎', name:'XP Collector',  desc:'Earn 500 XP' },
-        { id:'code_master',   icon:'🏆', name:'Code Master',   desc:'Complete a full path' },
-    ];
-    let earned = [];
-    try {
-        const res  = await fetch(`${API}/rewards/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
-        const data = await res.json();
-        earned = (data.badges || []).map(b => b.badge_type || b.id || b);
-    } catch {}
-
-    document.getElementById('badgeGrid').innerHTML = allBadges.map(b => {
-        const ok = earned.includes(b.id);
-        return `<div class="badge-card${ok?' earned':''}" style="${ok?'':'opacity:.42;filter:grayscale(1);'}">
-            <span class="badge-ico">${b.icon}</span>
-            <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
-        </div>`;
-    }).join('');
-}
-
-// ─── Arena Achievements (localStorage) ───────────────────────────────────────
-const ARENA_ACHIEVEMENTS = [
-    { id:'arena_first',    icon:'🎮', name:'First Battle',    desc:'Complete your first Arena session' },
-    { id:'arena_perfect',  icon:'🎯', name:'Perfect Score',   desc:'100% accuracy in a session' },
-    { id:'arena_streak5',  icon:'🔥', name:'On Fire',         desc:'Achieve a 5-streak in one game' },
-    { id:'arena_streak10', icon:'⚡', name:'Unstoppable',     desc:'Achieve a 10-streak in one game' },
-    { id:'arena_bigbrain', icon:'🧠', name:'Big Brain',       desc:'Score 150+ points in a session' },
-    { id:'arena_diamond',  icon:'💎', name:'Diamond Coder',   desc:'90%+ accuracy on Advanced' },
-    { id:'arena_veteran',  icon:'🏆', name:'Arena Veteran',   desc:'Complete 10 arena sessions' },
-    { id:'arena_python',   icon:'🐍', name:'Pythonista',      desc:'Complete 3 games in Python' },
-    { id:'arena_js',       icon:'💛', name:'JS Ninja',        desc:'Complete 3 games in JavaScript' },
-    { id:'arena_java',     icon:'☕', name:'Java Master',     desc:'Complete 3 games in Java' },
-    { id:'arena_cpp',      icon:'⚙️', name:'C++ Warrior',    desc:'Complete 3 games in C++' },
-    { id:'arena_polyglot', icon:'🌍', name:'Polyglot',        desc:'Play in all 4 languages' },
-];
-
-function loadAchievements() {
-    let earned = [];
-    try { earned = JSON.parse(localStorage.getItem('earnedAchievements') || '[]'); } catch {}
-    const earnedIds = new Set(earned.map(a => a.id));
-    const grid = document.getElementById('achievementGrid');
-    grid.innerHTML = ARENA_ACHIEVEMENTS.map(a => {
-        const ok = earnedIds.has(a.id);
-        const earnedDate = ok ? earned.find(e => e.id === a.id)?.earnedAt : null;
-        const dateTxt = earnedDate ? new Date(earnedDate).toLocaleDateString() : '';
-        return `<div class="badge-card${ok?' earned':''}" title="${a.desc}" style="${ok?'':'opacity:.38;filter:grayscale(1);'}">
-            <span class="badge-ico">${a.icon}</span>
-            <div>
-                <div class="badge-name">${a.name}</div>
-                <div class="badge-desc">${ok ? ('Earned ' + dateTxt) : a.desc}</div>
-            </div>
-        </div>`;
-    }).join('');
-}
 
 // ─── Certificates (database, with localStorage fallback) ─────────────────────
 let _certStore = [];  // module-level so viewCert(i) can access them
@@ -783,12 +713,13 @@ async function loadCertificates() {
     const list = document.getElementById('certList');
     let certs = [];
 
-    // Prefer the database so certificates persist across devices
+    // 1. Arena/Assessment certificates from DB
     try {
         const res = await fetch(`${API}/certificates/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) {
             const data = await res.json();
             certs = (data.certificates || []).map(c => ({
+                type: 'arena',
                 lang: c.language, langName: capitalize(c.language || ''),
                 level: c.level, mastery: c.mastery,
                 score: c.score, accuracy: c.accuracy,
@@ -797,32 +728,59 @@ async function loadCertificates() {
         }
     } catch { /* DB unreachable — fall back to local cache below */ }
 
-    // Fallback to the browser cache if the API returned nothing
+    // Fallback to the browser cache for arena certs
     if (!certs.length) {
-        try { certs = JSON.parse(localStorage.getItem('certificates') || '[]').reverse(); } catch {}
+        try { certs = JSON.parse(localStorage.getItem('certificates') || '[]').reverse().map(c => ({ type:'arena', ...c })); } catch {}
     }
+
+    // 2. Curriculum (classroom level) certificates
+    try {
+        const res2 = await fetch(`${API}/curriculum/certs-for-user/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res2.ok) {
+            const data2 = await res2.json();
+            const currCerts = (data2.certificates || []).map(c => ({
+                type: 'curriculum',
+                lang: c.language,
+                langName: capitalize(c.language || ''),
+                level: c.levelName,
+                mastery: 'Curriculum',
+                score: c.score,
+                accuracy: c.score,
+                classroomName: c.classroomName,
+                dateStr: c.issuedAt ? new Date(c.issuedAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : ''
+            }));
+            certs = [...certs, ...currCerts];
+        }
+    } catch { /* curriculum certs unavailable */ }
 
     _certStore = certs;   // keep for viewCert(i)
 
     if (!certs.length) {
         list.innerHTML = `<div class="empty-state">
             <span class="material-symbols-outlined">workspace_premium</span>
-            <p>No certificates yet.<br>Complete an Assessment with 75%+ accuracy to earn one!</p>
+            <p>No certificates yet.<br>Complete an Assessment or finish a curriculum level to earn one!</p>
         </div>`;
         return;
     }
-    const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅' };
+
+    const MASTERY_ICONS = { Expert:'🏆', Proficient:'⭐', Competent:'✅', Curriculum:'🎓' };
     list.innerHTML = certs.map((c, i) => {
-        const icon  = MASTERY_ICONS[c.mastery] || '📜';
-        const chip  = (c.mastery||'').toLowerCase();
-        const dataAttr = encodeURIComponent(JSON.stringify(c));
+        const isCurr = c.type === 'curriculum';
+        const icon   = MASTERY_ICONS[c.mastery] || '📜';
+        const chip   = isCurr ? 'curriculum' : (c.mastery||'').toLowerCase();
+        const title  = isCurr
+            ? `${esc(c.classroomName || 'Classroom')} — ${capitalize(c.level||'')} Level`
+            : `${esc(c.langName||c.lang||'?')} Programming — ${capitalize(c.level||'')}`;
+        const metaExtra = isCurr
+            ? `<span class="cert-mastery-chip" style="background:rgba(16,185,129,.1);color:#34d399;border-color:rgba(16,185,129,.3);">🎓 Level Certificate</span>`
+            : `<span class="cert-mastery-chip ${chip}">${c.mastery} Level</span>`;
         return `<div class="cert-card">
             <div class="cert-card-icon">${icon}</div>
             <div class="cert-card-body">
-                <div class="cert-card-title">${esc(c.langName||c.lang||'?')} Programming — ${capitalize(c.level||'')}</div>
+                <div class="cert-card-title">${title}</div>
                 <div class="cert-card-meta">
-                    <span class="cert-mastery-chip ${chip}">${c.mastery} Level</span>
-                    <span>Score: ${c.score} &nbsp;·&nbsp; Accuracy: ${c.accuracy}%</span>
+                    ${metaExtra}
+                    <span>Score: ${c.score}%</span>
                     <span>${c.dateStr||''}</span>
                 </div>
             </div>
@@ -839,23 +797,28 @@ function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
 // ─── Certificate View Modal ───────────────────────────────────────────────────
 const LANG_NAMES_CERT = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' };
-const MASTERY_ICONS_CERT = { Expert:'🏅', Proficient:'⭐', Competent:'✅' };
+const MASTERY_ICONS_CERT = { Expert:'🏅', Proficient:'⭐', Competent:'✅', Curriculum:'🎓' };
 
 function viewCert(idx) {
     const c = _certStore[idx];
     if (!c) return;
 
+    const isCurr      = c.type === 'curriculum';
     const studentName = me.fullName || me.full_name || me.name || 'Student';
     const langName    = c.langName || LANG_NAMES_CERT[c.lang] || capitalize(c.lang || '');
     const levelCap    = capitalize(c.level || '');
     const mastery     = c.mastery || 'Proficient';
     const mastIcon    = MASTERY_ICONS_CERT[mastery] || '📜';
     const dateStr     = c.dateStr || (c.earnedAt ? new Date(c.earnedAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '');
+    const courseTitle = isCurr
+        ? `${c.classroomName || 'Classroom'} — ${levelCap} Level`
+        : `${langName} Programming — ${levelCap}`;
+    const pillText    = isCurr ? `🎓 Level Certificate` : `${mastIcon} ${mastery} Level`;
 
     document.getElementById('cvName').textContent    = studentName;
-    document.getElementById('cvMastery').textContent = mastery;
-    document.getElementById('cvCourse').textContent  = `${langName} Programming — ${levelCap}`;
-    document.getElementById('cvPill').textContent    = `${mastIcon} ${mastery} Level`;
+    document.getElementById('cvMastery').textContent = isCurr ? 'Curriculum' : mastery;
+    document.getElementById('cvCourse').textContent  = courseTitle;
+    document.getElementById('cvPill').textContent    = pillText;
     document.getElementById('cvScore').textContent   = c.score ?? '—';
     document.getElementById('cvAccuracy').textContent = (c.accuracy != null ? c.accuracy + '%' : '—');
     document.getElementById('cvLevel').textContent   = levelCap;

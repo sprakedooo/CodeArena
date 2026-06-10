@@ -440,6 +440,89 @@
             .classroom-hero-inner { flex-direction:column; align-items:flex-start; gap:14px; }
             .classroom-hero-right { align-items:flex-start; }
         }
+        /* ══ CURRICULUM ══════════════════════════════════════════════════ */
+        .curr-level-section { margin-bottom:32px; }
+        .curr-level-header {
+            display:flex; align-items:center; gap:10px;
+            padding:12px 16px; border-radius:10px 10px 0 0;
+            background:linear-gradient(90deg,rgba(124,58,237,.15),rgba(6,182,212,.08));
+            border:1px solid rgba(124,58,237,.2); border-bottom:none; margin-bottom:0;
+        }
+        .curr-level-name { font-size:.88rem; font-weight:700; color:var(--text); flex:1; }
+        .curr-level-prog { font-size:.72rem; color:var(--text-muted); }
+        .curr-units-list { border:1px solid rgba(124,58,237,.2); border-radius:0 0 10px 10px; overflow:hidden; }
+
+        .curr-unit-row {
+            display:flex; align-items:center; gap:12px; padding:14px 16px;
+            border-bottom:1px solid var(--border); cursor:pointer;
+            transition:background .15s; position:relative;
+        }
+        .curr-unit-row:last-child { border-bottom:none; }
+        .curr-unit-row:hover:not(.locked) { background:rgba(124,58,237,.07); }
+        .curr-unit-row.locked { cursor:not-allowed; opacity:.6; }
+        .curr-unit-row.completed { background:rgba(16,185,129,.04); }
+
+        .curr-unit-icon {
+            width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .curr-unit-icon.done  { background:rgba(16,185,129,.15); }
+        .curr-unit-icon.open  { background:rgba(124,58,237,.15); }
+        .curr-unit-icon.locked{ background:var(--bg-surface); }
+
+        .curr-unit-body { flex:1; min-width:0; }
+        .curr-unit-title { font-size:.88rem; font-weight:600; color:var(--text); }
+        .curr-unit-meta  { font-size:.72rem; color:var(--text-muted); margin-top:2px; }
+        .curr-unit-badge {
+            font-size:.68rem; font-weight:700; padding:.18rem .55rem; border-radius:20px; flex-shrink:0;
+        }
+        .curr-unit-badge.passed  { background:rgba(16,185,129,.12); color:#34d399; border:1px solid rgba(16,185,129,.25); }
+        .curr-unit-badge.open    { background:rgba(124,58,237,.12); color:#a78bfa;  border:1px solid rgba(124,58,237,.25); }
+        .curr-unit-badge.locked  { background:var(--bg-surface);    color:var(--text-muted); border:1px solid var(--border); }
+
+        /* Unit viewer content */
+        .uv-topic-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:24px 28px; margin-bottom:20px; }
+        .uv-topic-card h2 { font-size:1rem; font-weight:700; color:var(--text); margin:0 0 16px; display:flex; align-items:center; gap:.5rem; }
+        .uv-topic-body { font-size:.9rem; line-height:1.8; color:var(--text-secondary); }
+        .uv-topic-body h3 { font-size:.95rem; font-weight:700; color:var(--text); margin:1.2rem 0 .5rem; }
+        .uv-topic-body h4 { font-size:.85rem; font-weight:700; color:var(--primary); margin:1rem 0 .4rem; }
+        .uv-topic-body pre,.uv-topic-body code { background:var(--bg-surface); border-radius:6px; font-family:monospace; font-size:.83rem; }
+        .uv-topic-body pre  { padding:12px 16px; overflow-x:auto; border:1px solid var(--border); margin:12px 0; }
+        .uv-topic-body code { padding:2px 6px; }
+        .uv-topic-body ul,
+        .uv-topic-body ol   { padding-left:1.4rem; margin:.5rem 0; }
+        .uv-topic-body li   { margin-bottom:.3rem; }
+
+        /* Rendered lesson content (matches faculty builder preview) */
+        .uv-topic-content pre  { background:#0d1117; border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+                  font-family:'Fira Code','Consolas',monospace; font-size:.82rem; color:#e2e8f0; overflow-x:auto; margin:12px 0; white-space:pre; }
+        .uv-topic-content code { background:rgba(124,58,237,.12); color:#a78bfa; padding:1px 6px; border-radius:4px;
+                  font-family:'Fira Code','Consolas',monospace; font-size:.85em; }
+        .uv-topic-content pre code { background:none; color:inherit; padding:0; }
+        .uv-topic-content h3 { font-size:1.05rem; margin:14px 0 8px; color:var(--text); }
+        .uv-topic-content h4 { font-size:.9rem; font-weight:700; color:var(--primary); margin:12px 0 6px; }
+        .uv-topic-content ul, .uv-topic-content ol { padding-left:1.4rem; margin:8px 0; }
+        .uv-topic-content li { margin-bottom:.3rem; }
+        .uv-topic-content p  { margin:8px 0; }
+
+        .uv-eval-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:16px; }
+        .uv-eval-q-num { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--primary); margin-bottom:6px; }
+        .uv-eval-q-text { font-size:.92rem; color:var(--text); margin-bottom:14px; font-weight:500; }
+        .uv-eval-option {
+            display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px;
+            border:1px solid var(--border); cursor:pointer; margin-bottom:8px; transition:all .15s;
+            font-size:.85rem; color:var(--text-secondary);
+        }
+        .uv-eval-option:hover { border-color:var(--primary); color:var(--text); background:rgba(124,58,237,.07); }
+        .uv-eval-option.selected { border-color:var(--primary); background:rgba(124,58,237,.12); color:var(--text); }
+        .uv-eval-option.correct  { border-color:#10b981; background:rgba(16,185,129,.1); color:#34d399; }
+        .uv-eval-option.wrong    { border-color:#ef4444; background:rgba(239,68,68,.08);  color:#f87171; }
+        .uv-fill-input { width:100%; box-sizing:border-box; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:.6rem .9rem; color:var(--text); font-size:.9rem; outline:none; }
+        .uv-fill-input:focus { border-color:var(--primary); }
+
+        .uv-nav-bar { display:flex; gap:12px; justify-content:flex-end; align-items:center; margin-top:24px; padding-top:16px; border-top:1px solid var(--border); }
+        .uv-result-banner { border-radius:12px; padding:20px 24px; text-align:center; margin-bottom:20px; }
+        .uv-result-banner.pass { background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); }
+        .uv-result-banner.fail { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); }
     </style>
 </head>
 <body>
@@ -479,6 +562,9 @@
     <div class="tab-bar" style="margin-top:0; border-radius:0 0 0 0;">
         <button class="tab-btn active" data-tab="stream"    onclick="switchTab('stream',this)">
             <span class="material-symbols-outlined">campaign</span>Stream
+        </button>
+        <button class="tab-btn" data-tab="curriculum" onclick="switchTab('curriculum',this);loadCurriculum()">
+            <span class="material-symbols-outlined">menu_book</span>Lessons
         </button>
         <button class="tab-btn" data-tab="classwork" onclick="switchTab('classwork',this)">
             <span class="material-symbols-outlined">assignment</span>Classwork
@@ -547,21 +633,6 @@
 
     <!-- ══════════════ CLASSWORK TAB ══════════════════════════════════════ -->
     <div id="tab-classwork" class="tab-panel">
-        <!-- Lessons section -->
-        <div class="classwork-section">
-            <div class="classwork-section-header">
-                <h3 class="classwork-section-title">
-                    <span class="material-symbols-outlined">menu_book</span>
-                    Lessons
-                    <span class="cw-count" id="lessonCount">0</span>
-                </h3>
-            </div>
-            <div class="lesson-list" id="lessonList">
-                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
-                <div class="skeleton-line" style="height:66px;border-radius:10px;"></div>
-            </div>
-        </div>
-
         <!-- Assignments section -->
         <div class="classwork-section">
             <div class="classwork-section-header">
@@ -652,7 +723,40 @@
         </div>
     </div>
 
+    <!-- ══════════════ CURRICULUM TAB ════════════════════════════════════ -->
+    <div id="tab-curriculum" class="tab-panel">
+        <div id="curriculumView">
+            <div style="text-align:center;padding:3rem;color:var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
+                Loading curriculum…
+            </div>
+        </div>
+    </div>
+
 </main>
+
+<!-- ── Curriculum Unit Viewer (full-screen overlay) ───────────────────────── -->
+<div id="unitOverlay" style="display:none;position:fixed;inset:0;background:#0d1117;z-index:200;overflow-y:auto;padding:0;">
+    <div style="max-width:860px;margin:0 auto;padding:24px 20px 80px;">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+            <button onclick="closeUnitViewer()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:.4rem .75rem;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:.35rem;font-size:.82rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back
+            </button>
+            <div style="flex:1;">
+                <div id="uvLevelLabel" style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--primary);margin-bottom:2px;"></div>
+                <div id="uvUnitTitle" style="font-size:1.05rem;font-weight:700;color:var(--text);"></div>
+            </div>
+            <div id="uvProgressChip" style="font-size:.75rem;font-weight:700;padding:.25rem .75rem;border-radius:20px;background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);"></div>
+        </div>
+
+        <!-- Step indicator -->
+        <div id="uvStepIndicator" style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;"></div>
+
+        <!-- Content pane -->
+        <div id="uvContent"></div>
+    </div>
+</div>
 
 <!-- Toast -->
 <div class="toast" id="toast">
@@ -951,7 +1055,9 @@ async function loadLessons() {
 
 function renderLessons(lessons) {
     const list = document.getElementById('lessonList');
-    document.getElementById('lessonCount').textContent = lessons.length;
+    if (!list) return;   // old flat lessons section removed — lessons now live in the Lessons (curriculum) tab
+    const countEl = document.getElementById('lessonCount');
+    if (countEl) countEl.textContent = lessons.length;
 
     if (!lessons.length) {
         list.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">menu_book</span>No lessons assigned yet.</div>';
@@ -991,9 +1097,9 @@ function markDone(lid) {
 
 function updateProgressSidebar(done, total) {
     const pct = total ? Math.round((done / total) * 100) : 0;
-    document.getElementById('lessonProgressTxt').textContent  = done + ' / ' + total;
-    document.getElementById('lessonProgressBar').style.width  = pct + '%';
-    document.getElementById('statLessons').textContent        = done;
+    const t = document.getElementById('lessonProgressTxt'); if (t) t.textContent = done + ' / ' + total;
+    const b = document.getElementById('lessonProgressBar'); if (b) b.style.width = pct + '%';
+    const s = document.getElementById('statLessons');       if (s) s.textContent = done;
 }
 
 // ── Progress ───────────────────────────────────────────────────────────────────
@@ -1656,6 +1762,589 @@ async function renderInstCard(inst) {
 
 function startQuiz(iid) {
     window.location.href = `classroom_quiz.html?cid=${classroomId}&iid=${iid}`;
+}
+
+// ══ CURRICULUM ════════════════════════════════════════════════════════════════
+
+let _curriculum = null;       // full curriculum object from API
+let _currProgress = {};       // userId_unitId → { evalPassed, evalScore, contentCompleted }
+let _uvUnit = null;           // currently open unit
+let _uvLevel = null;          // currently open level object
+let _uvTopics = [];           // topics + ['eval'] sentinel
+let _uvStep = 0;              // current step index
+let _uvAnswers = {};          // questionId → chosen answer
+let _uvSubmitted = false;     // whether eval was submitted
+let _uvCompletedTopics = new Set();  // topic ids the student has finished (persisted)
+
+async function loadCurriculum() {
+    const view = document.getElementById('curriculumView');
+    view.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
+        Loading curriculum…</div>`;
+    try {
+        const res = await fetch(API + `/curriculum/${classroomId}/student`, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('no curriculum');
+        const data = await res.json();
+        _curriculum = data.curriculum;
+        _currProgress = data.progress || {};
+        renderCurriculumView();
+    } catch {
+        view.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
+            No curriculum has been set up for this classroom yet.</div>`;
+    }
+}
+
+function renderCurriculumView() {
+    const view = document.getElementById('curriculumView');
+    if (!_curriculum || !_curriculum.levels || _curriculum.levels.length === 0) {
+        view.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.3;">auto_stories</span>
+            No curriculum has been set up yet.</div>`;
+        return;
+    }
+
+    const levels = [..._curriculum.levels].sort((a, b) => a.order - b.order);
+    let html = '';
+
+    for (const lvl of levels) {
+        const units = [...(lvl.units || [])].sort((a, b) => a.order - b.order);
+        const levelColors = { beginner: '#10b981', intermediate: '#fbbf24', advanced: '#f87171' };
+        const col = levelColors[lvl.name?.toLowerCase()] || 'var(--primary)';
+
+        html += `<div class="curr-level-section" style="margin-bottom:2rem;">
+            <div class="curr-level-header" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+                <span style="width:10px;height:10px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>
+                <span style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${col};">${esc(lvl.name)}</span>
+            </div>`;
+
+        if (units.length === 0) {
+            html += `<div style="font-size:.8rem;color:var(--text-muted);padding:.5rem 1rem;">No units in this level yet.</div>`;
+        } else {
+            for (let i = 0; i < units.length; i++) {
+                const unit = units[i];
+                const prog = _currProgress[unit.id] || {};
+                const evalPassed = prog.evalPassed || false;
+                const contentDone = prog.contentCompleted || false;
+                // unlocked is computed by backend buildStudentProgress
+                const locked = !prog.unlocked;
+
+                const topicCount = (unit.topics || []).length;
+                const evalCount  = (unit.evalQuestions || []).length;
+                const doneTopics = Array.isArray(prog.completedTopics)
+                    ? (unit.topics || []).filter(t => prog.completedTopics.includes(t.id)).length : 0;
+                const inProgress = !evalPassed && !locked && doneTopics > 0 && doneTopics < topicCount;
+
+                let statusIcon, statusColor;
+                if (evalPassed) {
+                    statusIcon = 'check_circle'; statusColor = '#10b981';
+                } else if (contentDone || inProgress) {
+                    statusIcon = 'pending'; statusColor = '#fbbf24';
+                } else if (locked) {
+                    statusIcon = 'lock'; statusColor = 'var(--text-muted)';
+                } else {
+                    statusIcon = 'radio_button_unchecked'; statusColor = 'var(--text-muted)';
+                }
+
+                const score = evalPassed && prog.evalScore != null ? `<span style="font-size:.7rem;font-weight:700;color:#34d399;background:rgba(52,211,153,.12);border-radius:10px;padding:.15rem .5rem;margin-left:6px;">Score: ${prog.evalScore}%</span>` : '';
+                // Topic progress label (e.g. "2/3 topics")
+                const topicProg = (!locked && topicCount > 0)
+                    ? `<span style="color:${doneTopics === topicCount ? '#34d399' : 'var(--text-muted)'};">${doneTopics}/${topicCount} topic${topicCount !== 1 ? 's' : ''}</span>`
+                    : `${topicCount} topic${topicCount !== 1 ? 's' : ''}`;
+                // Mini progress bar
+                const pct = topicCount ? Math.round((doneTopics / topicCount) * 100) : 0;
+                const progBar = (!locked && topicCount > 0 && !evalPassed)
+                    ? `<div style="height:4px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct===100?'#10b981':'var(--primary)'};border-radius:3px;transition:width .3s;"></div></div>`
+                    : '';
+
+                html += `<div class="curr-unit-row" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-bottom:8px;cursor:${locked ? 'not-allowed' : 'pointer'};opacity:${locked ? '.5' : '1'};"
+                    ${locked ? '' : `onclick="openUnitViewer('${lvl.id}','${unit.id}')"`}>
+                    <span class="material-symbols-outlined" style="color:${statusColor};font-size:1.3rem;flex-shrink:0;">${statusIcon}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:.88rem;font-weight:600;color:var(--text);">${esc(unit.title)}</div>
+                        <div style="font-size:.72rem;color:var(--text-muted);margin-top:3px;">${topicProg} · ${evalCount} eval question${evalCount !== 1 ? 's' : ''}${score}</div>
+                        ${progBar}
+                    </div>
+                    ${locked ? '' : `<span class="material-symbols-outlined" style="color:var(--text-muted);font-size:1rem;">chevron_right</span>`}
+                </div>`;
+            }
+        }
+        html += `</div>`;
+    }
+
+    view.innerHTML = html;
+}
+
+async function openUnitViewer(levelId, unitId) {
+    const level = _curriculum.levels.find(l => l.id === levelId);
+    if (!level) return;
+    const unit = (level.units || []).find(u => u.id === unitId);
+    if (!unit) return;
+
+    _uvLevel = level;
+    _uvUnit  = unit;
+    _uvTopics = [...(unit.topics || []).sort((a, b) => a.order - b.order)];
+    // Only add eval step if there are eval questions
+    if ((unit.evalQuestions || []).length > 0) _uvTopics.push({ _isEval: true });
+    _uvAnswers = {};
+    _uvSubmitted = false;
+
+    // Load saved per-topic progress so the student resumes where they left off
+    _uvCompletedTopics = new Set((_currProgress[unitId]?.completedTopics) || []);
+
+    // Resume: jump to the first topic that hasn't been completed yet
+    _uvStep = 0;
+    for (let i = 0; i < _uvTopics.length; i++) {
+        const t = _uvTopics[i];
+        if (t._isEval) { _uvStep = i; break; }          // all topics done → go to eval
+        if (!_uvCompletedTopics.has(t.id)) { _uvStep = i; break; }  // first unread topic
+        _uvStep = i;                                     // fallback: last topic
+    }
+
+    document.getElementById('uvLevelLabel').textContent = level.name;
+    document.getElementById('uvUnitTitle').textContent  = unit.title;
+    document.getElementById('uvProgressChip').style.display = '';
+
+    document.getElementById('unitOverlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    renderUVStep();
+}
+
+// Persist a single topic as completed (so progress survives logout/login)
+async function markTopicComplete(topicId) {
+    if (!topicId || _uvCompletedTopics.has(topicId)) return;
+    _uvCompletedTopics.add(topicId);
+    // Update local cache immediately
+    if (!_currProgress[_uvUnit.id]) _currProgress[_uvUnit.id] = {};
+    _currProgress[_uvUnit.id].completedTopics = [..._uvCompletedTopics];
+    try {
+        await fetch(API + `/curriculum/${classroomId}/units/${_uvUnit.id}/topics/${topicId}/complete`, {
+            method: 'POST', headers: getAuthHeaders()
+        });
+    } catch {}
+}
+
+function closeUnitViewer() {
+    document.getElementById('unitOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+    renderCurriculumView();
+}
+
+function renderUVStep() {
+    const totalSteps = _uvTopics.length;
+    const current    = _uvTopics[_uvStep];
+
+    // Step indicator — checkmark reflects persisted topic completion
+    const ind = document.getElementById('uvStepIndicator');
+    ind.innerHTML = _uvTopics.map((t, i) => {
+        const isEval = t._isEval;
+        const label  = isEval ? 'Eval' : (i + 1);
+        const active = i === _uvStep;
+        const done   = isEval ? (_currProgress[_uvUnit.id]?.evalPassed || false)
+                              : _uvCompletedTopics.has(t.id);
+        return `<div style="display:flex;align-items:center;gap:4px;cursor:pointer;opacity:${done||active?'1':'.55'};" onclick="goToStep(${i})">
+            <div style="min-width:26px;height:26px;border-radius:50%;border:2px solid ${active?'var(--primary)':done?'#10b981':'var(--border)'};background:${active?'var(--primary)':done?'rgba(16,185,129,.2)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:${active?'#fff':done?'#34d399':'var(--text-muted)'};">${done ? '<span class="material-symbols-outlined" style="font-size:.7rem;">check</span>' : label}</div>
+            ${i < _uvTopics.length - 1 ? '<div style="width:20px;height:2px;background:var(--border);"></div>' : ''}
+        </div>`;
+    }).join('');
+
+    // Progress chip
+    document.getElementById('uvProgressChip').textContent = `${_uvStep + 1} / ${totalSteps}`;
+
+    // Content
+    if (current._isEval) {
+        renderEvalStep();
+    } else {
+        renderTopicStep(current);
+    }
+}
+
+function goToStep(idx) {
+    // Going back freely
+    if (idx < _uvStep) { _uvStep = idx; renderUVStep(); return; }
+    // Going forward one step: mark current topic complete first
+    if (idx <= _uvStep + 1) {
+        const cur = _uvTopics[_uvStep];
+        if (cur && !cur._isEval && idx > _uvStep) markTopicComplete(cur.id);
+        _uvStep = idx; renderUVStep();
+    }
+}
+
+function renderTopicStep(topic) {
+    const isLast = _uvStep === _uvTopics.length - 1;
+    const nextLabel = isLast ? null : (_uvTopics[_uvStep + 1]?._isEval ? 'Start Evaluation' : 'Next Topic');
+    const doneChip = _uvCompletedTopics.has(topic.id)
+        ? `<span style="font-size:.72rem;font-weight:700;color:#34d399;background:rgba(16,185,129,.12);border-radius:20px;padding:.2rem .6rem;display:inline-flex;align-items:center;gap:4px;"><span class="material-symbols-outlined" style="font-size:.85rem;">check_circle</span>Completed</span>`
+        : '';
+
+    document.getElementById('uvContent').innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 32px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;">
+                <h2 style="font-size:1.15rem;font-weight:700;color:var(--text);margin:0;">${esc(topic.title)}</h2>
+                ${doneChip}
+            </div>
+            <div class="uv-topic-content" style="font-size:.9rem;color:var(--text-secondary);line-height:1.75;">${topic.content || '<em style="opacity:.5;">No content.</em>'}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+            <button onclick="uvPrev()" class="btn btn-secondary" style="font-size:.82rem;${_uvStep===0?'visibility:hidden;':''}" >
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Previous
+            </button>
+            ${nextLabel ? `<button onclick="uvNext()" class="btn btn-primary" style="font-size:.82rem;">
+                ${nextLabel} <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+            </button>`
+            : `<button onclick="finishTopicUnit()" class="btn btn-primary" style="font-size:.82rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">check</span> Finish Lesson
+            </button>`}
+        </div>`;
+}
+
+// Last topic with no eval → mark complete + return to lessons
+async function finishTopicUnit() {
+    const cur = _uvTopics[_uvStep];
+    if (cur && !cur._isEval) await markTopicComplete(cur.id);
+    showToast('Lesson completed!', 'success');
+    closeUnitViewer();
+}
+
+// Remove a redundant leading option label like "A)", "A.", "(A)", "A:" — the circle shows the letter.
+// Requires a delimiter after the letter so plain text such as "A cat" is left untouched.
+function stripOptionLetter(opt) {
+    const s = String(opt == null ? '' : opt);
+    const stripped = s.replace(/^\s*\(?[A-Za-z][)．。:：.\-]\s*/, '').trim();
+    return stripped || s;
+}
+
+function renderEvalStep() {
+    if (_uvSubmitted) return; // already showing result
+
+    const questions = _uvUnit.evalQuestions || [];
+    if (questions.length === 0) {
+        document.getElementById('uvContent').innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">No evaluation questions for this unit.</div>
+            <div style="text-align:center;margin-top:12px;">
+                <button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">Back to Curriculum</button>
+            </div>`;
+        return;
+    }
+
+    let html = `<div style="background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:20px 24px;margin-bottom:24px;">
+        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--primary);margin-bottom:6px;">Unit Evaluation</div>
+        <div style="font-size:.88rem;color:var(--text-secondary);">Answer all questions to complete this unit. Pass score: <strong>${_uvUnit.passScore || 70}%</strong></div>
+    </div>`;
+
+    questions.forEach((q, qi) => {
+        html += `<div class="uv-eval-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px;">
+            <div style="font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px;">Question ${qi + 1}</div>`;
+
+        if (q.questionType === 'output_prediction' && q.codeSnippet) {
+            html += `<pre style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'Fira Code',monospace;font-size:.82rem;color:#e2e8f0;overflow-x:auto;margin-bottom:12px;">${esc(q.codeSnippet)}</pre>`;
+        }
+
+        html += `<div style="font-size:.92rem;color:var(--text);font-weight:500;margin-bottom:14px;">${esc(q.question)}</div>`;
+
+        if (q.questionType === 'fill_blank') {
+            const cur = _uvAnswers[q.id] || '';
+            html += `<input type="text" value="${esc(cur)}" placeholder="Type your answer…"
+                style="width:100%;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.55rem .8rem;color:var(--text);font-size:.88rem;box-sizing:border-box;"
+                oninput="_uvAnswers['${q.id}']=this.value" />`;
+
+        } else if (q.questionType === 'code_ordering' && q.codeLines && q.codeLines.length) {
+            // Render as drag handles — simplified: render as radio-like ranked list
+            if (!_uvAnswers[q.id]) _uvAnswers[q.id] = [...q.codeLines];
+            html += `<div id="ord_${qi}" style="display:flex;flex-direction:column;gap:6px;">`;
+            _uvAnswers[q.id].forEach((line, li) => {
+                html += `<div style="display:flex;align-items:center;gap:8px;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:grab;">
+                    <span style="font-size:.75rem;color:var(--text-muted);font-family:monospace;min-width:18px;">${li+1}.</span>
+                    <code style="font-size:.82rem;color:#e2e8f0;font-family:'Fira Code',monospace;flex:1;">${esc(line)}</code>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                        ${li > 0 ? `<button onclick="uvMoveUp(${qi},'${q.id}',${li})" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;line-height:1;"><span class="material-symbols-outlined" style="font-size:.9rem;">keyboard_arrow_up</span></button>` : '<span style="width:18px;height:18px;display:block;"></span>'}
+                        ${li < _uvAnswers[q.id].length-1 ? `<button onclick="uvMoveDown(${qi},'${q.id}',${li})" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;line-height:1;"><span class="material-symbols-outlined" style="font-size:.9rem;">keyboard_arrow_down</span></button>` : '<span style="width:18px;height:18px;display:block;"></span>'}
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+
+        } else {
+            // multiple_choice or output_prediction (with options)
+            const opts = q.options || [];
+            opts.forEach((opt, oi) => {
+                const letter = String.fromCharCode(65 + oi);
+                const selected = _uvAnswers[q.id] === letter;
+                // Strip any redundant leading "A)" / "A." / "(A)" prefix — the circle already shows the letter
+                const label = stripOptionLetter(opt);
+                html += `<div class="uv-eval-option" onclick="selectEvalOption('${q.id}',this,'${letter}',${qi})"
+                    style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;border:1px solid ${selected?'var(--primary)':'var(--border)'};background:${selected?'rgba(124,58,237,.12)':'transparent'};cursor:pointer;margin-bottom:6px;transition:.15s;">
+                    <div style="min-width:24px;height:24px;border-radius:50%;border:2px solid ${selected?'var(--primary)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:${selected?'var(--primary)':'var(--text-muted)'};">${letter}</div>
+                    <span style="font-size:.88rem;color:var(--text);">${esc(label)}</span>
+                </div>`;
+            });
+        }
+        html += `</div>`;
+    });
+
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+        <button onclick="uvPrev()" class="btn btn-secondary" style="font-size:.82rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Previous
+        </button>
+        <button onclick="submitEval()" class="btn btn-primary" style="font-size:.85rem;padding:.55rem 1.4rem;">
+            Submit Evaluation <span class="material-symbols-outlined" style="font-size:1rem;">send</span>
+        </button>
+    </div>`;
+
+    document.getElementById('uvContent').innerHTML = html;
+}
+
+function selectEvalOption(qid, el, letter, qi) {
+    _uvAnswers[qid] = letter;
+    // Re-render to highlight
+    const card = el.closest('.uv-eval-card');
+    card.querySelectorAll('.uv-eval-option').forEach(opt => {
+        const optLetter = opt.querySelector('div:first-child')?.textContent.trim();
+        const active = optLetter === letter;
+        opt.style.borderColor = active ? 'var(--primary)' : 'var(--border)';
+        opt.style.background   = active ? 'rgba(124,58,237,.12)' : 'transparent';
+        const circle = opt.querySelector('div:first-child');
+        if (circle) { circle.style.borderColor = active ? 'var(--primary)' : 'var(--border)'; circle.style.color = active ? 'var(--primary)' : 'var(--text-muted)'; }
+    });
+}
+
+function uvMoveUp(qi, qid, li) {
+    const arr = _uvAnswers[qid];
+    if (li <= 0) return;
+    [arr[li-1], arr[li]] = [arr[li], arr[li-1]];
+    renderEvalStep();
+}
+function uvMoveDown(qi, qid, li) {
+    const arr = _uvAnswers[qid];
+    if (li >= arr.length - 1) return;
+    [arr[li], arr[li+1]] = [arr[li+1], arr[li]];
+    renderEvalStep();
+}
+
+function uvPrev() { if (_uvStep > 0) { _uvStep--; renderUVStep(); } }
+function uvNext() {
+    // Mark the current topic complete (persisted) before moving on
+    const cur = _uvTopics[_uvStep];
+    if (cur && !cur._isEval) markTopicComplete(cur.id);
+    if (_uvStep < _uvTopics.length - 1) { _uvStep++; renderUVStep(); }
+}
+
+async function submitEval() {
+    const questions = _uvUnit.evalQuestions || [];
+    // Check all answered
+    const unanswered = questions.filter(q => _uvAnswers[q.id] == null || _uvAnswers[q.id] === '');
+    if (unanswered.length > 0) {
+        showToast('Please answer all questions before submitting.', 'warning'); return;
+    }
+
+    const btn = document.querySelector('#uvContent button[onclick="submitEval()"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+    try {
+        const res = await fetch(API + `/curriculum/${classroomId}/units/${_uvUnit.id}/submit-eval`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ userId: me.id, answers: _uvAnswers })
+        });
+        const data = await res.json();
+        _uvSubmitted = true;
+
+        // Update local progress cache (keyed by unit.id, matching backend buildStudentProgress)
+        if (!_currProgress[_uvUnit.id]) _currProgress[_uvUnit.id] = {};
+        _currProgress[_uvUnit.id].evalPassed  = data.passed;
+        _currProgress[_uvUnit.id].evalScore   = data.score;
+        _currProgress[_uvUnit.id].contentCompleted = true;
+
+        if (data.passed) {
+            // Re-fetch progress to get updated unlocked state
+            try {
+                const pr = await fetch(API + `/curriculum/${classroomId}/student`, { headers: getAuthHeaders() });
+                const pd = await pr.json();
+                if (pd.progress) _currProgress = pd.progress;
+            } catch {}
+
+            // Check if this was the last unit in the level → issue level certificate
+            const levelUnits = [...(_uvLevel.units || [])].sort((a, b) => a.order - b.order);
+            const isLastUnit = levelUnits[levelUnits.length - 1]?.id === _uvUnit.id;
+            if (isLastUnit) {
+                await renderLevelComplete(data);
+                return;
+            }
+        }
+
+        renderEvalResult(data);
+    } catch (err) {
+        showToast('Error submitting evaluation. Please try again.', 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
+    }
+}
+
+function renderEvalResult(data) {
+    const passed = data.passed;
+    const score  = data.score;
+    const correct = data.correct;
+    const total   = data.total;
+    const questions = _uvUnit.evalQuestions || [];
+    // Convert results array to a map keyed by questionId
+    const resultsArr = Array.isArray(data.results) ? data.results : [];
+    const results = {};
+    resultsArr.forEach(r => { results[r.questionId] = r; });
+
+    let html = `<div style="text-align:center;padding:24px 20px;margin-bottom:24px;border-radius:14px;background:${passed?'rgba(16,185,129,.1)':'rgba(248,113,113,.1)'};border:1px solid ${passed?'rgba(16,185,129,.3)':'rgba(248,113,113,.3)'};">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;color:${passed?'#34d399':'#f87171'};display:block;margin-bottom:10px;">${passed?'check_circle':'cancel'}</span>
+        <div style="font-size:1.5rem;font-weight:800;color:${passed?'#34d399':'#f87171'};">${score}%</div>
+        <div style="font-size:.9rem;color:var(--text-secondary);margin-top:6px;">${correct} / ${total} correct · ${passed ? '✅ Passed!' : '❌ Did not pass'}</div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:4px;">Pass threshold: ${_uvUnit.passScore || 70}%</div>
+    </div>`;
+
+    // Per-question results
+    html += `<div style="margin-bottom:24px;">`;
+    questions.forEach((q, qi) => {
+        const r = results[q.id] || {};
+        const isCorrect = r.correct;
+        html += `<div style="background:var(--surface);border:1px solid ${isCorrect?'rgba(16,185,129,.3)':'rgba(248,113,113,.3)'};border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span class="material-symbols-outlined" style="color:${isCorrect?'#34d399':'#f87171'};font-size:1.1rem;margin-top:1px;">${isCorrect?'check_circle':'cancel'}</span>
+                <div style="flex:1;">
+                    <div style="font-size:.85rem;color:var(--text);font-weight:500;margin-bottom:6px;">${esc(q.question)}</div>
+                    <div style="font-size:.78rem;color:var(--text-muted);">Your answer: <span style="color:${isCorrect?'#34d399':'#f87171'};">${esc(String(_uvAnswers[q.id] ?? '—'))}</span></div>
+                    ${!isCorrect ? `<div style="font-size:.78rem;color:var(--text-muted);margin-top:3px;">Correct answer: <span style="color:#34d399;">${esc(String(r.correctAnswer ?? '—'))}</span></div>` : ''}
+                </div>
+            </div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    html += `<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        ${!passed ? `<button onclick="retryEval()" class="btn btn-secondary" style="font-size:.85rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">refresh</span> Try Again
+        </button>` : ''}
+        <button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
+            ${passed ? '<span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back to Curriculum' : 'Back to Curriculum'}
+        </button>
+    </div>`;
+
+    document.getElementById('uvContent').innerHTML = html;
+
+    // Hide step indicator for result screen
+    document.getElementById('uvStepIndicator').innerHTML = '';
+    document.getElementById('uvProgressChip').textContent = passed ? '✅ Passed' : '❌ Failed';
+}
+
+function retryEval() {
+    _uvAnswers = {};
+    _uvSubmitted = false;
+    renderUVStep();
+}
+
+// ── Level Completion Certificate ───────────────────────────────────────────────
+let _levelCert = null;   // the just-issued certificate data
+
+async function renderLevelComplete(evalData) {
+    // Issue the certificate via API
+    const levelColors = { beginner: '#10b981', intermediate: '#fbbf24', advanced: '#f87171' };
+    const col = levelColors[_uvLevel.name?.toLowerCase()] || 'var(--primary)';
+
+    let cert = null;
+    try {
+        const classRes = await fetch(API + `/classrooms/${classroomId}`, { headers: getAuthHeaders() });
+        const classData = await classRes.json();
+        const cl = classData.classroom || classData;
+        const classroomName = cl.name || `Classroom ${classroomId}`;
+        const language = cl.language || 'general';
+
+        // Compute average score for the level
+        const levelUnits = _uvLevel.units || [];
+        const scores = levelUnits.map(u => (_currProgress[u.id]?.evalScore || 0));
+        const avgScore = Math.round(scores.reduce((s, n) => s + n, 0) / (scores.length || 1));
+
+        const certRes = await fetch(API + `/curriculum/${classroomId}/issue-level-cert`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                levelId:      _uvLevel.id,
+                levelName:    _uvLevel.name,
+                classroomName,
+                language,
+                score:        avgScore,
+            })
+        });
+        const certData = await certRes.json();
+        if (certData.success) cert = certData.certificate;
+        _levelCert = cert;
+    } catch (e) {
+        console.warn('Could not issue curriculum certificate:', e);
+    }
+
+    // Render celebration screen in unit overlay
+    document.getElementById('uvStepIndicator').innerHTML = '';
+    document.getElementById('uvProgressChip').style.display = 'none';
+
+    const studentName = me.fullName || me.full_name || me.name || 'Student';
+    const levelName   = _uvLevel.name || 'Level';
+    const dateStr     = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+    document.getElementById('uvContent').innerHTML = `
+        <!-- Confetti / celebration banner -->
+        <div style="text-align:center;padding:2rem 1rem 1.5rem;">
+            <div style="font-size:3rem;margin-bottom:.5rem;">🎉</div>
+            <div style="font-family:'Press Start 2P',monospace;font-size:.65rem;color:${col};letter-spacing:2px;margin-bottom:.6rem;text-transform:uppercase;">Level Complete!</div>
+            <h2 style="font-size:1.5rem;font-weight:800;color:var(--text);margin:0 0 .4rem;">${esc(levelName)} Mastered</h2>
+            <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:2rem;">You've completed all units in the ${esc(levelName)} level. Here's your certificate.</p>
+        </div>
+
+        <!-- Certificate -->
+        <div id="levelCertWrap" style="max-width:600px;margin:0 auto 2rem;">
+            <div id="levelCertBody" style="background:#fff;border-radius:14px;padding:2.5rem 3rem;text-align:center;color:#1a1a2e;position:relative;border:2px solid #7c3aed;">
+                <div style="position:absolute;top:14px;left:14px;right:14px;height:4px;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4,#10b981);"></div>
+                <div style="position:absolute;bottom:14px;left:14px;right:14px;height:4px;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4,#10b981);"></div>
+
+                <div style="margin-bottom:.4rem;margin-top:.5rem;">
+                    <img src="../img/logo.png" alt="CodeArena" style="height:50px;object-fit:contain;" onerror="this.style.display='none'">
+                </div>
+                <div style="font-family:'Press Start 2P',monospace;font-size:.52rem;color:#7c3aed;letter-spacing:2px;margin:.6rem 0 .4rem;text-transform:uppercase;">Certificate of Completion</div>
+                <div style="font-size:.8rem;color:#6b7280;margin-bottom:.4rem;">This certifies that</div>
+                <div style="font-size:1.7rem;font-weight:800;color:#111827;font-style:italic;border-bottom:2px solid #e5e7eb;padding-bottom:.45rem;margin:.5rem 2rem .7rem;">${esc(studentName)}</div>
+                <div style="font-size:.82rem;color:#4b5563;margin:.5rem 0 .2rem;">has successfully completed</div>
+                <div style="font-size:1.15rem;font-weight:800;color:#7c3aed;margin:.2rem 0 .7rem;">${esc(_levelCert?.classroomName || 'Classroom')} — ${esc(levelName)} Level</div>
+                <div style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff;padding:.35rem 1.2rem;border-radius:30px;font-size:.82rem;font-weight:700;margin-bottom:1.2rem;">🎓 Level Certificate</div>
+                <div style="display:flex;justify-content:center;gap:2.5rem;margin-bottom:1rem;">
+                    <div><span style="font-size:1.2rem;font-weight:800;color:#111827;display:block;">${_levelCert?.score || evalData.score}%</span><span style="font-size:.65rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">Avg. Score</span></div>
+                    <div><span style="font-size:1.2rem;font-weight:800;color:#111827;display:block;">${(_uvLevel.units||[]).length}</span><span style="font-size:.65rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">Units</span></div>
+                </div>
+                <div style="font-size:.75rem;color:#9ca3af;margin-bottom:1.2rem;">Issued on ${dateStr}</div>
+                <div style="border-top:1px solid #e5e7eb;padding-top:.8rem;">
+                    <div style="font-size:.9rem;font-weight:700;color:#1a1a2e;">CodeArena</div>
+                    <div style="font-size:.68rem;color:#9ca3af;">Adaptive Programming Education Platform</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding-bottom:2rem;">
+            <button onclick="printLevelCert()" class="btn btn-secondary" style="font-size:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">download</span> Download PDF
+            </button>
+            <button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back to Curriculum
+            </button>
+        </div>`;
+}
+
+function printLevelCert() {
+    const cert = document.getElementById('levelCertBody');
+    if (!cert) return;
+    const win = window.open('', '_blank', 'width=780,height=700');
+    win.document.write(`<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><title>CodeArena Certificate</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#fff;display:flex;justify-content:center;padding:2rem;font-family:'Inter',sans-serif;}
+  div{box-sizing:border-box;}
+</style>
+</head><body>${cert.outerHTML}</body></html>`);
+    win.document.close();
+    setTimeout(() => { win.focus(); win.print(); }, 600);
 }
 </script>
 

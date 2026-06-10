@@ -1,0 +1,101 @@
+{
+  "1": {
+    "levels": [
+      {
+        "id": "lvl_1781045922145_6mtkn",
+        "name": "Beginner",
+        "order": 0,
+        "locked": true,
+        "units": [
+          {
+            "id": "unit_1781046596019_i0lf8",
+            "title": "Data Types",
+            "order": 0,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_1781046614598_h8uay",
+                "title": "fewfwefwf",
+                "content": "fwfewfweafe\n<code>fewfe</code>\nwfwefwe\n<h3>fwefwef</h3>\n<p>wfwefwefwewfwwwfwe\nfwefwefewf\nfwefwefewfwe</p>\n<h3>wfwefew</h3>\n\n<pre data-lang=\"python\"><code>wefwefwefwe</code></pre>\n",
+                "order": 0
+              },
+              {
+                "id": "topic_1781046621785_f269t",
+                "title": "fweafwa",
+                "content": "wefwafawfweaf",
+                "order": 1
+              },
+              {
+                "id": "topic_1781046626942_gzqna",
+                "title": "fawefweaf",
+                "content": "ewfwaefwfwf",
+                "order": 2
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "q_1781046683202_uehxm",
+                "question": "fwefwafewfw3",
+                "questionType": "multiple_choice",
+                "options": [
+                  "fwefwe"
+                ],
+                "correctAnswer": "fwefwe",
+                "hint": "",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              }
+            ]
+          },
+          {
+            "id": "unit_1781046928915_01jrd",
+            "title": "gwegwe",
+            "order": 1,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_1781048371351_vzjdd",
+                "title": "wfwefwef",
+                "content": "<h3>wfwfwewfw</h3>\n\n<pre data-lang=\"python\"><code>print(\"Hello World!\")</code></pre>\n",
+                "order": 0
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "q_1781048608965_jlt9c",
+                "question": "fwefwefwea",
+                "questionType": "multiple_choice",
+                "options": [
+                  "A fwefewfew",
+                  "B)",
+                  "C)",
+                  "D)"
+                ],
+                "correctAnswer": "A fwefewfew",
+                "hint": "",
+                "codeSnippet": null,
+                "codeLines": null,
+                "order": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lvl_1781045981131_wx6e4",
+        "name": "Intermediate",
+        "order": 1,
+        "locked": true,
+        "units": []
+      },
+      {
+        "id": "lvl_1781046945858_jhqz0",
+        "name": "Advanced",
+        "order": 2,
+        "locked": true,
+        "units": []
+      }
+    ]
+  }
+}
