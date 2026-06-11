@@ -211,11 +211,16 @@ router.get('/:cid/student', authMiddleware, (req, res) => {
     res.json({ success: true, curriculum: safe, progress: prog, levelStatus });
 });
 
-// ── POST /:cid/levels — create level ─────────────────────────────────────────
+// ── POST /:cid/levels — create level (idempotent by name) ────────────────────
 router.post('/:cid/levels', authMiddleware, requireFaculty, (req, res) => {
     const curr = getCurr(req.params.cid);
     const { name, locked } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Name required.' });
+
+    // Idempotent: return the existing level if one with the same name already exists
+    const existing = curr.levels.find(l => l.name.trim().toLowerCase() === name.trim().toLowerCase());
+    if (existing) return res.json({ success: true, level: existing });
+
     const level = {
         id:     genId('lvl'),
         name:   name.trim(),

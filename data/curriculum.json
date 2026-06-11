@@ -1,96 +1,567 @@
 {
   "1": {
+    "language": "python",
     "levels": [
       {
-        "id": "lvl_1781045922145_6mtkn",
+        "id": "lvl_py101_beginner",
         "name": "Beginner",
         "order": 0,
-        "locked": true,
+        "locked": false,
         "units": [
           {
-            "id": "unit_1781046596019_i0lf8",
-            "title": "Data Types",
+            "id": "unit_py101_beg_01",
+            "title": "Introduction to Python",
             "order": 0,
-            "passScore": 70,
+            "passScore": 75,
             "topics": [
               {
-                "id": "topic_1781046614598_h8uay",
-                "title": "fewfwefwf",
-                "content": "fwfewfweafe\n<code>fewfe</code>\nwfwefwe\n<h3>fwefwef</h3>\n<p>wfwefwefwewfwwwfwe\nfwefwefewf\nfwefwefewfwe</p>\n<h3>wfwefew</h3>\n\n<pre data-lang=\"python\"><code>wefwefwefwe</code></pre>\n",
+                "id": "topic_py101_beg_01_01",
+                "title": "What is Python?",
+                "content": "<h2>What is Python?</h2><p>Python is a beginner-friendly, high-level programming language created by Guido van Rossum in 1991. It is one of the most popular programming languages in the world, used in web development, data science, artificial intelligence, and automation.</p><h3>Why Python?</h3><ul><li>Clean, readable syntax — almost like English</li><li>Massive ecosystem of libraries (NumPy, Pandas, Django, etc.)</li><li>Used at Google, Instagram, NASA, and Netflix</li><li>Perfect as a first programming language</li></ul><div class=\"info-box\">💡 Python uses <strong>indentation</strong> (4 spaces or 1 tab) to define code blocks — not curly braces like most languages.</div>",
                 "order": 0
               },
               {
-                "id": "topic_1781046621785_f269t",
-                "title": "fweafwa",
-                "content": "wefwafawfweaf",
+                "id": "topic_py101_beg_01_02",
+                "title": "Your First Python Program",
+                "content": "<h2>Hello, World!</h2><p>By tradition, the first program you write in any language prints \"Hello, World!\". In Python it takes exactly one line:</p><pre><code class=\"language-python\">print(\"Hello, World!\")</code></pre><p>Run it and you will see:</p><pre><code>Hello, World!</code></pre><h3>How print() works</h3><p>The <code>print()</code> function displays any value to the screen. You can print text (strings), numbers, or even the result of calculations:</p><pre><code class=\"language-python\">print(\"Welcome to Python!\")\nprint(42)\nprint(3 + 7)</code></pre><div class=\"info-box\">💡 Strings (text) must be wrapped in quotes — either single <code>'</code> or double <code>\"</code>.</div>",
                 "order": 1
               },
               {
-                "id": "topic_1781046626942_gzqna",
-                "title": "fawefweaf",
-                "content": "ewfwaefwfwf",
+                "id": "topic_py101_beg_01_03",
+                "title": "Comments",
+                "content": "<h2>Writing Comments</h2><p>Comments are notes in your code that Python ignores when running. They help you and others understand what the code does.</p><pre><code class=\"language-python\"># This is a single-line comment\nprint(\"Hello!\")  # This comment is at the end of a line\n\n\"\"\"\nThis is a multi-line comment\n(actually a docstring, but commonly used as a comment)\n\"\"\"</code></pre><h3>Why write comments?</h3><ul><li>Explain <em>why</em> you wrote the code a certain way</li><li>Leave notes for your future self</li><li>Temporarily disable code while testing</li></ul><div class=\"info-box\">💡 Good programmers comment their code. Aim for comments that explain <em>why</em>, not <em>what</em> — the code itself shows <em>what</em>.</div>",
                 "order": 2
               }
             ],
             "evalQuestions": [
               {
-                "id": "q_1781046683202_uehxm",
-                "question": "fwefwafewfw3",
+                "id": "eq_py101_beg_01_01",
+                "question": "Which function is used to display output in Python?",
                 "questionType": "multiple_choice",
-                "options": [
-                  "fwefwe"
-                ],
-                "correctAnswer": "fwefwe",
-                "hint": "",
+                "options": ["echo()", "printf()", "print()", "display()"],
+                "correctAnswer": "C",
+                "hint": "Think about the built-in function you use every time you want to show something on screen.",
                 "codeSnippet": null,
                 "codeLines": [],
                 "order": 0
+              },
+              {
+                "id": "eq_py101_beg_01_02",
+                "question": "How do you write a single-line comment in Python?",
+                "questionType": "multiple_choice",
+                "options": ["// comment", "/* comment */", "# comment", "-- comment"],
+                "correctAnswer": "C",
+                "hint": "Python uses a symbol that looks like a hashtag.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_beg_01_03",
+                "question": "What will the following code print?",
+                "questionType": "output_prediction",
+                "options": [],
+                "correctAnswer": "10",
+                "hint": "Evaluate the arithmetic expression inside print().",
+                "codeSnippet": "print(3 + 7)",
+                "codeLines": [],
+                "order": 2
               }
             ]
           },
           {
-            "id": "unit_1781046928915_01jrd",
-            "title": "gwegwe",
+            "id": "unit_py101_beg_02",
+            "title": "Variables & Data Types",
             "order": 1,
-            "passScore": 70,
+            "passScore": 75,
             "topics": [
               {
-                "id": "topic_1781048371351_vzjdd",
-                "title": "wfwefwef",
-                "content": "<h3>wfwfwewfw</h3>\n\n<pre data-lang=\"python\"><code>print(\"Hello World!\")</code></pre>\n",
+                "id": "topic_py101_beg_02_01",
+                "title": "Variables",
+                "content": "<h2>Storing Data in Variables</h2><p>A variable is a named container that stores data. In Python you create a variable simply by assigning a value — no keyword needed.</p><pre><code class=\"language-python\">name = \"Maria\"   # text\nage  = 20        # whole number\ngpa  = 1.75      # decimal\nis_enrolled = True  # yes/no</code></pre><h3>Naming Rules</h3><ul><li>Start with a letter or underscore (<code>_</code>)</li><li>Can contain letters, numbers, and underscores</li><li>Case-sensitive: <code>Name</code> ≠ <code>name</code></li><li>Cannot use Python keywords (<code>if</code>, <code>for</code>, <code>while</code>, etc.)</li></ul><div class=\"info-box\">💡 Python convention: use <code>snake_case</code> — lowercase words joined by underscores: <code>student_name</code>, <code>total_score</code>.</div>",
                 "order": 0
+              },
+              {
+                "id": "topic_py101_beg_02_02",
+                "title": "Data Types",
+                "content": "<h2>The Four Core Data Types</h2><table><tr><th>Type</th><th>Example</th><th>Use case</th></tr><tr><td><code>str</code></td><td><code>\"hello\"</code></td><td>Text and characters</td></tr><tr><td><code>int</code></td><td><code>42</code></td><td>Whole numbers</td></tr><tr><td><code>float</code></td><td><code>3.14</code></td><td>Decimal numbers</td></tr><tr><td><code>bool</code></td><td><code>True</code> / <code>False</code></td><td>Logic / yes-no values</td></tr></table><h3>Checking the Type</h3><pre><code class=\"language-python\">x = 42\nprint(type(x))      # &lt;class 'int'&gt;\nprint(type(3.14))   # &lt;class 'float'&gt;\nprint(type(\"hi\"))   # &lt;class 'str'&gt;\nprint(type(True))   # &lt;class 'bool'&gt;</code></pre><h3>Type Conversion</h3><pre><code class=\"language-python\">print(int(\"42\"))    # 42   str → int\nprint(float(5))     # 5.0  int → float\nprint(str(100))     # \"100\" int → str</code></pre>",
+                "order": 1
+              },
+              {
+                "id": "topic_py101_beg_02_03",
+                "title": "Operators",
+                "content": "<h2>Arithmetic Operators</h2><pre><code class=\"language-python\">print(10 + 3)   # 13  — addition\nprint(10 - 3)   # 7   — subtraction\nprint(10 * 3)   # 30  — multiplication\nprint(10 / 3)   # 3.333… — division (always float)\nprint(10 // 3)  # 3   — floor division (drops decimal)\nprint(10 % 3)   # 1   — modulo (remainder)\nprint(2 ** 8)   # 256 — exponentiation</code></pre><h3>Comparison Operators</h3><pre><code class=\"language-python\">print(5 == 5)   # True\nprint(5 != 3)   # True\nprint(5 > 3)    # True\nprint(5 <= 3)   # False</code></pre><div class=\"info-box\">⚠️ <code>==</code> checks equality; <code>=</code> assigns. Never confuse them!</div>",
+                "order": 2
               }
             ],
             "evalQuestions": [
               {
-                "id": "q_1781048608965_jlt9c",
-                "question": "fwefwefwea",
+                "id": "eq_py101_beg_02_01",
+                "question": "Which is the correct way to create a variable in Python?",
                 "questionType": "multiple_choice",
-                "options": [
-                  "A fwefewfew",
-                  "B)",
-                  "C)",
-                  "D)"
-                ],
-                "correctAnswer": "A fwefewfew",
-                "hint": "",
+                "options": ["var x = 5", "int x = 5", "x = 5", "declare x = 5"],
+                "correctAnswer": "C",
+                "hint": "Python does not require a keyword to declare a variable.",
                 "codeSnippet": null,
-                "codeLines": null,
+                "codeLines": [],
                 "order": 0
+              },
+              {
+                "id": "eq_py101_beg_02_02",
+                "question": "What data type does Python assign to the value 3.14?",
+                "questionType": "multiple_choice",
+                "options": ["int", "double", "float", "decimal"],
+                "correctAnswer": "C",
+                "hint": "Numbers with decimal points are a specific numeric type.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_beg_02_03",
+                "question": "Fill in the blank to convert the string '42' to an integer.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "int",
+                "hint": "Use the built-in function that converts to integer.",
+                "codeSnippet": "age = ___(\"42\")\nprint(age)",
+                "codeLines": [],
+                "order": 2
+              },
+              {
+                "id": "eq_py101_beg_02_04",
+                "question": "What is the output of the following code?",
+                "questionType": "output_prediction",
+                "options": [],
+                "correctAnswer": "1",
+                "hint": "% gives the remainder after division.",
+                "codeSnippet": "print(10 % 3)",
+                "codeLines": [],
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_py101_beg_03",
+            "title": "Control Flow",
+            "order": 2,
+            "passScore": 75,
+            "topics": [
+              {
+                "id": "topic_py101_beg_03_01",
+                "title": "if / elif / else",
+                "content": "<h2>Making Decisions</h2><p>The <code>if</code> statement runs code only when a condition is true.</p><pre><code class=\"language-python\">grade = int(input(\"Enter grade: \"))\n\nif grade >= 90:\n    print(\"Excellent!\")\nelif grade >= 75:\n    print(\"Passed\")\nelif grade >= 60:\n    print(\"Conditional Passed\")\nelse:\n    print(\"Failed\")</code></pre><h3>Logical Operators</h3><pre><code class=\"language-python\">age = 20\nis_enrolled = True\n\nif age >= 18 and is_enrolled:\n    print(\"Eligible\")\n\nif age < 18 or not is_enrolled:\n    print(\"Not eligible\")</code></pre><div class=\"info-box\">💡 Python uses <code>and</code>, <code>or</code>, <code>not</code> — not <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>.</div>",
+                "order": 0
+              },
+              {
+                "id": "topic_py101_beg_03_02",
+                "title": "for Loops",
+                "content": "<h2>Repeating with for</h2><p>A <code>for</code> loop iterates over a sequence — a range of numbers, a list, or any iterable.</p><pre><code class=\"language-python\"># Loop 5 times\nfor i in range(5):\n    print(i)        # prints 0 1 2 3 4\n\n# Loop from 1 to 5\nfor i in range(1, 6):\n    print(i)        # prints 1 2 3 4 5\n\n# Loop over a list\nfruits = [\"apple\", \"mango\", \"banana\"]\nfor fruit in fruits:\n    print(fruit)</code></pre><h3>Loop Control</h3><pre><code class=\"language-python\">for i in range(10):\n    if i == 5:\n        break       # exit the loop\n    if i % 2 == 0:\n        continue    # skip even numbers\n    print(i)        # prints 1 3</code></pre>",
+                "order": 1
+              },
+              {
+                "id": "topic_py101_beg_03_03",
+                "title": "while Loops",
+                "content": "<h2>Repeating with while</h2><p>A <code>while</code> loop keeps running as long as a condition is <code>True</code>.</p><pre><code class=\"language-python\">count = 0\nwhile count < 5:\n    print(\"count:\", count)\n    count += 1      # Don't forget to update the condition!\n\n# Output: count: 0  count: 1  count: 2  count: 3  count: 4</code></pre><h3>Infinite Loop Warning</h3><pre><code class=\"language-python\"># ⚠️ This runs forever — never do this!\n# while True:\n#     print(\"forever\")</code></pre><div class=\"info-box\">⚠️ Always make sure a while loop's condition will eventually become <code>False</code>, or use <code>break</code> to exit.</div>",
+                "order": 2
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_py101_beg_03_01",
+                "question": "Which is the correct syntax for an if statement in Python?",
+                "questionType": "multiple_choice",
+                "options": ["if x > 5:", "if (x > 5)", "if x > 5 then", "if x > 5;"],
+                "correctAnswer": "A",
+                "hint": "Python uses a colon, not brackets or 'then'.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              },
+              {
+                "id": "eq_py101_beg_03_02",
+                "question": "What does range(1, 5) produce?",
+                "questionType": "multiple_choice",
+                "options": ["1,2,3,4,5", "1,2,3,4", "0,1,2,3,4", "2,3,4"],
+                "correctAnswer": "B",
+                "hint": "range(start, stop) includes start but excludes stop.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_beg_03_03",
+                "question": "Arrange the lines to create a for loop that prints numbers 1 to 3.",
+                "questionType": "code_ordering",
+                "options": [],
+                "correctAnswer": "",
+                "hint": "The for statement comes first, then the print inside the loop.",
+                "codeSnippet": null,
+                "codeLines": ["for i in range(1, 4):", "    print(i)"],
+                "order": 2
+              }
+            ]
+          },
+          {
+            "id": "unit_py101_beg_04",
+            "title": "Functions & Lists",
+            "order": 3,
+            "passScore": 75,
+            "topics": [
+              {
+                "id": "topic_py101_beg_04_01",
+                "title": "Defining Functions",
+                "content": "<h2>Reusable Code Blocks</h2><p>Functions let you write code once and call it many times.</p><pre><code class=\"language-python\">def greet(name):\n    print(f\"Hello, {name}!\")\n\ngreet(\"Maria\")   # Hello, Maria!\ngreet(\"Juan\")    # Hello, Juan!</code></pre><h3>Return Values</h3><pre><code class=\"language-python\">def add(a, b):\n    return a + b\n\nresult = add(3, 7)\nprint(result)   # 10</code></pre><h3>Default Parameters</h3><pre><code class=\"language-python\">def greet(name, greeting=\"Hello\"):\n    print(f\"{greeting}, {name}!\")\n\ngreet(\"Maria\")           # Hello, Maria!\ngreet(\"Juan\", \"Kamusta\") # Kamusta, Juan!</code></pre><div class=\"info-box\">💡 Each function should do <em>one thing</em>. Keep them short and focused.</div>",
+                "order": 0
+              },
+              {
+                "id": "topic_py101_beg_04_02",
+                "title": "Lists",
+                "content": "<h2>Working with Lists</h2><p>A list stores multiple values in an ordered, changeable sequence.</p><pre><code class=\"language-python\">fruits = [\"apple\", \"banana\", \"cherry\"]\n\nprint(fruits[0])    # apple (first element)\nprint(fruits[-1])   # cherry (last element)\nprint(len(fruits))  # 3\n\n# Modifying\nfruits.append(\"mango\")   # add to end\nfruits.remove(\"banana\")  # remove by value\nfruits.pop()             # remove and return last\nfruits.sort()            # sort alphabetically</code></pre><h3>List Slicing</h3><pre><code class=\"language-python\">nums = [0, 1, 2, 3, 4, 5]\nprint(nums[1:4])    # [1, 2, 3]\nprint(nums[:3])     # [0, 1, 2]\nprint(nums[3:])     # [3, 4, 5]</code></pre>",
+                "order": 1
+              },
+              {
+                "id": "topic_py101_beg_04_03",
+                "title": "Input & Output",
+                "content": "<h2>Getting User Input</h2><pre><code class=\"language-python\">name = input(\"Enter your name: \")\nprint(f\"Hello, {name}!\")</code></pre><div class=\"info-box\">⚠️ <code>input()</code> always returns a <strong>string</strong>. Convert it if you need a number:</div><pre><code class=\"language-python\">age = int(input(\"Enter your age: \"))\nheight = float(input(\"Height in meters: \"))\n\nprint(f\"In 5 years you will be {age + 5}.\")</code></pre><h3>f-Strings (Formatted Strings)</h3><pre><code class=\"language-python\">name = \"Maria\"\nscore = 95\nprint(f\"Student: {name}, Score: {score}\")\n# Student: Maria, Score: 95</code></pre>",
+                "order": 2
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_py101_beg_04_01",
+                "question": "What keyword is used to define a function in Python?",
+                "questionType": "multiple_choice",
+                "options": ["function", "func", "define", "def"],
+                "correctAnswer": "D",
+                "hint": "It is a short form of 'define'.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              },
+              {
+                "id": "eq_py101_beg_04_02",
+                "question": "Fill in the blank to add 'mango' to the end of the list.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "append",
+                "hint": "Which list method adds an element to the end?",
+                "codeSnippet": "fruits = [\"apple\", \"banana\"]\nfruits.___(\"mango\")",
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_beg_04_03",
+                "question": "Arrange the lines to define a function that returns the sum of two numbers, then call it.",
+                "questionType": "code_ordering",
+                "options": [],
+                "correctAnswer": "",
+                "hint": "Define the function before calling it.",
+                "codeSnippet": null,
+                "codeLines": ["def add(a, b):", "    return a + b", "result = add(5, 3)", "print(result)"],
+                "order": 2
+              },
+              {
+                "id": "eq_py101_beg_04_04",
+                "question": "What is the output of the following code?",
+                "questionType": "output_prediction",
+                "options": [],
+                "correctAnswer": "15",
+                "hint": "sum() adds all elements of a list.",
+                "codeSnippet": "nums = [1, 2, 3, 4, 5]\nprint(sum(nums))",
+                "codeLines": [],
+                "order": 3
               }
             ]
           }
         ]
       },
       {
-        "id": "lvl_1781045981131_wx6e4",
+        "id": "lvl_py101_intermediate",
+        "name": "Intermediate",
+        "order": 1,
+        "locked": true,
+        "units": [
+          {
+            "id": "unit_py101_int_01",
+            "title": "Dictionaries & Sets",
+            "order": 0,
+            "passScore": 75,
+            "topics": [
+              {
+                "id": "topic_py101_int_01_01",
+                "title": "Dictionaries",
+                "content": "<h2>Key-Value Storage</h2><p>A dictionary stores data as <strong>key-value pairs</strong>. Use it when data has named attributes.</p><pre><code class=\"language-python\">student = {\n    \"name\": \"Maria\",\n    \"age\": 20,\n    \"gpa\": 1.75\n}\n\nprint(student[\"name\"])              # Maria\nprint(student.get(\"grade\", \"N/A\")) # N/A (safe access)\n\nstudent[\"year\"] = 2    # add new key\ndel student[\"gpa\"]     # remove key\n\n# Iterating\nfor key, value in student.items():\n    print(f\"{key}: {value}\")</code></pre>",
+                "order": 0
+              },
+              {
+                "id": "topic_py101_int_01_02",
+                "title": "List Comprehensions",
+                "content": "<h2>Elegant List Building</h2><p>List comprehensions create lists in a single readable line.</p><pre><code class=\"language-python\"># Traditional\nsquares = []\nfor x in range(5):\n    squares.append(x**2)\n\n# List comprehension (same result)\nsquares = [x**2 for x in range(5)]\nprint(squares)   # [0, 1, 4, 9, 16]\n\n# With condition\nevens = [x for x in range(10) if x % 2 == 0]\nprint(evens)     # [0, 2, 4, 6, 8]</code></pre>",
+                "order": 1
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_py101_int_01_01",
+                "question": "What is a Python dictionary?",
+                "questionType": "multiple_choice",
+                "options": ["Ordered sequence of values", "Collection of key-value pairs", "A list of unique values", "An immutable sequence"],
+                "correctAnswer": "B",
+                "hint": "Think about how you look something up by name.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              },
+              {
+                "id": "eq_py101_int_01_02",
+                "question": "What is the output of the following code?",
+                "questionType": "output_prediction",
+                "options": [],
+                "correctAnswer": "0",
+                "hint": "dict.get(key, default) returns default if key is not found.",
+                "codeSnippet": "d = {\"a\": 1, \"b\": 2}\nprint(d.get(\"c\", 0))",
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_int_01_03",
+                "question": "What does [x**2 for x in range(5)] produce?",
+                "questionType": "multiple_choice",
+                "options": ["[1,4,9,16,25]", "[0,1,4,9,16]", "[0,2,4,6,8]", "[1,2,3,4,5]"],
+                "correctAnswer": "B",
+                "hint": "range(5) starts at 0.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 2
+              }
+            ]
+          },
+          {
+            "id": "unit_py101_int_02",
+            "title": "OOP & Error Handling",
+            "order": 1,
+            "passScore": 75,
+            "topics": [
+              {
+                "id": "topic_py101_int_02_01",
+                "title": "Classes and Objects",
+                "content": "<h2>Object-Oriented Programming</h2><p>OOP organises code around <strong>objects</strong> — bundles of data (attributes) and behaviour (methods).</p><pre><code class=\"language-python\">class Student:\n    school = \"CodeArena\"   # class attribute\n\n    def __init__(self, name, age):\n        self.name = name   # instance attribute\n        self.age  = age\n\n    def greet(self):\n        print(f\"Hi, I am {self.name}!\")\n\ns = Student(\"Maria\", 20)\ns.greet()   # Hi, I am Maria!</code></pre><h3>Inheritance</h3><pre><code class=\"language-python\">class GradStudent(Student):\n    def __init__(self, name, age, thesis):\n        super().__init__(name, age)\n        self.thesis = thesis</code></pre>",
+                "order": 0
+              },
+              {
+                "id": "topic_py101_int_02_02",
+                "title": "Error Handling",
+                "content": "<h2>Handling Exceptions</h2><pre><code class=\"language-python\">try:\n    age = int(input(\"Enter age: \"))\n    print(f\"Next year: {age + 1}\")\nexcept ValueError:\n    print(\"Please enter a valid number.\")\nexcept Exception as e:\n    print(f\"Unexpected error: {e}\")\nelse:\n    print(\"No errors occurred!\")\nfinally:\n    print(\"This always runs.\")</code></pre><h3>Common Exceptions</h3><ul><li><code>ValueError</code> — invalid value (e.g. int(\"abc\"))</li><li><code>TypeError</code> — wrong type</li><li><code>IndexError</code> — list index out of range</li><li><code>KeyError</code> — missing dictionary key</li><li><code>ZeroDivisionError</code> — dividing by zero</li></ul>",
+                "order": 1
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_py101_int_02_01",
+                "question": "What does the __init__ method do in a class?",
+                "questionType": "multiple_choice",
+                "options": ["Destroys the object", "Initialises instance attributes when an object is created", "Returns a string representation", "Copies the object"],
+                "correctAnswer": "B",
+                "hint": "It is called automatically when you create a new object.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              },
+              {
+                "id": "eq_py101_int_02_02",
+                "question": "Which exception is raised when dividing by zero?",
+                "questionType": "multiple_choice",
+                "options": ["ValueError", "ArithmeticError", "ZeroDivisionError", "MathError"],
+                "correctAnswer": "C",
+                "hint": "The exception name describes exactly what happened.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_int_02_03",
+                "question": "Fill in the correct exception type for invalid integer conversion.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "ValueError",
+                "hint": "int('abc') raises a specific exception related to the value.",
+                "codeSnippet": "try:\n    x = int(\"abc\")\nexcept ___:\n    print(\"Not a number\")",
+                "codeLines": [],
+                "order": 2
+              },
+              {
+                "id": "eq_py101_int_02_04",
+                "question": "Arrange the lines to define a Person class and call its greet method.",
+                "questionType": "code_ordering",
+                "options": [],
+                "correctAnswer": "",
+                "hint": "Define the class and its methods before creating an instance.",
+                "codeSnippet": null,
+                "codeLines": ["class Person:", "    def __init__(self, name):", "        self.name = name", "    def greet(self):", "        print(f\"Hello, {self.name}!\")", "p = Person(\"Ana\")", "p.greet()"],
+                "order": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lvl_py101_advanced",
+        "name": "Advanced",
+        "order": 2,
+        "locked": true,
+        "units": [
+          {
+            "id": "unit_py101_adv_01",
+            "title": "Generators & Decorators",
+            "order": 0,
+            "passScore": 75,
+            "topics": [
+              {
+                "id": "topic_py101_adv_01_01",
+                "title": "Generators",
+                "content": "<h2>Memory-Efficient Sequences</h2><p>Generators produce values <strong>one at a time</strong> using <code>yield</code>, without building a full list in memory.</p><pre><code class=\"language-python\">def countdown(n):\n    while n > 0:\n        yield n\n        n -= 1\n\nfor val in countdown(3):\n    print(val)   # 3, 2, 1</code></pre><h3>Generator Expressions</h3><pre><code class=\"language-python\"># List (all in memory)\nsquares_list = [x**2 for x in range(1000000)]\n\n# Generator (lazy, efficient)\nsquares_gen = (x**2 for x in range(1000000))</code></pre><div class=\"info-box\">💡 Use generators when you work with large data sets or infinite sequences — they are far more memory-efficient than lists.</div>",
+                "order": 0
+              },
+              {
+                "id": "topic_py101_adv_01_02",
+                "title": "Decorators",
+                "content": "<h2>Wrapping Functions</h2><p>A decorator wraps a function to add behaviour <em>without modifying its code</em>.</p><pre><code class=\"language-python\">def my_decorator(func):\n    def wrapper():\n        print(\"Before\")\n        func()\n        print(\"After\")\n    return wrapper\n\n@my_decorator\ndef say_hello():\n    print(\"Hello!\")\n\nsay_hello()\n# Before\n# Hello!\n# After</code></pre><h3>Practical: Timing Decorator</h3><pre><code class=\"language-python\">import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        print(f\"Elapsed: {time.time()-start:.4f}s\")\n        return result\n    return wrapper</code></pre>",
+                "order": 1
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_py101_adv_01_01",
+                "question": "What makes a function a generator in Python?",
+                "questionType": "multiple_choice",
+                "options": ["Using return with a list", "Using the yield keyword", "Inheriting from Generator", "Using async/await"],
+                "correctAnswer": "B",
+                "hint": "Generators produce values one at a time.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              },
+              {
+                "id": "eq_py101_adv_01_02",
+                "question": "What is the output of the following code?",
+                "questionType": "output_prediction",
+                "options": [],
+                "correctAnswer": "Before\nHello\nAfter",
+                "hint": "Trace what the decorator wraps around the original call.",
+                "codeSnippet": "def deco(fn):\n    def wrapper():\n        print(\"Before\")\n        fn()\n        print(\"After\")\n    return wrapper\n\n@deco\ndef say_hello():\n    print(\"Hello\")\n\nsay_hello()",
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_py101_adv_01_03",
+                "question": "Fill in the blank to complete the generator.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "yield",
+                "hint": "What keyword makes a function a generator?",
+                "codeSnippet": "def countdown(n):\n    while n > 0:\n        ___ n\n        n -= 1",
+                "codeLines": [],
+                "order": 2
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "2": {
+    "language": "javascript",
+    "levels": [
+      {
+        "id": "lvl_wdev_beginner",
+        "name": "Beginner",
+        "order": 0,
+        "locked": false,
+        "units": [
+          {
+            "id": "unit_wdev_beg_01",
+            "title": "JavaScript Basics",
+            "order": 0,
+            "passScore": 75,
+            "topics": [
+              {
+                "id": "topic_wdev_beg_01_01",
+                "title": "Introduction to JavaScript",
+                "content": "<h2>What is JavaScript?</h2><p>JavaScript is the programming language of the web. It runs in every browser and lets you make pages <strong>interactive</strong> — responding to clicks, fetching data, and updating content without a page reload.</p><h3>Where does JavaScript run?</h3><ul><li><strong>Browser</strong> — client-side interactivity (animations, forms, games)</li><li><strong>Server</strong> — Node.js powers backends like Discord and Netflix</li><li><strong>Mobile</strong> — React Native apps</li></ul><h3>Hello, World!</h3><pre><code class=\"language-javascript\">console.log(\"Hello, World!\");</code></pre>",
+                "order": 0
+              },
+              {
+                "id": "topic_wdev_beg_01_02",
+                "title": "Variables and Data Types",
+                "content": "<h2>Storing Data</h2><pre><code class=\"language-javascript\">let name    = \"Maria\";    // string\nlet age     = 20;          // number\nlet gpa     = 1.75;        // number (float)\nlet enrolled = true;       // boolean\nconst PI    = 3.14159;     // constant — cannot reassign</code></pre><h3>var vs let vs const</h3><table><tr><th>Keyword</th><th>Scope</th><th>Reassignable</th></tr><tr><td><code>var</code></td><td>function</td><td>✓</td></tr><tr><td><code>let</code></td><td>block</td><td>✓</td></tr><tr><td><code>const</code></td><td>block</td><td>✗</td></tr></table><div class=\"info-box\">💡 Prefer <code>const</code> by default; use <code>let</code> when you need to reassign. Avoid <code>var</code>.</div>",
+                "order": 1
+              },
+              {
+                "id": "topic_wdev_beg_01_03",
+                "title": "Functions & Arrays",
+                "content": "<h2>Functions</h2><pre><code class=\"language-javascript\">// Function declaration\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\n// Arrow function (modern)\nconst square = n => n * n;\n\nconsole.log(greet(\"Maria\"));  // Hello, Maria!\nconsole.log(square(5));        // 25</code></pre><h2>Arrays</h2><pre><code class=\"language-javascript\">const fruits = [\"apple\", \"banana\", \"cherry\"];\nconsole.log(fruits[0]);           // apple\nconsole.log(fruits.length);       // 3\n\nfruits.push(\"mango\");             // add to end\nfruits.pop();                     // remove last\n\nconst evens = [1,2,3,4].filter(n => n % 2 === 0);\nconsole.log(evens);               // [2, 4]</code></pre>",
+                "order": 2
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_wdev_beg_01_01",
+                "question": "Which keyword declares a block-scoped variable in modern JavaScript?",
+                "questionType": "multiple_choice",
+                "options": ["var", "let", "define", "local"],
+                "correctAnswer": "B",
+                "hint": "Introduced in ES6, it replaced var for most use cases.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 0
+              },
+              {
+                "id": "eq_wdev_beg_01_02",
+                "question": "What does === check in JavaScript?",
+                "questionType": "multiple_choice",
+                "options": ["Value only", "Type only", "Both value and type (strict equality)", "Reference equality"],
+                "correctAnswer": "C",
+                "hint": "It is stricter than ==.",
+                "codeSnippet": null,
+                "codeLines": [],
+                "order": 1
+              },
+              {
+                "id": "eq_wdev_beg_01_03",
+                "question": "What is the output of the following code?",
+                "questionType": "output_prediction",
+                "options": [],
+                "correctAnswer": "10",
+                "hint": "+= adds to the current value.",
+                "codeSnippet": "let x = 5;\nx += 5;\nconsole.log(x);",
+                "codeLines": [],
+                "order": 2
+              },
+              {
+                "id": "eq_wdev_beg_01_04",
+                "question": "Arrange the lines to define and call a function that squares a number.",
+                "questionType": "code_ordering",
+                "options": [],
+                "correctAnswer": "",
+                "hint": "Declare the function before calling it.",
+                "codeSnippet": null,
+                "codeLines": ["function square(n) {", "  return n * n;", "}", "const result = square(5);", "console.log(result);"],
+                "order": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lvl_wdev_intermediate",
         "name": "Intermediate",
         "order": 1,
         "locked": true,
         "units": []
       },
       {
-        "id": "lvl_1781046945858_jhqz0",
+        "id": "lvl_wdev_advanced",
         "name": "Advanced",
         "order": 2,
         "locked": true,

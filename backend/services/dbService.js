@@ -24,7 +24,11 @@ let dbAvailable = false;
 async function init() {
     try {
         dbAvailable = await db.testConnection();
-        if (dbAvailable) await ensureQuestionColumns();
+        if (dbAvailable) {
+            await ensureQuestionColumns();
+            await ensureUsersColumns();
+            await ensureMissingTables();
+        }
         return dbAvailable;
     } catch (error) {
         console.log('Database not available, using mock data');
@@ -71,6 +75,177 @@ async function ensureQuestionColumns() {
     } catch (e) {
         // Non-fatal — will fall back to in-memory for any incompatible query
         console.warn('ensureQuestionColumns warning:', e.message);
+    }
+}
+
+/**
+ * Ensure the users table has columns added after the initial schema.
+ * Covers: streak, last_activity_at, google_id, avatar, total_xp, role, selected_language
+ */
+async function ensureUsersColumns() {
+    if (!dbAvailable) return;
+    const newCols = [
+        ['streak',           "ALTER TABLE users ADD COLUMN streak INT DEFAULT 0"],
+        ['last_activity_at', "ALTER TABLE users ADD COLUMN last_activity_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"],
+        ['google_id',        "ALTER TABLE users ADD COLUMN google_id VARCHAR(255) DEFAULT NULL"],
+        ['avatar',           "ALTER TABLE users ADD COLUMN avatar VARCHAR(500) DEFAULT NULL"],
+        ['total_xp',         "ALTER TABLE users ADD COLUMN total_xp INT DEFAULT 0"],
+        ['role',             "ALTER TABLE users ADD COLUMN role ENUM('student','faculty','admin') DEFAULT 'student'"],
+        ['selected_language',"ALTER TABLE users ADD COLUMN selected_language VARCHAR(50) DEFAULT NULL"],
+    ];
+    try {
+        const [cols] = await db.pool.query("SHOW COLUMNS FROM users");
+        const existing = cols.map(c => c.Field);
+        for (const [col, sql] of newCols) {
+            if (!existing.includes(col)) {
+                await db.pool.query(sql);
+                console.log(`✓ users: added column ${col}`);
+            }
+        }
+    } catch (e) {
+        console.warn('ensureUsersColumns warning:', e.message);
+    }
+}
+
+/**
+ * Ensure tables that may be missing on older DB installs are created.
+ * Uses CREATE TABLE IF NOT EXISTS — safe to run on every startup.
+ */
+async function ensureMissingTables() {
+    if (!dbAvailable) return;
+    const tables = [
+        {
+            name: 'learning_paths',
+            sql: `CREATE TABLE IF NOT EXISTS learning_paths (
+                path_id      INT AUTO_INCREMENT PRIMARY KEY,
+                title        VARCHAR(255) NOT NULL,
+                language     VARCHAR(50)  NOT NULL,
+                description  TEXT,
+                difficulty   ENUM('beginner','intermediate','advanced') DEFAULT 'beginner',
+                icon         VARCHAR(100) DEFAULT 'code',
+                color        VARCHAR(20)  DEFAULT '#7c3aed',
+                order_index  INT     DEFAULT 0,
+                is_published BOOLEAN DEFAULT TRUE,
+                is_active    BOOLEAN DEFAULT TRUE,
+                created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`
+        },
+        {
+            name: 'path_lessons',
+            sql: `CREATE TABLE IF NOT EXISTS path_lessons (
+                lesson_id         INT AUTO_INCREMENT PRIMARY KEY,
+                path_id           INT NOT NULL,
+                title             VARCHAR(255) NOT NULL,
+                content           LONGTEXT,
+                order_index       INT  DEFAULT 0,
+                estimated_minutes INT  DEFAULT 10,
+                xp_reward         INT  DEFAULT 20,
+                is_published      BOOLEAN DEFAULT TRUE,
+                created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`
+        },
+        {
+            name: 'lesson_progress',
+            sql: `CREATE TABLE IF NOT EXISTS lesson_progress (
+                id              INT AUTO_INCREMENT PRIMARY KEY,
+                user_id         INT NOT NULL,
+                lesson_id       INT NOT NULL,
+                status          ENUM('not_started','in_progress','completed') DEFAULT 'not_started',
+                completed_at    TIMESTAMP NULL,
+                time_spent_secs INT DEFAULT 0,
+                UNIQUE KEY uq_user_lesson (user_id, lesson_id)
+            )`
+        },
+        {
+            name: 'classrooms',
+            sql: `CREATE TABLE IF NOT EXISTS classrooms (
+                classroom_id INT AUTO_INCREMENT PRIMARY KEY,
+                faculty_id   INT NOT NULL,
+                name         VARCHAR(255) NOT NULL,
+                description  TEXT,
+                subject      VARCHAR(100),
+                language     VARCHAR(50),
+                banner_image VARCHAR(500) DEFAULT NULL,
+                join_code    VARCHAR(20) UNIQUE,
+                is_active    BOOLEAN DEFAULT TRUE,
+                created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`
+        },
+        {
+            name: 'classroom_enrollments',
+            sql: `CREATE TABLE IF NOT EXISTS classroom_enrollments (
+                enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+                classroom_id  INT NOT NULL,
+                student_id    INT NOT NULL,
+                status        ENUM('active','dropped') DEFAULT 'active',
+                enrolled_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_enrollment (classroom_id, student_id)
+            )`
+        },
+        {
+            name: 'classroom_lessons',
+            sql: `CREATE TABLE IF NOT EXISTS classroom_lessons (
+                lesson_id    INT AUTO_INCREMENT PRIMARY KEY,
+                classroom_id INT NOT NULL,
+                title        VARCHAR(255) NOT NULL,
+                content      LONGTEXT,
+                order_index  INT DEFAULT 0,
+                is_published BOOLEAN DEFAULT FALSE,
+                created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`
+        },
+        {
+            name: 'weaknesses',
+            sql: `CREATE TABLE IF NOT EXISTS weaknesses (
+                id               INT AUTO_INCREMENT PRIMARY KEY,
+                user_id          INT NOT NULL,
+                topic            VARCHAR(100) NOT NULL,
+                language         VARCHAR(50)  NOT NULL,
+                error_count      INT  DEFAULT 1,
+                total_attempts   INT  DEFAULT 1,
+                error_rate       DECIMAL(5,2) DEFAULT 100.00,
+                last_detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                resolved         BOOLEAN DEFAULT FALSE,
+                UNIQUE KEY uq_user_topic_lang (user_id, topic, language)
+            )`
+        },
+    ];
+    for (const { name, sql } of tables) {
+        try {
+            await db.pool.query(sql);
+        } catch (e) {
+            console.warn(`ensureMissingTables [${name}] warning:`, e.message);
+        }
+    }
+    // Patch columns that may be absent on tables that already existed
+    await ensureTableColumns('learning_paths', [
+        ['is_published', 'ALTER TABLE learning_paths ADD COLUMN is_published BOOLEAN DEFAULT TRUE'],
+        ['is_active',    'ALTER TABLE learning_paths ADD COLUMN is_active BOOLEAN DEFAULT TRUE'],
+    ]);
+    await ensureTableColumns('path_lessons', [
+        ['is_published',      'ALTER TABLE path_lessons ADD COLUMN is_published BOOLEAN DEFAULT TRUE'],
+        ['estimated_minutes', 'ALTER TABLE path_lessons ADD COLUMN estimated_minutes INT DEFAULT 10'],
+        ['xp_reward',         'ALTER TABLE path_lessons ADD COLUMN xp_reward INT DEFAULT 20'],
+    ]);
+}
+
+/**
+ * Generic helper — adds listed columns to a table if they are absent.
+ * @param {string} table
+ * @param {[string, string][]} cols  — [ [colName, alterSql], ... ]
+ */
+async function ensureTableColumns(table, cols) {
+    try {
+        const [rows] = await db.pool.query(`SHOW COLUMNS FROM \`${table}\``);
+        const existing = rows.map(r => r.Field);
+        for (const [col, sql] of cols) {
+            if (!existing.includes(col)) {
+                await db.pool.query(sql);
+                console.log(`✓ ${table}: added column ${col}`);
+            }
+        }
+    } catch (e) {
+        // Table may not exist yet — silently skip
     }
 }
 

@@ -1817,7 +1817,7 @@ function renderCurriculumView() {
         const lstat = _levelStatus[lvl.id] || { unlocked: true };
         const levelLocked = lstat.unlocked === false;
 
-        html += `<div class="curr-level-section" style="margin-bottom:2rem;${levelLocked ? 'opacity:.75;' : ''}">
+        html += `<div class="curr-level-section" data-level-id="${lvl.id}" style="margin-bottom:2rem;${levelLocked ? 'opacity:.75;' : ''}">
             <div class="curr-level-header" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
                 <span style="width:10px;height:10px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>
                 <span style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${col};">${esc(lvl.name)}</span>
@@ -1947,6 +1947,48 @@ function closeUnitViewer() {
     document.getElementById('unitOverlay').style.display = 'none';
     document.body.style.overflow = '';
     renderCurriculumView();
+}
+
+/** Returns the sorted next level after _uvLevel, or null if already last. */
+function getNextLevel() {
+    if (!_curriculum || !_uvLevel) return null;
+    const sorted = [...(_curriculum.levels || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const idx = sorted.findIndex(l => l.id === _uvLevel.id);
+    return idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : null;
+}
+
+/** Builds the action button HTML for the certificate screen. */
+function getNextLevelBtn() {
+    const next = getNextLevel();
+    if (next) {
+        return `<button onclick="proceedToNextLevel()" class="btn btn-primary" style="font-size:.85rem;gap:.4rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+            Proceed to ${next.name || 'Next'} Level
+        </button>`;
+    }
+    // All levels done
+    return `<button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
+        <span class="material-symbols-outlined" style="font-size:1rem;">emoji_events</span>
+        All Levels Complete!
+    </button>`;
+}
+
+/** Closes the overlay and scrolls to + briefly highlights the next level card. */
+function proceedToNextLevel() {
+    const next = getNextLevel();
+    closeUnitViewer();          // re-renders curriculum
+    if (!next) return;
+    // Give renderCurriculumView a tick to paint, then scroll + flash
+    setTimeout(() => {
+        // Level header elements carry data-level-id (set in renderCurriculumView)
+        const el = document.querySelector(`[data-level-id="${next.id}"]`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.style.transition = 'box-shadow .3s';
+            el.style.boxShadow  = '0 0 0 3px var(--primary)';
+            setTimeout(() => { el.style.boxShadow = ''; }, 1800);
+        }
+    }, 120);
 }
 
 function renderUVStep() {
@@ -2343,9 +2385,7 @@ async function renderLevelComplete(evalData) {
             <button onclick="printLevelCert()" class="btn btn-secondary" style="font-size:.85rem;">
                 <span class="material-symbols-outlined" style="font-size:1rem;">download</span> Download PDF
             </button>
-            <button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
-                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back to Curriculum
-            </button>
+            ${getNextLevelBtn()}
         </div>`;
 }
 

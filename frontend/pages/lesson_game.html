@@ -53,6 +53,34 @@
         .diff-btn.locked .lock-badge { display: block; }
         .diff-btn.locked .diff-sub { color: #f59e0b; font-size: 0.6rem; }
 
+        /* ── Certificate callout ──────────────────────────────────────────── */
+        .cert-callout {
+            display: flex; align-items: flex-start; gap: 0.85rem;
+            background: linear-gradient(135deg, rgba(124,58,237,0.13) 0%, rgba(168,85,247,0.08) 100%);
+            border: 1px solid rgba(124,58,237,0.45);
+            border-radius: var(--radius-sm);
+            padding: 0.95rem 1rem;
+            animation: certPulse 3s ease-in-out infinite;
+        }
+        @keyframes certPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+            50%       { box-shadow: 0 0 0 4px rgba(124,58,237,0.12); }
+        }
+        .cert-callout-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; margin-top: 0.05rem; }
+        .cert-callout-title {
+            font-size: 0.82rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.7px; color: var(--primary); margin-bottom: 0.3rem;
+        }
+        .cert-callout-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; }
+        .cert-callout-desc strong { color: var(--text); }
+        .cert-callout-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: rgba(124,58,237,0.18); color: var(--primary);
+            border: 1px solid rgba(124,58,237,0.35);
+            border-radius: 20px; padding: 0.18rem 0.65rem;
+            font-size: 0.7rem; font-weight: 700; margin-top: 0.5rem;
+        }
+
         /* ── Custom language picker ───────────────────────────────────────── */
         .lang-picker { position: relative; user-select: none; }
         .lang-picker-selected {
@@ -490,6 +518,24 @@
                     </button>
                 </div>
             </div>
+            <!-- ── Certificate earn notice ─────────────────────────────── -->
+            <div class="cert-callout" id="certCallout">
+                <div class="cert-callout-icon">🏅</div>
+                <div>
+                    <div class="cert-callout-title">🎓 Earn a Certificate</div>
+                    <div class="cert-callout-desc">
+                        Score <strong>75% or higher</strong> to earn your official
+                        <strong id="certLevelPreview">Beginner</strong> certificate for
+                        <strong id="certLangPreview">Python</strong>.
+                        Certificates are awarded <strong>once per level</strong> and saved to your profile.
+                    </div>
+                    <div class="cert-callout-badge">
+                        <span class="material-symbols-outlined" style="font-size:0.8rem;">workspace_premium</span>
+                        Pass 15 / 20 questions to qualify
+                    </div>
+                </div>
+            </div>
+
             <button class="btn btn-primary" onclick="startGame()" style="justify-content:center;font-size:0.92rem;padding:0.8rem;">
                 <span class="material-symbols-outlined" style="font-size:1.1rem;">play_circle</span>
                 Start Assessment
@@ -767,6 +813,7 @@ function pickLang(value) {
     document.getElementById('langPicker').classList.remove('open');
     updateDiffLocks(value);
     loadServerMastery(value);   // refresh locks with cross-system (classroom) mastery
+    updateCertCallout();
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('#langPicker'))
@@ -777,7 +824,7 @@ document.addEventListener('click', e => {
 document.addEventListener('DOMContentLoaded', () => {
     const lang = me.selected_language || me.language || 'python';
     if (LANG_META[lang]) pickLang(lang);
-    else { updateDiffLocks('python'); loadServerMastery('python'); }
+    else { updateDiffLocks('python'); loadServerMastery('python'); updateCertCallout(); }
     document.addEventListener('keydown', handleKeyboard);
 
     // Check for an in-progress session
@@ -885,6 +932,21 @@ function selectDiff(btn) {
     }
     document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    updateCertCallout();
+}
+
+// ── Certificate callout updater ───────────────────────────────────────────────
+function updateCertCallout() {
+    const lang  = document.getElementById('setupLang')?.value || 'python';
+    const level = document.querySelector('.diff-btn.active')?.dataset.level || 'beginner';
+    const meta  = LANG_META[lang];
+    const langLabel  = meta ? meta.label : lang.charAt(0).toUpperCase() + lang.slice(1);
+    const levelLabel = level.charAt(0).toUpperCase() + level.slice(1);
+
+    const elLevel = document.getElementById('certLevelPreview');
+    const elLang  = document.getElementById('certLangPreview');
+    if (elLevel) elLevel.textContent = levelLabel;
+    if (elLang)  elLang.textContent  = langLabel;
 }
 
 // ── Assessment lock helpers ───────────────────────────────────────────────────

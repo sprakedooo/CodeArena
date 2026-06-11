@@ -16,5 +16,24 @@
       "topic_1781048371351_vzjdd"
     ],
     "contentCompleted": true
+  },
+  "6_unit_1781046596019_i0lf8": {
+    "completedTopics": [
+      "topic_1781046614598_h8uay",
+      "topic_1781046621785_f269t",
+      "topic_1781046626942_gzqna"
+    ],
+    "contentCompleted": true,
+    "attempts": 8,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-10T23:31:12.927Z"
+  },
+  "6_unit_1781133015330_9u4ck": {
+    "completedTopics": [
+      "topic_1781133021083_73d37",
+      "topic_1781133023945_q1r3a"
+    ],
+    "contentCompleted": true
   }
 }
