@@ -29,16 +29,14 @@
             background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.7) 100%);
             pointer-events:none;
         }
-        .classroom-hero-top {
-            position:absolute; top:0; left:0; right:0; z-index:2;
-            display:flex; flex-direction:column; align-items:flex-start;
-            padding:22px 24px 0; gap:4px;
-        }
         .classroom-hero-name {
             font-family:'Press Start 2P',monospace; font-size:1rem; color:#fff;
-            margin:0; line-height:1.4; text-shadow:0 1px 6px rgba(0,0,0,.6);
+            margin:0 0 6px; line-height:1.4; text-shadow:0 1px 6px rgba(0,0,0,.6);
         }
-        .classroom-hero-desc { font-size:.875rem; color:rgba(255,255,255,.75); margin:0; }
+        .classroom-hero-desc {
+            font-size:.875rem; color:rgba(255,255,255,.75); margin:0;
+            line-height:1.5; max-width:560px;
+        }
         .hero-settings-wrap { position:relative; }
         .hero-settings-btn {
             background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.2);
@@ -105,7 +103,7 @@
         .banner-edit-btn .material-symbols-outlined { font-size:1.05rem; }
         #bannerInput { display:none; }
         .classroom-hero-inner {
-            position:relative; z-index:1; padding:52px 28px 20px;
+            position:relative; z-index:1; padding:24px 28px 20px;
             display:flex; align-items:flex-end; gap:24px; width:100%;
         }
         .classroom-hero-body { flex:1; min-width:0; }
@@ -563,14 +561,12 @@
 
     <!-- Hero -->
     <div class="classroom-hero" id="classroomHero">
-        <div class="classroom-hero-top">
-            <h1 class="classroom-hero-name" id="classroomName">Loading…</h1>
-            <p class="classroom-hero-desc" id="classroomDesc">—</p>
-        </div>
         <input type="file" id="bannerInput" accept="image/*" onchange="handleBannerUpload(event)">
         <div class="classroom-hero-inner">
             <div class="classroom-hero-body">
-                <div style="display:flex;gap:8px;align-items:center;">
+                <h1 class="classroom-hero-name" id="classroomName">Loading…</h1>
+                <p class="classroom-hero-desc" id="classroomDesc">—</p>
+                <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
                     <button class="banner-edit-btn" onclick="document.getElementById('bannerInput').click()" title="Change banner">
                         <span class="material-symbols-outlined">edit</span>
                     </button>

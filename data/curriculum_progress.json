@@ -35,5 +35,37 @@
       "topic_1781133023945_q1r3a"
     ],
     "contentCompleted": true
+  },
+  "2_unit_py101_beg_01": {
+    "completedTopics": [
+      "topic_py101_beg_01_01",
+      "topic_py101_beg_01_02",
+      "topic_py101_beg_01_03"
+    ],
+    "contentCompleted": true,
+    "attempts": 2,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-11T00:36:39.639Z"
+  },
+  "2_unit_py101_beg_02": {
+    "completedTopics": [
+      "topic_py101_beg_02_01",
+      "topic_py101_beg_02_02",
+      "topic_py101_beg_02_03"
+    ],
+    "contentCompleted": true,
+    "attempts": 1,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-11T00:47:40.357Z"
+  },
+  "2_unit_py101_beg_03": {
+    "completedTopics": [
+      "topic_py101_beg_03_01",
+      "topic_py101_beg_03_02",
+      "topic_py101_beg_03_03"
+    ],
+    "contentCompleted": true
   }
 }

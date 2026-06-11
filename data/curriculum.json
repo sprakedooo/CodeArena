@@ -38,7 +38,12 @@
                 "id": "eq_py101_beg_01_01",
                 "question": "Which function is used to display output in Python?",
                 "questionType": "multiple_choice",
-                "options": ["echo()", "printf()", "print()", "display()"],
+                "options": [
+                  "echo()",
+                  "printf()",
+                  "print()",
+                  "display()"
+                ],
                 "correctAnswer": "C",
                 "hint": "Think about the built-in function you use every time you want to show something on screen.",
                 "codeSnippet": null,
@@ -49,7 +54,12 @@
                 "id": "eq_py101_beg_01_02",
                 "question": "How do you write a single-line comment in Python?",
                 "questionType": "multiple_choice",
-                "options": ["// comment", "/* comment */", "# comment", "-- comment"],
+                "options": [
+                  "// comment",
+                  "/* comment */",
+                  "# comment",
+                  "-- comment"
+                ],
                 "correctAnswer": "C",
                 "hint": "Python uses a symbol that looks like a hashtag.",
                 "codeSnippet": null,
@@ -60,8 +70,13 @@
                 "id": "eq_py101_beg_01_03",
                 "question": "What will the following code print?",
                 "questionType": "output_prediction",
-                "options": [],
-                "correctAnswer": "10",
+                "options": [
+                  "8",
+                  "10",
+                  "9",
+                  "11"
+                ],
+                "correctAnswer": "A",
                 "hint": "Evaluate the arithmetic expression inside print().",
                 "codeSnippet": "print(3 + 7)",
                 "codeLines": [],
@@ -99,7 +114,12 @@
                 "id": "eq_py101_beg_02_01",
                 "question": "Which is the correct way to create a variable in Python?",
                 "questionType": "multiple_choice",
-                "options": ["var x = 5", "int x = 5", "x = 5", "declare x = 5"],
+                "options": [
+                  "var x = 5",
+                  "int x = 5",
+                  "x = 5",
+                  "declare x = 5"
+                ],
                 "correctAnswer": "C",
                 "hint": "Python does not require a keyword to declare a variable.",
                 "codeSnippet": null,
@@ -110,7 +130,12 @@
                 "id": "eq_py101_beg_02_02",
                 "question": "What data type does Python assign to the value 3.14?",
                 "questionType": "multiple_choice",
-                "options": ["int", "double", "float", "decimal"],
+                "options": [
+                  "int",
+                  "double",
+                  "float",
+                  "decimal"
+                ],
                 "correctAnswer": "C",
                 "hint": "Numbers with decimal points are a specific numeric type.",
                 "codeSnippet": null,
@@ -171,7 +196,12 @@
                 "id": "eq_py101_beg_03_01",
                 "question": "Which is the correct syntax for an if statement in Python?",
                 "questionType": "multiple_choice",
-                "options": ["if x > 5:", "if (x > 5)", "if x > 5 then", "if x > 5;"],
+                "options": [
+                  "if x > 5:",
+                  "if (x > 5)",
+                  "if x > 5 then",
+                  "if x > 5;"
+                ],
                 "correctAnswer": "A",
                 "hint": "Python uses a colon, not brackets or 'then'.",
                 "codeSnippet": null,
@@ -182,7 +212,12 @@
                 "id": "eq_py101_beg_03_02",
                 "question": "What does range(1, 5) produce?",
                 "questionType": "multiple_choice",
-                "options": ["1,2,3,4,5", "1,2,3,4", "0,1,2,3,4", "2,3,4"],
+                "options": [
+                  "1,2,3,4,5",
+                  "1,2,3,4",
+                  "0,1,2,3,4",
+                  "2,3,4"
+                ],
                 "correctAnswer": "B",
                 "hint": "range(start, stop) includes start but excludes stop.",
                 "codeSnippet": null,
@@ -197,7 +232,10 @@
                 "correctAnswer": "",
                 "hint": "The for statement comes first, then the print inside the loop.",
                 "codeSnippet": null,
-                "codeLines": ["for i in range(1, 4):", "    print(i)"],
+                "codeLines": [
+                  "for i in range(1, 4):",
+                  "    print(i)"
+                ],
                 "order": 2
               }
             ]
@@ -232,7 +270,12 @@
                 "id": "eq_py101_beg_04_01",
                 "question": "What keyword is used to define a function in Python?",
                 "questionType": "multiple_choice",
-                "options": ["function", "func", "define", "def"],
+                "options": [
+                  "function",
+                  "func",
+                  "define",
+                  "def"
+                ],
                 "correctAnswer": "D",
                 "hint": "It is a short form of 'define'.",
                 "codeSnippet": null,
@@ -258,7 +301,12 @@
                 "correctAnswer": "",
                 "hint": "Define the function before calling it.",
                 "codeSnippet": null,
-                "codeLines": ["def add(a, b):", "    return a + b", "result = add(5, 3)", "print(result)"],
+                "codeLines": [
+                  "def add(a, b):",
+                  "    return a + b",
+                  "result = add(5, 3)",
+                  "print(result)"
+                ],
                 "order": 2
               },
               {
@@ -306,7 +354,12 @@
                 "id": "eq_py101_int_01_01",
                 "question": "What is a Python dictionary?",
                 "questionType": "multiple_choice",
-                "options": ["Ordered sequence of values", "Collection of key-value pairs", "A list of unique values", "An immutable sequence"],
+                "options": [
+                  "Ordered sequence of values",
+                  "Collection of key-value pairs",
+                  "A list of unique values",
+                  "An immutable sequence"
+                ],
                 "correctAnswer": "B",
                 "hint": "Think about how you look something up by name.",
                 "codeSnippet": null,
@@ -328,7 +381,12 @@
                 "id": "eq_py101_int_01_03",
                 "question": "What does [x**2 for x in range(5)] produce?",
                 "questionType": "multiple_choice",
-                "options": ["[1,4,9,16,25]", "[0,1,4,9,16]", "[0,2,4,6,8]", "[1,2,3,4,5]"],
+                "options": [
+                  "[1,4,9,16,25]",
+                  "[0,1,4,9,16]",
+                  "[0,2,4,6,8]",
+                  "[1,2,3,4,5]"
+                ],
                 "correctAnswer": "B",
                 "hint": "range(5) starts at 0.",
                 "codeSnippet": null,
@@ -361,7 +419,12 @@
                 "id": "eq_py101_int_02_01",
                 "question": "What does the __init__ method do in a class?",
                 "questionType": "multiple_choice",
-                "options": ["Destroys the object", "Initialises instance attributes when an object is created", "Returns a string representation", "Copies the object"],
+                "options": [
+                  "Destroys the object",
+                  "Initialises instance attributes when an object is created",
+                  "Returns a string representation",
+                  "Copies the object"
+                ],
                 "correctAnswer": "B",
                 "hint": "It is called automatically when you create a new object.",
                 "codeSnippet": null,
@@ -372,7 +435,12 @@
                 "id": "eq_py101_int_02_02",
                 "question": "Which exception is raised when dividing by zero?",
                 "questionType": "multiple_choice",
-                "options": ["ValueError", "ArithmeticError", "ZeroDivisionError", "MathError"],
+                "options": [
+                  "ValueError",
+                  "ArithmeticError",
+                  "ZeroDivisionError",
+                  "MathError"
+                ],
                 "correctAnswer": "C",
                 "hint": "The exception name describes exactly what happened.",
                 "codeSnippet": null,
@@ -398,7 +466,15 @@
                 "correctAnswer": "",
                 "hint": "Define the class and its methods before creating an instance.",
                 "codeSnippet": null,
-                "codeLines": ["class Person:", "    def __init__(self, name):", "        self.name = name", "    def greet(self):", "        print(f\"Hello, {self.name}!\")", "p = Person(\"Ana\")", "p.greet()"],
+                "codeLines": [
+                  "class Person:",
+                  "    def __init__(self, name):",
+                  "        self.name = name",
+                  "    def greet(self):",
+                  "        print(f\"Hello, {self.name}!\")",
+                  "p = Person(\"Ana\")",
+                  "p.greet()"
+                ],
                 "order": 3
               }
             ]
@@ -435,7 +511,12 @@
                 "id": "eq_py101_adv_01_01",
                 "question": "What makes a function a generator in Python?",
                 "questionType": "multiple_choice",
-                "options": ["Using return with a list", "Using the yield keyword", "Inheriting from Generator", "Using async/await"],
+                "options": [
+                  "Using return with a list",
+                  "Using the yield keyword",
+                  "Inheriting from Generator",
+                  "Using async/await"
+                ],
                 "correctAnswer": "B",
                 "hint": "Generators produce values one at a time.",
                 "codeSnippet": null,
@@ -509,7 +590,12 @@
                 "id": "eq_wdev_beg_01_01",
                 "question": "Which keyword declares a block-scoped variable in modern JavaScript?",
                 "questionType": "multiple_choice",
-                "options": ["var", "let", "define", "local"],
+                "options": [
+                  "var",
+                  "let",
+                  "define",
+                  "local"
+                ],
                 "correctAnswer": "B",
                 "hint": "Introduced in ES6, it replaced var for most use cases.",
                 "codeSnippet": null,
@@ -520,7 +606,12 @@
                 "id": "eq_wdev_beg_01_02",
                 "question": "What does === check in JavaScript?",
                 "questionType": "multiple_choice",
-                "options": ["Value only", "Type only", "Both value and type (strict equality)", "Reference equality"],
+                "options": [
+                  "Value only",
+                  "Type only",
+                  "Both value and type (strict equality)",
+                  "Reference equality"
+                ],
                 "correctAnswer": "C",
                 "hint": "It is stricter than ==.",
                 "codeSnippet": null,
@@ -546,7 +637,13 @@
                 "correctAnswer": "",
                 "hint": "Declare the function before calling it.",
                 "codeSnippet": null,
-                "codeLines": ["function square(n) {", "  return n * n;", "}", "const result = square(5);", "console.log(result);"],
+                "codeLines": [
+                  "function square(n) {",
+                  "  return n * n;",
+                  "}",
+                  "const result = square(5);",
+                  "console.log(result);"
+                ],
                 "order": 3
               }
             ]
