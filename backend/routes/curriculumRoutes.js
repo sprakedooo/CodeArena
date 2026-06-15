@@ -442,12 +442,22 @@ router.post('/:cid/units/:uid/submit-eval', authMiddleware, (req, res) => {
     const questions = unit.evalQuestions || [];
     let correct = 0;
     const results = questions.map(q => {
-        const submitted = String(answers[q.id] || '').trim().toLowerCase();
-        const expected  = String(q.correctAnswer || '').trim().toLowerCase();
-        // Also accept just the letter if correctAnswer is "A) some text"
-        const expectedLetter = expected.match(/^([a-d])[).]?\s*/i)?.[1]?.toLowerCase() || expected;
-        const isCorrect = submitted === expected || submitted === expectedLetter ||
-                          submitted === expected.replace(/^[a-d][).]\s*/i,'');
+        let isCorrect = false;
+
+        if (q.questionType === 'code_ordering') {
+            const submittedArr = Array.isArray(answers[q.id]) ? answers[q.id] : [];
+            const expectedArr  = Array.isArray(q.codeLines) ? q.codeLines : [];
+            isCorrect = submittedArr.length === expectedArr.length &&
+                        submittedArr.every((line, i) => line === expectedArr[i]);
+        } else {
+            const submitted = String(answers[q.id] || '').trim().toLowerCase();
+            const expected  = String(q.correctAnswer || '').trim().toLowerCase();
+            // Also accept just the letter if correctAnswer is "A) some text"
+            const expectedLetter = expected.match(/^([a-d])[).]?\s*/i)?.[1]?.toLowerCase() || expected;
+            isCorrect = submitted === expected || submitted === expectedLetter ||
+                        submitted === expected.replace(/^[a-d][).]\s*/i,'');
+        }
+
         if (isCorrect) correct++;
         return { questionId: q.id, correct: isCorrect, correctAnswer: q.correctAnswer };
     });

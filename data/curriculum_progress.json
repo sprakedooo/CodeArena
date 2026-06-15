@@ -43,10 +43,10 @@
       "topic_py101_beg_01_03"
     ],
     "contentCompleted": true,
-    "attempts": 2,
+    "attempts": 4,
     "evalScore": 100,
     "evalPassed": true,
-    "completedAt": "2026-06-11T00:36:39.639Z"
+    "completedAt": "2026-06-15T01:29:39.700Z"
   },
   "2_unit_py101_beg_02": {
     "completedTopics": [
@@ -66,6 +66,10 @@
       "topic_py101_beg_03_02",
       "topic_py101_beg_03_03"
     ],
-    "contentCompleted": true
+    "contentCompleted": true,
+    "attempts": 3,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-15T01:29:23.784Z"
   }
 }

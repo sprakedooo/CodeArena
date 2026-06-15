@@ -1085,15 +1085,18 @@ function resolveCorrectAnswer(q) {
     const type = q.questionType || 'multiple_choice';
     if (type !== 'multiple_choice') return raw; // fill_blank / output_prediction use raw text
 
-    // If it's a single letter A–D, find the matching option text
     if (/^[A-D]$/i.test(raw)) {
         const opts = q.options || q.choices || [];
         const letter = raw.toUpperCase();
-        const match = opts.find(o => {
+        // Check if options carry their own prefix like "A) …"
+        const prefixed = opts.find(o => {
             const s = String(o).trim().toUpperCase();
             return s.startsWith(letter + ')') || s.startsWith(letter + '.') || s.startsWith(letter + ' ');
         });
-        if (match) return String(match);
+        if (prefixed) return String(prefixed);
+        // Otherwise map letter to 0-based index in the ORIGINAL (unshuffled) options array
+        const idx = letter.charCodeAt(0) - 65; // A→0, B→1, C→2, D→3
+        if (opts[idx] !== undefined) return String(opts[idx]);
     }
     return raw;
 }

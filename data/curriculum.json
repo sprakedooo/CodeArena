@@ -69,14 +69,14 @@
               {
                 "id": "eq_py101_beg_01_03",
                 "question": "What will the following code print?",
-                "questionType": "output_prediction",
+                "questionType": "multiple_choice",
                 "options": [
                   "8",
                   "10",
                   "9",
                   "11"
                 ],
-                "correctAnswer": "A",
+                "correctAnswer": "B",
                 "hint": "Evaluate the arithmetic expression inside print().",
                 "codeSnippet": "print(3 + 7)",
                 "codeLines": [],
@@ -526,9 +526,14 @@
               {
                 "id": "eq_py101_adv_01_02",
                 "question": "What is the output of the following code?",
-                "questionType": "output_prediction",
-                "options": [],
-                "correctAnswer": "Before\nHello\nAfter",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Before / Hello / After",
+                  "Hello / Before / After",
+                  "After / Hello / Before",
+                  "Hello only"
+                ],
+                "correctAnswer": "A",
                 "hint": "Trace what the decorator wraps around the original call.",
                 "codeSnippet": "def deco(fn):\n    def wrapper():\n        print(\"Before\")\n        fn()\n        print(\"After\")\n    return wrapper\n\n@deco\ndef say_hello():\n    print(\"Hello\")\n\nsay_hello()",
                 "codeLines": [],
