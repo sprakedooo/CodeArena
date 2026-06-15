@@ -53,6 +53,17 @@
         .diff-btn.locked .lock-badge { display: block; }
         .diff-btn.locked .diff-sub { color: #f59e0b; font-size: 0.6rem; }
 
+        .diff-btn.done       { cursor: not-allowed; border-color: #10b981; background: rgba(16,185,129,0.08); position: relative; }
+        .diff-btn.done:hover { border-color: #10b981; background: rgba(16,185,129,0.08); }
+        .diff-btn.done .diff-name { color: #10b981; }
+        .diff-btn .done-badge {
+            display: none;
+            position: absolute; top: 5px; right: 6px;
+            font-size: 0.65rem; font-weight: 700; color: #10b981;
+        }
+        .diff-btn.done .done-badge { display: block; }
+        .diff-btn.done .diff-sub   { color: #10b981; font-size: 0.6rem; font-weight: 600; }
+
         /* ── Certificate callout ──────────────────────────────────────────── */
         .cert-callout {
             display: flex; align-items: flex-start; gap: 0.85rem;
@@ -500,18 +511,21 @@
                 <label>Difficulty</label>
                 <div class="difficulty-grid">
                     <button class="diff-btn active" data-level="beginner" onclick="selectDiff(this)">
+                        <span class="material-symbols-outlined done-badge">check_circle</span>
                         <span class="diff-icon material-symbols-outlined">eco</span>
                         <div class="diff-name">Beginner</div>
-                        <div class="diff-sub">Foundation</div>
+                        <div class="diff-sub" id="diffSubBeginner">Foundation</div>
                     </button>
                     <button class="diff-btn" data-level="intermediate" onclick="selectDiff(this)">
                         <span class="material-symbols-outlined lock-badge">lock</span>
+                        <span class="material-symbols-outlined done-badge">check_circle</span>
                         <span class="diff-icon material-symbols-outlined">bolt</span>
                         <div class="diff-name">Intermediate</div>
                         <div class="diff-sub" id="diffSubIntermediate">Challenge</div>
                     </button>
                     <button class="diff-btn" data-level="advanced" onclick="selectDiff(this)">
                         <span class="material-symbols-outlined lock-badge">lock</span>
+                        <span class="material-symbols-outlined done-badge">check_circle</span>
                         <span class="diff-icon material-symbols-outlined">local_fire_department</span>
                         <div class="diff-name">Advanced</div>
                         <div class="diff-sub" id="diffSubAdvanced">Expert</div>
@@ -923,6 +937,10 @@ function handleKeyboard(e) {
 }
 
 function selectDiff(btn) {
+    if (btn.classList.contains('done')) {
+        showLockToast('You have already completed this level. Check your Profile for the certificate.');
+        return;
+    }
     if (btn.classList.contains('locked')) {
         const msg = btn.dataset.level === 'intermediate'
             ? 'Pass the Beginner assessment first to unlock Intermediate.'
@@ -982,37 +1000,67 @@ async function loadServerMastery(lang) {
 function updateDiffLocks(lang) {
     const passedBeginner     = hasPassed(lang, 'beginner');
     const passedIntermediate = hasPassed(lang, 'intermediate');
+    const passedAdvanced     = hasPassed(lang, 'advanced');
 
+    const btnBeg   = document.querySelector('.diff-btn[data-level="beginner"]');
     const btnInter = document.querySelector('.diff-btn[data-level="intermediate"]');
     const btnAdv   = document.querySelector('.diff-btn[data-level="advanced"]');
+    const subBeg   = document.getElementById('diffSubBeginner');
     const subInter = document.getElementById('diffSubIntermediate');
     const subAdv   = document.getElementById('diffSubAdvanced');
 
+    // Beginner
+    if (passedBeginner) {
+        btnBeg.classList.add('done');
+        btnBeg.classList.remove('active');
+        if (subBeg) subBeg.textContent = 'Completed ✓';
+    } else {
+        btnBeg.classList.remove('done');
+        if (subBeg) subBeg.textContent = 'Foundation';
+    }
+
     // Intermediate
-    if (!passedBeginner) {
+    if (passedIntermediate) {
+        btnInter.classList.add('done');
+        btnInter.classList.remove('locked', 'active');
+        if (subInter) subInter.textContent = 'Completed ✓';
+    } else if (!passedBeginner) {
         btnInter.classList.add('locked');
+        btnInter.classList.remove('done');
         if (subInter) subInter.textContent = 'Pass Beginner first';
-        // If it was selected, reset selection to beginner
         if (btnInter.classList.contains('active')) {
             btnInter.classList.remove('active');
-            document.querySelector('.diff-btn[data-level="beginner"]').classList.add('active');
+            if (!passedBeginner) btnBeg.classList.add('active');
         }
     } else {
-        btnInter.classList.remove('locked');
+        btnInter.classList.remove('locked', 'done');
         if (subInter) subInter.textContent = 'Challenge';
     }
 
     // Advanced
-    if (!passedIntermediate) {
+    if (passedAdvanced) {
+        btnAdv.classList.add('done');
+        btnAdv.classList.remove('locked', 'active');
+        if (subAdv) subAdv.textContent = 'Completed ✓';
+    } else if (!passedIntermediate) {
         btnAdv.classList.add('locked');
+        btnAdv.classList.remove('done');
         if (subAdv) subAdv.textContent = 'Pass Intermediate first';
         if (btnAdv.classList.contains('active')) {
             btnAdv.classList.remove('active');
-            document.querySelector('.diff-btn[data-level="beginner"]').classList.add('active');
+            if (!passedBeginner) btnBeg.classList.add('active');
         }
     } else {
-        btnAdv.classList.remove('locked');
+        btnAdv.classList.remove('locked', 'done');
         if (subAdv) subAdv.textContent = 'Expert';
+    }
+
+    // If all done levels are consumed, ensure one valid level is selected
+    const anyActive = document.querySelector('.diff-btn.active');
+    if (!anyActive) {
+        // Pick the first non-done, non-locked level
+        const next = document.querySelector('.diff-btn:not(.done):not(.locked)');
+        if (next) next.classList.add('active');
     }
 }
 
