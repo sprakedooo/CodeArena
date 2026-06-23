@@ -6,81 +6,7 @@
         "name": "Beginner",
         "order": 0,
         "locked": true,
-        "units": [
-          {
-            "id": "unit_1781046596019_i0lf8",
-            "title": "Data Types",
-            "order": 0,
-            "passScore": 70,
-            "topics": [
-              {
-                "id": "topic_1781046614598_h8uay",
-                "title": "fewfwefwf",
-                "content": "fwfewfweafe\n<code>fewfe</code>\nwfwefwe\n<h3>fwefwef</h3>\n<p>wfwefwefwewfwwwfwe\nfwefwefewf\nfwefwefewfwe</p>\n<h3>wfwefew</h3>\n\n<pre data-lang=\"python\"><code>wefwefwefwe</code></pre>\n",
-                "order": 0
-              },
-              {
-                "id": "topic_1781046621785_f269t",
-                "title": "fweafwa",
-                "content": "wefwafawfweaf",
-                "order": 1
-              },
-              {
-                "id": "topic_1781046626942_gzqna",
-                "title": "fawefweaf",
-                "content": "ewfwaefwfwf",
-                "order": 2
-              }
-            ],
-            "evalQuestions": [
-              {
-                "id": "q_1781046683202_uehxm",
-                "question": "fwefwafewfw3",
-                "questionType": "multiple_choice",
-                "options": [
-                  "fwefwe"
-                ],
-                "correctAnswer": "fwefwe",
-                "hint": "",
-                "codeSnippet": null,
-                "codeLines": [],
-                "order": 0
-              }
-            ]
-          },
-          {
-            "id": "unit_1781046928915_01jrd",
-            "title": "gwegwe",
-            "order": 1,
-            "passScore": 70,
-            "topics": [
-              {
-                "id": "topic_1781048371351_vzjdd",
-                "title": "wfwefwef",
-                "content": "<h3>wfwfwewfw</h3>\n\n<pre data-lang=\"python\"><code>print(\"Hello World!\")</code></pre>\n",
-                "order": 0
-              }
-            ],
-            "evalQuestions": [
-              {
-                "id": "q_1781048608965_jlt9c",
-                "question": "fwefwefwea",
-                "questionType": "multiple_choice",
-                "options": [
-                  "A fwefewfew",
-                  "B)",
-                  "C)",
-                  "D)"
-                ],
-                "correctAnswer": "A fwefewfew",
-                "hint": "",
-                "codeSnippet": null,
-                "codeLines": null,
-                "order": 0
-              }
-            ]
-          }
-        ]
+        "units": []
       },
       {
         "id": "lvl_1781045981131_wx6e4",
@@ -96,6 +22,1097 @@
         "locked": true,
         "units": []
       }
-    ]
+    ],
+    "language": "python"
+  },
+  "4": {
+    "levels": [
+      {
+        "id": "lvl_4_beg",
+        "name": "Beginner",
+        "order": 0,
+        "locked": false,
+        "units": [
+          {
+            "id": "unit_4_b1",
+            "title": "Introduction to Python",
+            "order": 0,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_b1_1",
+                "title": "What is Python?",
+                "order": 0,
+                "content": "<h3>What is Python?</h3>\n<p>Python is a high-level, interpreted programming language known for its simple and readable syntax. It was created by <strong>Guido van Rossum</strong> and first released in 1991.</p>\n<p>Python is used in many fields:</p>\n<ul>\n  <li>🌐 Web development (Django, Flask)</li>\n  <li>🤖 Artificial Intelligence &amp; Machine Learning</li>\n  <li>📊 Data Science &amp; Analytics</li>\n  <li>🔧 Automation &amp; Scripting</li>\n  <li>🎮 Game Development</li>\n</ul>\n<h3>Why Python?</h3>\n<p>Python's philosophy emphasizes <em>code readability</em>. Compare a simple greeting in different languages:</p>\n<pre data-lang=\"python\"><code># Python — clean and simple\nprint(\"Hello, World!\")</code></pre>\n<p>Python reads almost like plain English, making it one of the best languages for beginners.</p>"
+              },
+              {
+                "id": "topic_4_b1_2",
+                "title": "Your First Python Program",
+                "order": 1,
+                "content": "<h3>Hello, World!</h3>\n<p>Every programming journey starts with a \"Hello, World!\" program. In Python, it's just one line:</p>\n<pre data-lang=\"python\"><code>print(\"Hello, World!\")</code></pre>\n<p>The <code>print()</code> function outputs text to the screen. You can print any text by placing it inside the parentheses, enclosed in quotes.</p>\n<h3>Try More Examples</h3>\n<pre data-lang=\"python\"><code>print(\"My name is Python!\")\nprint(\"I am learning to code.\")\nprint(\"2 + 2 =\", 2 + 2)</code></pre>\n<p><strong>Output:</strong></p>\n<pre data-lang=\"python\"><code>My name is Python!\nI am learning to code.\n2 + 2 = 4</code></pre>\n<h3>Comments</h3>\n<p>Comments are notes in your code that Python ignores. Use the <code>#</code> symbol:</p>\n<pre data-lang=\"python\"><code># This is a comment — Python ignores it\nprint(\"This runs!\")  # You can also comment after code</code></pre>"
+              },
+              {
+                "id": "topic_4_b1_3",
+                "title": "Python Syntax Basics",
+                "order": 2,
+                "content": "<h3>Indentation</h3>\n<p>Python uses <strong>indentation</strong> (spaces or tabs) to define code blocks. This is mandatory — unlike other languages that use curly braces.</p>\n<pre data-lang=\"python\"><code># Correct indentation\nif True:\n    print(\"This is indented correctly\")\n    print(\"Same block\")\n\n# Wrong — will cause an IndentationError\nif True:\nprint(\"This will fail\")  # Missing indent!</code></pre>\n<h3>Case Sensitivity</h3>\n<p>Python is case-sensitive. <code>name</code>, <code>Name</code>, and <code>NAME</code> are three different variables.</p>\n<pre data-lang=\"python\"><code>name = \"Alice\"\nName = \"Bob\"\nprint(name)  # Alice\nprint(Name)  # Bob</code></pre>\n<h3>Line Endings</h3>\n<p>Each statement in Python goes on its own line. You don't need semicolons (though they're allowed).</p>\n<pre data-lang=\"python\"><code>x = 5\ny = 10\nz = x + y\nprint(z)  # 15</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_b1_1",
+                "question": "Which function is used to display output in Python?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "print()",
+                  "output()",
+                  "display()",
+                  "echo()"
+                ],
+                "correctAnswer": "print()",
+                "order": 0
+              },
+              {
+                "id": "eq_4_b1_2",
+                "question": "What symbol is used to write a comment in Python?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "#",
+                  "//",
+                  "/*",
+                  "--"
+                ],
+                "correctAnswer": "#",
+                "order": 1
+              },
+              {
+                "id": "eq_4_b1_3",
+                "question": "Python was created by ___.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "Guido van Rossum",
+                "order": 2
+              },
+              {
+                "id": "eq_4_b1_4",
+                "question": "What will `print(2 + 3)` output?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "5",
+                  "2 + 3",
+                  "23",
+                  "Error"
+                ],
+                "correctAnswer": "5",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_b2",
+            "title": "Variables & Data Types",
+            "order": 1,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_b2_1",
+                "title": "Variables",
+                "order": 0,
+                "content": "<h3>What is a Variable?</h3>\n<p>A variable is a named container that stores a value. Think of it as a labeled box that holds data.</p>\n<pre data-lang=\"python\"><code>name = \"Alice\"      # Stores a string\nage  = 20           # Stores an integer\nheight = 5.6        # Stores a decimal number\nis_student = True   # Stores a boolean</code></pre>\n<h3>Variable Naming Rules</h3>\n<ul>\n  <li>Must start with a letter or underscore (<code>_</code>)</li>\n  <li>Can contain letters, numbers, and underscores</li>\n  <li>Cannot use reserved keywords (<code>if</code>, <code>for</code>, <code>while</code>, etc.)</li>\n  <li>Case-sensitive: <code>score</code> ≠ <code>Score</code></li>\n</ul>\n<pre data-lang=\"python\"><code># Good variable names\nstudent_name = \"Bob\"\n_private_var = 42\ntotalScore = 95\n\n# Bad variable names (will cause errors)\n2fast = 100      # starts with a number\nmy-var = \"hi\"   # hyphens not allowed</code></pre>"
+              },
+              {
+                "id": "topic_4_b2_2",
+                "title": "Data Types",
+                "order": 1,
+                "content": "<h3>Python's Core Data Types</h3>\n<p>Python has several built-in data types. The most common ones are:</p>\n<ul>\n  <li><strong>int</strong> — whole numbers: <code>5</code>, <code>-3</code>, <code>100</code></li>\n  <li><strong>float</strong> — decimal numbers: <code>3.14</code>, <code>-0.5</code></li>\n  <li><strong>str</strong> — text (strings): <code>\"hello\"</code>, <code>'Python'</code></li>\n  <li><strong>bool</strong> — True or False</li>\n</ul>\n<pre data-lang=\"python\"><code>x = 42          # int\ny = 3.14        # float\nz = \"Python\"    # str\nflag = True     # bool\n\n# Check the type\nprint(type(x))    # &lt;class 'int'&gt;\nprint(type(y))    # &lt;class 'float'&gt;\nprint(type(z))    # &lt;class 'str'&gt;\nprint(type(flag)) # &lt;class 'bool'&gt;</code></pre>"
+              },
+              {
+                "id": "topic_4_b2_3",
+                "title": "Type Conversion",
+                "order": 2,
+                "content": "<h3>Converting Between Types</h3>\n<p>You can convert one data type to another using built-in functions:</p>\n<ul>\n  <li><code>int()</code> — converts to integer</li>\n  <li><code>float()</code> — converts to float</li>\n  <li><code>str()</code> — converts to string</li>\n  <li><code>bool()</code> — converts to boolean</li>\n</ul>\n<pre data-lang=\"python\"><code>x = \"42\"          # This is a string\ny = int(x)        # Now it's an integer: 42\nz = float(x)      # Now it's a float: 42.0\nw = str(100)      # Now it's a string: \"100\"\n\nprint(y + 8)      # 50  (math works now!)\nprint(w + \" pts\") # \"100 pts\"</code></pre>\n<h3>Common Mistake</h3>\n<pre data-lang=\"python\"><code>age = input(\"Enter your age: \")  # input() always returns a string!\nage = int(age)                    # Convert to int before doing math\nnext_year = age + 1\nprint(\"Next year you'll be\", next_year)</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_b2_1",
+                "question": "Which data type would store the value 3.14?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "float",
+                  "int",
+                  "str",
+                  "bool"
+                ],
+                "correctAnswer": "float",
+                "order": 0
+              },
+              {
+                "id": "eq_4_b2_2",
+                "question": "What does `type(True)` return?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "<class 'bool'>",
+                  "<class 'int'>",
+                  "<class 'str'>",
+                  "<class 'true'>"
+                ],
+                "correctAnswer": "<class 'bool'>",
+                "order": 1
+              },
+              {
+                "id": "eq_4_b2_3",
+                "question": "What will `int(\"7\") + 3` evaluate to?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "10",
+                  "73",
+                  "Error",
+                  "\"73\""
+                ],
+                "correctAnswer": "10",
+                "order": 2
+              },
+              {
+                "id": "eq_4_b2_4",
+                "question": "What function is used to convert a value to a string?",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "str()",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_b3",
+            "title": "Operators",
+            "order": 2,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_b3_1",
+                "title": "Arithmetic Operators",
+                "order": 0,
+                "content": "<h3>Arithmetic Operators</h3>\n<p>Python supports all standard arithmetic operations:</p>\n<pre data-lang=\"python\"><code>a = 10\nb = 3\n\nprint(a + b)   # 13  — Addition\nprint(a - b)   # 7   — Subtraction\nprint(a * b)   # 30  — Multiplication\nprint(a / b)   # 3.333... — Division (always float)\nprint(a // b)  # 3   — Floor Division (integer result)\nprint(a % b)   # 1   — Modulus (remainder)\nprint(a ** b)  # 1000 — Exponentiation (10³)</code></pre>\n<h3>Order of Operations</h3>\n<p>Python follows standard math rules (PEMDAS): Parentheses → Exponents → Multiply/Divide → Add/Subtract.</p>\n<pre data-lang=\"python\"><code>result = 2 + 3 * 4      # 14  (not 20)\nresult = (2 + 3) * 4   # 20  (parentheses first)</code></pre>"
+              },
+              {
+                "id": "topic_4_b3_2",
+                "title": "Comparison & Logical Operators",
+                "order": 1,
+                "content": "<h3>Comparison Operators</h3>\n<p>These operators compare two values and return <code>True</code> or <code>False</code>:</p>\n<pre data-lang=\"python\"><code>x = 10\ny = 5\n\nprint(x == y)  # False — Equal to\nprint(x != y)  # True  — Not equal to\nprint(x > y)   # True  — Greater than\nprint(x < y)   # False — Less than\nprint(x >= 10) # True  — Greater than or equal\nprint(x <= 10) # True  — Less than or equal</code></pre>\n<h3>Logical Operators</h3>\n<p>Combine multiple conditions:</p>\n<pre data-lang=\"python\"><code>age = 20\nhas_id = True\n\n# and — both must be True\nprint(age >= 18 and has_id)  # True\n\n# or — at least one must be True\nprint(age < 18 or has_id)    # True\n\n# not — reverses True/False\nprint(not has_id)             # False</code></pre>"
+              },
+              {
+                "id": "topic_4_b3_3",
+                "title": "Assignment Operators",
+                "order": 2,
+                "content": "<h3>Assignment Operators</h3>\n<p>Beyond simple <code>=</code>, Python has shorthand assignment operators:</p>\n<pre data-lang=\"python\"><code>score = 100\n\nscore += 10   # score = score + 10  → 110\nscore -= 5    # score = score - 5   → 105\nscore *= 2    # score = score * 2   → 210\nscore //= 3   # score = score // 3  → 70\nscore **= 2   # score = score ** 2  → 4900\nscore %= 100  # score = score % 100 → 0\n\nprint(score)  # 0</code></pre>\n<p>These are useful for updating counters and accumulators:</p>\n<pre data-lang=\"python\"><code>total = 0\ntotal += 10   # Add 10\ntotal += 20   # Add 20\ntotal += 30   # Add 30\nprint(total)  # 60</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_b3_1",
+                "question": "What does `10 % 3` evaluate to?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "1",
+                  "3",
+                  "0",
+                  "3.33"
+                ],
+                "correctAnswer": "1",
+                "order": 0
+              },
+              {
+                "id": "eq_4_b3_2",
+                "question": "What is `2 ** 4`?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "16",
+                  "8",
+                  "6",
+                  "24"
+                ],
+                "correctAnswer": "16",
+                "order": 1
+              },
+              {
+                "id": "eq_4_b3_3",
+                "question": "What does `x += 5` mean?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "x = x + 5",
+                  "x = 5 + x + 5",
+                  "x = 5",
+                  "x = x - 5"
+                ],
+                "correctAnswer": "x = x + 5",
+                "order": 2
+              },
+              {
+                "id": "eq_4_b3_4",
+                "question": "Which operator checks if two values are equal?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "==",
+                  "=",
+                  "!=",
+                  ">="
+                ],
+                "correctAnswer": "==",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_b4",
+            "title": "Control Flow",
+            "order": 3,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_b4_1",
+                "title": "if Statements",
+                "order": 0,
+                "content": "<h3>Making Decisions with if</h3>\n<p>The <code>if</code> statement lets your program make decisions based on conditions:</p>\n<pre data-lang=\"python\"><code>temperature = 35\n\nif temperature > 30:\n    print(\"It's hot today!\")\n    print(\"Wear sunscreen.\")</code></pre>\n<p>The code inside the <code>if</code> block runs <em>only if</em> the condition is <code>True</code>.</p>\n<h3>if-else</h3>\n<p>Use <code>else</code> to handle the case when the condition is <code>False</code>:</p>\n<pre data-lang=\"python\"><code>score = 65\n\nif score >= 70:\n    print(\"You passed!\")\nelse:\n    print(\"You need more practice.\")</code></pre>"
+              },
+              {
+                "id": "topic_4_b4_2",
+                "title": "elif — Multiple Conditions",
+                "order": 1,
+                "content": "<h3>elif — Else If</h3>\n<p>Use <code>elif</code> to check multiple conditions in sequence:</p>\n<pre data-lang=\"python\"><code>grade = 85\n\nif grade >= 90:\n    print(\"A — Excellent!\")\nelif grade >= 80:\n    print(\"B — Great job!\")\nelif grade >= 70:\n    print(\"C — Good work.\")\nelif grade >= 60:\n    print(\"D — Needs improvement.\")\nelse:\n    print(\"F — Please see your teacher.\")</code></pre>\n<p>Python checks each condition from top to bottom and runs the <strong>first</strong> block whose condition is True.</p>\n<h3>Nested if Statements</h3>\n<pre data-lang=\"python\"><code>age = 20\nhas_ticket = True\n\nif age >= 18:\n    if has_ticket:\n        print(\"You may enter.\")\n    else:\n        print(\"You need a ticket.\")\nelse:\n    print(\"You must be 18 or older.\")</code></pre>"
+              },
+              {
+                "id": "topic_4_b4_3",
+                "title": "One-Line Conditions (Ternary)",
+                "order": 2,
+                "content": "<h3>Inline if Expression</h3>\n<p>Python has a concise one-line way to write simple if-else:</p>\n<pre data-lang=\"python\"><code># Standard way\nif score >= 70:\n    result = \"Pass\"\nelse:\n    result = \"Fail\"\n\n# One-liner (ternary expression)\nresult = \"Pass\" if score >= 70 else \"Fail\"\nprint(result)</code></pre>\n<h3>Practical Examples</h3>\n<pre data-lang=\"python\"><code>age = 17\nstatus = \"adult\" if age >= 18 else \"minor\"\nprint(status)  # minor\n\n# Check even or odd\nnumber = 7\nparity = \"even\" if number % 2 == 0 else \"odd\"\nprint(parity)  # odd</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_b4_1",
+                "question": "What keyword is used for a secondary condition check after `if`?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "elif",
+                  "elseif",
+                  "else if",
+                  "ifelse"
+                ],
+                "correctAnswer": "elif",
+                "order": 0
+              },
+              {
+                "id": "eq_4_b4_2",
+                "question": "What will this print?\n```\nx = 10\nif x > 5:\n    print(\"big\")\nelse:\n    print(\"small\")\n```",
+                "questionType": "multiple_choice",
+                "options": [
+                  "big",
+                  "small",
+                  "Error",
+                  "Nothing"
+                ],
+                "correctAnswer": "big",
+                "order": 1
+              },
+              {
+                "id": "eq_4_b4_3",
+                "question": "What does `\"even\" if n % 2 == 0 else \"odd\"` evaluate to when n = 4?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "even",
+                  "odd",
+                  "4",
+                  "True"
+                ],
+                "correctAnswer": "even",
+                "order": 2
+              },
+              {
+                "id": "eq_4_b4_4",
+                "question": "In Python, indentation inside an `if` block is ___.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "mandatory",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_b5",
+            "title": "Loops",
+            "order": 4,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_b5_1",
+                "title": "while Loop",
+                "order": 0,
+                "content": "<h3>The while Loop</h3>\n<p>A <code>while</code> loop repeats a block of code as long as a condition is <code>True</code>:</p>\n<pre data-lang=\"python\"><code>count = 1\n\nwhile count <= 5:\n    print(count)\n    count += 1\n\n# Output: 1 2 3 4 5</code></pre>\n<h3>Avoiding Infinite Loops</h3>\n<p>Always make sure your condition will eventually become <code>False</code>, or your loop will run forever!</p>\n<pre data-lang=\"python\"><code># Safe: count increases each iteration\ncount = 0\nwhile count < 3:\n    print(\"Running...\")\n    count += 1  # Without this, it loops forever!</code></pre>\n<h3>break and continue</h3>\n<pre data-lang=\"python\"><code>i = 0\nwhile True:\n    i += 1\n    if i == 3:\n        continue  # Skip 3\n    if i > 5:\n        break     # Stop at 6\n    print(i)      # Prints: 1 2 4 5</code></pre>"
+              },
+              {
+                "id": "topic_4_b5_2",
+                "title": "for Loop & range()",
+                "order": 1,
+                "content": "<h3>The for Loop</h3>\n<p>A <code>for</code> loop iterates over a sequence (list, string, range, etc.):</p>\n<pre data-lang=\"python\"><code># Loop over a range\nfor i in range(5):\n    print(i)  # 0 1 2 3 4\n\n# Loop over a list\nfruits = [\"apple\", \"banana\", \"cherry\"]\nfor fruit in fruits:\n    print(fruit)</code></pre>\n<h3>range() Function</h3>\n<pre data-lang=\"python\"><code>range(5)        # 0, 1, 2, 3, 4\nrange(1, 6)     # 1, 2, 3, 4, 5  (start, stop)\nrange(0, 10, 2) # 0, 2, 4, 6, 8  (start, stop, step)\nrange(10, 0, -2)# 10, 8, 6, 4, 2 (counting down)</code></pre>\n<h3>Loop with Index</h3>\n<pre data-lang=\"python\"><code>names = [\"Ana\", \"Ben\", \"Cara\"]\nfor i, name in enumerate(names):\n    print(f\"{i}: {name}\")\n# Output:\n# 0: Ana\n# 1: Ben\n# 2: Cara</code></pre>"
+              },
+              {
+                "id": "topic_4_b5_3",
+                "title": "Nested Loops",
+                "order": 2,
+                "content": "<h3>Loops Inside Loops</h3>\n<p>You can place one loop inside another. The inner loop completes all its iterations for each single iteration of the outer loop.</p>\n<pre data-lang=\"python\"><code>for i in range(1, 4):\n    for j in range(1, 4):\n        print(f\"{i} x {j} = {i * j}\")\n\n# Output:\n# 1 x 1 = 1\n# 1 x 2 = 2\n# 1 x 3 = 3\n# 2 x 1 = 2\n# ... and so on</code></pre>\n<h3>Multiplication Table</h3>\n<pre data-lang=\"python\"><code>for i in range(1, 6):\n    row = \"\"\n    for j in range(1, 6):\n        row += f\"{i * j:4}\"\n    print(row)</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_b5_1",
+                "question": "How many times does this loop run?\n```\nfor i in range(3):\n    print(i)\n```",
+                "questionType": "multiple_choice",
+                "options": [
+                  "3",
+                  "2",
+                  "4",
+                  "1"
+                ],
+                "correctAnswer": "3",
+                "order": 0
+              },
+              {
+                "id": "eq_4_b5_2",
+                "question": "What keyword immediately exits a loop?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "break",
+                  "exit",
+                  "stop",
+                  "end"
+                ],
+                "correctAnswer": "break",
+                "order": 1
+              },
+              {
+                "id": "eq_4_b5_3",
+                "question": "What does `range(2, 8, 2)` produce?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "2, 4, 6",
+                  "2, 4, 6, 8",
+                  "0, 2, 4, 6",
+                  "2, 3, 4, 5, 6, 7"
+                ],
+                "correctAnswer": "2, 4, 6",
+                "order": 2
+              },
+              {
+                "id": "eq_4_b5_4",
+                "question": "Which keyword skips the current iteration and moves to the next?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "continue",
+                  "skip",
+                  "pass",
+                  "next"
+                ],
+                "correctAnswer": "continue",
+                "order": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lvl_4_int",
+        "name": "Intermediate",
+        "order": 1,
+        "locked": true,
+        "units": [
+          {
+            "id": "unit_4_i1",
+            "title": "Functions",
+            "order": 0,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_i1_1",
+                "title": "Defining Functions",
+                "order": 0,
+                "content": "<h3>What is a Function?</h3>\n<p>A <strong>function</strong> is a reusable block of code that performs a specific task. Functions help you avoid repeating code and make your programs more organized.</p>\n<pre data-lang=\"python\"><code>def greet():\n    print(\"Hello, welcome!\")\n    print(\"Let's learn Python.\")\n\n# Call the function\ngreet()\ngreet()  # Can be called multiple times</code></pre>\n<h3>Functions with Parameters</h3>\n<pre data-lang=\"python\"><code>def greet(name):\n    print(f\"Hello, {name}!\")\n\ngreet(\"Alice\")  # Hello, Alice!\ngreet(\"Bob\")    # Hello, Bob!</code></pre>"
+              },
+              {
+                "id": "topic_4_i1_2",
+                "title": "Return Values",
+                "order": 1,
+                "content": "<h3>Returning Data from Functions</h3>\n<p>Functions can compute a value and <strong>return</strong> it to the caller using the <code>return</code> keyword:</p>\n<pre data-lang=\"python\"><code>def add(a, b):\n    return a + b\n\nresult = add(5, 3)\nprint(result)  # 8\n\n# You can use the return value directly\nprint(add(10, 20))  # 30</code></pre>\n<h3>Multiple Return Values</h3>\n<pre data-lang=\"python\"><code>def min_max(numbers):\n    return min(numbers), max(numbers)\n\nlo, hi = min_max([4, 1, 9, 2, 7])\nprint(lo, hi)  # 1 9</code></pre>\n<h3>Default Parameters</h3>\n<pre data-lang=\"python\"><code>def power(base, exponent=2):\n    return base ** exponent\n\nprint(power(3))     # 9  (uses default exponent)\nprint(power(3, 3))  # 27 (overrides default)</code></pre>"
+              },
+              {
+                "id": "topic_4_i1_3",
+                "title": "Scope — Local vs Global",
+                "order": 2,
+                "content": "<h3>Variable Scope</h3>\n<p><strong>Scope</strong> refers to where a variable can be accessed. Variables created inside a function are <em>local</em> — they only exist within that function.</p>\n<pre data-lang=\"python\"><code>def my_func():\n    local_var = 10      # Only accessible inside my_func\n    print(local_var)    # Works fine\n\nmy_func()\n# print(local_var)    # NameError! Not accessible here</code></pre>\n<h3>Global Variables</h3>\n<pre data-lang=\"python\"><code>counter = 0  # Global variable\n\ndef increment():\n    global counter     # Tell Python to use the global one\n    counter += 1\n\nincrement()\nincrement()\nprint(counter)  # 2</code></pre>\n<p>💡 Tip: Avoid overusing <code>global</code>. Prefer passing values as parameters and returning results.</p>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_i1_1",
+                "question": "What keyword defines a function in Python?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "def",
+                  "func",
+                  "function",
+                  "define"
+                ],
+                "correctAnswer": "def",
+                "order": 0
+              },
+              {
+                "id": "eq_4_i1_2",
+                "question": "What does this function return?\n```\ndef double(x):\n    return x * 2\ndouble(6)\n```",
+                "questionType": "multiple_choice",
+                "options": [
+                  "12",
+                  "6",
+                  "2",
+                  "None"
+                ],
+                "correctAnswer": "12",
+                "order": 1
+              },
+              {
+                "id": "eq_4_i1_3",
+                "question": "A variable created inside a function is called a ___ variable.",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "local",
+                "order": 2
+              },
+              {
+                "id": "eq_4_i1_4",
+                "question": "What keyword is used to send a value back from a function?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "return",
+                  "send",
+                  "output",
+                  "give"
+                ],
+                "correctAnswer": "return",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_i2",
+            "title": "Lists & Tuples",
+            "order": 1,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_i2_1",
+                "title": "Lists",
+                "order": 0,
+                "content": "<h3>Working with Lists</h3>\n<p>A <strong>list</strong> is an ordered, mutable collection of items. Lists can hold any data type.</p>\n<pre data-lang=\"python\"><code>fruits = [\"apple\", \"banana\", \"cherry\"]\nnumbers = [1, 2, 3, 4, 5]\nmixed = [42, \"hello\", True, 3.14]\n\n# Access by index (starts at 0)\nprint(fruits[0])   # apple\nprint(fruits[-1])  # cherry (last item)\n\n# Slicing\nprint(fruits[1:3]) # ['banana', 'cherry']</code></pre>\n<h3>Modifying Lists</h3>\n<pre data-lang=\"python\"><code>colors = [\"red\", \"green\", \"blue\"]\n\ncolors.append(\"yellow\")      # Add to end\ncolors.insert(1, \"orange\")   # Insert at index 1\ncolors.remove(\"green\")       # Remove by value\npopped = colors.pop()        # Remove and return last item\n\nprint(colors)\nprint(len(colors))  # Length of list</code></pre>"
+              },
+              {
+                "id": "topic_4_i2_2",
+                "title": "List Methods & Sorting",
+                "order": 1,
+                "content": "<h3>Useful List Methods</h3>\n<pre data-lang=\"python\"><code>nums = [3, 1, 4, 1, 5, 9, 2, 6]\n\nnums.sort()          # Sort in place: [1, 1, 2, 3, 4, 5, 6, 9]\nnums.reverse()       # Reverse in place\nprint(nums.count(1)) # Count occurrences: 2\nprint(nums.index(5)) # Find index of 5\nnums.clear()         # Empty the list</code></pre>\n<h3>List Comprehension Preview</h3>\n<pre data-lang=\"python\"><code># Traditional way\nsquares = []\nfor i in range(1, 6):\n    squares.append(i ** 2)\n\n# List comprehension (much cleaner)\nsquares = [i ** 2 for i in range(1, 6)]\nprint(squares)  # [1, 4, 9, 16, 25]</code></pre>"
+              },
+              {
+                "id": "topic_4_i2_3",
+                "title": "Tuples",
+                "order": 2,
+                "content": "<h3>What is a Tuple?</h3>\n<p>A <strong>tuple</strong> is like a list but <em>immutable</em> — you cannot change it after creation. Use parentheses <code>()</code>:</p>\n<pre data-lang=\"python\"><code>point = (3, 7)      # x, y coordinates\nrgb = (255, 128, 0) # Red, Green, Blue\nname_age = (\"Alice\", 25)\n\nprint(point[0])  # 3\nprint(len(rgb))  # 3\n\n# Tuples are immutable\n# point[0] = 10  # TypeError!</code></pre>\n<h3>When to Use Tuple vs List?</h3>\n<ul>\n  <li>Use <strong>tuples</strong> for fixed data (coordinates, RGB values, database records)</li>\n  <li>Use <strong>lists</strong> for data that needs to change (shopping cart, student roster)</li>\n</ul>\n<pre data-lang=\"python\"><code># Tuple unpacking\nx, y = (10, 20)\nprint(x)  # 10\nprint(y)  # 20</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_i2_1",
+                "question": "Which method adds an item to the end of a list?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "append()",
+                  "add()",
+                  "push()",
+                  "insert()"
+                ],
+                "correctAnswer": "append()",
+                "order": 0
+              },
+              {
+                "id": "eq_4_i2_2",
+                "question": "What is the index of the first element in a Python list?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "0",
+                  "1",
+                  "-1",
+                  "None"
+                ],
+                "correctAnswer": "0",
+                "order": 1
+              },
+              {
+                "id": "eq_4_i2_3",
+                "question": "What makes a tuple different from a list?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Tuples are immutable",
+                  "Tuples use square brackets",
+                  "Tuples can only hold numbers",
+                  "Tuples are faster to type"
+                ],
+                "correctAnswer": "Tuples are immutable",
+                "order": 2
+              },
+              {
+                "id": "eq_4_i2_4",
+                "question": "What does `nums[-1]` return?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "The last element",
+                  "The first element",
+                  "-1",
+                  "An error"
+                ],
+                "correctAnswer": "The last element",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_i3",
+            "title": "Dictionaries & Sets",
+            "order": 2,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_i3_1",
+                "title": "Dictionaries",
+                "order": 0,
+                "content": "<h3>Key-Value Storage</h3>\n<p>A <strong>dictionary</strong> stores data as <em>key-value pairs</em>. Keys must be unique and immutable (strings or numbers).</p>\n<pre data-lang=\"python\"><code>student = {\n    \"name\": \"Alice\",\n    \"age\": 20,\n    \"grade\": \"A\",\n    \"enrolled\": True\n}\n\n# Access values by key\nprint(student[\"name\"])    # Alice\nprint(student.get(\"age\")) # 20 (safer — returns None if missing)\n\n# Add / update\nstudent[\"score\"] = 95\nstudent[\"grade\"] = \"A+\"\n\n# Delete\ndel student[\"enrolled\"]</code></pre>"
+              },
+              {
+                "id": "topic_4_i3_2",
+                "title": "Dictionary Methods",
+                "order": 1,
+                "content": "<h3>Useful Dictionary Methods</h3>\n<pre data-lang=\"python\"><code>person = {\"name\": \"Bob\", \"age\": 30, \"city\": \"Manila\"}\n\nprint(person.keys())    # dict_keys(['name', 'age', 'city'])\nprint(person.values())  # dict_values(['Bob', 30, 'Manila'])\nprint(person.items())   # dict_items([('name', 'Bob'), ...])\n\n# Loop through a dictionary\nfor key, value in person.items():\n    print(f\"{key}: {value}\")</code></pre>\n<h3>Nested Dictionaries</h3>\n<pre data-lang=\"python\"><code>classroom = {\n    \"students\": {\n        \"Alice\": {\"score\": 90},\n        \"Bob\":   {\"score\": 85}\n    },\n    \"subject\": \"Python\"\n}\n\nprint(classroom[\"students\"][\"Alice\"][\"score\"])  # 90</code></pre>"
+              },
+              {
+                "id": "topic_4_i3_3",
+                "title": "Sets",
+                "order": 2,
+                "content": "<h3>What is a Set?</h3>\n<p>A <strong>set</strong> is an unordered collection of <em>unique</em> values. Sets automatically remove duplicates.</p>\n<pre data-lang=\"python\"><code>colors = {\"red\", \"green\", \"blue\", \"red\"}\nprint(colors)  # {'red', 'green', 'blue'} — no duplicate!\n\n# Add and remove\ncolors.add(\"yellow\")\ncolors.discard(\"green\")\n\n# Set operations\na = {1, 2, 3, 4}\nb = {3, 4, 5, 6}\n\nprint(a | b)  # Union:        {1, 2, 3, 4, 5, 6}\nprint(a & b)  # Intersection: {3, 4}\nprint(a - b)  # Difference:   {1, 2}</code></pre>\n<p>Sets are great for <strong>removing duplicates</strong> from a list:</p>\n<pre data-lang=\"python\"><code>names = [\"Ana\", \"Bob\", \"Ana\", \"Cara\", \"Bob\"]\nunique = list(set(names))\nprint(unique)  # ['Ana', 'Bob', 'Cara']</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_i3_1",
+                "question": "How do you access the value for key \"name\" in a dictionary `d`?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "d[\"name\"]",
+                  "d.name",
+                  "d(\"name\")",
+                  "d->name"
+                ],
+                "correctAnswer": "d[\"name\"]",
+                "order": 0
+              },
+              {
+                "id": "eq_4_i3_2",
+                "question": "What does a set guarantee about its elements?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "All elements are unique",
+                  "Elements are sorted",
+                  "Elements are immutable",
+                  "Elements are in insertion order"
+                ],
+                "correctAnswer": "All elements are unique",
+                "order": 1
+              },
+              {
+                "id": "eq_4_i3_3",
+                "question": "Which dictionary method returns all key-value pairs as tuples?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "items()",
+                  "pairs()",
+                  "tuples()",
+                  "entries()"
+                ],
+                "correctAnswer": "items()",
+                "order": 2
+              },
+              {
+                "id": "eq_4_i3_4",
+                "question": "What symbol is used for the intersection of two sets?",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "&",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_i4",
+            "title": "String Methods",
+            "order": 3,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_i4_1",
+                "title": "Common String Methods",
+                "order": 0,
+                "content": "<h3>String Manipulation</h3>\n<p>Strings in Python have many built-in methods for manipulation:</p>\n<pre data-lang=\"python\"><code>text = \"  Hello, Python World!  \"\n\nprint(text.strip())       # Remove leading/trailing spaces\nprint(text.lower())       # Convert to lowercase\nprint(text.upper())       # Convert to uppercase\nprint(text.title())       # Capitalize Each Word\nprint(text.replace(\"Python\", \"Amazing\"))  # Replace substring\nprint(text.count(\"l\"))    # Count occurrences: 3\nprint(text.find(\"Python\")) # Index of substring: 9</code></pre>\n<h3>Splitting and Joining</h3>\n<pre data-lang=\"python\"><code>sentence = \"the quick brown fox\"\nwords = sentence.split()  # Split by whitespace\nprint(words)              # ['the', 'quick', 'brown', 'fox']\n\njoined = \"-\".join(words)  # Join with separator\nprint(joined)             # the-quick-brown-fox</code></pre>"
+              },
+              {
+                "id": "topic_4_i4_2",
+                "title": "String Formatting",
+                "order": 1,
+                "content": "<h3>f-strings (Recommended)</h3>\n<p>f-strings let you embed expressions directly inside string literals:</p>\n<pre data-lang=\"python\"><code>name = \"Alice\"\nscore = 95.5\n\nprint(f\"Hello, {name}!\")\nprint(f\"Score: {score:.1f}%\")  # 1 decimal place\nprint(f\"2 + 2 = {2 + 2}\")\nprint(f\"Name length: {len(name)}\")</code></pre>\n<h3>Other Formatting Methods</h3>\n<pre data-lang=\"python\"><code># .format() method\nprint(\"Hello, {}! You scored {}\".format(name, score))\n\n# Named placeholders\nprint(\"{name} got {score}%\".format(name=\"Bob\", score=88))\n\n# Alignment and padding\nprint(f\"{name:>10}\")   # Right-aligned in 10 chars\nprint(f\"{score:08.2f}\") # Zero-padded float</code></pre>"
+              },
+              {
+                "id": "topic_4_i4_3",
+                "title": "String Slicing & Checking",
+                "order": 2,
+                "content": "<h3>Slicing Strings</h3>\n<p>You can extract parts of a string using slicing, just like lists:</p>\n<pre data-lang=\"python\"><code>text = \"Hello, World!\"\n\nprint(text[0:5])    # Hello\nprint(text[7:])     # World!\nprint(text[-6:])    # World!\nprint(text[::2])    # HloWrd  (every 2nd char)\nprint(text[::-1])   # !dlroW ,olleH (reversed)</code></pre>\n<h3>Checking String Content</h3>\n<pre data-lang=\"python\"><code>s = \"Python3\"\n\nprint(s.startswith(\"Py\"))  # True\nprint(s.endswith(\"3\"))     # True\nprint(\"on\" in s)            # True\nprint(s.isdigit())          # False\nprint(\"123\".isdigit())      # True\nprint(\"hello\".isalpha())    # True\nprint(\"Hello World\".isalnum())  # False (space!)</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_i4_1",
+                "question": "What does `\"hello\".upper()` return?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "HELLO",
+                  "Hello",
+                  "hello",
+                  "hELLO"
+                ],
+                "correctAnswer": "HELLO",
+                "order": 0
+              },
+              {
+                "id": "eq_4_i4_2",
+                "question": "Which f-string correctly embeds a variable `x = 5`?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "f\"Value: {x}\"",
+                  "\"Value: {x}\"",
+                  "f\"Value: x\"",
+                  "\"Value: \" + {x}"
+                ],
+                "correctAnswer": "f\"Value: {x}\"",
+                "order": 1
+              },
+              {
+                "id": "eq_4_i4_3",
+                "question": "What does `\"a,b,c\".split(\",\")` return?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "['a', 'b', 'c']",
+                  "'a b c'",
+                  "('a', 'b', 'c')",
+                  "{'a', 'b', 'c'}"
+                ],
+                "correctAnswer": "['a', 'b', 'c']",
+                "order": 2
+              },
+              {
+                "id": "eq_4_i4_4",
+                "question": "What does `text[::-1]` do to a string?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Reverses the string",
+                  "Returns the last character",
+                  "Sorts the string",
+                  "Removes spaces"
+                ],
+                "correctAnswer": "Reverses the string",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_i5",
+            "title": "File Handling",
+            "order": 4,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_i5_1",
+                "title": "Opening & Reading Files",
+                "order": 0,
+                "content": "<h3>Working with Files</h3>\n<p>Python makes it easy to read from and write to files using the built-in <code>open()</code> function.</p>\n<h3>Reading a File</h3>\n<pre data-lang=\"python\"><code># Open a file for reading ('r' is default mode)\nfile = open(\"data.txt\", \"r\")\ncontent = file.read()       # Read entire file\nprint(content)\nfile.close()                # Always close!\n\n# Read line by line\nfile = open(\"data.txt\", \"r\")\nfor line in file:\n    print(line.strip())\nfile.close()</code></pre>\n<h3>Read Methods</h3>\n<pre data-lang=\"python\"><code>f = open(\"notes.txt\", \"r\")\nall_text  = f.read()         # Entire file as one string\nfirst_line = f.readline()    # One line at a time\nall_lines = f.readlines()    # List of all lines\nf.close()</code></pre>"
+              },
+              {
+                "id": "topic_4_i5_2",
+                "title": "Writing Files & Context Manager",
+                "order": 1,
+                "content": "<h3>Writing to Files</h3>\n<pre data-lang=\"python\"><code># 'w' mode: creates or overwrites the file\nf = open(\"output.txt\", \"w\")\nf.write(\"Hello, File!\\n\")\nf.write(\"Second line.\\n\")\nf.close()\n\n# 'a' mode: append to existing file\nf = open(\"output.txt\", \"a\")\nf.write(\"Appended line.\\n\")\nf.close()</code></pre>\n<h3>The with Statement (Best Practice)</h3>\n<p>The <code>with</code> statement automatically closes the file — even if an error occurs:</p>\n<pre data-lang=\"python\"><code>with open(\"data.txt\", \"r\") as f:\n    content = f.read()\n    print(content)\n# File is automatically closed here\n\n# Writing with context manager\nwith open(\"result.txt\", \"w\") as f:\n    for i in range(5):\n        f.write(f\"Line {i + 1}\\n\")</code></pre>\n<p>💡 Always use <code>with</code> — it's cleaner and safer than manual <code>close()</code>.</p>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_i5_1",
+                "question": "Which mode opens a file for appending without deleting existing content?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "a",
+                  "w",
+                  "r",
+                  "rw"
+                ],
+                "correctAnswer": "a",
+                "order": 0
+              },
+              {
+                "id": "eq_4_i5_2",
+                "question": "What is the advantage of using `with open(...) as f`?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Automatically closes the file",
+                  "Reads faster",
+                  "Allows writing only",
+                  "Creates a backup"
+                ],
+                "correctAnswer": "Automatically closes the file",
+                "order": 1
+              },
+              {
+                "id": "eq_4_i5_3",
+                "question": "Which method reads all lines of a file and returns a list?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "readlines()",
+                  "readline()",
+                  "read()",
+                  "lines()"
+                ],
+                "correctAnswer": "readlines()",
+                "order": 2
+              },
+              {
+                "id": "eq_4_i5_4",
+                "question": "What mode do you use to overwrite a file completely?",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "w",
+                "order": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lvl_4_adv",
+        "name": "Advanced",
+        "order": 2,
+        "locked": true,
+        "units": [
+          {
+            "id": "unit_4_a1",
+            "title": "Object-Oriented Programming",
+            "order": 0,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_a1_1",
+                "title": "Classes & Objects",
+                "order": 0,
+                "content": "<h3>What is OOP?</h3>\n<p>Object-Oriented Programming (OOP) organizes code around <strong>objects</strong> — real-world entities that have <em>attributes</em> (data) and <em>methods</em> (behavior).</p>\n<pre data-lang=\"python\"><code>class Dog:\n    # Class attribute (shared by all instances)\n    species = \"Canis familiaris\"\n\n    # Constructor method\n    def __init__(self, name, age):\n        self.name = name    # Instance attribute\n        self.age  = age\n\n    # Method\n    def bark(self):\n        return f\"{self.name} says: Woof!\"\n\n# Create objects (instances)\ndog1 = Dog(\"Rex\", 3)\ndog2 = Dog(\"Bella\", 5)\n\nprint(dog1.bark())     # Rex says: Woof!\nprint(dog2.name)       # Bella\nprint(Dog.species)     # Canis familiaris</code></pre>"
+              },
+              {
+                "id": "topic_4_a1_2",
+                "title": "Inheritance",
+                "order": 1,
+                "content": "<h3>Inheritance</h3>\n<p><strong>Inheritance</strong> lets a new class (child) reuse and extend the code of an existing class (parent).</p>\n<pre data-lang=\"python\"><code>class Animal:\n    def __init__(self, name):\n        self.name = name\n\n    def speak(self):\n        return \"Some sound\"\n\n    def __str__(self):\n        return f\"Animal: {self.name}\"\n\nclass Cat(Animal):   # Cat inherits from Animal\n    def speak(self): # Override parent method\n        return f\"{self.name} says: Meow!\"\n\nclass Duck(Animal):\n    def speak(self):\n        return f\"{self.name} says: Quack!\"\n\nanimals = [Cat(\"Whiskers\"), Duck(\"Donald\")]\nfor a in animals:\n    print(a.speak())</code></pre>"
+              },
+              {
+                "id": "topic_4_a1_3",
+                "title": "Encapsulation & Properties",
+                "order": 2,
+                "content": "<h3>Encapsulation</h3>\n<p>Encapsulation hides internal data and provides controlled access through methods. Use a leading underscore <code>_</code> for \"private\" attributes (by convention).</p>\n<pre data-lang=\"python\"><code>class BankAccount:\n    def __init__(self, balance):\n        self._balance = balance   # \"private\" attribute\n\n    def deposit(self, amount):\n        if amount > 0:\n            self._balance += amount\n\n    def withdraw(self, amount):\n        if 0 < amount <= self._balance:\n            self._balance -= amount\n            return True\n        return False\n\n    @property\n    def balance(self):      # Getter\n        return self._balance\n\nacc = BankAccount(1000)\nacc.deposit(500)\nprint(acc.balance)  # 1500  (read-only via property)</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_a1_1",
+                "question": "What is the name of the special method called when creating a new object?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "__init__",
+                  "__new__",
+                  "__create__",
+                  "__start__"
+                ],
+                "correctAnswer": "__init__",
+                "order": 0
+              },
+              {
+                "id": "eq_4_a1_2",
+                "question": "In `class Cat(Animal):`, what is `Animal`?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "The parent class",
+                  "The child class",
+                  "An instance",
+                  "A method"
+                ],
+                "correctAnswer": "The parent class",
+                "order": 1
+              },
+              {
+                "id": "eq_4_a1_3",
+                "question": "What does `self` refer to in a class method?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "The current instance",
+                  "The class itself",
+                  "The parent class",
+                  "A global variable"
+                ],
+                "correctAnswer": "The current instance",
+                "order": 2
+              },
+              {
+                "id": "eq_4_a1_4",
+                "question": "What concept allows a child class to provide its own version of a parent's method?",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "overriding",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_a2",
+            "title": "Error Handling",
+            "order": 1,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_a2_1",
+                "title": "try / except",
+                "order": 0,
+                "content": "<h3>Handling Errors Gracefully</h3>\n<p>Instead of letting your program crash, you can <em>catch</em> errors using <code>try/except</code>:</p>\n<pre data-lang=\"python\"><code>try:\n    number = int(input(\"Enter a number: \"))\n    result = 10 / number\n    print(f\"10 / {number} = {result}\")\nexcept ValueError:\n    print(\"That's not a valid number!\")\nexcept ZeroDivisionError:\n    print(\"Cannot divide by zero!\")\nexcept Exception as e:\n    print(f\"Unexpected error: {e}\")</code></pre>\n<h3>else and finally</h3>\n<pre data-lang=\"python\"><code>try:\n    f = open(\"data.txt\", \"r\")\nexcept FileNotFoundError:\n    print(\"File not found!\")\nelse:\n    content = f.read()   # Runs only if no exception\n    print(content)\nfinally:\n    print(\"Always runs — great for cleanup!\")</code></pre>"
+              },
+              {
+                "id": "topic_4_a2_2",
+                "title": "Raising & Custom Exceptions",
+                "order": 1,
+                "content": "<h3>Raising Exceptions</h3>\n<p>You can deliberately raise exceptions using the <code>raise</code> keyword:</p>\n<pre data-lang=\"python\"><code>def set_age(age):\n    if age < 0:\n        raise ValueError(\"Age cannot be negative!\")\n    if age > 150:\n        raise ValueError(\"Age seems unrealistic.\")\n    return age\n\ntry:\n    set_age(-5)\nexcept ValueError as e:\n    print(f\"Error: {e}\")</code></pre>\n<h3>Custom Exception Classes</h3>\n<pre data-lang=\"python\"><code>class InsufficientFundsError(Exception):\n    def __init__(self, amount, balance):\n        self.amount  = amount\n        self.balance = balance\n        super().__init__(f\"Cannot withdraw {amount}. Balance: {balance}\")\n\ndef withdraw(balance, amount):\n    if amount > balance:\n        raise InsufficientFundsError(amount, balance)\n    return balance - amount\n\ntry:\n    withdraw(100, 200)\nexcept InsufficientFundsError as e:\n    print(e)</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_a2_1",
+                "question": "Which block always executes, regardless of whether an exception occurred?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "finally",
+                  "else",
+                  "except",
+                  "always"
+                ],
+                "correctAnswer": "finally",
+                "order": 0
+              },
+              {
+                "id": "eq_4_a2_2",
+                "question": "What exception is raised when you divide by zero?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "ZeroDivisionError",
+                  "MathError",
+                  "DivisionError",
+                  "ValueError"
+                ],
+                "correctAnswer": "ZeroDivisionError",
+                "order": 1
+              },
+              {
+                "id": "eq_4_a2_3",
+                "question": "What keyword deliberately triggers an exception?",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "raise",
+                "order": 2
+              },
+              {
+                "id": "eq_4_a2_4",
+                "question": "Custom exception classes should inherit from which base class?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Exception",
+                  "Error",
+                  "BaseError",
+                  "RuntimeError"
+                ],
+                "correctAnswer": "Exception",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_a3",
+            "title": "List Comprehensions & Lambda",
+            "order": 2,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_a3_1",
+                "title": "List & Dict Comprehensions",
+                "order": 0,
+                "content": "<h3>List Comprehensions</h3>\n<p>A concise way to build lists using a single line:</p>\n<pre data-lang=\"python\"><code># Traditional loop\nsquares = []\nfor x in range(1, 6):\n    squares.append(x ** 2)\n\n# List comprehension\nsquares = [x ** 2 for x in range(1, 6)]\nprint(squares)  # [1, 4, 9, 16, 25]\n\n# With condition (filter)\nevens = [x for x in range(10) if x % 2 == 0]\nprint(evens)    # [0, 2, 4, 6, 8]</code></pre>\n<h3>Dict Comprehensions</h3>\n<pre data-lang=\"python\"><code>words = [\"apple\", \"banana\", \"cherry\"]\nlengths = {w: len(w) for w in words}\nprint(lengths)  # {'apple': 5, 'banana': 6, 'cherry': 6}\n\n# Squares dict\nsquare_map = {x: x**2 for x in range(1, 6)}\nprint(square_map)  # {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}</code></pre>"
+              },
+              {
+                "id": "topic_4_a3_2",
+                "title": "Lambda, map & filter",
+                "order": 1,
+                "content": "<h3>Lambda Functions</h3>\n<p>A <strong>lambda</strong> is an anonymous one-line function:</p>\n<pre data-lang=\"python\"><code># Regular function\ndef double(x):\n    return x * 2\n\n# Equivalent lambda\ndouble = lambda x: x * 2\nprint(double(5))  # 10\n\n# Multi-argument lambda\nadd = lambda a, b: a + b\nprint(add(3, 7))  # 10</code></pre>\n<h3>map() and filter()</h3>\n<pre data-lang=\"python\"><code>numbers = [1, 2, 3, 4, 5, 6]\n\n# map: apply function to each element\ndoubled = list(map(lambda x: x * 2, numbers))\nprint(doubled)  # [2, 4, 6, 8, 10, 12]\n\n# filter: keep elements where function returns True\nevens = list(filter(lambda x: x % 2 == 0, numbers))\nprint(evens)    # [2, 4, 6]\n\n# Sorting with lambda key\nstudents = [(\"Alice\", 90), (\"Bob\", 85), (\"Cara\", 92)]\nstudents.sort(key=lambda s: s[1], reverse=True)\nprint(students)  # [('Cara', 92), ('Alice', 90), ('Bob', 85)]</code></pre>"
+              },
+              {
+                "id": "topic_4_a3_3",
+                "title": "Generators & yield",
+                "order": 2,
+                "content": "<h3>What is a Generator?</h3>\n<p>A <strong>generator</strong> is a function that produces values one at a time using <code>yield</code>, instead of returning a list. It saves memory for large datasets.</p>\n<pre data-lang=\"python\"><code>def count_up(limit):\n    n = 1\n    while n <= limit:\n        yield n       # Pause and return n\n        n += 1\n\ngen = count_up(5)\nprint(next(gen))  # 1\nprint(next(gen))  # 2\n\n# Iterate with for loop\nfor num in count_up(5):\n    print(num)    # 1 2 3 4 5</code></pre>\n<h3>Generator Expressions</h3>\n<pre data-lang=\"python\"><code># Like list comprehension but with ()\ngen_expr = (x ** 2 for x in range(1000000))  # Memory-efficient!\n\n# Only computes values as needed\nprint(next(gen_expr))  # 0\nprint(next(gen_expr))  # 1\n\n# Using sum with generator\ntotal = sum(x ** 2 for x in range(100))\nprint(total)  # 328350</code></pre>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_a3_1",
+                "question": "What does `[x**2 for x in range(4)]` produce?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "[0, 1, 4, 9]",
+                  "[1, 4, 9, 16]",
+                  "[0, 1, 2, 3]",
+                  "[4, 9, 16, 25]"
+                ],
+                "correctAnswer": "[0, 1, 4, 9]",
+                "order": 0
+              },
+              {
+                "id": "eq_4_a3_2",
+                "question": "What keyword is used in a generator function instead of return?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "yield",
+                  "produce",
+                  "generate",
+                  "emit"
+                ],
+                "correctAnswer": "yield",
+                "order": 1
+              },
+              {
+                "id": "eq_4_a3_3",
+                "question": "What does `lambda x: x * 3` do?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Creates an anonymous function that triples x",
+                  "Multiplies lambda by 3",
+                  "Defines a named function",
+                  "Assigns x = 3"
+                ],
+                "correctAnswer": "Creates an anonymous function that triples x",
+                "order": 2
+              },
+              {
+                "id": "eq_4_a3_4",
+                "question": "Which built-in function applies a function to every element in an iterable?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "map()",
+                  "apply()",
+                  "each()",
+                  "transform()"
+                ],
+                "correctAnswer": "map()",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": "unit_4_a4",
+            "title": "Modules & Packages",
+            "order": 3,
+            "passScore": 70,
+            "topics": [
+              {
+                "id": "topic_4_a4_1",
+                "title": "Importing Modules",
+                "order": 0,
+                "content": "<h3>What is a Module?</h3>\n<p>A <strong>module</strong> is a Python file containing reusable code (functions, classes, variables). Python comes with a huge <strong>standard library</strong> of built-in modules.</p>\n<pre data-lang=\"python\"><code>import math\nimport random\nimport datetime\n\nprint(math.pi)           # 3.141592653589793\nprint(math.sqrt(16))     # 4.0\nprint(math.ceil(2.3))    # 3\n\nprint(random.randint(1, 10))   # Random int 1–10\nprint(random.choice([\"a\", \"b\", \"c\"]))  # Random item\n\ntoday = datetime.date.today()\nprint(today)  # e.g. 2026-06-10</code></pre>\n<h3>Import Styles</h3>\n<pre data-lang=\"python\"><code>import math                    # Use as math.sqrt()\nfrom math import sqrt          # Use as sqrt() directly\nfrom math import sqrt, pi      # Multiple items\nfrom math import *             # Import everything (avoid)\nimport numpy as np             # Alias (common for libraries)</code></pre>"
+              },
+              {
+                "id": "topic_4_a4_2",
+                "title": "Creating Your Own Module",
+                "order": 1,
+                "content": "<h3>Writing a Module</h3>\n<p>Any Python file is a module. Create <code>utils.py</code>:</p>\n<pre data-lang=\"python\"><code># utils.py\nPI = 3.14159\n\ndef circle_area(radius):\n    return PI * radius ** 2\n\ndef greet(name):\n    return f\"Hello, {name}!\"\n\nif __name__ == \"__main__\":\n    # This runs only when utils.py is executed directly\n    print(greet(\"World\"))</code></pre>\n<p>Then import it in another file:</p>\n<pre data-lang=\"python\"><code># main.py\nimport utils\n\nprint(utils.greet(\"Alice\"))     # Hello, Alice!\nprint(utils.circle_area(5))     # 78.53975</code></pre>\n<h3>The __name__ Guard</h3>\n<p><code>if __name__ == \"__main__\":</code> ensures test code only runs when the file is executed directly, not when imported.</p>"
+              }
+            ],
+            "evalQuestions": [
+              {
+                "id": "eq_4_a4_1",
+                "question": "Which import statement lets you use `sqrt(16)` directly (without `math.`)?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "from math import sqrt",
+                  "import math.sqrt",
+                  "import sqrt from math",
+                  "using math: sqrt"
+                ],
+                "correctAnswer": "from math import sqrt",
+                "order": 0
+              },
+              {
+                "id": "eq_4_a4_2",
+                "question": "What does `if __name__ == '__main__':` do?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "Runs code only when the file is executed directly",
+                  "Checks if the module is the main library",
+                  "Creates a new module",
+                  "Imports the __main__ module"
+                ],
+                "correctAnswer": "Runs code only when the file is executed directly",
+                "order": 1
+              },
+              {
+                "id": "eq_4_a4_3",
+                "question": "Which module provides `randint()` for generating random integers?",
+                "questionType": "fill_blank",
+                "options": [],
+                "correctAnswer": "random",
+                "order": 2
+              },
+              {
+                "id": "eq_4_a4_4",
+                "question": "What alias is conventionally used for the `numpy` library?",
+                "questionType": "multiple_choice",
+                "options": [
+                  "np",
+                  "num",
+                  "numpy",
+                  "nx"
+                ],
+                "correctAnswer": "np",
+                "order": 3
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "language": "python"
+  },
+  "5": {
+    "levels": [],
+    "language": "python"
   }
 }
