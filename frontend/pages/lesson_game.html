@@ -776,7 +776,7 @@ const QUESTIONS_PER_LEVEL = 20;
 let setupCount = QUESTIONS_PER_LEVEL;
 
 // ── Session persistence ────────────────────────────────────────────────────────
-const SAVE_KEY = 'assessment_session';
+const SAVE_KEY = `assessment_session_${me.id}`;
 
 function saveSession() {
     if (!questions.length) return;
@@ -968,7 +968,7 @@ function updateCertCallout() {
 }
 
 // ── Assessment lock helpers ───────────────────────────────────────────────────
-function assessKey(lang, level) { return `assessment_passed_${lang}_${level}`; }
+function assessKey(lang, level) { return `assessment_passed_${me.id}_${lang}_${level}`; }
 
 // Cross-system mastery fetched from the server (classroom level completions, etc.)
 // Map: language → Set of mastered levels
