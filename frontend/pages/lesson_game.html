@@ -53,6 +53,45 @@
         .diff-btn.locked .lock-badge { display: block; }
         .diff-btn.locked .diff-sub { color: #f59e0b; font-size: 0.6rem; }
 
+        .diff-btn.done       { cursor: not-allowed; border-color: #10b981; background: rgba(16,185,129,0.08); position: relative; }
+        .diff-btn.done:hover { border-color: #10b981; background: rgba(16,185,129,0.08); }
+        .diff-btn.done .diff-name { color: #10b981; }
+        .diff-btn .done-badge {
+            display: none;
+            position: absolute; top: 5px; right: 6px;
+            font-size: 0.65rem; font-weight: 700; color: #10b981;
+        }
+        .diff-btn.done .done-badge { display: block; }
+        .diff-btn.done .diff-sub   { color: #10b981; font-size: 0.6rem; font-weight: 600; }
+
+        /* ── Certificate callout ──────────────────────────────────────────── */
+        .cert-callout {
+            display: flex; align-items: flex-start; gap: 0.85rem;
+            background: linear-gradient(135deg, rgba(124,58,237,0.13) 0%, rgba(168,85,247,0.08) 100%);
+            border: 1px solid rgba(124,58,237,0.45);
+            border-radius: var(--radius-sm);
+            padding: 0.95rem 1rem;
+            animation: certPulse 3s ease-in-out infinite;
+        }
+        @keyframes certPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+            50%       { box-shadow: 0 0 0 4px rgba(124,58,237,0.12); }
+        }
+        .cert-callout-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; margin-top: 0.05rem; }
+        .cert-callout-title {
+            font-size: 0.82rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.7px; color: var(--primary); margin-bottom: 0.3rem;
+        }
+        .cert-callout-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; }
+        .cert-callout-desc strong { color: var(--text); }
+        .cert-callout-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: rgba(124,58,237,0.18); color: var(--primary);
+            border: 1px solid rgba(124,58,237,0.35);
+            border-radius: 20px; padding: 0.18rem 0.65rem;
+            font-size: 0.7rem; font-weight: 700; margin-top: 0.5rem;
+        }
+
         /* ── Custom language picker ───────────────────────────────────────── */
         .lang-picker { position: relative; user-select: none; }
         .lang-picker-selected {
@@ -472,24 +511,45 @@
                 <label>Difficulty</label>
                 <div class="difficulty-grid">
                     <button class="diff-btn active" data-level="beginner" onclick="selectDiff(this)">
+                        <span class="material-symbols-outlined done-badge">check_circle</span>
                         <span class="diff-icon material-symbols-outlined">eco</span>
                         <div class="diff-name">Beginner</div>
-                        <div class="diff-sub">Foundation</div>
+                        <div class="diff-sub" id="diffSubBeginner">Foundation</div>
                     </button>
                     <button class="diff-btn" data-level="intermediate" onclick="selectDiff(this)">
                         <span class="material-symbols-outlined lock-badge">lock</span>
+                        <span class="material-symbols-outlined done-badge">check_circle</span>
                         <span class="diff-icon material-symbols-outlined">bolt</span>
                         <div class="diff-name">Intermediate</div>
                         <div class="diff-sub" id="diffSubIntermediate">Challenge</div>
                     </button>
                     <button class="diff-btn" data-level="advanced" onclick="selectDiff(this)">
                         <span class="material-symbols-outlined lock-badge">lock</span>
+                        <span class="material-symbols-outlined done-badge">check_circle</span>
                         <span class="diff-icon material-symbols-outlined">local_fire_department</span>
                         <div class="diff-name">Advanced</div>
                         <div class="diff-sub" id="diffSubAdvanced">Expert</div>
                     </button>
                 </div>
             </div>
+            <!-- ── Certificate earn notice ─────────────────────────────── -->
+            <div class="cert-callout" id="certCallout">
+                <div class="cert-callout-icon">🏅</div>
+                <div>
+                    <div class="cert-callout-title">🎓 Earn a Certificate</div>
+                    <div class="cert-callout-desc">
+                        Score <strong>75% or higher</strong> to earn your official
+                        <strong id="certLevelPreview">Beginner</strong> certificate for
+                        <strong id="certLangPreview">Python</strong>.
+                        Certificates are awarded <strong>once per level</strong> and saved to your profile.
+                    </div>
+                    <div class="cert-callout-badge">
+                        <span class="material-symbols-outlined" style="font-size:0.8rem;">workspace_premium</span>
+                        Pass 15 / 20 questions to qualify
+                    </div>
+                </div>
+            </div>
+
             <button class="btn btn-primary" onclick="startGame()" style="justify-content:center;font-size:0.92rem;padding:0.8rem;">
                 <span class="material-symbols-outlined" style="font-size:1.1rem;">play_circle</span>
                 Start Assessment
@@ -767,6 +827,7 @@ function pickLang(value) {
     document.getElementById('langPicker').classList.remove('open');
     updateDiffLocks(value);
     loadServerMastery(value);   // refresh locks with cross-system (classroom) mastery
+    updateCertCallout();
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('#langPicker'))
@@ -777,7 +838,7 @@ document.addEventListener('click', e => {
 document.addEventListener('DOMContentLoaded', () => {
     const lang = me.selected_language || me.language || 'python';
     if (LANG_META[lang]) pickLang(lang);
-    else { updateDiffLocks('python'); loadServerMastery('python'); }
+    else { updateDiffLocks('python'); loadServerMastery('python'); updateCertCallout(); }
     document.addEventListener('keydown', handleKeyboard);
 
     // Check for an in-progress session
@@ -876,6 +937,10 @@ function handleKeyboard(e) {
 }
 
 function selectDiff(btn) {
+    if (btn.classList.contains('done')) {
+        showLockToast('You have already completed this level. Check your Profile for the certificate.');
+        return;
+    }
     if (btn.classList.contains('locked')) {
         const msg = btn.dataset.level === 'intermediate'
             ? 'Pass the Beginner assessment first to unlock Intermediate.'
@@ -885,6 +950,21 @@ function selectDiff(btn) {
     }
     document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    updateCertCallout();
+}
+
+// ── Certificate callout updater ───────────────────────────────────────────────
+function updateCertCallout() {
+    const lang  = document.getElementById('setupLang')?.value || 'python';
+    const level = document.querySelector('.diff-btn.active')?.dataset.level || 'beginner';
+    const meta  = LANG_META[lang];
+    const langLabel  = meta ? meta.label : lang.charAt(0).toUpperCase() + lang.slice(1);
+    const levelLabel = level.charAt(0).toUpperCase() + level.slice(1);
+
+    const elLevel = document.getElementById('certLevelPreview');
+    const elLang  = document.getElementById('certLangPreview');
+    if (elLevel) elLevel.textContent = levelLabel;
+    if (elLang)  elLang.textContent  = langLabel;
 }
 
 // ── Assessment lock helpers ───────────────────────────────────────────────────
@@ -920,37 +1000,67 @@ async function loadServerMastery(lang) {
 function updateDiffLocks(lang) {
     const passedBeginner     = hasPassed(lang, 'beginner');
     const passedIntermediate = hasPassed(lang, 'intermediate');
+    const passedAdvanced     = hasPassed(lang, 'advanced');
 
+    const btnBeg   = document.querySelector('.diff-btn[data-level="beginner"]');
     const btnInter = document.querySelector('.diff-btn[data-level="intermediate"]');
     const btnAdv   = document.querySelector('.diff-btn[data-level="advanced"]');
+    const subBeg   = document.getElementById('diffSubBeginner');
     const subInter = document.getElementById('diffSubIntermediate');
     const subAdv   = document.getElementById('diffSubAdvanced');
 
+    // Beginner
+    if (passedBeginner) {
+        btnBeg.classList.add('done');
+        btnBeg.classList.remove('active');
+        if (subBeg) subBeg.textContent = 'Completed ✓';
+    } else {
+        btnBeg.classList.remove('done');
+        if (subBeg) subBeg.textContent = 'Foundation';
+    }
+
     // Intermediate
-    if (!passedBeginner) {
+    if (passedIntermediate) {
+        btnInter.classList.add('done');
+        btnInter.classList.remove('locked', 'active');
+        if (subInter) subInter.textContent = 'Completed ✓';
+    } else if (!passedBeginner) {
         btnInter.classList.add('locked');
+        btnInter.classList.remove('done');
         if (subInter) subInter.textContent = 'Pass Beginner first';
-        // If it was selected, reset selection to beginner
         if (btnInter.classList.contains('active')) {
             btnInter.classList.remove('active');
-            document.querySelector('.diff-btn[data-level="beginner"]').classList.add('active');
+            if (!passedBeginner) btnBeg.classList.add('active');
         }
     } else {
-        btnInter.classList.remove('locked');
+        btnInter.classList.remove('locked', 'done');
         if (subInter) subInter.textContent = 'Challenge';
     }
 
     // Advanced
-    if (!passedIntermediate) {
+    if (passedAdvanced) {
+        btnAdv.classList.add('done');
+        btnAdv.classList.remove('locked', 'active');
+        if (subAdv) subAdv.textContent = 'Completed ✓';
+    } else if (!passedIntermediate) {
         btnAdv.classList.add('locked');
+        btnAdv.classList.remove('done');
         if (subAdv) subAdv.textContent = 'Pass Intermediate first';
         if (btnAdv.classList.contains('active')) {
             btnAdv.classList.remove('active');
-            document.querySelector('.diff-btn[data-level="beginner"]').classList.add('active');
+            if (!passedBeginner) btnBeg.classList.add('active');
         }
     } else {
-        btnAdv.classList.remove('locked');
+        btnAdv.classList.remove('locked', 'done');
         if (subAdv) subAdv.textContent = 'Expert';
+    }
+
+    // If all done levels are consumed, ensure one valid level is selected
+    const anyActive = document.querySelector('.diff-btn.active');
+    if (!anyActive) {
+        // Pick the first non-done, non-locked level
+        const next = document.querySelector('.diff-btn:not(.done):not(.locked)');
+        if (next) next.classList.add('active');
     }
 }
 
@@ -1023,15 +1133,18 @@ function resolveCorrectAnswer(q) {
     const type = q.questionType || 'multiple_choice';
     if (type !== 'multiple_choice') return raw; // fill_blank / output_prediction use raw text
 
-    // If it's a single letter A–D, find the matching option text
     if (/^[A-D]$/i.test(raw)) {
         const opts = q.options || q.choices || [];
         const letter = raw.toUpperCase();
-        const match = opts.find(o => {
+        // Check if options carry their own prefix like "A) …"
+        const prefixed = opts.find(o => {
             const s = String(o).trim().toUpperCase();
             return s.startsWith(letter + ')') || s.startsWith(letter + '.') || s.startsWith(letter + ' ');
         });
-        if (match) return String(match);
+        if (prefixed) return String(prefixed);
+        // Otherwise map letter to 0-based index in the ORIGINAL (unshuffled) options array
+        const idx = letter.charCodeAt(0) - 65; // A→0, B→1, C→2, D→3
+        if (opts[idx] !== undefined) return String(opts[idx]);
     }
     return raw;
 }

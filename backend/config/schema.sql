@@ -1,8 +1,11 @@
 -- ============================================================================
--- CODEARENA — PHASE 1 SCHEMA
+-- CODEARENA — FULL SCHEMA  (Phase 1 + Phase 2 features)
 -- AI-Powered Computer-Aided Instruction System
 -- ============================================================================
--- Run: mysql -u root -p < backend/config/schema.sql
+-- Run:  mysql -u root -p < backend/config/schema.sql
+-- NOTE: This drops and recreates all tables for a clean install.
+--       Existing data will be lost. For incremental migrations, the
+--       backend auto-applies ALTER TABLE patches on every startup.
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS codearena;
@@ -32,6 +35,7 @@ DROP TABLE IF EXISTS lesson_files;
 DROP TABLE IF EXISTS classroom_lessons;
 DROP TABLE IF EXISTS classroom_enrollments;
 DROP TABLE IF EXISTS classrooms;
+DROP TABLE IF EXISTS contributions;
 DROP TABLE IF EXISTS feedback;
 DROP TABLE IF EXISTS rewards;
 DROP TABLE IF EXISTS progress;
@@ -48,7 +52,7 @@ CREATE TABLE users (
     email           VARCHAR(255) UNIQUE NOT NULL,
     password        VARCHAR(255) NOT NULL,
     full_name       VARCHAR(255) NOT NULL,
-    role            ENUM('student','faculty') DEFAULT 'student',
+    role            ENUM('student','faculty','admin') DEFAULT 'student',
     avatar          TEXT,
     bio             TEXT,
     total_points    INT DEFAULT 0,
@@ -201,6 +205,7 @@ CREATE TABLE classroom_lessons (
     content      LONGTEXT NOT NULL,
     language     VARCHAR(50),
     order_index  INT DEFAULT 0,
+    is_published BOOLEAN DEFAULT FALSE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (classroom_id) REFERENCES classrooms(classroom_id) ON DELETE CASCADE,
     FOREIGN KEY (faculty_id)   REFERENCES users(user_id)           ON DELETE CASCADE
@@ -460,29 +465,34 @@ CREATE TABLE feedback (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS contributions (
-    contribution_id   INT AUTO_INCREMENT PRIMARY KEY,
-    faculty_id        INT NOT NULL,
-    type              ENUM('blog','course') NOT NULL DEFAULT 'blog',
-    title             VARCHAR(255) NOT NULL,
-    description       TEXT,
-    content           LONGTEXT,
-    language          VARCHAR(30) DEFAULT 'general',
-    tags              VARCHAR(500) DEFAULT '',
-    cover_image       TEXT,
-    status            ENUM('published','draft') DEFAULT 'published',
-    view_count        INT DEFAULT 0,
-    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- ============================================================================
+-- CONTRIBUTIONS  (faculty blogs and courses on the Learn page)
+-- ============================================================================
+CREATE TABLE contributions (
+    contribution_id INT AUTO_INCREMENT PRIMARY KEY,
+    faculty_id      INT NOT NULL,
+    type            ENUM('blog','course') NOT NULL DEFAULT 'blog',
+    title           VARCHAR(255) NOT NULL,
+    description     TEXT,
+    content         LONGTEXT,
+    language        VARCHAR(30) DEFAULT 'general',
+    tags            VARCHAR(500) DEFAULT '',
+    cover_image     TEXT,
+    status          ENUM('published','draft') DEFAULT 'published',
+    view_count      INT DEFAULT 0,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- ============================================================================
--- SAMPLE DATA: Demo User
+-- SEED DATA: Demo Users
 -- ============================================================================
--- Passwords are bcrypt-hashed (student123 and maria123 respectively)
-INSERT INTO users (email, password, full_name, role, total_points, current_level, badges) VALUES
-('student@example.com', '$2b$10$DgFiUCcmDnn5ZXTxal55Eubu7BfrYtdAnAn75R1C4F1r9UX4FiyJi', 'Juan Dela Cruz', 'student', 150, 'beginner', '["first_login"]'),
-('maria@example.com', '$2b$10$0jORJv28ymD7M5TEh6KBae21RoHdF7/8zevQeDZs5eyPWQgydRfgy', 'Maria Santos', 'student', 450, 'intermediate', '["first_login", "fast_learner", "perfect_score"]');
+-- Passwords (bcrypt): student123 / faculty123 / student123
+INSERT INTO users (email, password, full_name, role, selected_language, total_points, current_level, total_xp, streak, badges) VALUES
+('student@example.com',   '$2b$10$DgFiUCcmDnn5ZXTxal55Eubu7BfrYtdAnAn75R1C4F1r9UX4FiyJi', 'Juan Dela Cruz',     'student', 'python', 150, 'beginner',     0, 0, '["first_login"]'),
+('maria@example.com',     '$2b$10$0jORJv28ymD7M5TEh6KBae21RoHdF7/8zevQeDZs5eyPWQgydRfgy', 'Maria Santos',       'student', 'python', 450, 'intermediate', 0, 0, '["first_login","fast_learner","perfect_score"]'),
+('student@codearena.com', '$2b$10$DgFiUCcmDnn5ZXTxal55Eubu7BfrYtdAnAn75R1C4F1r9UX4FiyJi', 'Mark Jade Cabangon', 'student', 'python', 0,   'beginner',     0, 0, NULL),
+('faculty@codearena.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC18Log5L5ii.LrVHrH.', 'Prof. Maria Santos', 'faculty', NULL,     0,   'beginner',     0, 0, NULL);
 
 -- ============================================================================
 -- INDEXES
@@ -507,14 +517,6 @@ CREATE INDEX idx_assignment_tc_assign     ON assignment_test_cases(assignment_id
 CREATE INDEX idx_assignment_sub_assign    ON assignment_submissions(assignment_id);
 CREATE INDEX idx_assignment_sub_student   ON assignment_submissions(student_id);
 
--- ============================================================================
--- SEED DATA
--- ============================================================================
-
--- Demo users  (passwords: student123 / faculty123)
-INSERT INTO users (email, password, full_name, role, selected_language, total_xp, streak) VALUES
-('student@codearena.com', '$2b$10$DgFiUCcmDnn5ZXTxal55Eubu7BfrYtdAnAn75R1C4F1r9UX4FiyJi', 'Juan Dela Cruz', 'student', 'python', 0, 0),
-('faculty@codearena.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC18Log5L5ii.LrVHrH.', 'Prof. Maria Santos', 'faculty', NULL, 0, 0);
 
 -- ============================================================================
 -- LEARNING PATHS — Python

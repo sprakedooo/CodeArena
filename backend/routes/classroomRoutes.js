@@ -438,6 +438,7 @@ router.get('/:id/students', async (req, res) => {
                  FROM classroom_enrollments e
                  JOIN users u ON u.user_id = e.student_id
                  LEFT JOIN progress p ON p.user_id = u.user_id
+                     AND p.language_code = COALESCE(u.selected_language, 'python')
                  WHERE e.classroom_id = ? AND e.status = 'active'
                  ORDER BY u.total_xp DESC`,
                 [classroomId]

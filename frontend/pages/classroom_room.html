@@ -1817,7 +1817,7 @@ function renderCurriculumView() {
         const lstat = _levelStatus[lvl.id] || { unlocked: true };
         const levelLocked = lstat.unlocked === false;
 
-        html += `<div class="curr-level-section" style="margin-bottom:2rem;${levelLocked ? 'opacity:.75;' : ''}">
+        html += `<div class="curr-level-section" data-level-id="${lvl.id}" style="margin-bottom:2rem;${levelLocked ? 'opacity:.75;' : ''}">
             <div class="curr-level-header" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
                 <span style="width:10px;height:10px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>
                 <span style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${col};">${esc(lvl.name)}</span>
@@ -1949,6 +1949,48 @@ function closeUnitViewer() {
     renderCurriculumView();
 }
 
+/** Returns the sorted next level after _uvLevel, or null if already last. */
+function getNextLevel() {
+    if (!_curriculum || !_uvLevel) return null;
+    const sorted = [...(_curriculum.levels || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const idx = sorted.findIndex(l => l.id === _uvLevel.id);
+    return idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : null;
+}
+
+/** Builds the action button HTML for the certificate screen. */
+function getNextLevelBtn() {
+    const next = getNextLevel();
+    if (next) {
+        return `<button onclick="proceedToNextLevel()" class="btn btn-primary" style="font-size:.85rem;gap:.4rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+            Proceed to ${next.name || 'Next'} Level
+        </button>`;
+    }
+    // All levels done
+    return `<button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
+        <span class="material-symbols-outlined" style="font-size:1rem;">emoji_events</span>
+        All Levels Complete!
+    </button>`;
+}
+
+/** Closes the overlay and scrolls to + briefly highlights the next level card. */
+function proceedToNextLevel() {
+    const next = getNextLevel();
+    closeUnitViewer();          // re-renders curriculum
+    if (!next) return;
+    // Give renderCurriculumView a tick to paint, then scroll + flash
+    setTimeout(() => {
+        // Level header elements carry data-level-id (set in renderCurriculumView)
+        const el = document.querySelector(`[data-level-id="${next.id}"]`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.style.transition = 'box-shadow .3s';
+            el.style.boxShadow  = '0 0 0 3px var(--primary)';
+            setTimeout(() => { el.style.boxShadow = ''; }, 1800);
+        }
+    }, 120);
+}
+
 function renderUVStep() {
     const totalSteps = _uvTopics.length;
     const current    = _uvTopics[_uvStep];
@@ -2054,8 +2096,12 @@ function renderEvalStep() {
         html += `<div class="uv-eval-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px;">
             <div style="font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px;">Question ${qi + 1}</div>`;
 
-        if (q.questionType === 'output_prediction' && q.codeSnippet) {
-            html += `<pre style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'Fira Code',monospace;font-size:.82rem;color:#e2e8f0;overflow-x:auto;margin-bottom:12px;">${esc(q.codeSnippet)}</pre>`;
+        // Show code snippet for output_prediction AND fill_blank (which has ___ placeholder)
+        if (q.codeSnippet && (q.questionType === 'output_prediction' || q.questionType === 'fill_blank')) {
+            const snippetHtml = q.questionType === 'fill_blank'
+                ? esc(q.codeSnippet).replace(/___/g, '<span style="background:rgba(124,58,237,.25);color:var(--primary);border-radius:4px;padding:0 4px;font-weight:700;">___</span>')
+                : esc(q.codeSnippet);
+            html += `<pre style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'Fira Code',monospace;font-size:.82rem;color:#e2e8f0;overflow-x:auto;margin-bottom:12px;">${snippetHtml}</pre>`;
         }
 
         html += `<div style="font-size:.92rem;color:var(--text);font-weight:500;margin-bottom:14px;">${esc(q.question)}</div>`;
@@ -2064,6 +2110,14 @@ function renderEvalStep() {
             const cur = _uvAnswers[q.id] || '';
             html += `<input type="text" value="${esc(cur)}" placeholder="Type your answer…"
                 style="width:100%;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.55rem .8rem;color:var(--text);font-size:.88rem;box-sizing:border-box;"
+                oninput="_uvAnswers['${q.id}']=this.value" />`;
+
+        } else if (q.questionType === 'output_prediction') {
+            // Student types the expected output
+            const cur = _uvAnswers[q.id] || '';
+            html += `<div style="font-size:.78rem;color:var(--text-muted);margin-bottom:6px;">What will this code print? Type the exact output:</div>
+                <input type="text" value="${esc(cur)}" placeholder="e.g.  Hello, World!"
+                style="width:100%;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.55rem .8rem;color:var(--text);font-size:.88rem;box-sizing:border-box;font-family:'Fira Code',monospace;"
                 oninput="_uvAnswers['${q.id}']=this.value" />`;
 
         } else if (q.questionType === 'code_ordering' && q.codeLines && q.codeLines.length) {
@@ -2208,16 +2262,26 @@ function renderEvalResult(data) {
     const results = {};
     resultsArr.forEach(r => { results[r.questionId] = r; });
 
-    let html = `<div style="text-align:center;padding:24px 20px;margin-bottom:24px;border-radius:14px;background:${passed?'rgba(16,185,129,.1)':'rgba(248,113,113,.1)'};border:1px solid ${passed?'rgba(16,185,129,.3)':'rgba(248,113,113,.3)'};">
+    // ── "Evaluation Done" header ──────────────────────────────────────────────
+    let html = `
+    <div style="text-align:center;margin-bottom:20px;">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);border-radius:20px;padding:.35rem 1.1rem;margin-bottom:14px;">
+            <span class="material-symbols-outlined" style="font-size:1rem;color:var(--primary);">task_alt</span>
+            <span style="font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--primary);">Evaluation Done</span>
+        </div>
+    </div>`;
+
+    // ── Score card ────────────────────────────────────────────────────────────
+    html += `<div style="text-align:center;padding:24px 20px;margin-bottom:24px;border-radius:14px;background:${passed?'rgba(16,185,129,.1)':'rgba(248,113,113,.1)'};border:1px solid ${passed?'rgba(16,185,129,.3)':'rgba(248,113,113,.3)'};">
         <span class="material-symbols-outlined" style="font-size:2.5rem;color:${passed?'#34d399':'#f87171'};display:block;margin-bottom:10px;">${passed?'check_circle':'cancel'}</span>
         <div style="font-size:1.5rem;font-weight:800;color:${passed?'#34d399':'#f87171'};">${score}%</div>
         <div style="font-size:.9rem;color:var(--text-secondary);margin-top:6px;">${correct} / ${total} correct · ${passed ? '✅ Passed!' : '❌ Did not pass'}</div>
         <div style="font-size:.78rem;color:var(--text-muted);margin-top:4px;">Pass threshold: ${_uvUnit.passScore || 70}%</div>
     </div>`;
 
-    // Per-question results
-    html += `<div style="margin-bottom:24px;">`;
-    questions.forEach((q, qi) => {
+    // ── Per-question results ──────────────────────────────────────────────────
+    html += `<div style="margin-bottom:28px;">`;
+    questions.forEach((q) => {
         const r = results[q.id] || {};
         const isCorrect = r.correct;
         html += `<div style="background:var(--surface);border:1px solid ${isCorrect?'rgba(16,185,129,.3)':'rgba(248,113,113,.3)'};border-radius:10px;padding:14px 16px;margin-bottom:10px;">
@@ -2233,13 +2297,20 @@ function renderEvalResult(data) {
     });
     html += `</div>`;
 
+    // ── Action buttons ────────────────────────────────────────────────────────
+    const nextUnit = getNextUnit();
     html += `<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
-        ${!passed ? `<button onclick="retryEval()" class="btn btn-secondary" style="font-size:.85rem;">
-            <span class="material-symbols-outlined" style="font-size:1rem;">refresh</span> Try Again
-        </button>` : ''}
-        <button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
-            ${passed ? '<span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back to Curriculum' : 'Back to Curriculum'}
+        <button onclick="retryEval()" class="btn btn-secondary" style="font-size:.85rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">refresh</span> Retake Evaluation
         </button>
+        ${nextUnit
+            ? `<button onclick="proceedToNextUnit()" class="btn btn-primary" style="font-size:.85rem;">
+                Proceed to Next Lesson <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+               </button>`
+            : `<button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back to Curriculum
+               </button>`
+        }
     </div>`;
 
     document.getElementById('uvContent').innerHTML = html;
@@ -2247,6 +2318,21 @@ function renderEvalResult(data) {
     // Hide step indicator for result screen
     document.getElementById('uvStepIndicator').innerHTML = '';
     document.getElementById('uvProgressChip').textContent = passed ? '✅ Passed' : '❌ Failed';
+}
+
+/** Returns the next unit in the current level after _uvUnit, or null if last. */
+function getNextUnit() {
+    if (!_uvLevel || !_uvUnit) return null;
+    const units = [...(_uvLevel.units || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const idx = units.findIndex(u => u.id === _uvUnit.id);
+    return (idx >= 0 && idx < units.length - 1) ? units[idx + 1] : null;
+}
+
+/** Opens the next unit in the same level. */
+function proceedToNextUnit() {
+    const next = getNextUnit();
+    if (!next) { closeUnitViewer(); return; }
+    openUnitViewer(_uvLevel.id, next.id);
 }
 
 function retryEval() {
@@ -2343,9 +2429,7 @@ async function renderLevelComplete(evalData) {
             <button onclick="printLevelCert()" class="btn btn-secondary" style="font-size:.85rem;">
                 <span class="material-symbols-outlined" style="font-size:1rem;">download</span> Download PDF
             </button>
-            <button onclick="closeUnitViewer()" class="btn btn-primary" style="font-size:.85rem;">
-                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span> Back to Curriculum
-            </button>
+            ${getNextLevelBtn()}
         </div>`;
 }
 
