@@ -71,5 +71,64 @@
     "evalScore": 100,
     "evalPassed": true,
     "completedAt": "2026-06-15T01:29:23.784Z"
+  },
+  "4_u1b1": {
+    "completedTopics": [
+      "t1b1a",
+      "t1b1b",
+      "t1b1c"
+    ],
+    "contentCompleted": true,
+    "attempts": 2,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-25T00:43:08.115Z"
+  },
+  "4_u1b2": {
+    "completedTopics": [
+      "t1b2a",
+      "t1b2b",
+      "t1b2c"
+    ],
+    "contentCompleted": true,
+    "attempts": 1,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-25T00:43:47.363Z"
+  },
+  "4_u1b3": {
+    "completedTopics": [
+      "t1b3a",
+      "t1b3b",
+      "t1b3c"
+    ],
+    "contentCompleted": true,
+    "attempts": 1,
+    "evalScore": 75,
+    "evalPassed": true,
+    "completedAt": "2026-06-25T00:44:22.844Z"
+  },
+  "4_u1b4": {
+    "completedTopics": [
+      "t1b4a",
+      "t1b4b",
+      "t1b4c"
+    ],
+    "contentCompleted": true,
+    "attempts": 2,
+    "evalScore": 100,
+    "evalPassed": true,
+    "completedAt": "2026-06-25T00:45:47.276Z"
+  },
+  "4_u1b5": {
+    "completedTopics": [
+      "t1b5a",
+      "t1b5b"
+    ],
+    "contentCompleted": true,
+    "attempts": 1,
+    "evalScore": 75,
+    "evalPassed": true,
+    "completedAt": "2026-06-25T00:46:13.783Z"
   }
 }

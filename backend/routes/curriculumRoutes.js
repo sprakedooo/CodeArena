@@ -45,6 +45,11 @@ const fs      = require('fs');
 const path    = require('path');
 const { authMiddleware, requireFaculty } = require('../middleware/authMiddleware');
 const masteryService = require('../services/masteryService');
+const dbService = require('../services/dbService');
+const db = require('../config/database');
+
+// In-memory name cache: populated when students submit evals so leaderboard has names
+const userNameCache = {};
 
 // ── Persistent JSON store ─────────────────────────────────────────────────────
 const DATA_DIR  = path.join(__dirname, '../../data');
@@ -782,14 +787,27 @@ router.post('/:cid/units/:uid/submit-eval', authMiddleware, (req, res) => {
     const score    = total ? Math.round((correct / total) * 100) : 0;
     const passed   = score >= (unit.passScore || 70);
 
+    // Cache student name for leaderboard
+    userNameCache[String(userId)] = req.user.fullName || req.user.email || `Student #${userId}`;
+
     const key = `${userId}_${unitId}`;
     if (!progress[key]) progress[key] = { attempts: 0 };
+    const wasAlreadyPassed = progress[key].evalPassed === true;
     progress[key].attempts        = (progress[key].attempts || 0) + 1;
     progress[key].evalScore       = Math.max(progress[key].evalScore || 0, score);
     progress[key].contentCompleted = true;
     if (passed) {
         progress[key].evalPassed  = true;
         progress[key].completedAt = new Date().toISOString();
+
+        // Award XP on first-ever pass so the classroom leaderboard reflects curriculum work
+        if (!wasAlreadyPassed) {
+            const xpAmount = score; // 70–100 XP depending on score
+            if (dbService.isDbAvailable()) {
+                db.query('UPDATE users SET total_xp = total_xp + ? WHERE user_id = ?', [xpAmount, userId])
+                  .catch(err => console.error('[curriculum] XP award error:', err));
+            }
+        }
     }
     persistProgress();
 
@@ -806,6 +824,91 @@ router.post('/:cid/units/:uid/submit-eval', authMiddleware, (req, res) => {
     }
 
     res.json({ success: true, score, correct, total, passed, results, passScore: unit.passScore || 70 });
+});
+
+// ── GET /:cid/leaderboard — curriculum-score leaderboard ─────────────────────
+router.get('/:cid/leaderboard', authMiddleware, async (req, res) => {
+    const cid = req.params.cid;
+    const units = allUnits(cid);
+    const unitIds = new Set(units.map(u => u.id));
+
+    // Tally curriculum score per user from in-memory progress
+    const currScores = {};
+    for (const [key, p] of Object.entries(progress)) {
+        const firstUs = key.indexOf('_');
+        if (firstUs < 0) continue;
+        const uid    = key.slice(0, firstUs);
+        const unitId = key.slice(firstUs + 1);
+        if (!unitIds.has(unitId)) continue;
+        if (!currScores[uid]) currScores[uid] = { score: 0, unitsPassed: 0 };
+        if (p.evalPassed) {
+            currScores[uid].score += p.evalScore || 0;
+            currScores[uid].unitsPassed++;
+        }
+    }
+
+    let entries = [];
+    if (dbService.isDbAvailable()) {
+        try {
+            const rows = await db.query(
+                `SELECT u.user_id AS id, u.full_name AS fullName
+                 FROM classroom_enrollments ce
+                 JOIN users u ON u.user_id = ce.student_id
+                 WHERE ce.classroom_id = ? AND ce.status = 'active'`,
+                [Number(cid)]
+            );
+            entries = rows.map(r => ({
+                id: r.id,
+                fullName: r.fullName,
+                score: currScores[String(r.id)]?.score || 0,
+                unitsPassed: currScores[String(r.id)]?.unitsPassed || 0,
+            }));
+        } catch (err) { console.error('[curriculum] leaderboard DB error:', err); }
+    }
+
+    if (!entries.length) {
+        // Fallback: build from whatever progress we have
+        entries = Object.entries(currScores).map(([uid, s]) => ({
+            id: Number(uid),
+            fullName: userNameCache[uid] || `Student #${uid}`,
+            score: s.score,
+            unitsPassed: s.unitsPassed,
+        }));
+    }
+
+    entries.sort((a, b) => b.score - a.score);
+    res.json({ success: true, leaderboard: entries });
+});
+
+// ── GET /:cid/progress-summary — per-student curriculum stats (faculty) ───────
+router.get('/:cid/progress-summary', authMiddleware, (req, res) => {
+    const cid = req.params.cid;
+    const units = allUnits(cid);
+    const unitMap = {};
+    units.forEach(u => { unitMap[u.id] = u; });
+    const unitIds = new Set(units.map(u => u.id));
+    const totalUnits = units.length;
+
+    const summary = {};
+    for (const [key, p] of Object.entries(progress)) {
+        const firstUs = key.indexOf('_');
+        if (firstUs < 0) continue;
+        const uid    = key.slice(0, firstUs);
+        const unitId = key.slice(firstUs + 1);
+        if (!unitIds.has(unitId)) continue;
+        if (!summary[uid]) summary[uid] = { unitsPassed: 0, topScore: 0, answered: 0, correct: 0 };
+        if (p.evalPassed) {
+            summary[uid].unitsPassed++;
+            summary[uid].topScore = Math.max(summary[uid].topScore, p.evalScore || 0);
+        }
+        // Tally eval questions answered/correct from best score × question count
+        const qCount   = (unitMap[unitId]?.evalQuestions || []).length;
+        const attempts = p.attempts || (p.evalScore > 0 ? 1 : 0);
+        summary[uid].answered += qCount * attempts;
+        summary[uid].correct  += Math.round((p.evalScore || 0) / 100 * qCount);
+    }
+
+    res.json({ success: true, summary, totalUnits });
 });
 
 // ── GET /:cid/my-progress ─────────────────────────────────────────────────────

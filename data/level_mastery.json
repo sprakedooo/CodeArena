@@ -25,5 +25,15 @@
       "assessment"
     ],
     "achievedAt": "2026-06-14T09:53:36.369Z"
+  },
+  "4_python_beginner": {
+    "userId": "4",
+    "language": "python",
+    "level": "beginner",
+    "sources": [
+      "assessment",
+      "classroom"
+    ],
+    "achievedAt": "2026-06-25T00:36:04.431Z"
   }
 }

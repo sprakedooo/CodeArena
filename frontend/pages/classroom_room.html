@@ -1147,12 +1147,27 @@ async function loadMyProgress() {
     } catch (e) { console.error('loadMyProgress error:', e); }
 }
 
+// ── Curriculum stats sync ──────────────────────────────────────────────────────
+async function syncCurriculumStats() {
+    // If _currProgress not loaded yet, fetch it now
+    if (!_currProgress || !Object.keys(_currProgress).length) {
+        try {
+            const r = await fetch(API + `/curriculum/${classroomId}/my-progress`, { headers: getAuthHeaders() });
+            const d = await r.json();
+            if (d.progress) _currProgress = d.progress;
+        } catch {}
+    }
+    const passed = Object.values(_currProgress).filter(p => p.evalPassed).length;
+    const s = document.getElementById('statLessons');
+    if (s) s.textContent = passed;
+}
+
 // ── Leaderboard ────────────────────────────────────────────────────────────────
 async function loadLeaderboard() {
     try {
-        const res  = await fetch(API + '/classrooms/' + classroomId + '/leaderboard', { headers: getAuthHeaders() });
+        const res  = await fetch(API + '/curriculum/' + classroomId + '/leaderboard', { headers: getAuthHeaders() });
         const data = await res.json();
-        renderLeaderboard(data.leaderboard || data || []);
+        renderLeaderboard(data.leaderboard || []);
     } catch {
         renderLeaderboard([]);
     }
@@ -1161,7 +1176,7 @@ async function loadLeaderboard() {
 function renderLeaderboard(entries) {
     const table = document.getElementById('lbTable');
     if (!entries.length) {
-        table.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">emoji_events</span>No scores yet. Play a session first!</div>';
+        table.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">emoji_events</span>No scores yet. Complete a unit evaluation to appear here!</div>';
         return;
     }
     const medals = ['🥇','🥈','🥉'];
@@ -1180,16 +1195,37 @@ function renderLeaderboard(entries) {
 // ── AI Feedback ────────────────────────────────────────────────────────────────
 let _aiFeedbackCache = null;
 async function loadAIFeedback() {
-    if (_aiFeedbackCache) { document.getElementById('aiFeedbackBody').innerHTML = _aiFeedbackCache; return; }
+    _aiFeedbackCache = null; // always refresh when called
     const body = document.getElementById('aiFeedbackBody');
     body.innerHTML = '<div class="ai-feedback-loading"><div class="mini-spin"></div>Generating your personalised feedback…</div>';
 
     try {
-        const lessons = document.getElementById('statLessons').textContent  || '0';
+        // Ensure progress is loaded even if Lessons tab was never opened
+        if (!_currProgress || !Object.keys(_currProgress).length) {
+            try {
+                const pr = await fetch(API + `/curriculum/${classroomId}/my-progress`, { headers: getAuthHeaders() });
+                const pd = await pr.json();
+                if (pd.progress) _currProgress = pd.progress;
+            } catch {}
+        }
 
-        const prompt = 'I am a student in a programming classroom. Here is my current performance:\n' +
-            '- Lessons completed: ' + lessons + '\n\n' +
-            'Give me a brief (3-4 sentences) personalised assessment: what I\'m doing well, where I need improvement, and one specific actionable tip. Be encouraging but honest.';
+        // Gather curriculum stats from _currProgress
+        const allUnits = Object.values(_currProgress || {});
+        const unitsPassed  = allUnits.filter(p => p.evalPassed).length;
+        const totalUnits   = Object.keys(_currProgress || {}).length;
+        const avgScore     = unitsPassed
+            ? Math.round(allUnits.filter(p => p.evalPassed).reduce((s, p) => s + (p.evalScore || 0), 0) / unitsPassed)
+            : 0;
+        const inProgress   = allUnits.filter(p => !p.evalPassed && p.contentCompleted).length;
+        const lang         = (classroomLang || 'Python').charAt(0).toUpperCase() + (classroomLang || 'Python').slice(1);
+
+        const prompt =
+            'I am a student in a ' + lang + ' programming classroom. Here is my current curriculum progress:\n' +
+            '- Units passed (eval score ≥ 70%): ' + unitsPassed + '\n' +
+            '- Units in progress (reading done, eval not yet passed): ' + inProgress + '\n' +
+            '- Average eval score on passed units: ' + avgScore + '%\n' +
+            '- Total curriculum units available: ' + totalUnits + '\n\n' +
+            'Give me a brief (3-4 sentences) personalised assessment: what I\'m doing well, where I need improvement, and one specific actionable tip for ' + lang + '. Be encouraging but honest.';
 
         const res  = await fetch(API + '/ai/ask', {
             method: 'POST',
@@ -1197,7 +1233,8 @@ async function loadAIFeedback() {
             body: JSON.stringify({ message: prompt, conversationHistory: [] })
         });
         const data = await res.json();
-        const text = data.response || data.message || 'No feedback available.';
+        const text = data.reply || data.response || data.message || '';
+        if (!text) throw new Error('empty');
         const html = '<p>' + esc(text).replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
         body.innerHTML = html;
         _aiFeedbackCache = html;
@@ -1615,7 +1652,7 @@ function switchTab(name, btn) {
     document.getElementById('tab-' + name).classList.add('active');
     if (btn) btn.classList.add('active');
 
-    if (name === 'progress') { loadLeaderboard(); loadAIFeedback(); }
+    if (name === 'progress') { syncCurriculumStats(); loadLeaderboard(); loadAIFeedback(); }
     if (name === 'classwork') { loadClasswork(); }
 }
 
@@ -1790,6 +1827,11 @@ async function loadCurriculum() {
         _curriculum = data.curriculum;
         _currProgress = data.progress || {};
         _levelStatus  = data.levelStatus || {};
+        syncCurriculumStats();
+        // Update hero lesson counter to reflect actual unit count
+        const totalUnits = (_curriculum.levels || []).reduce((s, lvl) => s + (lvl.units || []).length, 0);
+        const heroEl = document.getElementById('heroLessons');
+        if (heroEl) heroEl.textContent = totalUnits;
         renderCurriculumView();
     } catch {
         view.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
@@ -2141,10 +2183,10 @@ function renderEvalStep() {
             const opts = q.options || [];
             opts.forEach((opt, oi) => {
                 const letter = String.fromCharCode(65 + oi);
-                const selected = _uvAnswers[q.id] === letter;
+                const selected = _uvAnswers[q.id] === opt;
                 // Strip any redundant leading "A)" / "A." / "(A)" prefix — the circle already shows the letter
                 const label = stripOptionLetter(opt);
-                html += `<div class="uv-eval-option" onclick="selectEvalOption('${q.id}',this,'${letter}',${qi})"
+                html += `<div class="uv-eval-option" onclick="selectEvalOption('${q.id}',this,${oi},${qi})"
                     style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;border:1px solid ${selected?'var(--primary)':'var(--border)'};background:${selected?'rgba(124,58,237,.12)':'transparent'};cursor:pointer;margin-bottom:6px;transition:.15s;">
                     <div style="min-width:24px;height:24px;border-radius:50%;border:2px solid ${selected?'var(--primary)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:${selected?'var(--primary)':'var(--text-muted)'};">${letter}</div>
                     <span style="font-size:.88rem;color:var(--text);">${esc(label)}</span>
@@ -2166,8 +2208,10 @@ function renderEvalStep() {
     document.getElementById('uvContent').innerHTML = html;
 }
 
-function selectEvalOption(qid, el, letter, qi) {
-    _uvAnswers[qid] = letter;
+function selectEvalOption(qid, el, oi, qi) {
+    const optValue = _uvUnit.evalQuestions[qi].options[oi];
+    _uvAnswers[qid] = optValue;
+    const letter = String.fromCharCode(65 + oi);
     // Re-render to highlight
     const card = el.closest('.uv-eval-card');
     card.querySelectorAll('.uv-eval-option').forEach(opt => {

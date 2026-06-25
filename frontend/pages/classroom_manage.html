@@ -1976,25 +1976,29 @@
     // ── Students / People ─────────────────────────────────────────────────────
     async function loadStudents() {
         try {
-            const [studRes, quizRes] = await Promise.all([
+            const [studRes, quizRes, currRes] = await Promise.all([
                 fetch(`${API}/classrooms/${classroomId}/students`, {headers:getAuthHeaders()}),
                 fetch(`${API}/quiz/${classroomId}/student-summary`, {headers:getAuthHeaders()}).catch(()=>null),
+                fetch(`${API}/curriculum/${classroomId}/progress-summary`, {headers:getAuthHeaders()}).catch(()=>null),
             ]);
             const studData  = await studRes.json();
             const quizData  = quizRes ? await quizRes.json().catch(()=>({})) : {};
+            const currData  = currRes ? await currRes.json().catch(()=>({})) : {};
             const students  = studData.success ? (studData.students||[]) : [];
             const quizMap   = quizData.summary || {};   // { userId: { quizzesTaken, bestAccuracy, passCount } }
+            const currMap   = currData.summary  || {};  // { userId: { unitsPassed, topScore } }
+            const totalUnits = currData.totalUnits || 0;
             const count     = students.length;
             document.getElementById('studentsCount').textContent   = count;
             document.getElementById('statStudents').textContent    = count;
             document.getElementById('sidebarStudents').textContent = count;
-            renderPeople(students, quizMap);
+            renderPeople(students, quizMap, currMap, totalUnits);
         } catch(err) {
             document.getElementById('peopleGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load students.</div>`;
         }
     }
 
-    function renderPeople(students, quizMap = {}) {
+    function renderPeople(students, quizMap = {}, currMap = {}, totalUnits = 0) {
         const grid = document.getElementById('peopleGrid');
         if (!students.length) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="empty-state-icon">👥</span><div class="empty-state-title">No students yet</div><div class="empty-state-sub">Share the enrollment key to get started</div></div>`;
@@ -2008,13 +2012,17 @@
             const lang  = (s.selectedLanguage || s.selected_language || 'python').toUpperCase();
             const joined = s.enrolledAt || s.enrolled_at;
             const quiz  = quizMap[String(sid)] || null;
+            const curr  = currMap[String(sid)] || null;
 
-            // Prefer real classroom-quiz activity; fall back to the student profile stats
+            // Prefer quiz activity → curriculum evals → student profile stats
             const acc     = quiz ? Math.round(quiz.overallAccuracy || 0)
+                                 : curr ? (curr.topScore || 0)
                                  : Math.round(s.accuracy || s.accuracy_percent || 0);
             const qs      = quiz ? (quiz.answered || 0)
+                                 : curr ? (curr.answered || 0)
                                  : (s.questionsAnswered || s.questions_answered || 0);
             const correct = quiz ? (quiz.correct || 0)
+                                 : curr ? (curr.correct || 0)
                                  : Math.round(((s.accuracy || 0) / 100) * (s.questionsAnswered || 0));
 
             // Accuracy bar color
@@ -2086,6 +2094,22 @@
                             <span class="pc-stat-label">Joined</span>
                         </div>
                     </div>
+
+                    <!-- Curriculum progress -->
+                    ${curr && curr.unitsPassed > 0
+                        ? `<div class="pc-quiz-row">
+                            <span class="material-symbols-outlined" style="color:#7c3aed;">auto_stories</span>
+                            <div style="flex:1;min-width:0;">
+                                <span style="font-weight:600;color:var(--text);">${curr.unitsPassed}${totalUnits ? ' / ' + totalUnits : ''} unit${curr.unitsPassed !== 1 ? 's' : ''} passed</span>
+                                <span style="color:var(--text-muted);"> &nbsp;·&nbsp; Top score: </span>
+                                <span style="font-weight:700;color:${curr.topScore >= 70 ? '#34d399' : '#f87171'};">${curr.topScore}%</span>
+                            </div>
+                           </div>`
+                        : `<div class="pc-quiz-row" style="color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="color:var(--text-muted);">auto_stories</span>
+                            No units completed yet
+                           </div>`
+                    }
 
                     <!-- Quiz performance -->
                     ${quizRow}

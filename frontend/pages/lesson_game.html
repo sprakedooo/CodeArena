@@ -223,6 +223,44 @@
         .q-option.correct .opt-check { display: block; }
         .q-option.wrong .opt-check   { display: block; }
 
+        /* Question index navigation strip */
+        .q-index-strip {
+            display: flex; flex-wrap: wrap; gap: 5px;
+            justify-content: center; margin: 0 0 14px;
+            padding: 10px 12px;
+            background: var(--bg-surface); border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .q-idx-btn {
+            width: 30px; height: 30px; border-radius: 6px;
+            border: 2px solid var(--border);
+            background: transparent; color: var(--text-muted);
+            font-size: .7rem; font-weight: 700; cursor: pointer;
+            transition: .12s; display: flex; align-items: center; justify-content: center;
+            font-family: 'Press Start 2P', monospace;
+        }
+        .q-idx-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .q-idx-btn.qi-current  { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,.12); }
+        .q-idx-btn.qi-answered { border-color: #06b6d4; color: #06b6d4; background: rgba(6,182,212,.12); }
+        .q-idx-btn.qi-timedout { border-color: #ef4444; color: #f87171; background: rgba(239,68,68,.08); opacity:.75; }
+        .q-idx-btn.qi-flagged  { border-color: #f59e0b; }
+
+        /* Nav buttons row */
+        .nav-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-submit-all {
+            background: linear-gradient(135deg,#10b981,#059669);
+            color: #fff; border: none; font-size: .82rem;
+        }
+        .btn-submit-all:hover { opacity: .9; }
+
+        /* Missed question buttons inside modal */
+        .missed-q-btn {
+            padding: 4px 10px; border-radius: 6px; font-size: .78rem; font-weight: 700;
+            border: 2px solid #ef4444; background: rgba(239,68,68,.1); color: #f87171;
+            cursor: pointer; transition: .12s;
+        }
+        .missed-q-btn:hover { background: rgba(239,68,68,.25); }
+
         /* Fill-blank / Output input */
         .fill-wrap { display: flex; gap: 0.6rem; align-items: stretch; }
         .fill-input {
@@ -566,25 +604,24 @@
             <div class="q-progress-fill" id="progressFill" style="width:0%"></div>
         </div>
 
-        <!-- HUD — Formal Assessment: Question / Timer / Correct -->
-        <div class="hud">
-            <div class="hud-chip">
-                <div class="hud-val" id="hudQ">1/20</div>
-                <div class="hud-lbl">Question</div>
-            </div>
-            <div class="hud-chip hud-timer" id="hudTimerChip">
-                <div class="hud-val" id="hudTimer">30</div>
-                <div class="hud-lbl">Seconds Left</div>
-            </div>
-            <div class="hud-chip hud-correct">
-                <div class="hud-val" id="hudCorrect">0</div>
-                <div class="hud-lbl">Correct</div>
+        <!-- HUD — question counter + timer in one row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.65rem 1.25rem;">
+            <div id="hudQ" style="font-size:0.95rem;font-weight:700;color:var(--text-primary);letter-spacing:0.02em;">Question 1 out of 20</div>
+            <div style="display:flex;align-items:center;gap:1.25rem;">
+                <span id="answeredCount" style="font-size:.82rem;font-weight:600;color:var(--text-secondary);"></span>
+                <span id="globalTimerDisp" style="font-size:.88rem;font-weight:700;font-family:'Press Start 2P',monospace;color:var(--accent-cyan,#06b6d4);"></span>
             </div>
         </div>
         <!-- Hidden legacy IDs so JS doesn't error -->
-        <span id="hudScore"   style="display:none">0</span>
-        <span id="hudStreak"  style="display:none">0</span>
-        <span id="hudCombo"   style="display:none">×1</span>
+        <span id="hudScore"    style="display:none">0</span>
+        <span id="hudStreak"   style="display:none">0</span>
+        <span id="hudCombo"    style="display:none">×1</span>
+        <span id="hudCorrect"  style="display:none">0</span>
+        <span id="hudTimer"    style="display:none">0</span>
+        <span id="hudTimerChip" style="display:none"></span>
+
+        <!-- Question index strip -->
+        <div class="q-index-strip" id="qIndexStrip"></div>
 
         <!-- Question card -->
         <div class="q-card" id="qCard">
@@ -629,20 +666,44 @@
 
         <!-- Keyboard tip -->
         <div class="kbd-tip">
-            <kbd class="kbd">1–4</kbd> select option &nbsp;·&nbsp;
-            <kbd class="kbd">Enter</kbd> next question &nbsp;·&nbsp;
+            <kbd class="kbd">1–4</kbd> select &nbsp;·&nbsp;
+            <kbd class="kbd">←→</kbd> prev/next &nbsp;·&nbsp;
             <kbd class="kbd">H</kbd> hint
         </div>
 
-        <!-- Action row -->
-        <div class="action-row">
-            <button id="nextBtn" class="btn btn-primary btn-next" onclick="nextQuestion()" style="display:none;">
-                Next Question →
+        <!-- Navigation row -->
+        <div class="action-row nav-row">
+            <button id="prevBtn" class="btn btn-secondary" onclick="prevQuestion()" style="font-size:0.82rem;" disabled>
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">arrow_back</span> Prev
             </button>
-            <button class="btn btn-secondary" onclick="quitGame()" style="font-size:0.82rem;">
-                <span class="material-symbols-outlined" style="font-size:0.95rem;">stop</span>
-                Quit
+            <button id="nextBtn" class="btn btn-primary btn-next" onclick="nextQuestion()">
+                Next <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">arrow_forward</span>
             </button>
+            <button id="submitAllBtn" class="btn btn-submit-all" onclick="submitAssessment()">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">check_circle</span> Submit Assessment
+            </button>
+            <button class="btn btn-secondary" onclick="quitGame()" style="font-size:0.82rem;margin-left:auto;">
+                <span class="material-symbols-outlined" style="font-size:0.95rem;">stop</span> Quit
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- UNANSWERED QUESTIONS MODAL -->
+<div id="missedModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:16px;padding:28px 28px 24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="material-symbols-outlined" style="font-size:1.4rem;color:#f59e0b;">warning</span>
+            <span style="font-size:1rem;font-weight:700;color:var(--text);">Unanswered Questions</span>
+        </div>
+        <p style="font-size:.87rem;color:var(--text-secondary);margin:0 0 16px;line-height:1.6;">
+            You have skipped some questions. Unanswered questions will be marked as <strong style="color:#f87171;">wrong</strong>. Go back and answer them, or submit anyway.
+        </p>
+        <div style="font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Unanswered:</div>
+        <div id="missedList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-secondary" onclick="closeMissedModal()" style="font-size:.83rem;">Go Back &amp; Answer</button>
+            <button class="btn" onclick="submitAnyway()" style="background:#ef4444;color:#fff;border:none;font-size:.83rem;">Submit Anyway</button>
         </div>
     </div>
 </div>
@@ -683,7 +744,10 @@
                 <div class="wr-pills" id="wrPills"></div>
             </div>
 
-            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+            <!-- Per-question review -->
+            <div id="questionReview" style="margin-top:16px;text-align:left;"></div>
+
+            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:16px;">
                 <button class="btn btn-primary" onclick="restartGame()" style="font-size:0.85rem;">
                     <span class="material-symbols-outlined" style="font-size:1rem;">replay</span>
                     Play Again
@@ -770,6 +834,10 @@ let hintUsed       = 0;
 let currentHintLevel = 0;
 let currentCorrect = '';   // resolved correct answer for current question
 let orderAnswer    = [];   // for code_ordering: user's chosen line indices
+let userAnswers    = {};   // { qIndex: storedAnswer } — stored without reveal
+let timedOutQs     = new Set(); // question indices where timer expired
+let totalTimerSec  = 30 * 60;  // 30-minute overall countdown
+let totalTimerInt  = null;     // interval handle for global timer
 let setupLang  = 'python';
 let setupLevel = 'beginner';
 const QUESTIONS_PER_LEVEL = 20;
@@ -783,6 +851,7 @@ function saveSession() {
     sessionStorage.setItem(SAVE_KEY, JSON.stringify({
         questions, qIndex, score, streak, bestStreak, multiplier,
         correctCount, sessionResults, setupLang, setupLevel,
+        userAnswers, timedOutQs: [...timedOutQs], totalTimerSec,
         savedAt: Date.now()
     }));
 }
@@ -802,6 +871,42 @@ function loadSession() {
         if (!s.questions?.length || s.qIndex >= s.questions.length) { clearSession(); return null; }
         return s;
     } catch { clearSession(); return null; }
+}
+
+// ── Global 30-minute assessment timer ────────────────────────────────────────
+function startGlobalTimer() {
+    clearInterval(totalTimerInt);
+    renderGlobalTimer();
+    totalTimerInt = setInterval(() => {
+        totalTimerSec--;
+        saveSession();
+        renderGlobalTimer();
+        if (totalTimerSec <= 0) {
+            clearInterval(totalTimerInt);
+            showToast('Time is up! Submitting your assessment.', 'warning');
+            endGame();
+        }
+    }, 1000);
+}
+
+function stopGlobalTimer() { clearInterval(totalTimerInt); }
+
+function renderGlobalTimer() {
+    const el = document.getElementById('globalTimerDisp');
+    if (!el) return;
+    const s   = Math.max(0, totalTimerSec);
+    const m   = Math.floor(s / 60);
+    const sec = String(s % 60).padStart(2, '0');
+    el.textContent = `⏱ ${m}:${sec}`;
+    el.style.color = s <= 120 ? '#ef4444' : s <= 300 ? '#f59e0b' : 'var(--text-muted)';
+}
+
+function updateAnsweredCount() {
+    const el = document.getElementById('answeredCount');
+    if (!el || !questions.length) return;
+    const done = Object.keys(userAnswers).length + timedOutQs.size;
+    el.textContent = `${done} / ${questions.length} answered`;
+    el.style.color = done === questions.length ? '#10b981' : 'var(--text-muted)';
 }
 
 // ── Language picker helpers ───────────────────────────────────────────────────
@@ -891,7 +996,6 @@ function showResumePrompt(saved) {
 function resumeSession() {
     const saved = loadSession();
     if (!saved) return;
-    // Restore state
     questions      = saved.questions;
     qIndex         = saved.qIndex;
     score          = saved.score;
@@ -902,9 +1006,12 @@ function resumeSession() {
     sessionResults = saved.sessionResults;
     setupLang      = saved.setupLang;
     setupLevel     = saved.setupLevel;
-    // Remove banner
+    userAnswers    = saved.userAnswers  || {};
+    timedOutQs     = new Set(saved.timedOutQs || []);
+    totalTimerSec  = saved.totalTimerSec != null ? saved.totalTimerSec : 30 * 60;
     document.getElementById('resumeBanner')?.remove();
     showScreen('game');
+    startGlobalTimer();
     showQuestion();
 }
 
@@ -915,13 +1022,11 @@ function discardSession() {
 
 function handleKeyboard(e) {
     if (document.querySelector('.screen.active')?.id !== 'screenGame') return;
-    // Enter / Space: go to next question after answering
-    if ((e.key === 'Enter' || e.key === ' ') && answered) {
-        e.preventDefault();
-        const nb = document.getElementById('nextBtn');
-        if (nb.style.display !== 'none') nextQuestion();
-        return;
-    }
+    // Arrow keys: navigate questions
+    if (e.key === 'ArrowRight') { e.preventDefault(); nextQuestion(); return; }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); prevQuestion(); return; }
+    // Enter: next question
+    if (e.key === 'Enter') { e.preventDefault(); nextQuestion(); return; }
     if (answered) return;
     // 1–4: select MCQ option
     if (['1','2','3','4'].includes(e.key)) {
@@ -1116,6 +1221,9 @@ async function loadQuestions() {
 
         qIndex = 0; score = 0; streak = 0; bestStreak = 0;
         multiplier = 1; correctCount = 0; sessionResults = [];
+        userAnswers = {}; timedOutQs = new Set();
+        totalTimerSec = 30 * 60;
+        startGlobalTimer();
         saveSession();   // save initial state so resume is available immediately
         showQuestion();
     } catch (err) {
@@ -1163,8 +1271,10 @@ function showQuestion() {
     if (qIndex >= questions.length) { endGame(); return; }
 
     const q    = questions[qIndex];
-    answered   = false;
-    orderAnswer = [];
+    const alreadyAnswered = userAnswers[qIndex] !== undefined;
+    const timedOut        = timedOutQs.has(qIndex);
+    answered   = alreadyAnswered || timedOut;
+    orderAnswer = alreadyAnswered && Array.isArray(userAnswers[qIndex]) ? [...userAnswers[qIndex]] : [];
     hintUsed   = 0;
     currentHintLevel = 0;
     const type = q.questionType || 'multiple_choice';
@@ -1174,8 +1284,9 @@ function showQuestion() {
     const card = document.getElementById('qCard');
     card.className = 'q-card fade-in';
     document.getElementById('qFeedback').className = 'q-feedback';
-    document.getElementById('qFeedback').innerHTML = '';
-    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('qFeedback').innerHTML = timedOut
+        ? '<span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">timer_off</span> <em style="font-size:.82rem;color:var(--text-muted);">Time ran out on this question</em>'
+        : '';
     document.getElementById('hintText').className   = 'hint-text';
     document.getElementById('hintText').innerHTML   = '';
     document.getElementById('hintSpinner').className = 'hint-spinner';
@@ -1196,7 +1307,7 @@ function showQuestion() {
 
     // Meta
     document.getElementById('qMeta').textContent  = `Q${qIndex+1} of ${questions.length} · ${setupLevel}`;
-    document.getElementById('hudQ').textContent   = `${qIndex+1}/${questions.length}`;
+    document.getElementById('hudQ').textContent   = `Question ${qIndex+1} out of ${questions.length}`;
     const topic = q.topic || q.category || setupLang;
     document.getElementById('qTopic').textContent = topic;
 
@@ -1229,14 +1340,41 @@ function showQuestion() {
     const optsEl = document.getElementById('qOptions');
     if (type === 'fill_blank' || type === 'output_prediction') {
         renderTextInput(optsEl, type);
+        // Restore saved text answer
+        if (alreadyAnswered) {
+            const inp = document.getElementById('fillInput');
+            if (inp) { inp.value = userAnswers[qIndex]; inp.disabled = true; inp.style.borderColor = '#06b6d4'; }
+            const btn = document.getElementById('fillSubmitBtn');
+            if (btn) { btn.textContent = 'Submitted ✓'; btn.style.background = '#374151'; btn.style.color = '#9ca3af'; btn.style.cursor = 'default'; btn.disabled = true; }
+            const cw = document.getElementById('fillChangeWrap');
+            if (cw) cw.style.display = 'block';
+        }
     } else if (type === 'code_ordering') {
         renderCodeOrdering(optsEl, q);
     } else {
         renderMCQ(optsEl, q);
+        // Restore previously selected MCQ option
+        if (alreadyAnswered) {
+            const saved = userAnswers[qIndex];
+            optsEl.querySelectorAll('.q-option').forEach(btn => {
+                if (btn.dataset.value === saved) btn.classList.add('selected');
+            });
+        }
     }
 
-    // Timer (ordering gets 60s, others 30s)
-    startTimer(q.time_limit || (type === 'code_ordering' ? 60 : 30));
+    // Disable inputs if already answered or timed out
+    if (answered) {
+        document.querySelectorAll('.q-option,.fill-input,#coSubmitBtn').forEach(el => {
+            el.disabled = true;
+            if (el.style) el.style.pointerEvents = 'none';
+        });
+    }
+
+    // No per-question timer — students navigate freely
+    clearInterval(timer);
+
+    updateIndexStrip();
+    updateNavButtons();
 }
 
 // Strip leading "A) ", "B. ", "C) " etc. from option text for display only
@@ -1263,29 +1401,16 @@ function renderMCQ(container, q) {
 }
 
 function selectMCQ(btn, selected) {
-    if (answered) return;
+    if (timedOutQs.has(qIndex)) return;
+    userAnswers[qIndex] = selected;
     answered = true;
-    clearInterval(timer);
 
-    const isCorrect = selected.trim() === currentCorrect.trim();
-    const q         = questions[qIndex];
-    const topic     = q.topic || q.category || setupLang;
-    sessionResults.push({ topic, isCorrect });
+    document.querySelectorAll('.q-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
 
-    document.querySelectorAll('.q-option').forEach(b => {
-        b.disabled = true;
-        const txt = b.querySelector('.opt-text')?.textContent?.trim();
-        if (txt === currentCorrect.trim()) {
-            b.classList.add('correct');
-            b.querySelector('.opt-check').innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>';
-        }
-    });
-    if (!isCorrect) {
-        btn.classList.add('wrong');
-        btn.querySelector('.opt-check').innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">cancel</span>';
-    }
-
-    recordResult(isCorrect, q);
+    saveSession();
+    updateIndexStrip();
+    updateNavButtons();
 }
 
 // ── Text input renderer (fill_blank / output_prediction) ─────────────────────
@@ -1300,39 +1425,70 @@ function renderTextInput(container, type) {
                    autocomplete="off" autocorrect="off"
                    autocapitalize="off" spellcheck="false"
                    onkeydown="if(event.key==='Enter'&&!answered)submitTextAnswer()">
-            <button class="btn btn-primary" onclick="submitTextAnswer()"
+            <button class="btn btn-primary" id="fillSubmitBtn" onclick="submitTextAnswer()"
                     style="white-space:nowrap;padding:0 1rem;font-size:0.85rem;">
                 Submit
             </button>
+        </div>
+        <div id="fillChangeWrap" style="display:none;margin-top:6px;">
+            <button onclick="changeTextAnswer()" style="background:none;border:none;font-size:.78rem;color:var(--primary);cursor:pointer;text-decoration:underline;">Change answer</button>
         </div>
     `;
     setTimeout(() => document.getElementById('fillInput')?.focus(), 60);
 }
 
 function submitTextAnswer() {
-    if (answered) return;
+    if (answered || timedOutQs.has(qIndex)) return;
     const input = document.getElementById('fillInput');
     if (!input) return;
     const selected = input.value.trim();
     if (!selected) { input.focus(); return; }
 
+    userAnswers[qIndex] = selected;
     answered = true;
-    clearInterval(timer);
     input.disabled = true;
+    input.style.borderColor = '#06b6d4';
 
-    const isCorrect = selected.toLowerCase() === currentCorrect.toLowerCase();
-    const q         = questions[qIndex];
-    sessionResults.push({ topic: q.topic || setupLang, isCorrect });
-
-    input.classList.add(isCorrect ? 'correct' : 'wrong');
-    if (!isCorrect) {
-        const correctDiv = document.createElement('div');
-        correctDiv.className = 'fill-correct-ans';
-        correctDiv.innerHTML = `✓ Correct answer: <strong>${esc(currentCorrect)}</strong>`;
-        input.closest('.fill-wrap').insertAdjacentElement('afterend', correctDiv);
+    // Update Submit button → "Submitted ✓" + show Change link
+    const btn = document.getElementById('fillSubmitBtn');
+    if (btn) {
+        btn.textContent = 'Submitted ✓';
+        btn.style.background = '#374151';
+        btn.style.color = '#9ca3af';
+        btn.style.cursor = 'default';
+        btn.disabled = true;
     }
+    const changeWrap = document.getElementById('fillChangeWrap');
+    if (changeWrap) changeWrap.style.display = 'block';
 
-    recordResult(isCorrect, q);
+    saveSession();
+    updateIndexStrip();
+    updateNavButtons();
+}
+
+function changeTextAnswer() {
+    const input = document.getElementById('fillInput');
+    if (!input) return;
+    delete userAnswers[qIndex];
+    answered = false;
+    input.disabled = false;
+    input.style.borderColor = '';
+    input.focus();
+
+    const btn = document.getElementById('fillSubmitBtn');
+    if (btn) {
+        btn.textContent = 'Submit';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.cursor = '';
+        btn.disabled = false;
+    }
+    const changeWrap = document.getElementById('fillChangeWrap');
+    if (changeWrap) changeWrap.style.display = 'none';
+
+    saveSession();
+    updateIndexStrip();
+    updateNavButtons();
 }
 
 // ── Code ordering renderer ────────────────────────────────────────────────────
@@ -1412,86 +1568,54 @@ function coRemoveLine(btn, origIdx) {
 }
 
 function checkCodeOrder() {
-    if (answered) return;
+    if (answered || timedOutQs.has(qIndex)) return;
     answered = true;
-    clearInterval(timer);
 
-    const q            = questions[qIndex];
-    const correctOrder = q.correctOrder || q.codeLines.map((_, i) => i);
-    const isCorrect    = orderAnswer.length === correctOrder.length &&
-                         orderAnswer.every((v, i) => v === correctOrder[i]);
-    sessionResults.push({ topic: q.topic || setupLang, isCorrect });
+    userAnswers[qIndex] = [...orderAnswer]; // store order indices
 
-    // Colour each line
-    document.querySelectorAll('.co-answer-line').forEach((el, i) => {
-        const correct = orderAnswer[i] === correctOrder[i];
-        el.classList.add(correct ? 'line-correct' : 'line-wrong');
-    });
-
-    // Disable interactions
+    // Disable interactions (answer locked in)
     document.querySelectorAll('.co-line,.co-remove,#coSubmitBtn').forEach(el => {
         el.style.pointerEvents = 'none';
         if (el.tagName === 'BUTTON') el.disabled = true;
     });
 
-    // If wrong, show correct order
-    if (!isCorrect) {
-        const wrap   = document.querySelector('.code-order-wrap');
-        const reveal = document.createElement('div');
-        reveal.className = 'co-correct-order';
-        reveal.innerHTML = `<div class="co-correct-title">✓ Correct order:</div>` +
-            correctOrder.map(i => `<code>${esc(q.codeLines[i])}</code>`).join('');
-        wrap.appendChild(reveal);
-    }
-
-    recordResult(isCorrect, q);
+    updateIndexStrip();
+    updateNavButtons();
 }
 
-// ── Record result & update HUD ────────────────────────────────────────────────
-function recordResult(isCorrect, q) {
-    if (isCorrect) {
-        streak++; correctCount++;
-        bestStreak = Math.max(bestStreak, streak);
-        multiplier = 1; // No multiplier in formal assessment
-        const pts = 10;
-        score += pts;
-    } else {
-        streak = 0; multiplier = 1;
-    }
-
-    document.getElementById('hudScore').textContent   = score;
-    document.getElementById('hudStreak').textContent  = streak;
-    document.getElementById('hudCombo').textContent   = `×${multiplier}`;
-    document.getElementById('hudCorrect').textContent = correctCount;
-
-    // Card border flash
-    const card = document.getElementById('qCard');
-    card.classList.add(isCorrect ? 'correct-border' : 'wrong-border');
-
-    // Hide quick hint (answer is in, no need for it)
-    document.getElementById('quickHintArea').style.display = 'none';
-
-    // Show feedback
-    showFeedback(isCorrect, q);
-
-    // Unlock all hint buttons (post-answer)
-    document.getElementById('hintBtn1').disabled = false;
-    document.getElementById('hintBtn2').disabled = false;
-    document.getElementById('hintBtn3').disabled = false;
-
-    // Show Next button
-    document.getElementById('nextBtn').style.display = 'block';
+// ── Index strip & nav button helpers ─────────────────────────────────────────
+function updateIndexStrip() {
+    const strip = document.getElementById('qIndexStrip');
+    if (!strip || !questions.length) return;
+    strip.innerHTML = questions.map((_, i) => {
+        let cls = 'q-idx-btn';
+        if (i === qIndex)           cls += ' qi-current';
+        else if (timedOutQs.has(i)) cls += ' qi-timedout';
+        else if (userAnswers[i] !== undefined) cls += ' qi-answered';
+        return `<button class="${cls}" onclick="jumpToQuestion(${i})" title="Question ${i+1}">${i+1}</button>`;
+    }).join('');
 }
 
-function showFeedback(isCorrect, q) {
-    const fb      = document.getElementById('qFeedback');
-    const explain = q.explanation ? `<span class="fb-explanation">${esc(q.explanation)}</span>` : '';
-    fb.className  = `q-feedback ${isCorrect ? 'correct' : 'wrong'}`;
-    if (isCorrect) {
-        fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">check_circle</span> Correct.${explain}`;
-    } else {
-        fb.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">cancel</span> Incorrect.${explain}`;
+function updateNavButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    if (prevBtn) prevBtn.disabled = qIndex === 0;
+    if (nextBtn) {
+        nextBtn.style.display = '';  // ensure visible after skeleton hides it
+        if (qIndex >= questions.length - 1) {
+            nextBtn.innerHTML = 'Last <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">check</span>';
+            nextBtn.disabled = true;
+        } else {
+            nextBtn.innerHTML = 'Next <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;">arrow_forward</span>';
+            nextBtn.disabled = false;
+        }
     }
+}
+
+function jumpToQuestion(idx) {
+    if (idx < 0 || idx >= questions.length) return;
+    qIndex = idx;
+    showQuestion();
 }
 
 // ── Quick hint toggle ─────────────────────────────────────────────────────────
@@ -1518,47 +1642,84 @@ function startTimer(seconds) {
 
 function timeUp() {
     if (answered) return;
-    answered  = true;
-    streak    = 0; multiplier = 1;
-    document.getElementById('hudStreak').textContent = '0';
-    document.getElementById('hudCombo').textContent  = '×1';
+    answered = true;
+    timedOutQs.add(qIndex);
 
-    const q     = questions[qIndex];
-    const topic = q.topic || q.category || setupLang;
-    sessionResults.push({ topic, isCorrect: false });
-
-    // Disable all interactive question elements
+    // Disable inputs for this question
     document.querySelectorAll('.q-option,.fill-input,#coSubmitBtn').forEach(el => {
         el.disabled = true;
         if (el.style) el.style.pointerEvents = 'none';
     });
 
-    // Show correct answer on time-up
-    const correctText = currentCorrect;
-    document.querySelectorAll('.q-option').forEach(b => {
-        const txt = b.querySelector('.opt-text')?.textContent?.trim();
-        if (txt === correctText.trim()) {
-            b.classList.add('correct');
-            b.querySelector('.opt-check').innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check_circle</span>';
+    // Brief "Time's up" notice on the card without revealing the answer
+    const fb = document.getElementById('qFeedback');
+    fb.className = 'q-feedback wrong';
+    fb.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">timer_off</span> Time\'s up — moving on…';
+
+    updateIndexStrip();
+
+    // Auto-advance to next unanswered after a short pause
+    setTimeout(() => {
+        const nextUnanswered = questions.findIndex(
+            (_, i) => i > qIndex && userAnswers[i] === undefined && !timedOutQs.has(i)
+        );
+        if (nextUnanswered !== -1) {
+            qIndex = nextUnanswered;
+            showQuestion();
+        } else {
+            updateNavButtons();
         }
-    });
-
-    const fb  = document.getElementById('qFeedback');
-    fb.className  = 'q-feedback wrong';
-    const explain = q.explanation ? `<span class="fb-explanation">${esc(q.explanation)}</span>` : '';
-    fb.innerHTML  = `<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">timer_off</span> Time's up!${correctText ? ` &nbsp;Answer: <strong>${esc(correctText)}</strong>` : ''}${explain}`;
-
-    document.getElementById('quickHintArea').style.display = 'none';
-    document.getElementById('nextBtn').style.display = 'block';
-    document.getElementById('hintBtn1').disabled = false;
-    document.getElementById('hintBtn2').disabled = false;
-    document.getElementById('hintBtn3').disabled = false;
+    }, 1200);
 }
 
 function nextQuestion() {
-    qIndex++;
-    saveSession();   // persist after every question advance
-    showQuestion();
+    if (qIndex < questions.length - 1) {
+        qIndex++;
+        saveSession();
+        showQuestion();
+    }
+}
+
+function prevQuestion() {
+    if (qIndex > 0) {
+        qIndex--;
+        saveSession();
+        showQuestion();
+    }
+}
+
+function submitAssessment() {
+    const unanswered = questions
+        .map((_, i) => i)
+        .filter(i => userAnswers[i] === undefined && !timedOutQs.has(i));
+
+    if (unanswered.length > 0) {
+        // Highlight unanswered in index strip
+        unanswered.forEach(i => {
+            const btn = document.querySelector(`#qIndexStrip button:nth-child(${i + 1})`);
+            if (btn) {
+                btn.style.borderColor = '#ef4444';
+                btn.style.color       = '#f87171';
+                btn.style.background  = 'rgba(239,68,68,.15)';
+            }
+        });
+        // Show modal
+        document.getElementById('missedModal').style.display = 'flex';
+        document.getElementById('missedList').innerHTML = unanswered.map(i =>
+            `<button class="missed-q-btn" onclick="closeMissedModal();jumpToQuestion(${i})">Q${i + 1}</button>`
+        ).join('');
+        return;
+    }
+    endGame();
+}
+
+function closeMissedModal() {
+    document.getElementById('missedModal').style.display = 'none';
+}
+
+function submitAnyway() {
+    closeMissedModal();
+    endGame();
 }
 
 // ── AI Hints ──────────────────────────────────────────────────────────────────
@@ -1614,8 +1775,32 @@ async function requestHint(level) {
 // ── End game ──────────────────────────────────────────────────────────────────
 async function endGame() {
     clearInterval(timer);
-    clearSession();   // completed — no resume needed
+    stopGlobalTimer();
+    clearSession();
     showScreen('end');
+
+    // Evaluate all stored answers now
+    correctCount  = 0;
+    sessionResults = [];
+    questions.forEach((q, i) => {
+        const stored  = userAnswers[i];
+        const timedOut = timedOutQs.has(i);
+        const topic   = q.topic || q.category || setupLang;
+        let isCorrect = false;
+        if (!timedOut && stored !== undefined) {
+            const correct = resolveCorrectAnswer(q);
+            if (Array.isArray(stored)) {
+                const correctOrder = q.correctOrder || q.codeLines.map((_, idx) => idx);
+                isCorrect = stored.length === correctOrder.length &&
+                            stored.every((v, idx) => v === correctOrder[idx]);
+            } else {
+                isCorrect = String(stored).trim().toLowerCase() === String(correct).trim().toLowerCase();
+            }
+        }
+        if (isCorrect) correctCount++;
+        sessionResults.push({ topic, isCorrect });
+    });
+    score = correctCount * 10;
 
     const total    = questions.length;
     const accuracy = total > 0 ? Math.round(correctCount / total * 100) : 0;
@@ -1682,6 +1867,35 @@ async function endGame() {
         ).join('');
     } else {
         document.getElementById('weaknessReport').style.display = 'none';
+    }
+
+    // Per-question review table
+    const reviewEl = document.getElementById('questionReview');
+    if (reviewEl) {
+        reviewEl.innerHTML = `
+            <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:12px;">Question Review</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+            ${questions.map((q, i) => {
+                const timedOut  = timedOutQs.has(i);
+                const stored    = userAnswers[i];
+                const correct   = resolveCorrectAnswer(q);
+                const isCorrect = sessionResults[i]?.isCorrect || false;
+                const icon      = timedOut ? '⏱' : isCorrect ? '✓' : '✗';
+                const color     = timedOut ? '#f59e0b' : isCorrect ? '#34d399' : '#f87171';
+                const bg        = timedOut ? 'rgba(245,158,11,.07)' : isCorrect ? 'rgba(16,185,129,.07)' : 'rgba(239,68,68,.07)';
+                return `<div style="background:${bg};border:1px solid ${color}33;border-radius:8px;padding:10px 14px;display:flex;gap:12px;align-items:flex-start;">
+                    <span style="font-size:1rem;color:${color};flex-shrink:0;margin-top:1px;">${icon}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:.82rem;color:var(--text);font-weight:500;margin-bottom:4px;">Q${i+1}. ${esc(q.question||q.question_text||'')}</div>
+                        <div style="font-size:.75rem;color:${color};">
+                            Your answer: <strong>${esc(timedOut ? 'Time ran out' : (Array.isArray(stored) ? '(code order)' : String(stored ?? '—')))}</strong>
+                        </div>
+                        ${!isCorrect && !timedOut ? `<div style="font-size:.75rem;color:#34d399;margin-top:2px;">Correct: <strong>${esc(String(correct))}</strong></div>` : ''}
+                        ${timedOut ? `<div style="font-size:.75rem;color:#34d399;margin-top:2px;">Correct: <strong>${esc(String(correct))}</strong></div>` : ''}
+                    </div>
+                </div>`;
+            }).join('')}
+            </div>`;
     }
 
     // Save XP + weaknesses to DB (non-blocking)

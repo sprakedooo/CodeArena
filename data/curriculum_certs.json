@@ -9,5 +9,16 @@
     "levelName": "Beginner",
     "score": 100,
     "issuedAt": "2026-06-10T23:22:09.849Z"
+  },
+  {
+    "id": "cert_1782348373818_dtnk",
+    "userId": 4,
+    "classroomId": "1",
+    "classroomName": "Python101",
+    "language": "python",
+    "levelId": "lvl_1782222000408_z0gsb",
+    "levelName": "Beginner",
+    "score": 90,
+    "issuedAt": "2026-06-25T00:46:13.818Z"
   }
 ]
