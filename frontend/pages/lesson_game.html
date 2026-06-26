@@ -1351,6 +1351,23 @@ function showQuestion() {
         }
     } else if (type === 'code_ordering') {
         renderCodeOrdering(optsEl, q);
+        // Restore submitted state when revisiting
+        if (alreadyAnswered && Array.isArray(userAnswers[qIndex])) {
+            // Reset orderAnswer before replay to avoid double-counting
+            orderAnswer = [];
+            answered = false;
+            userAnswers[qIndex].forEach(origIdx => {
+                const srcEl = document.querySelector(`.co-line[data-orig="${origIdx}"]`);
+                if (srcEl) coAddLine(srcEl);
+            });
+            answered = true;
+            // Lock UI and show submitted state
+            document.querySelectorAll('.co-line,.co-remove').forEach(el => { el.style.pointerEvents = 'none'; });
+            const btn = document.getElementById('coSubmitBtn');
+            if (btn) { btn.textContent = 'Submitted ✓'; btn.style.background = '#374151'; btn.style.color = '#9ca3af'; btn.style.cursor = 'default'; btn.disabled = true; btn.style.display = 'flex'; }
+            const cw = document.getElementById('coChangeWrap');
+            if (cw) cw.style.display = 'block';
+        }
     } else {
         renderMCQ(optsEl, q);
         // Restore previously selected MCQ option
@@ -1515,6 +1532,9 @@ function renderCodeOrdering(container, q) {
                     style="margin-top:0.75rem;justify-content:center;width:100%;display:none;">
                 ✓ Submit Order
             </button>
+            <div id="coChangeWrap" style="display:none;margin-top:6px;text-align:center;">
+                <button onclick="changeCodeOrder()" style="background:none;border:none;font-size:.78rem;color:var(--primary);cursor:pointer;text-decoration:underline;">Change answer</button>
+            </div>
         </div>`;
 }
 
@@ -1574,11 +1594,51 @@ function checkCodeOrder() {
     userAnswers[qIndex] = [...orderAnswer]; // store order indices
 
     // Disable interactions (answer locked in)
-    document.querySelectorAll('.co-line,.co-remove,#coSubmitBtn').forEach(el => {
+    document.querySelectorAll('.co-line,.co-remove').forEach(el => {
         el.style.pointerEvents = 'none';
-        if (el.tagName === 'BUTTON') el.disabled = true;
     });
 
+    // Update Submit button → "Submitted ✓" + show Change link
+    const btn = document.getElementById('coSubmitBtn');
+    if (btn) {
+        btn.textContent = 'Submitted ✓';
+        btn.style.background = '#374151';
+        btn.style.color = '#9ca3af';
+        btn.style.cursor = 'default';
+        btn.disabled = true;
+        btn.style.display = 'flex';
+    }
+    const cw = document.getElementById('coChangeWrap');
+    if (cw) cw.style.display = 'block';
+
+    saveSession();
+    updateIndexStrip();
+    updateNavButtons();
+}
+
+function changeCodeOrder() {
+    if (timedOutQs.has(qIndex)) return;
+    answered = false;
+    delete userAnswers[qIndex];
+
+    // Re-enable source lines and remove buttons
+    document.querySelectorAll('.co-line,.co-remove').forEach(el => {
+        el.style.pointerEvents = '';
+    });
+
+    // Restore Submit button to purple
+    const btn = document.getElementById('coSubmitBtn');
+    if (btn) {
+        btn.textContent = '✓ Submit Order';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.cursor = '';
+        btn.disabled = false;
+    }
+    const cw = document.getElementById('coChangeWrap');
+    if (cw) cw.style.display = 'none';
+
+    saveSession();
     updateIndexStrip();
     updateNavButtons();
 }
