@@ -456,7 +456,9 @@ function buildLevelStatus(userId, cid, language) {
 
 /** Build per-unit progress for a student in a classroom (with level + unit gating). */
 function buildStudentProgress(userId, cid, language) {
-    const uid = String(userId);
+    const uid  = String(userId);
+    const curr = getCurr(cid);
+    const lang = language || curr.language || '';
     const result = {};
     const units = allUnits(cid);
     const levelStatus = buildLevelStatus(userId, cid, language);
@@ -468,11 +470,14 @@ function buildStudentProgress(userId, cid, language) {
 
         const levelUnlocked = levelStatus[unit.levelId]?.unlocked !== false;
 
+        // If the student passed the Technical Assessment for this level, all units in it unlock.
+        const levelMastered = lang && masteryService.hasMastered(uid, lang, unit.levelName);
+
         // Within an unlocked level: first unit open, others unlock after the previous unit's eval
         const levelUnits = units.filter(u => u.levelId === unit.levelId).sort((a,b) => a.order - b.order);
         const posInLevel = levelUnits.findIndex(u => u.id === unit.id);
         let unitUnlocked;
-        if (posInLevel === 0) {
+        if (levelMastered || posInLevel === 0) {
             unitUnlocked = true;
         } else {
             const prevUnit = levelUnits[posInLevel - 1];
