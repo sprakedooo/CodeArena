@@ -1144,22 +1144,31 @@ async function loadMyProgress() {
         const lvlEl = document.getElementById('statLevel');
         if (lvlEl) lvlEl.textContent = level;
 
+        // Also sync curriculum lesson progress into the sidebar bar
+        syncCurriculumStats();
+
     } catch (e) { console.error('loadMyProgress error:', e); }
 }
 
 // ── Curriculum stats sync ──────────────────────────────────────────────────────
 async function syncCurriculumStats() {
-    // If _currProgress not loaded yet, fetch it now
-    if (!_currProgress || !Object.keys(_currProgress).length) {
+    const lang = encodeURIComponent(classroomLang || 'python');
+    // Fetch curriculum + progress together if not loaded yet
+    if (!_curriculum || !_currProgress || !Object.keys(_currProgress).length) {
         try {
-            const r = await fetch(API + `/curriculum/${classroomId}/my-progress`, { headers: getAuthHeaders() });
+            const r = await fetch(API + `/curriculum/${classroomId}/student?language=${lang}`, { headers: getAuthHeaders() });
             const d = await r.json();
-            if (d.progress) _currProgress = d.progress;
+            if (d.curriculum) _curriculum = d.curriculum;
+            if (d.progress)   _currProgress = d.progress;
+            if (d.levelStatus) _levelStatus = d.levelStatus;
         } catch {}
     }
     const passed = Object.values(_currProgress).filter(p => p.evalPassed).length;
+    const totalUnits = (_curriculum?.levels || []).reduce((s, lvl) => s + (lvl.units || []).length, 0);
+
     const s = document.getElementById('statLessons');
     if (s) s.textContent = passed;
+    updateProgressSidebar(passed, totalUnits);
 }
 
 // ── Leaderboard ────────────────────────────────────────────────────────────────
