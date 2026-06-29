@@ -1126,8 +1126,20 @@ async function loadMyProgress() {
         const level    = langProg.level || (overallData.byLanguage?.[lang]?.level) || 'beginner';
 
         // Per-language accuracy (more relevant than global if classroom has a language)
-        const langAcc  = Math.round(langProg.accuracy || overall.accuracy || 0);
+        const quizAcc  = Math.round(langProg.accuracy || overall.accuracy || 0);
         const langQs   = langProg.questionsAnswered || qs;
+
+        // Fall back to curriculum unit eval average if no quiz game data yet
+        let langAcc = quizAcc;
+        if (!langAcc) {
+            await syncCurriculumStats(); // ensure _currProgress is loaded
+            const evalScores = Object.values(_currProgress)
+                .filter(p => p.evalScore > 0)
+                .map(p => p.evalScore);
+            if (evalScores.length) {
+                langAcc = Math.round(evalScores.reduce((a, b) => a + b, 0) / evalScores.length);
+            }
+        }
 
         document.getElementById('accuracyTxt').textContent  = langAcc + '%';
         document.getElementById('accuracyBar').style.width  = langAcc + '%';
