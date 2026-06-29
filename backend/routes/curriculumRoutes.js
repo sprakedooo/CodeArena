@@ -515,12 +515,27 @@ router.get('/:cid', authMiddleware, (req, res) => {
 });
 
 // ── GET /:cid/student — curriculum + student progress ─────────────────────────
-router.get('/:cid/student', authMiddleware, (req, res) => {
+router.get('/:cid/student', authMiddleware, async (req, res) => {
     const cid  = req.params.cid;
     const curr = getCurr(cid);
     const language = (req.query.language || curr.language || '').toLowerCase();
     // Remember the classroom language for server-side level gating
     if (language && curr.language !== language) { curr.language = language; persistCurriculum(); }
+
+    // Backfill mastery from MySQL certificates so students who passed the
+    // Technical Assessment before mastery tracking existed still get unlocked.
+    if (dbService.isDbAvailable()) {
+        try {
+            const certs = await db.query(
+                'SELECT language_code, level, accuracy FROM certificates WHERE user_id = ? AND accuracy >= 70',
+                [req.user.id]
+            );
+            for (const c of (certs || [])) {
+                masteryService.recordMastery(req.user.id, c.language_code, c.level, 'assessment');
+            }
+        } catch (e) { /* non-fatal */ }
+    }
+
     const prog        = buildStudentProgress(req.user.id, cid, language);
     const levelStatus = buildLevelStatus(req.user.id, cid, language);
     // Strip correct answers from eval questions for students
