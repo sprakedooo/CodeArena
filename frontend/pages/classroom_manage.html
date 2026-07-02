@@ -2007,12 +2007,13 @@
         grid.innerHTML = students.map(s => {
             const sid   = s.id || s.student_id || s.user_id;
             const name  = s.fullName || s.full_name || 'Student';
-            const level = (curr?.currentLevel || s.currentLevel || s.current_level || 'beginner').toLowerCase();
             const xp    = s.totalXp || s.total_xp || 0;
             const lang  = (s.selectedLanguage || s.selected_language || 'python').toUpperCase();
             const joined = s.enrolledAt || s.enrolled_at;
             const quiz  = quizMap[String(sid)] || null;
             const curr  = currMap[String(sid)] || null;
+            // Classroom curriculum level takes priority over global quiz level
+            const level = (curr?.currentLevel || s.currentLevel || s.current_level || 'beginner').toLowerCase();
 
             // Prefer quiz activity → curriculum evals → student profile stats
             const acc     = quiz ? Math.round(quiz.overallAccuracy || 0)
