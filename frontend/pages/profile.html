@@ -733,6 +733,46 @@ async function loadCertificates() {
         try { certs = JSON.parse(localStorage.getItem('certificates') || '[]').reverse().map(c => ({ type:'arena', ...c })); } catch {}
     }
 
+    // 1b. Recover any certs from localStorage assess_* keys that aren't in DB yet.
+    // This handles the case where a student passed at 70-74% before the 75% threshold
+    // was lowered to 70%, so no cert was ever issued despite passing.
+    const LANGS  = ['python', 'javascript', 'java', 'cpp'];
+    const LEVELS = ['beginner', 'intermediate', 'advanced'];
+    const missingCertSaves = [];
+    for (const lang of LANGS) {
+        for (const lvl of LEVELS) {
+            const passed = localStorage.getItem(`assess_${lang}_${lvl}`) === 'true';
+            if (!passed) continue;
+            const already = certs.some(c => c.type === 'arena' && c.lang === lang && c.level === lvl);
+            if (already) continue;
+            // Passed the assessment but no cert recorded — save it now (accuracy = 70 min).
+            missingCertSaves.push({ lang, lvl });
+        }
+    }
+    if (missingCertSaves.length && token) {
+        await Promise.all(missingCertSaves.map(({ lang, lvl }) =>
+            fetch(`${API}/certificates`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ language: lang, level: lvl, mastery: 'Proficient', score: 0, accuracy: 70 })
+            }).catch(() => {})
+        ));
+        // Re-fetch certs from DB now that they're saved
+        try {
+            const res = await fetch(`${API}/certificates/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.ok) {
+                const data = await res.json();
+                certs = (data.certificates || []).map(c => ({
+                    type: 'arena',
+                    lang: c.language, langName: capitalize(c.language || ''),
+                    level: c.level, mastery: c.mastery,
+                    score: c.score, accuracy: c.accuracy,
+                    dateStr: c.issued_at ? new Date(c.issued_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : ''
+                }));
+            }
+        } catch { /* keep existing certs array */ }
+    }
+
     // 2. Curriculum (classroom level) certificates
     try {
         const res2 = await fetch(`${API}/curriculum/certs-for-user/${me.id}`, { headers: { Authorization: `Bearer ${token}` } });
