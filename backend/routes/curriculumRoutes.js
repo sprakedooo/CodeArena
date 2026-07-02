@@ -909,7 +909,14 @@ router.get('/:cid/progress-summary', authMiddleware, (req, res) => {
     const unitIds = new Set(units.map(u => u.id));
     const totalUnits = units.length;
 
+    // Build level order from curriculum for currentLevel derivation
+    const curr = Object.values(curricula).find(c => String(c.id) === String(cid));
+    const levelOrder = (curr?.levels || []).map(l => (l.name || '').toLowerCase());
+
     const summary = {};
+    // Track highest level with any activity per user: { uid: levelName }
+    const userHighestLevel = {};
+
     for (const [key, p] of Object.entries(progress)) {
         const firstUs = key.indexOf('_');
         if (firstUs < 0) continue;
@@ -921,11 +928,24 @@ router.get('/:cid/progress-summary', authMiddleware, (req, res) => {
             summary[uid].unitsPassed++;
             summary[uid].topScore = Math.max(summary[uid].topScore, p.evalScore || 0);
         }
+        // Track the highest curriculum level this student has touched
+        const unitLevelName = (unitMap[unitId]?.levelName || '').toLowerCase();
+        if (unitLevelName) {
+            const prev = userHighestLevel[uid];
+            if (!prev || levelOrder.indexOf(unitLevelName) > levelOrder.indexOf(prev)) {
+                userHighestLevel[uid] = unitLevelName;
+            }
+        }
         // Tally eval questions answered/correct from best score × question count
         const qCount   = (unitMap[unitId]?.evalQuestions || []).length;
         const attempts = p.attempts || (p.evalScore > 0 ? 1 : 0);
         summary[uid].answered += qCount * attempts;
         summary[uid].correct  += Math.round((p.evalScore || 0) / 100 * qCount);
+    }
+
+    // Attach currentLevel to each summary entry
+    for (const uid of Object.keys(summary)) {
+        summary[uid].currentLevel = userHighestLevel[uid] || (levelOrder[0] || 'beginner');
     }
 
     res.json({ success: true, summary, totalUnits });

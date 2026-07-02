@@ -2007,7 +2007,7 @@
         grid.innerHTML = students.map(s => {
             const sid   = s.id || s.student_id || s.user_id;
             const name  = s.fullName || s.full_name || 'Student';
-            const level = (s.currentLevel || s.current_level || 'beginner').toLowerCase();
+            const level = (curr?.currentLevel || s.currentLevel || s.current_level || 'beginner').toLowerCase();
             const xp    = s.totalXp || s.total_xp || 0;
             const lang  = (s.selectedLanguage || s.selected_language || 'python').toUpperCase();
             const joined = s.enrolledAt || s.enrolled_at;
