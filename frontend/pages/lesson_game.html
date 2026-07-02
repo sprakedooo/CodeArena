@@ -576,14 +576,14 @@
                 <div>
                     <div class="cert-callout-title">🎓 Earn a Certificate</div>
                     <div class="cert-callout-desc">
-                        Score <strong>75% or higher</strong> to earn your official
+                        Score <strong>70% or higher</strong> to earn your official
                         <strong id="certLevelPreview">Beginner</strong> certificate for
                         <strong id="certLangPreview">Python</strong>.
                         Certificates are awarded <strong>once per level</strong> and saved to your profile.
                     </div>
                     <div class="cert-callout-badge">
                         <span class="material-symbols-outlined" style="font-size:0.8rem;">workspace_premium</span>
-                        Pass 15 / 20 questions to qualify
+                        Pass 14 / 20 questions to qualify
                     </div>
                 </div>
             </div>
@@ -1886,7 +1886,7 @@ async function endGame() {
     if (passed) {
         localStorage.setItem(assessKey(setupLang, setupLevel), 'true');
         // Record cross-system mastery (≥70%) → unlocks the next level in classrooms too.
-        // Decoupled from the certificate (which needs ≥75%).
+        // Both mastery and certificate share the same ≥70% threshold.
         fetch(`${API}/mastery`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -2134,11 +2134,11 @@ function getMasteryLabel(accuracy) {
 }
 
 // A level certificate is earned by completing an Arena run at that difficulty
-// with at least 75% accuracy. One certificate per (language, level).
-const CERT_PASS_ACCURACY = 75;
+// with at least 70% accuracy (same as the pass threshold). One per (language, level).
+const CERT_PASS_ACCURACY = 70;
 
 function showCertificate(gameData) {
-    if (gameData.accuracy < CERT_PASS_ACCURACY) return;   // below 75% — no certificate
+    if (gameData.accuracy < CERT_PASS_ACCURACY) return;   // below 70% — no certificate
     const mastery = getMasteryLabel(gameData.accuracy) || 'Proficient';
 
     const LANG_NAMES = { python:'Python', javascript:'JavaScript', java:'Java', cpp:'C++' };

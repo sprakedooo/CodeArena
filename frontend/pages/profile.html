@@ -780,7 +780,7 @@ async function loadCertificates() {
                 <div class="cert-card-title">${title}</div>
                 <div class="cert-card-meta">
                     ${metaExtra}
-                    <span>Score: ${c.score}%</span>
+                    <span>Accuracy: ${c.accuracy ?? c.score}%</span>
                     <span>${c.dateStr||''}</span>
                 </div>
             </div>
