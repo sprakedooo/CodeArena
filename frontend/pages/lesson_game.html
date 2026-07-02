@@ -588,10 +588,15 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary" onclick="startGame()" style="justify-content:center;font-size:0.92rem;padding:0.8rem;">
+            <button class="btn btn-primary" id="startBtn" onclick="startGame()" style="justify-content:center;font-size:0.92rem;padding:0.8rem;">
                 <span class="material-symbols-outlined" style="font-size:1.1rem;">play_circle</span>
                 Start Assessment
             </button>
+            <div id="allDoneMsg" style="display:none;text-align:center;margin-top:0.5rem;padding:0.75rem 1rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;">
+                <div style="font-size:.88rem;font-weight:700;color:#34d399;margin-bottom:4px;">🎉 All levels completed!</div>
+                <div style="font-size:.78rem;color:var(--text-secondary);">You've passed Beginner, Intermediate, and Advanced for this language.</div>
+                <a href="profile.html" style="display:inline-block;margin-top:8px;font-size:.78rem;color:var(--primary);text-decoration:underline;cursor:pointer;">View your certificates →</a>
+            </div>
         </div>
     </div>
 </div>
@@ -1163,9 +1168,19 @@ function updateDiffLocks(lang) {
     // If all done levels are consumed, ensure one valid level is selected
     const anyActive = document.querySelector('.diff-btn.active');
     if (!anyActive) {
-        // Pick the first non-done, non-locked level
         const next = document.querySelector('.diff-btn:not(.done):not(.locked)');
         if (next) next.classList.add('active');
+    }
+
+    // Disable Start button and show completion message when all levels passed
+    const startBtn   = document.getElementById('startBtn');
+    const allDoneMsg = document.getElementById('allDoneMsg');
+    if (passedBeginner && passedIntermediate && passedAdvanced) {
+        if (startBtn) { startBtn.disabled = true; startBtn.style.opacity = '.45'; startBtn.style.cursor = 'not-allowed'; }
+        if (allDoneMsg) allDoneMsg.style.display = 'block';
+    } else {
+        if (startBtn) { startBtn.disabled = false; startBtn.style.opacity = ''; startBtn.style.cursor = ''; }
+        if (allDoneMsg) allDoneMsg.style.display = 'none';
     }
 }
 
