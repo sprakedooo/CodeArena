@@ -536,6 +536,14 @@ function buildTabs() {
         // Hide faculty tabs
         document.getElementById('tab-overview').remove();
     }
+
+    // Auto-switch to a tab if ?tab=certificates (or other) is in the URL
+    const urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab) {
+        const tabBtn = [...document.querySelectorAll('.tab-btn')]
+            .find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${urlTab}'`));
+        if (tabBtn) tabBtn.click();
+    }
 }
 
 let quizResultsLoaded = false;
