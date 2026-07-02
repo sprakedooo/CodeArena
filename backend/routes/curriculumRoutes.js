@@ -910,7 +910,7 @@ router.get('/:cid/progress-summary', authMiddleware, (req, res) => {
     const totalUnits = units.length;
 
     // Build level order from curriculum for currentLevel derivation
-    const curr = Object.values(curricula).find(c => String(c.id) === String(cid));
+    const curr = curriculum[cid];
     const levelOrder = (curr?.levels || []).map(l => (l.name || '').toLowerCase());
 
     const summary = {};
