@@ -1080,6 +1080,23 @@ function updateCertCallout() {
 // ── Assessment lock helpers ───────────────────────────────────────────────────
 function assessKey(lang, level) { return `assessment_passed_${me.id}_${lang}_${level}`; }
 
+// Track which (lang, level) certs have been synced this session to avoid redundant POSTs.
+const _certSynced = new Set();
+
+// Silently save a certificate for a passed level if it isn't already recorded.
+// accuracy=70 is the floor — the server GREATEST() upsert won't overwrite a higher score.
+function _ensureCertSaved(lang, level) {
+    const key = `${lang}_${level}`;
+    if (_certSynced.has(key) || !token) return;
+    _certSynced.add(key);
+    const MASTERY_MAP = { beginner: 'Proficient', intermediate: 'Proficient', advanced: 'Expert' };
+    fetch(`${API}/certificates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ language: lang, level, mastery: MASTERY_MAP[level] || 'Proficient', score: 0, accuracy: 70 })
+    }).catch(() => {});
+}
+
 // Cross-system mastery fetched from the server (classroom level completions, etc.)
 // Map: language → Set of mastered levels
 const _serverMastery = {};
@@ -1124,6 +1141,7 @@ function updateDiffLocks(lang) {
         btnBeg.classList.add('done');
         btnBeg.classList.remove('active');
         if (subBeg) subBeg.textContent = 'Completed ✓';
+        _ensureCertSaved(lang, 'beginner');
     } else {
         btnBeg.classList.remove('done');
         if (subBeg) subBeg.textContent = 'Foundation';
@@ -1134,6 +1152,7 @@ function updateDiffLocks(lang) {
         btnInter.classList.add('done');
         btnInter.classList.remove('locked', 'active');
         if (subInter) subInter.textContent = 'Completed ✓';
+        _ensureCertSaved(lang, 'intermediate');
     } else if (!passedBeginner) {
         btnInter.classList.add('locked');
         btnInter.classList.remove('done');
@@ -1152,6 +1171,7 @@ function updateDiffLocks(lang) {
         btnAdv.classList.add('done');
         btnAdv.classList.remove('locked', 'active');
         if (subAdv) subAdv.textContent = 'Completed ✓';
+        _ensureCertSaved(lang, 'advanced');
     } else if (!passedIntermediate) {
         btnAdv.classList.add('locked');
         btnAdv.classList.remove('done');
