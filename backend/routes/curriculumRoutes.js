@@ -948,7 +948,11 @@ router.get('/:cid/progress-summary', authMiddleware, (req, res) => {
         summary[uid].currentLevel = userHighestLevel[uid] || (levelOrder[0] || 'beginner');
     }
 
-    res.json({ success: true, summary, totalUnits });
+    // Technical Assessment mastery per user for this curriculum's language:
+    // { userId: ['beginner','intermediate','advanced'] }
+    const masteryMap = masteryService.getUsersMastery(curr?.language || 'python');
+
+    res.json({ success: true, summary, totalUnits, masteryMap });
 });
 
 // ── GET /:cid/my-progress ─────────────────────────────────────────────────────

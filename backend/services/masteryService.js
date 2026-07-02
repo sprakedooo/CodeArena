@@ -69,6 +69,17 @@ function getMasteredLevels(userId, language) {
     return LEVELS.filter(l => !!store[`${userId}_${lang}_${l}`]);
 }
 
+/** Mastered levels for EVERY user in a language → { userId: ['beginner', ...] }. */
+function getUsersMastery(language) {
+    const lang = norm(language);
+    const out = {};
+    for (const rec of Object.values(store)) {
+        if (rec.language !== lang) continue;
+        (out[rec.userId] = out[rec.userId] || []).push(rec.level);
+    }
+    return out;
+}
+
 /**
  * Is `level` unlocked for this user+language?
  * Beginner is always unlocked; higher levels need the previous level mastered.
@@ -87,5 +98,6 @@ module.exports = {
     recordMastery,
     hasMastered,
     getMasteredLevels,
+    getUsersMastery,
     isLevelUnlocked,
 };

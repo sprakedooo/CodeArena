@@ -1987,18 +1987,19 @@
             const students  = studData.success ? (studData.students||[]) : [];
             const quizMap   = quizData.summary || {};   // { userId: { quizzesTaken, bestAccuracy, passCount } }
             const currMap   = currData.summary  || {};  // { userId: { unitsPassed, topScore } }
+            const masteryMap = currData.masteryMap || {}; // { userId: ['beginner','intermediate','advanced'] }
             const totalUnits = currData.totalUnits || 0;
             const count     = students.length;
             document.getElementById('studentsCount').textContent   = count;
             document.getElementById('statStudents').textContent    = count;
             document.getElementById('sidebarStudents').textContent = count;
-            renderPeople(students, quizMap, currMap, totalUnits);
+            renderPeople(students, quizMap, currMap, totalUnits, masteryMap);
         } catch(err) {
             document.getElementById('peopleGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Failed to load students.</div>`;
         }
     }
 
-    function renderPeople(students, quizMap = {}, currMap = {}, totalUnits = 0) {
+    function renderPeople(students, quizMap = {}, currMap = {}, totalUnits = 0, masteryMap = {}) {
         const grid = document.getElementById('peopleGrid');
         if (!students.length) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="empty-state-icon">👥</span><div class="empty-state-title">No students yet</div><div class="empty-state-sub">Share the enrollment key to get started</div></div>`;
@@ -2012,8 +2013,12 @@
             const joined = s.enrolledAt || s.enrolled_at;
             const quiz  = quizMap[String(sid)] || null;
             const curr  = currMap[String(sid)] || null;
-            // Classroom curriculum level takes priority over global quiz level
-            const level = (curr?.currentLevel || s.currentLevel || s.current_level || 'beginner').toLowerCase();
+            // Technical Assessment mastery — passing all 3 levels caps the badge at Advanced
+            const mastered = masteryMap[String(sid)] || [];
+            const allTA = ['beginner','intermediate','advanced'].every(l => mastered.includes(l));
+            // TA mastery → classroom curriculum level → global quiz level
+            const level = allTA ? 'advanced'
+                                : (curr?.currentLevel || s.currentLevel || s.current_level || 'beginner').toLowerCase();
 
             // Prefer quiz activity → curriculum evals → student profile stats
             const acc     = quiz ? Math.round(quiz.overallAccuracy || 0)
@@ -2067,6 +2072,7 @@
                         <span class="pc-xp-badge">⚡ ${xp} XP</span>
                         <span class="pc-lang-badge">${lang}</span>
                         ${quiz && quiz.passCount > 0 ? `<span style="font-size:.62rem;font-weight:700;color:#f97316;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);padding:2px 8px;border-radius:20px;">🏆 ${quiz.passCount} passed</span>` : ''}
+                        ${allTA ? `<span style="font-size:.62rem;font-weight:700;color:#fbbf24;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);padding:2px 8px;border-radius:20px;" title="Passed Beginner, Intermediate, and Advanced Technical Assessments">🎓 All 3 assessments passed</span>` : ''}
                     </div>
 
                     <!-- Accuracy bar -->
